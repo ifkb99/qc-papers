@@ -220,7 +220,8 @@ low exponent bits, and affineness of the identity block — are recorded in
 ## Reproduction
 
 ```
-uv run python experiment_c15.py     # controlled: fix N, vary a  (N=7 and N=21)
-uv run python experiment_c15b.py    # exact constancy sweep, n_exp 2..10
-uv run python experiment_c7.py      # scaling to 24 qubits, density -> 1/2
+uv run python -m experiments.experiment_c15    # controlled: fix N, vary a  (N=7 and N=21)
+uv run python -m experiments.experiment_c15b   # exact constancy sweep, n_exp 2..10
+uv run python -m experiments.experiment_c7     # scaling to 24 qubits, density -> 1/2
+uv run python test_claims.py                   # headline rows, pinned, ~15 s
 ```

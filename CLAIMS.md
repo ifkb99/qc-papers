@@ -22,6 +22,11 @@ material (`ABSTRACT.md`, `ABSTRACT_SHOR_2ADIC.md`, `TODO.md`, `HANDOFF.md`,
 `README.md`, `NOTES.md` section headers). A blank cell means no pointer was
 recorded, not that none exists.
 
+**Paths note (2026-08-08 restructure).** Experiment scripts moved into
+`experiments/` with filenames unchanged; a bare `experiment_*.py` reference
+below means `experiments/experiment_*.py`. The headline rows are additionally
+re-verified by `test_claims.py`, which runs as part of the correctness gate.
+
 ---
 
 ## Paper A — Walsh cost model (`ABSTRACT.md`)

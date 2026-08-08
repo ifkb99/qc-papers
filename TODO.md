@@ -412,7 +412,16 @@ structureless — but it is the natural next question the method itself asks.
 - `[ ]` `experiment.py` §3, `experiment2.py` §§2–3 and all of `experiment3.py`
   are retracted. They carry warning headers; consider deleting once the papers
   are drafted and nothing references them.
-- `[ ]` Organize experiments into a proper file structure, with a general engine to keep the codebase DRY
+- `[x]` Organize experiments into a proper file structure, with a general
+  engine — **DONE 2026-08-08.** `lab/` package (harness with enforced
+  predictions/controls, cached measurement, GF(2) structure tools, modarith,
+  wrap-registry variants, null models); experiments moved to `experiments/`
+  unchanged (records, not code to DRY); `experiment3.py` to `archive/`; two
+  new gate suites (`test_lab.py` pins the engine to logged numbers,
+  `test_claims.py` re-verifies the headline claims); `experiments/TEMPLATE.py`
+  for new work. Deliberately NOT a `src/` package — the unit of value here is
+  the readable record, and root-level instruments keep every historical
+  import working.
 - `[x]` Split claims into a separate file to keep a single source of truth —
   **DONE.** `CLAIMS.md` is now canonical: Paper A claims, Paper B claims, and a
   retracted/dead section, one full row per claim with a pointer to where it is

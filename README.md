@@ -56,6 +56,8 @@ uv run python test_modexp.py         # Beauregard modexp, layers A-G
 uv run python test_toffoli_arith.py  # Toffoli modexp, layers A-G + cross-check
 uv run python test_walsh.py          # logical trace, Walsh machinery
 uv run python test_perm_pps.py       # permutation-native PPS vs Walsh and vs PPS
+uv run python test_lab.py            # lab/ engine, pinned to logged numbers
+uv run python test_claims.py         # CLAIMS.md headline rows, re-verified
 ```
 
 Sanity anchor: `ModExp(15, 7, n_exp=4).build_shor()` must give exponent-register
@@ -73,12 +75,16 @@ peaks at y = 0, 4, 8, 12 with p = 0.25 each (r = 4).
 | `statevec.py` | O(2ⁿ)-per-gate state-vector simulation (batched) |
 | `modexp.py` | Beauregard (Fourier-arithmetic) modular exponentiation |
 | `toffoli_arith.py` | Toffoli-compiled modular exponentiation |
-| `experiment_c8.py` | the Walsh identity (Paper A core) |
-| `experiment_c7.py` | scaling to 24 qubits; density → ½ |
-| `experiment_c12.py` | cryptanalysis bridge: sparsity vs nonlinearity |
-| `experiment_c15.py`, `experiment_c15b.py` | the 2-adic result (Paper B core) |
-| `experiment_scope.py` | scope limits and truncation admissibility |
-| `experiment.py`, `experiment2.py`, `experiment3.py` | early work, **partially or wholly retracted** — see headers |
+| `lab/` | experiment engine: protocol harness, cached measurement, GF(2)/structure analysis, modexp variants, null models |
+| `experiments/` | the experiment scripts — lab-notebook records, filenames unchanged; run as `uv run python -m experiments.<name>`; start new ones from `TEMPLATE.py` |
+| `archive/` | fully retracted scripts, kept for the record |
+| `out/` | gitignored: logs and the measurement cache |
+
+Notable experiments: `experiment_c8` (the Walsh identity, Paper A core),
+`experiment_c7` (scaling to 24 qubits, density → ½), `experiment_c15{,b}` (the
+2-adic result, Paper B core), `experiment_resid{1,2}` + `experiment_affstruct`
+(the conditional-structure resolution, C33–C35). `experiment.py` and
+`experiment2.py` are partially retracted — see their headers.
 
 ## Scope and limits
 

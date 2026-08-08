@@ -70,12 +70,22 @@ destroyed, and it is unidentified.**
 
 ### Where the tools are
 
+> **Restructured 2026-08-08.** The patterns below now live in the `lab/`
+> package — `lab.gf2` (rank/kernel plus the affine-aware structure finder),
+> `lab.variants` (the wrap registry that replaced the copy-pasted `Variant`
+> subclasses, with `verify_correctness`), `lab.measure` (cached
+> support/density/peak), `lab.modarith`, `lab.nulls`, and `lab.harness`
+> (`Experiment`: predictions-before-measurement and must-fail controls,
+> enforced). Start new experiments from `experiments/TEMPLATE.py`. Finished
+> scripts moved to `experiments/` unchanged; run them as
+> `uv run python -m experiments.<name>`.
+
 - `walsh.py` — `pullback_coefficients`, `classical_permutation`, FWHT,
   `walsh_sparsity`, `is_affine`.
-- `experiment_linstruct.py` — GF(2) rank + kernel extraction (reuse
-  `gf2_rank_and_kernel`).
-- `experiment_reduction2.py` — the `Variant` subclass that injects modified
-  reductions while preserving correctness. Add new modes to `_wrap`.
+- `experiments/experiment_linstruct.py` — GF(2) rank + kernel extraction
+  (now `lab.gf2.rank_kernel`).
+- `experiments/experiment_reduction2.py` — the `Variant` subclass that injects
+  modified reductions while preserving correctness (now `lab.variants`).
 - `perm_pps.py` — permutation-native propagation, ~10× faster than
   rotation-level, with `delta` and `max_weight` truncation.
 
@@ -86,11 +96,13 @@ destroyed, and it is unidentified.**
 ```bash
 cd /home/djneko/Workspace/qsim-test/QuantumSimTest-master/research
 uv run python test_core.py          # correctness gate — run first, always
-uv run python test_perm_pps.py
+uv run python test_claims.py        # headline results, pinned to logged numbers
 ```
 
-All five suites must pass before trusting anything:
-`test_core`, `test_modexp`, `test_toffoli_arith`, `test_walsh`, `test_perm_pps`.
+All seven suites must pass before trusting anything:
+`test_core`, `test_modexp`, `test_toffoli_arith`, `test_walsh`,
+`test_perm_pps`, `test_lab` (engine vs historical numbers), `test_claims`
+(executable reproductions of the CLAIMS.md headline rows).
 
 **Traps that will bite immediately:**
 

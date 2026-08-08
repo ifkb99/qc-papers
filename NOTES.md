@@ -1823,6 +1823,14 @@ Things believed and then killed, in order. Keep adding to this.
 
 Run everything with `uv run python` from `research/` (see trap 5).
 
+**2026-08-08 restructure:** experiment scripts moved to `experiments/`
+(filenames unchanged; run as `uv run python -m experiments.<name>`), fully
+retracted ones to `archive/`, and the shared machinery was extracted into the
+`lab/` package (`lab.harness`, `lab.measure`, `lab.gf2`, `lab.modarith`,
+`lab.variants`, `lab.nulls`) with `test_lab.py` pinning it to the numbers
+logged here and `test_claims.py` re-verifying the headline claims. Bare
+`experiment_*.py` names below predate the move.
+
 ```
 perm_pps.py      permutation-native PPS: X/CNOT/Toffoli as atomic gates,
                  stays Z-type throughout, 2x lower peak, ~10x faster
