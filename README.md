@@ -20,6 +20,10 @@ support and peak memory, and **proved** via a parity-reduction argument.
 
 ## Start here
 
+**`HANDOFF.md`** — if you are picking this up fresh, read that first. It states
+where things stand, the single open thread, how to get running, and what not to
+redo.
+
 `METHOD.md` records how this work was actually conducted — the research loop,
 the failure modes hit, and the techniques that earned their keep. Worth reading
 before extending anything, since several of the lessons cost real time.
