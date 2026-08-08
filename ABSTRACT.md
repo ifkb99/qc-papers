@@ -1,5 +1,11 @@
 # Draft abstract — Paper A (cost model)
 
+> **SUPERSEDED AS THE DRAFT 2026-08-08 → `PAPER_A.md`.** The full paper draft
+> now lives in `PAPER_A.md`; this file is retained as the abstract workshop and
+> the prior-art dossier, which `PAPER_A.md` §10 condenses. Where the two
+> disagree on wording, `PAPER_A.md` is the live document; where either
+> disagrees with `CLAIMS.md` on a *status*, `CLAIMS.md` wins.
+
 **Working title:** *Walsh–Hadamard Sparsity Exactly Determines Pauli-Path
 Simulation Cost for Reversible Quantum Arithmetic*
 
@@ -242,7 +248,11 @@ reached 24 qubits. `TODO.md` is the live ranking of remaining work.
   MPS simulation of Shor; the natural comparison point for a different method
   meeting the same circuits.
 
-**Prior-art check still owed:** C1/C6 are elementary enough that they are
-plausibly folklore in the stabilizer-simulation literature. Before any
-submission, search specifically for prior statements that permutation circuits
-preserve the diagonal Pauli subalgebra in a Heisenberg-picture simulator.
+**Prior-art check on C1/C6 — DONE 2026-08-08, no prior statement found.**
+Searched specifically for prior statements that permutation circuits preserve
+the diagonal Pauli subalgebra in a Heisenberg-picture simulator. The
+*ingredients* are folklore — Clifford preserves the Pauli group; diagonal
+operators are exactly the I/Z strings — but the composition is not stated **as a
+simulation cost mechanism**. Frame C1/C6 as elementary-but-unstated, never as a
+discovery; `PAPER_A.md` §10 does this. Also surfaced and worth citing: the
+Pauli Propagation framework paper, [arXiv:2505.21606](https://arxiv.org/abs/2505.21606).

@@ -4,7 +4,7 @@ Research code for two related results about Pauli Path Simulation (PPS, also
 called sparse Pauli dynamics) applied to reversible arithmetic and Shor's
 algorithm.
 
-**Paper A — `ABSTRACT.md`.** For any circuit implementing a permutation of the
+**Paper A — `PAPER_A.md`** (full draft; `ABSTRACT.md` is now the abstract workshop and prior-art dossier). For any circuit implementing a permutation of the
 computational basis, the Pauli support carried by PPS with a computational-basis
 observable is *exactly* the Walsh–Hadamard spectrum of the corresponding output
 bit function. Cost is therefore computable in closed form rather than
@@ -75,6 +75,7 @@ peaks at y = 0, 4, 8, 12 with p = 0.25 each (r = 4).
 | `walsh.py` | permutation extraction, FWHT, pullback coefficients, sparsity, affineness |
 | `statevec.py` | O(2ⁿ)-per-gate state-vector simulation (batched) |
 | `modexp.py` | Beauregard (Fourier-arithmetic) modular exponentiation |
+| `PAPER_A.md` | **the Paper A draft** — full paper, supersedes `ABSTRACT.md` |
 | `toffoli_arith.py` | Toffoli-compiled modular exponentiation |
 | `windowed_arith.py` | windowed modexp: `WindowedModExp` (table lookup) and `SelectModExp` (select-multiply, with the `skip_zero` knob); `replay` for circuits too wide to hold a permutation array |
 | `lab/` | experiment engine: protocol harness, cached measurement, GF(2)/structure analysis, modexp variants, null models |

@@ -216,8 +216,15 @@ Logged in full in `NOTES.md`; listed here so a fresh session does not burn time.
 
 ## Publication state
 
-Both abstracts are drafted with honest status markers and scope caveats; the
-claims ledger they both point at is `CLAIMS.md`. Before submitting anything:
+**Paper A is drafted in full: `PAPER_A.md` (v1, 2026-08-08).** It supersedes
+`ABSTRACT.md` as the live document; `ABSTRACT.md` is retained as the abstract
+workshop and prior-art dossier. Paper B is still abstract-only
+(`ABSTRACT_SHOR_2ADIC.md`). A third paper is now viable and was not before —
+the compilation-dependence results (C30–C32, C33–C35, C36–C39) acquired a
+spine in C40/C41 and are currently scattered as caveats inside A and B.
+
+Both abstracts carry honest status markers and scope caveats; the claims ledger
+they all point at is `CLAIMS.md`. Before submitting anything:
 
 - The **prior-art position is settled and narrowed**: the diagonal↔Walsh
   ingredient is standard ([arXiv:1306.3991](https://arxiv.org/pdf/1306.3991))
