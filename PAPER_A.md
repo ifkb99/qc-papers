@@ -38,9 +38,13 @@ exponentiation, which implement the same permutation by very different means.
 characterises affineness, and PPS collapses to a single term. **(iii)** Peak
 memory is a distinct and larger quantity than final support, and its excess is an
 artifact of Clifford+T decomposition; propagating X, CNOT and Toffoli as atomic
-permutations keeps the expansion Z-type at every step, reduces peak memory by a
-measured factor of 2.000 (adders) to 1.9997 (modular exponentiation), and makes
-the peak itself a Walsh quantity. **(iv)** Walsh sparsity and nonlinearity are
+permutations keeps the expansion Z-type at every step and makes the peak itself a
+Walsh quantity. The saving is exact rather than approximate:
+N_max^rot = 2·N_max^perm − |B|, where B is the set of peak-time Pauli strings
+missing the target qubit of the Toffoli gadget in which the peak falls. B is
+empty for ripple-carry adders, giving exactly 2; for modular exponentiation with
+the standard observable it has two elements, and those two are precisely the
+dominant Walsh coefficients of the pulled-back function. **(iv)** Walsh sparsity and nonlinearity are
 the same object linear cryptanalysis studies, giving a transfer: any published
 nonlinearity lower-bounds PPS cost for *every* circuit computing that function,
 with no simulation.

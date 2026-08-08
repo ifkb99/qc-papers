@@ -139,7 +139,8 @@ measurement would have produced that.
 | **Lucky sampling hiding a threshold** | every sweep started at n_exp = α+1. |
 | **Trusting a summary over source** | web summaries claimed Qiskit `pauli-prop` supports Toffoli; the source rejects it. |
 | **Reading an abstract, not the body** | Dang et al.'s abstract says "factors of r"; §4 is explicitly 2-adic. Nearly caused a wrong retraction. |
-| **A test with only one possible answer** | `z_I ∈ {0, 1_I}` at \|I\| = 1. Caught by the must-fail control, which passed. See §OS3. |
+| **A test with only one possible answer** | `z_I ∈ {0, 1_I}` at \|I\| = 1. Caught by the must-fail control, which passed. See §OS3. And again a day later: a sign test on monotone data, where every pair "agrees" for free (§DF, P3). Both returned unanimous passes, which is the tell. |
+| **A control that fails to fail because the *predicate* is wrong** | §DF's β=1 control demanded monotone growth across the whole sweep, but the support only locks at n_exp = α+1, so D legitimately drops once first. The control was right; the code asking it was not. Fixing it produced a *sharper* control (|S| exactly constant past the lock). |
 
 ---
 

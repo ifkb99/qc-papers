@@ -23,7 +23,7 @@ the 2-adic structure of the multiplicative order r = β·2^α — independent of
 exponent-register width when β = 1, Θ(2ⁿ) otherwise, with the mechanism proved.
 
 **No live research thread is blocked.** TODO items 1–12b **and 12e** are
-closed; 12c, 12f, 12g, 13 and 14 are open and each states its own rationale.
+closed; 12c, 12f, 13 and 14 are open and each states its own rationale.
 
 > **12e closed 2026-08-08 — see `NOTES.md` §OS.** Every sweep that had been
 > deferred for want of compute is now run. C21's onset is **measured** at
@@ -47,9 +47,19 @@ closed; 12c, 12f, 12g, 13 and 14 are open and each states its own rationale.
 > Paper A §5 is now Proposition 2 rather than "an observation"; claim **C44**.
 > Still unproved and marked so: |B| = 2 itself.
 
+> **12g closed negatively — see `NOTES.md` §DF.** The one loose end 12e left
+> (a suspected "cliff" in the hyperplane deficit between n_exp 2 and 3) does
+> not exist: sweeping n_exp by 1 at fixed (N, a) over 10–12 widths gives a
+> **monotone** decrease every time, and the cliff was two points straddling the
+> single step at which N = 21 disagrees with every other instance. §OS4 is
+> retracted at its source and in the honesty log. The §I period-ord₂(β)
+> structure is function-level only and **does not transfer to circuit level** —
+> that transfer failing is the reusable part. The experiment fails 3 of its 4
+> predictions and exits nonzero by design.
+
 The best remaining candidate is **14** (through the inverse QFT — highest risk,
 highest reach, a Paper C candidate). **12c** is mostly dead (its naive form was
-refuted by derivation); **12g** is a cheap one-sweep loose end from 12e.
+refuted by derivation) and **12f** is deliberately not done.
 
 ---
 

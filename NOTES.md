@@ -1109,19 +1109,26 @@ the density by exactly 4× per two qubits (0.4733 → 0.1183 → 0.0296, ratios
 width. So the ~½ reading is a property of these circuits, not of the
 instrument or the register size.
 
-**Open observation, logged not claimed.** Write the *missing fraction* of the
-C30 hyperplane, 1 − 2·density. In series A it shrinks with almost perfect
+**Open observation — RETRACTED 2026-08-08 by §DF, same day. Kept because the
+way it was wrong is the point.** Write the *missing fraction* of the C30
+hyperplane, 1 − 2·density. In series A it shrinks with almost perfect
 regularity, ~2.1–2.3× per extra bit of modulus:
 0.0544 / 0.0239 / 0.0107 / 0.00494 / 0.00234 / 0.00112 at n = 3..8. In series
 B it does **not**: 0.0627 / 0.0100 / 0.00063 / 0.00022 at n = 3, 5, 6, 7.
-Matched pairs (same N and a, only n_exp differing) show the same split —
-N = 21 barely moves (0.01074 → 0.01004) while N = 33, 35, 77 each drop by
-8–11×. So there is *something* about how completely the support fills the
-hyperplane that depends on n_exp for larger n and not for smaller, and two
-series is far too little to name it. **Do not quote the "halves per qubit"
-reading; it is series A only.** A future session wanting a cheap question:
-sweep n_exp at fixed N ≥ 33 with β > 1 and see whether the deficit really
-falls off a cliff between n_exp = 2 and 3.
+Matched pairs (same N and a, only n_exp differing) appeared to split the same
+way — N = 21 barely moving (0.01074 → 0.01004) while N = 33, 35, 77 each drop
+8–11× — which read as a threshold in n_exp.
+
+> **There is no threshold.** Sweeping n_exp by 1 at fixed (N, a) over 10–12
+> widths (§DF) shows D decreasing **monotonically** in every instance, with the
+> same step-ratio profile everywhere, and N = 21 the lone instance whose second
+> drop lands one step late. The matched pairs above compared n_exp = 2 vs 3 —
+> precisely the step at which N = 21 disagrees with everything else. **Two
+> points straddling one instance's one anomaly.** The lesson is the one §I
+> already taught and this failed to apply: a two-point comparison cannot
+> distinguish a trend from a phase, and the fix is to sweep the parameter, not
+> to collect more pairs. Also do not quote the "halves per qubit" reading; it is
+> series A only.
 
 ### OS6 — C38's 2-periodicity holds to K = 5, i.e. three full periods
 
@@ -1164,6 +1171,93 @@ predicted first:
 - **`lab.measure.support(..., exact=True)` and `lab.measure.stats`**, both
   cached under their own keys so exact and thresholded results can be
   compared rather than silently substituted.
+
+## DF — TODO 12g CLOSED NEGATIVELY: there is no cliff, and §OS4 is RETRACTED
+
+`experiments/experiment_c7_deficit.py`. **Three of its four predictions fail
+and the file exits nonzero; that is the result.** No new claim; §OS4's
+observation is withdrawn and TODO 12g closes.
+
+**What was asked.** §OS4 noticed that the missing fraction of the C30
+hyperplane, `D = 1 − 2·density`, dropped 8–11× between n_exp = 2 and 3 for
+N = 33, 35 and 77 but barely moved for N = 21 (0.01074 → 0.01004). Two points
+per instance, in series that also varied N. This swept n_exp by 1 at **fixed
+(N, a)** — one parameter — over 10 to 12 consecutive widths per instance.
+
+```
+  n_exp     1        2        3        4        5        6       ...     12
+ N=11  .528687  .023872  .006561  .004818  .003883  .003302  ...  .002125   β=5
+ N=13  .530884  .023491  .006027  .004881  .004114  .003696  ...  .002187   β=3
+ N=33  .506047  .004931  .000630  .000468  .000359  .000284               β=5
+ N=21  .512184  .010733  .010044  .001746  .001472  .001164  ...  .000613   β=3
+ ctrl  .524780  .022964  .511482  .755741  .877871  .938935  ...  .984734   β=1
+```
+
+(N = 11 and 13 run to n_exp = 12 / q = 28, N = 21 to n_exp = 11 / q = 30 with
+|S| = 536,542,026, N = 33 to n_exp = 6, control to n_exp = 8.)
+
+**P1 (D is not monotone) — REFUTED, 0/4.** D decreases monotonically at every
+one of ~40 consecutive steps. **P2 (period ord₂(β)) and P3 — vacuous once P1
+falls: there is no oscillation, so there is no period.** The §I
+period-ord₂(β) structure is a **function-level** phenomenon and does **not**
+transfer to circuit level. Importing it was the whole reason this looked worth
+a sweep, so that transfer failing is the useful part.
+
+**What §OS4 actually caught.** The step-ratio profile is the same shape
+everywhere — a tiny 1→2 step, one further sizeable drop, then a slow climb of
+the ratio towards 1 — and **N = 21 is the single instance whose second drop
+lands one step late**:
+
+```
+  step        1->2   2->3   3->4   4->5   5->6
+  N=11        .045   .275   .734   .806   .850
+  N=13        .044   .257   .810   .843   .898
+  N=33        .010   .128   .743   .767   .791
+  N=21        .021   .936   .174   .843   .791     <- second drop delayed by 1
+```
+
+§OS4 compared exactly n_exp = 2 vs 3 — the one step at which N = 21 disagrees
+with everything else. **The cliff was two points straddling one instance's one
+anomaly. Retracted.** Why N = 21 is late is not explained and is not pursued:
+it is not α (N = 33 shares α = 1 and behaves normally) and not β (N = 13
+shares β = 3 and behaves normally).
+
+**The control is the clean part.** β = 1 at the same moduli (N = 11 a = 10 and
+N = 21 a = 20, both r = 2) locks at n_exp = 2 exactly as C21 says, so |S| is
+frozen — at 128,062 and 1,037,435 respectively, *bit-identical across six
+widths* — while the hyperplane doubles and D climbs monotonically to 0.985. No
+oscillation anywhere, which is what makes "no oscillation" in the β > 1 rows a
+statement about the circuits rather than about the instrument.
+
+**Two of my own predicates were wrong, in opposite directions, and both are
+worth recording.**
+
+- **C1 failed to fail on the first run.** I demanded monotone growth across the
+  whole sweep, but the lock is at n_exp = α + 1 = 2, so D legitimately *drops*
+  once (0.5248 → 0.0230) before it can climb. The control's content is what
+  happens *from the lock onward*; the predicate included a pre-lock step.
+  Sharpened while fixing it: the strong form is that |S| is **exactly
+  constant** past the lock, not merely that D rises — which is a cleaner
+  statement of C21 than the one being tested.
+- **P3 passed vacuously.** Its statistic was "do steps p apart agree in
+  direction" — but once D is monotone every ratio is < 1, so every pair agrees
+  for free, and it returned 4/4 unanimous. Caught by noticing the pass was
+  unanimous and unearned. P3 is now recorded as **refuted**, which is its
+  actual status: there is no oscillation for the §OS4 pairs to be phases of.
+  Same failure mode as the |I| = 1 tail check in §OS3, one week's worth of
+  lesson apart — **a statistic that cannot come out any other way is not
+  evidence, and monotone data makes sign tests vacuous.**
+
+**One observation kept, and explicitly NOT claimed.** The step ratios climb
+towards 1 rather than settling, so D looks to converge to a small
+*instance-dependent* constant rather than to 0 — i.e. as n_exp grows at fixed
+N, density tends to something just below ½, not to ½. Fitting the successive
+differences of the N = 11 row (which decay by a near-constant ~0.71) puts
+D∞ ≈ 0.0020, density ≈ 0.4990. **This is extrapolation from a converging
+sequence, which is exactly the move §I punished, so it is logged and not
+believed.** It does not threaten C7, whose density → ½ statement is about
+growing N and is measured, not extrapolated. If anyone wants it: the honest
+route is a function-level calculation of the n_exp → ∞ limit, not more widths.
 
 ## PK — TODO 12d SOLVED: the peak deficit is a COUNTABLE SET, and it is the
 ## two dominant Fourier modes
@@ -2589,6 +2683,17 @@ Things believed and then killed, in order. Keep adding to this.
   exactly; the dead-bit half failed because the activation ancilla is itself a
   scratch qubit the pullback ranges over. Logged rather than re-scoped; the
   diagnosis is in §WD and is now a check in `experiment_windowed.py`.
+- §OS4's "the hyperplane deficit falls off a cliff between n_exp 2 and 3"
+  (TODO 12e → 12g) — **retracted the same day it was written, by the sweep it
+  asked for.** D is monotone decreasing in n_exp in all four instances; the
+  "cliff" was a two-point comparison landing on the one step where N = 21
+  disagrees with every other instance. Believed because three of four matched
+  pairs moved together and the fourth looked anomalous — when in fact the
+  fourth was anomalous *at that step only*. **A two-point comparison cannot
+  tell a trend from a phase**; §I had already taught this and it was not
+  applied. Logged rather than quietly deleted because the observation was
+  correctly flagged "not a law" when written, and the flag is what made the
+  one-sweep check obvious.
 - C24's tail-confinement test at |I| = 1 (TODO 12e) — **not wrong, but
   vacuous, and it had been counted as evidence.** "z_I ∈ {0, 1_I}" has one
   possible answer when the tail is a single bit, so the n_exp = α+1 rows say
