@@ -583,11 +583,47 @@ This is a negative result that *protects* the paper: it rules out a complication
 rather than adding one, and it means C15 should be stated as the binary split
 without hedging about intermediate regimes.
 
-**Caveat on scope.** This sub-investigation used `g(e) = h[e mod r]` with random
-h, not the actual modexp bit function, in order to sweep r freely. The real
-function is a *specific* function of e mod r. The β=1 conclusion is unaffected
-(it is proved independently), but the fine structure within β>1 could differ for
-the real function and was not checked.
+### Scope caveat CLOSED — rechecked with the real modexp bit function
+
+`experiment_c15_realfn.py` reruns the same fixed-function, consecutive-t design
+using the genuine table `h[c] = bit_j(a^c mod N)` instead of a random one.
+
+**P1 holds.** β=1 gives constant sparsity across t=11..22 (4 for r=4; 8 for
+r=16, so ≤ 2^α without being tight).
+
+**Step 6's conclusion is confirmed: α is not the controlling parameter.**
+
+```
+  r= 3 alpha=0 beta= 3:  1.000 0.500 1.000 0.500 ...   exact period 2
+  r= 6 alpha=1 beta= 3:  1.000 0.500 1.000 0.500 ...   identical to alpha=0
+  r=12 alpha=2 beta= 3:  all 1.000
+  r=10 alpha=1 beta= 5:  0.770 1.000 0.791 1.000 ...   drift 0.054
+  r=18 alpha=1 beta= 9:  ~0.93-1.000                    drift 0.053
+  r=22 alpha=1 beta=11:  ~0.92-1.000                    drift 0.015
+```
+
+α=1 produces wildly different behaviour across r = 6, 10, 18, 22, while α=0
+(r=3) matches α=1 (r=6) exactly. **α does not organise the data.** The period is
+set by ord₂(β), the values by β. Same qualitative structure as the random-table
+study, so that study's conclusion transfers.
+
+### NEW: the real modexp table is measurably NON-generic
+
+Same r, real table vs random table:
+
+```
+  r= 6 (beta=3):  real  1.000 0.500 1.000 0.500 ...
+                  random 1.000 1.000 1.000 1.000 ...
+  r=10 (beta=5):  real  0.770 1.000 0.791 1.000 ...
+                  random 0.500 0.500 0.394 0.197 ...
+```
+
+The real function is *sparser* than random at r=6 (exactly 0.500 on even t — a
+clean factor of two, suggesting a dead variable or parity constraint) and
+*denser* at r=10. So modexp bit functions carry structure beyond "depends on
+e mod r". Not pursued further; noted as an open observation, and it means
+random-table results should not be used as a proxy for real densities — only
+for the qualitative α question they were built to answer.
 
 ## T — DOES C15 SURVIVE TRUNCATION? (TODO step 7). Peak cost: yes. Accuracy: to a point.
 

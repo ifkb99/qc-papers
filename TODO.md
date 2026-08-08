@@ -226,9 +226,16 @@ tables at small r (rejected constants), and drawing a new table per t, which
 confounded t-dependence with table variance — a direct violation of "vary
 exactly one parameter". Both produced confident-looking numbers first.
 
-**Scope caveat:** used `g(e)=h[e mod r]` with random h to sweep r freely, not
-the real modexp bit function. The β=1 conclusion is unaffected (proved
-independently); fine structure within β>1 could differ for the real function.
+**Scope caveat CLOSED** (`experiment_c15_realfn.py`). Rechecked with the real
+table `h[c]=bit_j(a^c mod N)`: P1 holds (constant sparsity for β=1), and α is
+confirmed not to organise the data — α=0 (r=3) matches α=1 (r=6) exactly, while
+α=1 spans r=6,10,18,22 with wildly different behaviour. Step 6's conclusion
+transfers.
+
+**New observation, unpursued:** the real modexp table is measurably non-generic
+— sparser than random at r=6 (exactly 0.500 on even t, a clean factor of two)
+and denser at r=10. So modexp bit functions carry structure beyond "depends on
+e mod r". Random-table densities must not be used as a proxy for real ones.
 
 ## 7. `[x]` Does C15 survive truncation? — DONE, mostly yes
 
