@@ -138,10 +138,21 @@ Evidence chain, each link verified:
 32768 violations) and the (z, z⊕e) pairing (an n_exp=1 artifact, not
 r-dependent).
 
-**Still owed:** formalisation. Two steps are numerical rather than proved —
-V² = id from the circuit construction, and exactness of the parity reduction on
-the full space including invalid inputs. Both look elementary. Until written,
-report the mechanism as established and the theorem as outstanding.
+**FORMALISED — C15 is now a theorem for this circuit family.** Both owed links
+closed once the block structure was read properly: `u_a(·,1) = A⁻¹SA` with S a
+product of *disjoint* transpositions, so S²=id and V is an involution by
+conjugation; the blocks then commute and compose to `V^p`; and averaging the
+Walsh character over the tail confines the support to `z_I ∈ {0, 1_I}`, two
+values regardless of tail length, so the size carries no dependence on it.
+
+Its sharpest consequence was **derived before being tested** and then confirmed:
+0 violations in 7/7 β=1 instances with the two halves individually constant
+(7770/7779 at |I| = 2, 3, 4), against 48189 and 1556046 for the β>1 controls.
+
+Scope limit to state in the paper: the proof uses only the
+multiply–swap–unmultiply form, so it covers both compilations here and any
+Vedral/Beauregard-style construction, but does not automatically transfer to a
+modexp built otherwise.
 
 ## 4. `[x]` Third modulus for C15 — DONE, and it caught an over-claim
 

@@ -378,12 +378,73 @@ The "added qubits are live" puzzle raised in the external review — which
 defeated the naive valid-subspace argument — is resolved: liveness and constancy
 are *both* consequences of parity dependence, not in tension.
 
-**Status.** This is a verified mechanism, not yet a written-out theorem. Each
-link is checked numerically on several instances; formalising it requires
-proving `V² = id` from the circuit construction (currently numerical) and that
-the parity reduction is exact on the full space (currently numerical). Both look
-elementary. Paper B's honesty note should be rewritten accordingly — the main
-open problem is now *formalisation*, not *explanation*.
+### FORMALISED — this is now a theorem, not an empirical regularity
+
+Both owed links closed, and they were three lines each once the circuit
+structure was looked at properly.
+
+**Setup.** `u_a(ctrl, a)` is built as *multiply, swap, unmultiply*:
+```
+u_a(ctrl,a) = cmult_mod(ctrl,a) ; cswap layer ; cmult_mod(ctrl,a⁻¹)⁻¹
+```
+For a = 1 the two multiplies are inverse to each other, so as an operator
+**V := u_a(·,1) = A⁻¹ ∘ S ∘ A**, with A the controlled multiply-accumulate and S
+the cswap layer.
+
+**(i) V² = id.** S is a product of `cswap(ctrl, x_i, b_i)` over i; the target
+pairs (x_i, b_i) are disjoint, so the factors commute and each is an involution,
+giving S² = id. Hence
+`V² = A⁻¹SA·A⁻¹SA = A⁻¹S²A = A⁻¹A = id`. **V is an involution because it is a
+conjugate of one.** (Was numerical; now proved.)
+
+**(ii) The identity blocks commute.** V never modifies an exponent qubit — they
+appear only as controls — and all identity blocks apply the same V, so on any
+basis state `C_{e_i}(V) C_{e_j}(V)` acts as `V^{e_i+e_j}` either way.
+
+**(iii) Parity reduction.** With (i) and (ii),
+`∏_{i≥α} C_{e_i}(V) = V^{Σ e_i} = V^{p}` where `p = ⊕_{i≥α} e_i`. The circuit
+depends on the whole identity tail through that one bit. (Was numerical.)
+
+**(iv) Support-size independence.** Write `f(y, e_I) = F(y, p)` for the tail
+I = {i ≥ α}. Averaging the Walsh character over e_I, and using that the
+annihilator of the even-parity subgroup is exactly {0, 1_I}:
+
+```
+   z_I = 0        ->  ( (-1)^F(y,0) + (-1)^F(y,1) ) / 2
+   z_I = all-ones ->  ( (-1)^F(y,0) - (-1)^F(y,1) ) / 2
+   otherwise      ->  0        (character nontrivial on the even-parity subgroup)
+```
+
+So the support is confined to **z_I ∈ {0, 1_I}** — two values, whatever |I| is —
+and `|support| = #{z_y : c(z_y,0)≠0} + #{z_y : c(z_y,1_I)≠0}`, which contains no
+dependence on |I|. ∎
+
+**Verification of (iv)'s sharpest consequence** (`experiment_c15_proof5.py`),
+which had not been tested before deriving it:
+
+```
+   N   a   r  al  n_exp  |I|  |support|     z_I=0  z_I=all1   other  holds
+   7   6   2   1      3    2      15549      7770      7779       0   True
+   7   6   2   1      4    3      15549      7770      7779       0   True
+   7   6   2   1      5    4      15549      7770      7779       0   True
+   5   2   4   2      4    2      32143     16089     16054       0   True
+   5   2   4   2      5    3      32143     16089     16054       0   True
+  21   8   2   1      3    2    1037174    518574    518600       0   True
+CONTROL (beta>1):
+   7   3   6          4          64353      8075      8089    48189  False
+  21   4   3          3        2074894    259435    259413 1556046  False
+```
+
+`other = 0` in every β=1 case, and the **two halves are individually constant**
+across |I| = 2, 3, 4 — not merely the total. Controls fail massively.
+
+**Scope.** The proof uses only that the block has the multiply-swap-unmultiply
+form, so it covers **both compilations here** (the Fourier `ModExp` builds `u_a`
+identically) and any Vedral/Beauregard-style construction. It does not
+automatically transfer to a modular exponentiation built some other way.
+
+**Status: C15 is a theorem for this circuit family.** What remains for Paper B is
+presentation, not proof.
 
 ## C15 REFINED (TODO step 4) — it locks at n_exp = v2(r)+1, not "always"
 

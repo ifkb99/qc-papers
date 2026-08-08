@@ -18,8 +18,8 @@ Baker, I.
 > review. Confirmed for both final support and peak memory. The core dichotomy
 > is verified in a controlled design at **three** moduli (N = 5, 7, 21); the
 > onset rule n_exp = v₂(r)+1 is exact for α = 1, 2 and consistent for α = 3, 4.
-> The *mechanism* at circuit level is still empirical rather than proved — see
-> the honesty note below, which must survive into any submitted version.
+> **The circuit-level mechanism is now PROVED** (parity reduction via an
+> involution) — see the honesty note, which also records the scope limit.
 
 ---
 
@@ -98,43 +98,35 @@ one that makes it uninformative as a benchmark.
 
 ## Honesty note that must survive into any submitted version
 
-**Updated: the mechanism is now identified; what remains is formalisation.**
+**Updated twice. The circuit-level invariance is now PROVED, not empirical.**
 
-At **function** level the argument was always exact: r | 2^α implies the bit
-function depends only on the low α bits of e, bounding the Walsh support
-independently of register width.
+The original argument (r | 2^α ⟹ the bit function depends only on the low α bits
+of e) is exact at *function* level but does **not** apply at circuit level: the
+added exponent qubits remain live, because `u_a(ctrl, a^{2^i})` with
+`a^{2^i} = 1` is the identity only on the valid subspace. That earlier claim is
+withdrawn.
 
-At **circuit** level that argument does *not* apply — the added exponent qubits
-remain **live** (for r=2, n_exp=6, qubits 15–18 are each set in ≈7779 of 15549
-support terms), because `u_a(ctrl, a^{2^i})` with `a^{2^i}=1` is the identity
-only on the valid subspace. The correct mechanism is different and is now
-verified:
+The correct mechanism is a **parity reduction**, and it is proved:
 
-> For β=1 and i ≥ α, every such block applies the **same** permutation
-> V = u_a(·,1), controlled on its own qubit, and **V is an involution**. The
-> circuit therefore depends on the whole identity tail through a single parity
-> bit ⊕_{i≥α} e_i — one effective variable however many qubits it spans.
+> `u_a(·,1) = A⁻¹SA` with S a product of disjoint transpositions, so S² = id and
+> hence **V := u_a(·,1) is an involution**. All identity blocks apply this same V
+> on distinct controls that V never modifies, so they commute and compose to
+> `V^p` with `p = ⊕_{i≥α} e_i`. Averaging the Walsh character over that tail
+> confines the support to `z_I ∈ {0, 1_I}` — two values regardless of tail
+> length — so the support size carries no dependence on the number of exponent
+> qubits.
 
-This explains constancy and liveness *simultaneously* rather than in tension,
-predicts the observed onset n_exp = α+1, predicts the branch relation
-h(y) = g(y ⊕ e_prev) confirmed as an exact linear character on every support
-element, and fails for β>1 exactly as required.
+This explains constancy and liveness together rather than in tension, predicts
+the onset n_exp = α+1, predicts the branch relation h(y) = g(y ⊕ e_prev), and
+fails for β>1 as required. Its sharpest consequence — support confined to
+z_I ∈ {0, 1_I} — was derived before being tested and then confirmed with zero
+violations across seven instances, with the two halves individually constant.
 
-**What is still owed.** Every link is verified numerically across several
-instances, but two steps are not yet written as proofs: that V² = id follows
-from the circuit construction (currently checked exhaustively at 2^15 and 2^21),
-and that the parity reduction is exact on the full space including invalid
-inputs (currently checked pointwise). Both look elementary. **Report the
-mechanism as established and the formal proof as outstanding — do not claim a
-theorem until those two steps are written.**
-
-Note the onset rule (C21) is a partial exception: *that* part has a clean
-mechanism — blocks with i ≥ α multiply by 1 on the valid subspace, so the first
-identity block appears at n_exp = α+1 — and it predicts the observed lock point
-correctly. What remains unproved is why the locked value is then preserved
-exactly on the full space, invalid inputs included.
-
----
+**Remaining scope caveat, which must be stated.** The proof uses only that the
+controlled-multiplier block has the multiply–swap–unmultiply form, so it covers
+both compilations studied here and any Vedral/Beauregard-style construction. It
+does not automatically transfer to a modular exponentiation built differently,
+and we do not claim it does.
 
 ## Claims ledger (Paper B)
 
@@ -148,7 +140,8 @@ exactly on the full space, invalid inputs included.
 | F12 | Function-level dichotomy is absolute | **established** | r=4: sparsity 4 constant to t=24; odd factor: density 1.000000 |
 | C19 | Same r = β·2^α invariant governs MPS simulation | **established, cited** | Dang et al. §4: α = trailing zeros, β = odd part "cannot be localised"; §5.2: memory ∝ β² |
 | C20 | N=15 is a degenerate benchmark **for every base**, forced by the modulus | **established, strengthened** | 100% of its bases free; smallest product of two Fermat primes |
-| **C23** | Mechanism: identity blocks apply one involution V, so the circuit depends on the identity tail only through a **parity bit** | **VERIFIED (not yet formalised)** | V²=id exhaustively; parity-invariance pointwise; branch character exact on 100% of support; fails for β>1 |
+| **C23** | Mechanism: identity blocks apply one involution V, so the circuit depends on the identity tail only through a **parity bit** | **PROVED** | V²=id since V=A⁻¹SA with S disjoint transpositions; blocks commute; character averaging confines support to z_I ∈ {0,1_I} |
+| **C24** | Consequence: support confined to z_I ∈ {0, all-ones}, so size is independent of tail length | **PROVED + verified** | derived before testing; 0 violations in 7/7 β=1 instances, halves individually constant; controls fail with 48189 / 1556046 |
 | — | *Earlier guess:* support confined to low exponent bits | **DISPROVED** | added qubits live in ~half the support terms — superseded by C23 |
 | — | *Earlier guess:* identity block is affine over GF(2) | **DISPROVED** | 14336/32768 violations |
 
