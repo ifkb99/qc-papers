@@ -300,6 +300,91 @@ killing C3. Not a valid compilation comparison.
 
 ---
 
+## C15 MECHANISM SOLVED (TODO step 3) — the parity reduction
+
+Paper B's main open problem. Two routes failed first; the third worked and every
+link is now verified.
+
+### Failed routes (do not retry)
+
+1. **Affineness of the identity block.** If `u_a(ctrl,1)` were affine over GF(2),
+   conjugation would relabel the Walsh spectrum and preserve sparsity. **It is
+   not** — 14336 violations of 32768, and conjugating `Z_j` by it gives 2504
+   support terms rather than 1. (`experiment_c15_proof.py`)
+2. **The (z, z⊕e) pairing.** Exact at n_exp=1 for *both* r=2 and r=6, broken at
+   n_exp≥2 for both. An n_exp=1 artifact. (§W5)
+
+### The mechanism
+
+Adding an exponent qubit appends a block controlled on it, so the pulled-back
+bit function splits into two branches — g (control off) and h (control on) —
+with Walsh coefficients
+
+```
+    c_(z,0) = ( ĝ(z) + ĥ(z) ) / 2        c_(z,1) = ( ĝ(z) − ĥ(z) ) / 2
+```
+
+Size is preserved *with the new qubit live* precisely when **|ĥ(z)| = |ĝ(z)|**
+pointwise: then exactly one of each pair survives. Verified
+(`experiment_c15_proof2.py`):
+
+```
+                                    BOTH  EXACTLY-ONE   M2 magnitudes
+ N=7 a=6 (r=2)  n_exp=3               0        15549   match, err 0.00e+00
+ N=7 a=6 (r=2)  n_exp=4               0        15549   match, err 0.00e+00
+ N=5 a=2 (r=4)  n_exp=4               0        32143   match, err 0.00e+00
+ N=7 a=3 (r=6)  n_exp=3           14934          844   FAILS
+ N=21 a=4 (r=3) n_exp=3         1036508         1878   FAILS
+```
+
+Bit-for-bit magnitude agreement for β=1; decisive failure for β>1.
+
+The sign pattern `ĥ(z) = ε(z)ĝ(z)` is then a **linear character**
+(`experiment_c15_proof3.py`): multiplicative on 5000/5000 sampled triples, and
+`ε(z) = (−1)^⟨z,v⟩` holds on **every** support element (15549/15549,
+32143/32143, 15509/15509). Moreover **v is a single bit — always the previous
+exponent qubit.** So `h(y) = g(y ⊕ e_prev)`: a translation, which preserves
+Walsh magnitudes exactly.
+
+A single-bit shift equal to another control is the fingerprint of a **parity
+dependence**, and that is what it is (`experiment_c15_proof4.py`):
+
+- **V1.** For i ≥ α, `a^(2^i) mod N = 1`, so every such block applies the *same*
+  fixed permutation `V = u_a(·,1)`, controlled on its own qubit. **V is an
+  involution**: `V² = id` exactly, 32768/32768 fixed points (2097152/2097152 at
+  N=21). Consistent with `V² = u_{a²}`, so `u_a(·,a)` is an involution iff
+  `a² ≡ 1` — which the data confirms (true for a=4 mod 5, a=6 mod 7, a=8 mod 21;
+  false for a=2 mod 5, a=3 mod 7).
+- **V2.** Consequently the composite depends on those controls only through
+  `p = ⊕_{i≥α} e_i`. Verified directly: flipping any **two** identity-block
+  controls together leaves the pulled-back bit function **pointwise unchanged**.
+  True for N=7 a=6, N=5 a=4, and N=5 a=2 (α=2).
+
+### The chain, and what it explains
+
+> For β=1, blocks with i ≥ α all apply the same involution V. The circuit
+> therefore depends on the entire identity tail through **one** parity bit,
+> however many qubits it spans.
+
+| observation | explained by |
+|---|---|
+| support size constant in n_exp | one effective variable regardless of tail length |
+| **added qubits stay LIVE** | the parity involves every one of them |
+| `h(y) = g(y ⊕ e_prev)` | toggling any one control just flips the parity |
+| locks at n_exp = α+1 (C21) | the first identity block sits at i = α |
+| grows for β>1 | no block is the identity, so V differs per block |
+
+The "added qubits are live" puzzle raised in the external review — which
+defeated the naive valid-subspace argument — is resolved: liveness and constancy
+are *both* consequences of parity dependence, not in tension.
+
+**Status.** This is a verified mechanism, not yet a written-out theorem. Each
+link is checked numerically on several instances; formalising it requires
+proving `V² = id` from the circuit construction (currently numerical) and that
+the parity reduction is exact on the full space (currently numerical). Both look
+elementary. Paper B's honesty note should be rewritten accordingly — the main
+open problem is now *formalisation*, not *explanation*.
+
 ## C15 REFINED (TODO step 4) — it locks at n_exp = v2(r)+1, not "always"
 
 Sweeping a third modulus caught an over-claim. N=5 with a=2 has r=4 (α=2), where

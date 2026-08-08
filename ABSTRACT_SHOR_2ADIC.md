@@ -98,20 +98,35 @@ one that makes it uninformative as a benchmark.
 
 ## Honesty note that must survive into any submitted version
 
-At **function** level the mechanism is exact and provable: r | 2^α implies the
-bit function depends only on the low α bits of e, bounding the Walsh support by
-2^α independently of register width.
+**Updated: the mechanism is now identified; what remains is formalisation.**
 
-At **circuit** level the invariance is verified but *not* explained by that
-argument. Direct measurement shows the added exponent qubits remain **live** —
-for r = 2, n_exp = 6, qubits 15–18 are each set in ≈7779 of the 15549 support
-terms. The support does not shrink into a subspace; it is relabelled while its
-cardinality is preserved. The cause is that `u_a(ctrl, a^{2^i})` with
-a^{2^i} = 1 is the identity only on the *valid* subspace; as a full-space unitary
-it acts nontrivially on invalid inputs, and the constancy arises through
-cancellation there. **Report the circuit-level result as an empirical regularity
-across five widths and three moduli, not as a corollary of the subspace
-argument.** Proving it is the main open problem for this paper.
+At **function** level the argument was always exact: r | 2^α implies the bit
+function depends only on the low α bits of e, bounding the Walsh support
+independently of register width.
+
+At **circuit** level that argument does *not* apply — the added exponent qubits
+remain **live** (for r=2, n_exp=6, qubits 15–18 are each set in ≈7779 of 15549
+support terms), because `u_a(ctrl, a^{2^i})` with `a^{2^i}=1` is the identity
+only on the valid subspace. The correct mechanism is different and is now
+verified:
+
+> For β=1 and i ≥ α, every such block applies the **same** permutation
+> V = u_a(·,1), controlled on its own qubit, and **V is an involution**. The
+> circuit therefore depends on the whole identity tail through a single parity
+> bit ⊕_{i≥α} e_i — one effective variable however many qubits it spans.
+
+This explains constancy and liveness *simultaneously* rather than in tension,
+predicts the observed onset n_exp = α+1, predicts the branch relation
+h(y) = g(y ⊕ e_prev) confirmed as an exact linear character on every support
+element, and fails for β>1 exactly as required.
+
+**What is still owed.** Every link is verified numerically across several
+instances, but two steps are not yet written as proofs: that V² = id follows
+from the circuit construction (currently checked exhaustively at 2^15 and 2^21),
+and that the parity reduction is exact on the full space including invalid
+inputs (currently checked pointwise). Both look elementary. **Report the
+mechanism as established and the formal proof as outstanding — do not claim a
+theorem until those two steps are written.**
 
 Note the onset rule (C21) is a partial exception: *that* part has a clean
 mechanism — blocks with i ≥ α multiply by 1 on the valid subspace, so the first
@@ -133,7 +148,9 @@ exactly on the full space, invalid inputs included.
 | F12 | Function-level dichotomy is absolute | **established** | r=4: sparsity 4 constant to t=24; odd factor: density 1.000000 |
 | C19 | Same r = β·2^α invariant governs MPS simulation | **established, cited** | Dang et al. §4: α = trailing zeros, β = odd part "cannot be localised"; §5.2: memory ∝ β² |
 | C20 | N=15 is a degenerate benchmark **for every base**, forced by the modulus | **established, strengthened** | 100% of its bases free; smallest product of two Fermat primes |
-| — | *Circuit-level mechanism* (support confined to low exponent bits) | **DISPROVED as stated** | added qubits are live in ~half the support terms; see honesty note |
+| **C23** | Mechanism: identity blocks apply one involution V, so the circuit depends on the identity tail only through a **parity bit** | **VERIFIED (not yet formalised)** | V²=id exhaustively; parity-invariance pointwise; branch character exact on 100% of support; fails for β>1 |
+| — | *Earlier guess:* support confined to low exponent bits | **DISPROVED** | added qubits live in ~half the support terms — superseded by C23 |
+| — | *Earlier guess:* identity block is affine over GF(2) | **DISPROVED** | 14336/32768 violations |
 
 ## Dependencies on Paper A
 

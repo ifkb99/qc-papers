@@ -112,28 +112,36 @@ Files: `experiment_weight.py`, `experiment_weight2.py`; `perm_pps.py` gained a
 
 **Subsumes step 8** (decode the dominant coefficients) — done as part of W4.
 
-## 3. `[~]` Prove the circuit-level C15 invariance — one lead tried and killed
+## 3. `[x]` Prove the circuit-level C15 invariance — MECHANISM SOLVED
 
-Paper B's soft centre. The valid-subspace argument **demonstrably does not
-cover it** — the added exponent qubits are live (each set in ≈7779/15549 support
-terms), so the support is relabelled, not confined.
+Paper B's soft centre, now explained. Full write-up in `NOTES.md`
+"C15 MECHANISM SOLVED"; files `experiment_c15_proof{,2,3,4}.py`.
 
-**Lead tried: the (z, z⊕e) pairing. REFUTED** (`experiment_pairing.py`,
-`NOTES.md` §W5). The support looked closed under XOR with each exponent qubit,
-which would have been a hard group-theoretic constraint. It holds exactly at
-n_exp=1 for **both** r=2 and r=6 and breaks at n_exp≥2 for both — an n_exp=1
-artifact, not r-dependent, not the mechanism.
+**The mechanism (C23).** For β=1 and i ≥ α, every block applies the *same*
+permutation V = u_a(·,1), controlled on its own qubit, and **V is an
+involution**. So the circuit depends on the entire identity tail through a
+single parity bit ⊕_{i≥α} e_i — one effective variable however many qubits it
+spans. That explains constancy and liveness *together* (they had looked in
+tension), predicts the onset n_exp = α+1, predicts the exact branch relation
+h(y) = g(y ⊕ e_prev), and fails for β>1 as required.
 
-Remaining routes, untried:
-- Affine-subspace structure of the support (would also explain density → ½).
-- Track *which* terms are created and destroyed by the identity `u_a(ctrl, 1)`
-  blocks, rather than only the support size — the invariance must be a
-  bijection, so exhibit it.
-- Work in the valid/invalid subspace decomposition explicitly rather than on the
-  full space.
+Evidence chain, each link verified:
+- branch symmetry |ĥ(z)|=|ĝ(z)|: BOTH=0 for β=1, magnitudes match bit-for-bit
+  (err 0.00e+00); BOTH=14934/1036508 for β>1;
+- sign pattern is a linear character, exact on 100% of support, with v a single
+  bit = the previous exponent qubit;
+- V² = id exhaustively (2^15 and 2^21);
+- flipping any two identity-block controls leaves the function pointwise
+  unchanged.
 
-Until this lands, Paper B reports an empirical regularity over five widths and
-two moduli — publishable but weaker than it reads.
+**Two failed routes, do not retry:** affineness of the identity block (14336 of
+32768 violations) and the (z, z⊕e) pairing (an n_exp=1 artifact, not
+r-dependent).
+
+**Still owed:** formalisation. Two steps are numerical rather than proved —
+V² = id from the circuit construction, and exactness of the parity reduction on
+the full space including invalid inputs. Both look elementary. Until written,
+report the mechanism as established and the theorem as outstanding.
 
 ## 4. `[x]` Third modulus for C15 — DONE, and it caught an over-claim
 
