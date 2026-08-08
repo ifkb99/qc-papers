@@ -1,0 +1,906 @@
+# PPS / Shor working notes
+
+Working notes, not a report. Dense on purpose. Written to restore context fast.
+
+**Question being probed:** does the Pauli Path Simulation (PPS) resource-prediction
+framework of Gharibyan et al. ([arXiv:2507.10771](https://arxiv.org/pdf/2507.10771))
+transfer from the brickwork/kicked-Ising circuits it was derived on to
+*structured arithmetic* circuits (Shor-like)?
+
+**Standing constraint that bounds the whole project:** efficient classical
+simulation of Shor's for arbitrary N ⟹ classical poly-time factoring. So nothing
+here can be a route to "simulate Shor's at scale." The only live question is
+*characterising where PPS breaks*, which is a tooling/limits result, not a
+speedup result. Do not lose sight of this.
+
+---
+
+## Conventions (get these wrong and everything silently breaks)
+
+**Pauli representation** (`pauli.py`): string = `(x, z)` bitmask pair,
+
+```
+P(x,z) = i^{popcount(x & z)} * X^x Z^z
+```
+
+The `i^{|x&z|}` is what makes P Hermitian (turns XZ into Y). Consequence:
+**all coefficients in the Heisenberg expansion stay real.** Qubit 0 is the
+least significant bit; `to_matrix` builds with `np.kron(m, M)` in that order.
+
+`pauli_mult(p,q) -> (r, k)` with `P(p)P(q) == i^k P(r)`, where
+`k = |a&b| + |x&z| - |rx&rz| + 2*|b&x|  (mod 4)`. Verified exhaustively n=3.
+
+**Everything is a Pauli rotation.** `U = exp(-i θ σ / 2)`, one conjugation rule:
+
+```
+U† P U = P                            if [P,σ]=0
+       = cos(θ) P + sin(θ) (i σ P)     if {P,σ}=0
+```
+
+Clifford = θ=±π/2 ⟹ cos=0 ⟹ maps to a *single* Pauli, no branching.
+All branching comes from non-Clifford angles. This is the whole cost mechanism.
+
+**Gate decompositions** (`circuits.py`, all verified up to global phase):
+- `H = Rz(π/2) Rx(π/2) Rz(π/2)`
+- `X = Rx(π)`, `T = Rz(π/4)`, `S = Rz(π/2)`
+- `CNOT(c,t) = Rzx(-π/2) · Rz_c(π/2) · Rx_t(π/2)`, σ for the ZX term is `(1<<t, 1<<c)`
+- `Toffoli` = standard 15-gate Clifford+T, **exactly 7 T gates** (asserted in tests)
+- `CP(θ) = Rz_a(θ/2) Rz_b(θ/2) Rzz(-θ/2)`
+
+**Ordering.** `Circuit.gates[0]` is applied to the state *first*. PPS therefore
+iterates `reversed(circuit.gates)` (Heisenberg: innermost conjugation is the
+last gate). Getting this backwards gives plausible-looking wrong answers.
+
+**Expectation readout.** `<0|P(x,z)|0>` = 1 if `x == 0`, else 0. So
+`<O> = sum of coeffs over Z-type terms`.
+
+---
+
+## Verified infrastructure
+
+`test_core.py` — all pass. Do not trust any result if these regress.
+
+```
+[1] pauli_mult / i·σ·P / commutation vs dense, n=3, all 4096 pairs
+[2] H, X, T, S, CNOT(0,1), CNOT(1,0), Toffoli decompositions; Toffoli T-count == 7
+[3] Cuccaro ripple adder correct on all inputs, nbits=2,3; T-count == 14·nbits
+[4] PPS(δ=0) == dense expectation, random circuits (max err ~1e-9)
+[5] PPS(δ=0) == dense on a real adder circuit
+```
+`experiment2.py` §0 additionally verifies `CP`, `QFT` vs DFT, `QFT∘QFT⁻¹ = I`.
+
+---
+
+## STATUS 2 — CRITICAL BUG FOUND; F4/F6/F7/F8 ALL RETRACTED
+
+**A bug in `pps.py` invalidated every result involving an X, Y or Z gate.**
+
+```python
+if abs(s) < 1e-12:      # WRONG: "identity up to phase"
+    new = terms
+```
+
+`U†PU = cos(θ)P + sin(θ)(iσP)` for anticommuting P. At **θ = π**, `sin = 0` but
+`cos = −1`, so anticommuting terms must be **negated**. The shortcut treated
+every θ=π gate — i.e. every X, Y, Z — as a no-op. Fixed: the fast path now
+requires `cos > 0`.
+
+**Why the test suite missed it:** the random circuits in `test_core.py` [4] drew
+from `{h, t, cnot, rx, rz}` and never emitted an `x()`. The ripple adder is built
+only from CNOT/Toffoli — also no X. The bug could only fire in `ToffoliModExp`
+(`_load` uncontrolled, `cc_add_mod`'s `qc.x(msb)`) and in `build()`'s `x(x[0])`.
+Regression test added as `test_core.py` [4b], which fails on the old code.
+
+**How it was caught:** Walsh (exact integer arithmetic) disagreed with PPS. The
+discriminating test was running PPS in `longdouble` — the error was *identical*
+to `float64` (1.000e+00), ruling out precision and proving a logic bug.
+**Keep that trick: if extra precision doesn't move the error, it isn't precision.**
+
+### Corrected results (all re-run post-fix)
+
+```
+                       exact PPS (delta=0)
+ N,a  compilation   q  gates    N_max   N_fin  nonZ      <O>  true
+ 5,2      Fourier  10   5359     2530     451     0  -1.0000    -1
+ 5,2      Toffoli  15  21247    40770   15493     0  -1.0000    -1
+ 7,3      Fourier  10   5359     2494     461     0  -1.0000    -1
+ 7,3      Toffoli  15  21715    40796   15539     0  -1.0000    -1
+```
+
+Every prior claim that flipped:
+
+- **F4 RETRACTED.** "Fourier lacks Z-closure" was pure artifact. **Both**
+  compilations end with **zero** non-Z terms. Z-closure is a property of the
+  *unitary being a basis permutation*, not of the gate set.
+- **F6 RETRACTED.** The direction reverses: Fourier is *cheaper* (451 vs 15493),
+  not 8.5x more expensive.
+- **F7 SUPERSEDED by F9** (below) — right instinct, wrong framing.
+- **F8 RETRACTED.** ⟨O⟩ was wrong (+1 where truth is −1), so the δ-sweep
+  conclusions were meaningless.
+- **C5 partially survives**: norm violation still occurs under truncation
+  (Fourier N=7 δ=1e-3 gives ⟨O⟩ = −1.02086), but it is now the *only*
+  truncation claim standing.
+
+### CONFOUND that kills the A/B as designed
+
+The two compilations use **different qubit counts** (10 vs 15) with different
+ancilla layouts. They agree on the *valid subspace* but implement **different
+permutations of their respective full Hilbert spaces**, so their pullbacks are
+different operators over different-sized domains. 451 vs 15493 is therefore
+**not** a compilation effect — it is mostly an ancilla-count effect.
+**Any future A/B must match total qubit count.**
+
+---
+
+## F9 — THE RESULT: PPS term count = Walsh sparsity, exactly
+
+For a circuit implementing a basis permutation π, `π†Z_jπ` is the diagonal
+operator `(−1)^{g(y)}` with `g(y) = bit j of π(y)`. Expanding a diagonal operator
+in the Pauli basis is *precisely* the Walsh–Hadamard transform of `(−1)^g`.
+Therefore:
+
+> **the number of Pauli terms PPS carries = the Walsh sparsity of g**
+
+Verified to machine precision, 6/6 instances, both compilations, supports
+identical (not merely counts):
+
+```
+ N,a  compilation   q   walsh     pps  match    maxerr
+ 5,2      Fourier  10     451     451    YES  6.66e-16
+ 5,2      Toffoli  15   15493   15493    YES  3.75e-16
+ 7,3      Fourier  10     461     461    YES  3.61e-16
+ 7,3      Toffoli  15   15539   15539    YES  4.44e-16
+ 4-bit adder Z_b0  10       1       1    YES  1.11e-16
+ 4-bit adder Z_b2  10      10      10    YES  1.11e-16
+```
+
+Consequences:
+
+1. **Exact predictive cost model.** Walsh runs in O(2ⁿ·n) and took 0.05s where
+   PPS took 49s. No extrapolation, no power-law fitting, no truncation
+   heuristics — for permutation circuits the answer is computable outright.
+   This sidesteps the paper's Eq. 17 machinery entirely *in this regime*.
+2. **Compilation-invariant.** Kills the "compilation, not algorithm" thesis.
+3. **Explains F1 correctly at last.** Adder low bit = `a0⊕b0⊕c0`, affine ⟹ Walsh
+   sparsity 1. Sparsity 1 ⟺ affine is a standard theorem. The permutation
+   property was never the operative fact.
+4. **Bridge to cryptanalysis.** Walsh sparsity / linearity is *the* central
+   quantity in linear cryptanalysis. "PPS-hard reversible circuit" ≈ "Boolean
+   function resistant to linear approximation". That literature is deep and
+   directly importable — likely the most valuable thread here.
+
+**Caveat:** Walsh is itself O(2ⁿ), so this predicts cost rather than beating it.
+Its value is as an *exact* cost model and an explanation, not a faster simulator.
+
+## REVIEW ROUND (external) — 3 of 4 findings upheld, 1 refuted
+
+An independent review raised four objections. Verified each rather than
+accepting; results below. **Net: the core (F9/C8) is unharmed, C15 is
+strengthened, one real gap found and fixed, one review claim was wrong.**
+
+### R1 UPHELD (important) — Walsh predicts N_final, not N_max (peak memory)
+
+PPS memory cost is the *peak* term count during propagation, not the final one.
+Walsh sparsity equals the **final** count. These differ:
+
+```
+        circuit    walsh/final    rot N_max   ratio
+ 3-bit adder Z_b0            1          128    128x
+ 4-bit adder Z_b0            1          512    512x
+ 5-bit adder Z_b0            1         2048   2048x
+      modexp N=5         3086        13666    4.4x
+     modexp N=15        31176       128138    4.1x
+```
+
+**So F1's "the adder is FREE for PPS" is misleading** — it peaks at the full
+lightcone (2^(q-1)) before collapsing to 1. And C11's "exact cost model" predicts
+*result complexity*, not peak memory. Both need restating. For modexp the ratio
+is a bounded ~4x, so **C7's Θ(2ⁿ) asymptotic is unaffected**.
+
+### R1 FIX — permutation-native PPS (`perm_pps.py`), a real improvement
+
+Root cause: standard PPS decomposes Toffoli into Clifford+T and propagates
+through the *rotations*, which include Hadamards — so the operator leaves the
+diagonal mid-circuit even though the Toffoli as a whole is a permutation.
+
+Treating X/CNOT/Toffoli as **atomic permutation gates** keeps everything Z-type
+at every step. Conjugation rules (from `(-1)^{popcount(perm(y) & z)}`):
+
+```
+X(q)           : Z^z -> (-1)^{z_q} Z^z                        1 term
+CNOT(c,t)      : Z^z -> Z^{z XOR (z_t << c)}                  1 term
+Toffoli(a,b,c) : z_c=0 -> Z^z                                 1 term
+                 z_c=1 -> 1/2[Z^z + Z^{z^a} + Z^{z^b} - Z^{z^a^b}]   4 terms
+```
+
+Measured (verified against Walsh and against rotation-level PPS,
+`test_perm_pps.py` all pass):
+
+```
+        circuit    final   rot N_max   perm N_max   saving
+ 3-bit adder Z_b0      1         128           64     2.0x
+      modexp N=5    3086       13666         6834     2.0x
+     modexp N=15   31176      128138        64070     2.0x
+```
+
+**Exactly 2.0x everywhere** — at the peak the rotation-level run holds Z and
+non-Z terms in equal measure, so dropping the non-Z half is precisely a factor
+of two. Modest, but two things matter more than the constant:
+
+1. The peak becomes a **well-defined Walsh quantity**: after k gates the term
+   count *is* the Walsh sparsity of the k-gate suffix's pullback, so
+   `N_max = max over suffixes of Walsh sparsity`. Exact, not extrapolated.
+2. It is **much faster** — logical ops instead of rotations (1699 vs 21247 for
+   N=5) and half the terms. Did q=21 in 7.4s where rotation-level PPS failed to
+   finish q=17 in 20 minutes.
+
+Actionable claim for a PPS engine: *implement reversible arithmetic blocks as
+atomic permutation primitives; the propagation never leaves the diagonal.*
+
+### R1 consequence — C15 SURVIVES for peak memory, not just final count
+
+The critical test the review did not run. Using `perm_pps`:
+
+```
+   a   r  n_exp    q   N_final  N_max(peak)  peak growth
+   6   2      2   15     15549        24369            -
+   6   2      4   17     15549        24369        1.00x
+   6   2      6   19     15549        24369        1.00x
+   6   2      8   21     15549        24369        1.00x
+
+   3   6      2   15     15539        24412            -
+   3   6      4   17     64353        98018        4.02x
+```
+
+Peak is **exactly** constant at 24369 across a 64x growth in dimension for r=2,
+against 4.02x/step for r=6. **C15's headline holds for memory cost, not merely
+result size.** (Also confirmed at rotation level: N_max 40753 at both n_exp=2
+and n_exp=3.)
+
+### R2 UPHELD — the C15 *mechanism* stated in ABSTRACT.md is wrong
+
+Checked directly: for r=2, n_exp=6, the added exponent qubits (15–18) are each
+set in ~7779/15549 support terms — **genuinely live**, not confined. So the
+abstract's "the Walsh support is confined to the low bits of the exponent
+register" is false at circuit level. It is true for the *idealised* function
+(F12), where the domain is e alone. Cause: `u_a(ctrl, 1)` is identity only on
+the valid subspace; as a full-space unitary it entangles the control with ancilla
+garbage. The count is constant; the support is not confined.
+
+NOTES already carried this caveat; **the abstract did not, and has been fixed.**
+
+### R3 REFUTED — the "2-adic vs factors of r" objection was based on the abstract only
+
+The review fetched only Dang et al.'s abstract ("depends on its factors") and
+concluded MPS keys on general smoothness while PPS keys on powers of two,
+offering r=6 as a counterexample. **The full text says otherwise.** Section 4:
+
+> "α is the number of trailing zeroes in the binary representation of r" …
+> "due to the **odd factor β ≡ r/2^α** of r which cannot be localised to
+> specific qubits"
+
+and §5.2: MPS matrices for the qubits in A "reduced by a factor of **β²**".
+
+So Dang et al. decompose r = β·2^α *exactly* as 2-adic valuation times odd part,
+and it is the **odd part β that costs memory** — β=1 (r a power of two) is the
+free case. r=6 has β=3, so it is in the expensive branch for MPS too, and is
+**not** a counterexample. The correspondence is real and now citable with a
+specific mechanism. Claim strengthened rather than weakened.
+
+### R4 UPHELD in substance, but its numbers are confounded
+
+True and useful: at rotation level the Toffoli decomposition passes through H
+gates, so the operator does leave the diagonal mid-circuit — "Z-closure" is a
+property of the *endpoint*, not the trajectory. That is exactly R1, and
+`perm_pps.py` fixes it.
+
+But the specific figures offered (Toffoli peak non-Z 13664 vs Fourier 848) compare
+**q=14 against q=9** — the same ancilla/qubit-count confound already logged as
+killing C3. Not a valid compilation comparison.
+
+---
+
+## C7 RESOLVED — the results are NOT pre-asymptotic
+
+F9 removed the need for a faster simulator: since PPS term count *equals* Walsh
+sparsity, exact PPS cost is computable in O(2ⁿn) without running PPS. That
+reached **24 qubits** (dim 1.7e7) where PPS itself stalls around 15–17.
+
+`experiment_c7.py` / `/tmp/c7a.log`, Toffoli modexp, observable Z_x0:
+
+```
+   N   n   r  qubits        2^q   sparsity  density  r pow2    time
+   5   3   4      15      32768      15493  0.47281     yes    0.1s
+   7   3   6      15      32768      15539  0.47421      no    0.0s
+  15   4   4      18     262144     127936  0.48804     yes    0.8s
+  21   5   6      21    2097152    1037322  0.49463      no   16.5s
+  33   6  10      24   16777216    8347241  0.49753      no  258.2s
+  35   6  12      24   16777216    8346759  0.49751      no  262.1s
+
+  log2(sparsity) grows 1.008 bits/qubit  (1.000 = exactly Theta(2^n))
+  density: 0.473 -> 0.474 -> 0.488 -> 0.495 -> 0.498 -> 0.498
+```
+
+**Density converges monotonically to 1/2 and the growth slope is 1.008
+bits/qubit.** So PPS on modular exponentiation costs Θ(2ⁿ) — asymptotically no
+better than a state-vector simulation. The small-n numbers were already in the
+asymptotic regime; C7 is answered, and negatively for the threat.
+
+For contrast, PPS at 17 qubits ran >20 min without finishing while the Walsh
+computation of the same quantity took **0.01s**.
+
+## C15 CONFIRMED AT CIRCUIT LEVEL — and it is the sharpest result so far
+
+The tension in F12 (function-level dichotomy vs circuit-level density stuck at
+~0.5) is resolved: **the earlier runs all used n_exp=2, where a 2-bit exponent
+register leaves no room for periodicity to show.** Sweep n_exp and the dichotomy
+appears immediately.
+
+Controlled design: fix N (identical circuit, ancillas, gate structure), vary `a`
+so that only r changes. `experiment_c15.py`, `experiment_c15b.py`.
+
+**N=7, a=6 (r=2, a power of two), observable Z_x0:**
+
+```
+ n_exp  qubits        2^q   sparsity   density  vs n_exp=2    time
+     2      15      32768      15549  0.474518        SAME    0.0s
+     4      17     131072      15549  0.118629        SAME    0.4s
+     6      19     524288      15549  0.029657        SAME    2.9s
+     8      21    2097152      15549  0.007414        SAME   27.3s
+    10      23    8388608      15549  0.001854        SAME  176.2s
+```
+
+**CONTROL — N=7, a=3 (r=6, has an odd factor), same circuit size:**
+
+```
+ n_exp  qubits   sparsity   density    growth
+     2      15      15539  0.474213         -
+     4      17      64353  0.490974     4.14x
+     6      19     258691  0.493414     4.02x
+     8      21    1037728  0.494827     4.01x
+    10      23    4155634  0.495390     4.00x
+```
+
+Sparsity is **exactly** 15549 across a 256x growth in Hilbert-space dimension
+for r=2, against a clean 4.00x-per-step growth for r=6. Same modulus, same
+circuit, only the base differs.
+
+**Independent confirmation at N=21** (`experiment_c15.py` §2): a=8 (r=2) gives
+1037174 at both n_exp=2 and n_exp=4 while the dimension quadruples; a=2 (r=6)
+goes 1037322 → 4186980 and a=4 (r=3) goes 512784 → 4152181.
+
+**Mechanism.** aᵉ mod N depends only on e mod r. If r | 2ᵏ then only the low k
+bits of e matter, so every additional exponent qubit adds a variable the Walsh
+support cannot touch — the support is pinned to a fixed subspace. Any odd factor
+in r makes the period incommensurate with the GF(2) basis and the support
+spreads over everything.
+
+**Statement of the result.**
+
+> For reversible modular exponentiation with computational-basis observables,
+> Pauli-path simulation cost is **independent of the exponent-register size when
+> the order r is a power of two**, and **Θ(2^q) as soon as r has an odd factor.**
+
+Consequences:
+
+1. **Period-finding precision is free, or fatal, depending on r.** The exponent
+   register is what sets the accuracy of the continued-fractions step; here
+   enlarging it costs PPS *nothing* when r is a power of two and quadruples cost
+   per two qubits otherwise.
+2. **The textbook demo is the degenerate case, quantitatively.** N=15 a=7 has
+   r=4. Every "we simulated Shor on N=15" result sits in the corner where PPS
+   cost does not grow at all. Cryptographic N has r with odd factors
+   generically, i.e. the Θ(2ⁿ) branch.
+3. **Same 2-adic dependence as MPS.** Dang, Hill & Hollenberg report memory
+   depending on *the factors of r*
+   ([arXiv:1712.07311](https://arxiv.org/abs/1712.07311)). Two structurally
+   unrelated classical methods keying on the same arithmetic property is worth
+   stating as a shared fact about the algorithm, not a coincidence of either.
+
+**Caveat.** `live_variables` reports all q bits live even in the r=2 case, so the
+constancy is *not* simply "the function ignores the extra qubits". The extra
+exponent qubits do influence the function (through behaviour on invalid inputs)
+without enlarging the Walsh support. The clean subspace argument above explains
+the valid-input structure; the full-space statement is empirical over 5 sizes
+and 2 moduli, not proved.
+
+## F12 — the 2-adic dichotomy at function level (superseded by C15 above)
+
+Function-level probe (`/tmp/c7b.log`), g(e) = bit 0 of aᵉ mod N over e ∈ [0,2ᵗ),
+which isolates the algorithm from ancilla layout:
+
+```
+    N   a    r   t        2^t   sparsity  density  r pow2
+   15   7    4  12       4096          4  0.00098     yes
+   15   7    4  24   16777216          4  0.00000     yes    <- CONSTANT in t
+   21   2    6  24   16777216   16777216  1.00000      no    <- FULLY DENSE
+   35   3   12  24   16777216   16777216  1.00000      no
+  143   5   20  24   16777216   16777216  1.00000      no
+  323   5  144  16      65536      64293  0.98103      no
+  323   5  144  24   16777216   16777216  1.00000      no
+```
+
+Sharp dichotomy, and the reason is elementary: if r | 2ᵏ then aᵉ mod N depends
+only on the low k bits of e, so g is a function of k variables and its Walsh
+support is ≤ 2ᵏ — **constant in t**. If r has any odd factor, the periodicity is
+incommensurate with the GF(2)ᵗ Walsh basis and the spectrum is **maximally
+spread**. N=323 (r=144=16·9) shows the intermediate case: the factor 16 buys
+partial sparsity at small t, washed out by t=24.
+
+Two consequences:
+
+1. **This is the same phenomenon Dang, Hill & Hollenberg report for MPS** — that
+   memory depends on *the factors of r* rather than r itself
+   ([arXiv:1712.07311](https://arxiv.org/abs/1712.07311)). Two unrelated
+   classical methods, same 2-adic dependence. Worth stating as a shared
+   structural fact rather than a coincidence of either method.
+2. **The textbook demo is the degenerate case.** N=15, a=7 has r=4, a power of
+   two — sparsity 4, constant forever. Every "we simulated Shor" result on N=15
+   sits in the trivially-simulable corner. For cryptographic N, r is generically
+   not a power of two, so PPS is at the fully-dense worst case.
+
+## F13 — the spectrum shape explains F11 (aggressive truncation wins)
+
+F11 was empirical; C12's spectrum data explains it. modexp N=5, Z_x0:
+
+```
+   keep |c| >    #kept     sum kept      |err|
+        0e+00    15493    -1.000000   0.00e+00
+        1e-03    13005    -0.987061   1.29e-02
+        1e-02     1579    -0.955322   4.47e-02
+        3e-02       75    -0.771973   2.28e-01   <- worst
+        1e-01        4    -1.000000   0.00e+00   <- exact, 4 terms
+```
+
+**4 of 15493 coefficients reproduce ⟨O⟩ exactly; the other 15489 sum to zero.**
+The spectrum is heavy-tailed by a factor of 33 (max|c| = 0.2676 against the
+flat-spectrum value 1/√S = 0.0080). Keep the spikes → exact. Keep the spikes and
+*some* of the cancelling sea → residue. That is the non-monotonicity, now
+predicted from spectrum shape rather than observed.
+
+Practical rule, counterintuitive and actionable: **for these circuits truncate
+aggressively, not mildly.** Mild δ is the worst regime.
+
+## C12 VALIDATED — the cryptanalysis bridge is quantitative
+
+With c_z normalised, L = 2ⁿ·max|c|, NL = 2ⁿ⁻¹(1 − max|c|), bent bound
+2ⁿ⁻¹ − 2^(n/2−1). Parseval gives Σc² = 1, so a flat spectrum over S terms has
+each |c| = 1/√S and NL ≈ 2ⁿ⁻¹(1 − 1/√S) — tying PPS cost S to nonlinearity.
+
+```
+                  function   n  sparsity   dens   max|c| 1/sqrt(S)  NL/NLbent
+         adder b0 (affine)  12         1  0.000  1.00000   1.00000    0.00000
+                  adder b1  12         4  0.001  0.50000   0.50000    0.50794
+                  adder b4  12        46  0.011  0.50000   0.14744    0.50794
+            modexp N=5 a=2  15     15493  0.473  0.26758   0.00803    0.73649
+           modexp N=15 a=7  18    127936  0.488  0.25763   0.00280    0.74382
+           modexp N=21 a=2  21   1037322  0.495  0.25588   0.00098    0.74463
+            random f, n=14  14     16384  1.000  0.03357   0.00781    0.97404
+            random f, n=18  18    262144  1.000  0.00965   0.00195    0.99229
+```
+
+Both endpoints land exactly: affine ⟹ sparsity 1, NL 0. Random ⟹ density 1.000,
+NL/NLbent 0.97–0.99 (near-bent, as expected). **modexp sits at a stable ~0.74 of
+the bent bound** — strongly nonlinear, but measurably *not* random, and the
+figure is flat across 15→21 qubits.
+
+**Caveat that must be stated:** the Parseval prediction over-estimates NL by
+~35% for modexp (measured 12000 vs predicted 16252) because the spectrum is
+heavy-tailed, while for random functions it is accurate to 1–3%. So S ↔ NL is a
+**bound that is tight only for flat spectra**, exact at the affine and bent
+endpoints, not an identity. Do not overclaim it.
+
+## F10 — scope of the Walsh identity (exactly where it stops)
+
+`experiment_scope.py` Q1, Toffoli modexp N=5, 14 qubits:
+
+```
+         observable   type   walsh     pps   nonZ  match
+               Z_x0      Z    3086    3086      0    YES
+               Z_x1      Z    2926    2926      0    YES
+          Z_x0 Z_x1      Z    2848    2848      0    YES
+     Z_x0 Z_x1 Z_x2      Z    2514    2514      0    YES
+               X_x0      X       -   60358  60358    n/a (hit cap)
+               Y_x0      Y       -   60358  60358    n/a (hit cap)
+```
+
+Holds for **every Z-type observable**, single- or multi-qubit (generalise via
+`(-1)^{popcount(π(y) & zmask)}`). Fails completely for X/Y-type: the pullback
+leaves the diagonal, every surviving term is non-Z, and it blows past the cap.
+
+Honest scope statement: **computational-basis observables on permutation
+circuits.** That is exactly what one measures in Shor (bits of the output
+register), so the restriction is natural rather than convenient — but it must be
+stated, not glossed.
+
+## F11 — truncation error is NON-MONOTONIC in δ (aggressive beats mild)
+
+`experiment_scope.py` Q2, Toffoli modexp N=5, truth = −1:
+
+```
+   delta    N_max        <O>     |err|  admissible
+   0e+00    40770   -1.00000  6.66e-16         yes
+   1e-04    39992   -1.00348  3.48e-03    VIOLATED
+   1e-03    23482   -0.71532  2.85e-01         yes
+   1e-02     2052   -1.00000  0.00e+00         yes
+   3e-02      514   -1.00000  0.00e+00         yes
+   1e-01       34   -1.00000  0.00e+00         yes
+```
+
+**δ=1e-1 gives the exact answer with 34 terms; δ=1e-3 is off by 0.285 with
+23482 terms.** Three orders of magnitude more work, far worse answer.
+
+Mechanism: the coefficient spectrum is a handful of large terms plus ~10⁴ small
+ones (each ≈2⁻ⁿ) that **cancel among themselves**. Discard all of them and the
+cancellation is preserved exactly. Discard *some* and the residue survives.
+Mild truncation is the worst regime — it breaks cancellations without removing
+the terms that would have completed them.
+
+This independently reproduces the paper's own counterintuitive observation that
+"reducing δ does not always improve accuracy" (Gharibyan et al., abstract) on a
+completely different circuit family, and gives a concrete mechanism for it.
+
+**C5 survives, quantified: 4/18 truncated runs were inadmissible (|⟨O⟩| > 1).**
+All four were at mild δ (1e-4, 1e-3) — never at aggressive δ. The check is free
+and one-sided: it can prove a run invalid, never valid.
+
+---
+
+## STATUS 1: F2 RETRACTED, F1 NARROWED (after building real modexp)
+
+Building the real Beauregard modexp (`modexp.py`) invalidated two of the three
+findings below. **Read this block before trusting F1–F3.**
+
+- **F2 is RETRACTED.** The "QFT is the bottleneck" numbers came from a QFT with
+  a bit-reversal bug (trap 4) *and* a toy where the adder acted on the b-register
+  while the QFT acted on the a-register — so the observable barely met the
+  arithmetic. With the QFT fixed, the toy sandwich collapses to a constant
+  `N_max = 8` at every size. The old scaling table (138 → 872306, 1.57 bits/qubit)
+  is an artifact. Do not cite it.
+- **F1 is NARROWED.** It holds for *gate-level* permutation circuits only.
+- **F3 survives in corrected form**, see F5.
+
+Real-circuit numbers (N=5, a=2, n_exp=3, 11 qubits; modexp = 8038 rotations /
+3339 non-Clifford; δ=1e-3):
+
+```
+   observable   circuit     N_max         <O>
+       Z_exp0    modexp         1   +1.000000     <- trivial: Z on a control qubit
+       Z_exp0      shor     46756   +0.072884
+         Z_x0    modexp     13313   +1.022676     <- |<O>| > 1 : INVALID estimate
+         Z_x0      shor     13313   +0.222552
+         Z_x1    modexp     17555   +1.021963     <- also invalid
+         Z_x1      shor     17555   +0.162320
+         Z_b0    modexp     17126   +0.455090
+         Z_b0      shor     17126   +0.025288
+```
+
+### F4 — PPS cost depends on the *gate-level* arithmetic, not the logical map
+
+Toffoli-based adder (`circuits.ripple_adder`) is a permutation **gate by gate**,
+so Z-strings stay Z-type and everything cancels (F1). Beauregard modexp computes
+the *same kind of logical map* but in Fourier space, where the individual gates
+are CP/Rz rotations and are **not** permutations. Result: Z_x0 through the modexp
+gives `N_max = 13313`, not 1.
+
+**⟹ Same logical arithmetic, opposite PPS profile, depending only on whether you
+compile to Toffoli or to Fourier rotations.** This was thread 3 (a curiosity);
+it is now the main result and the main live question.
+
+Also note: adding the inverse QFT changes `N_max` **not at all** for x/b-register
+observables (13313 both, 17555 both, 17126 both) — it only shifts `<O>`. The
+modexp dominates. This is the direct refutation of F2.
+
+### F5 — Truncation produces provably invalid estimates (corrected F3)
+
+`<Z_x0> = +1.022676` at δ=1e-3. For any Pauli observable |<O>| ≤ 1, so this is
+not a slightly-wrong answer, it is an *impossible* one. Truncation error here is
+not small and not bounded. This is much harder evidence than the old F3 slope
+argument, and it does not depend on the toy circuits.
+
+**Cheap validity check to keep using: assert |<O>| ≤ 1.** Free, and it caught
+this immediately.
+
+---
+
+## Findings (F1 narrowed, F2 retracted, F3 superseded by F5 — see above)
+
+### F1 — Gate-level permutation circuits are FREE for PPS with Z-type observables
+
+**Scope: Toffoli/CNOT/X circuits only. Does NOT extend to Fourier arithmetic.**
+
+3-bit Cuccaro adder, 42 T gates, observable `Z_b0`:
+
+```
+peak Pauli terms 128  →  final terms 1  →  <O> exact at every δ tested (incl 1e-2)
+```
+
+**Mechanism:** a classical reversible circuit is a permutation matrix.
+Conjugating a *diagonal* operator by a permutation stays diagonal. Z-type Pauli
+strings span the diagonals ⟹ Z-strings map to Z-strings, and every intermediate
+branch into an X/Y string **cancels exactly**. Branching is real but transient.
+
+**⟹ Toffoli-density does NOT imply PPS-hardness.** This is elementary once seen
+and is almost certainly known. Treat as corrected foundation, not a result.
+
+### F2 — The QFT is the bottleneck, not the arithmetic
+
+Adding an inverse QFT on the a-register drives the observable off-diagonal, and
+*then* the T gates branch for real:
+
+```
+                 Z-type weight fraction:  start   min    end    mean
+arithmetic only                           1.000  0.000  1.000  0.484
++ inverse QFT                             1.000  0.000  0.000  0.004
+```
+
+Scaling (δ=0, exact PPS; "sandwich" = H layer → adder → inverse QFT):
+
+```
+ nbits qubits Tgates | arith N_max fin | sand N_max    fin  ratio
+     2      6     31 |          32   1 |        138     52    4.3
+     3      8     51 |         128   1 |       1158    384    9.0
+     4     10     74 |         512   1 |      10306   2916   20.1
+     5     12    100 |        2048   1 |      94006  22592   45.9
+     6     14    129 |        8192   1 |     872306      -  106.5 (CAP)
+
+sandwich: log2(N_max) ~ 1.57 bits per qubit   (1.0 = 2^n, 2.0 = 4^n worst case)
+```
+
+arith column *always* ends at 1 term (F1). Sandwich never collapses, and the
+QFT's multiplier is itself growing exponentially.
+
+**⟹ For Shor-like circuits the PPS bottleneck is the QFT, not the modular
+exponentiation — the opposite of where the gate count sits.** This is the most
+interesting thing found so far.
+
+### F3 — δ is not a working dial for this family
+
+```
+nbits=5 (12 qubits):  δ=1e-2  N_max= 2974   slope 2.09
+                      δ=1e-3  N_max=41398   slope 1.14
+                      δ=1e-4  N_max=91446   slope 0.34
+                      δ=1e-6  N_max=94006   slope 0.01
+                      δ=0     N_max=94006   (exact)
+```
+
+Below ~1e-4 δ does nothing: coefficient spectrum has a **floor**, not a
+power-law tail, so truncation has nothing left to discard. Accuracy fails as a
+**cliff**, not gracefully — on a non-degenerate observable: exact through
+δ=3e-2, then error jumps to 1.0 at δ=1e-1.
+
+Matters because the paper's practical contribution (extrapolate N_max from cheap
+test runs, their Eq. 17 `N_max ~ δ^-m`) needs a power law to extrapolate along.
+
+---
+
+## Falsified hypotheses — do not re-derive
+
+**H1 (DEAD): "arithmetic is hard for PPS because all T angles are π/4, so
+cos=sin=1/√2 and nothing is safe to truncate."**
+Branch-weight data *supports the premise* (adder: 42 branching gates, all
+|sin|=0.7071 exactly, 1 distinct value; brickwork: 96 gates, 96 distinct values,
+mean 0.377). But the conclusion is wrong — see F1, it all cancels.
+
+**H2 (DEAD): "the π/4-uniform angle is what breaks the power law."**
+Paper's **Appendix C / Fig. 9b** already tested fixed correlated θ_X = π/4 and
+the power law *still held*. The angle is not the differentiator. If there's a
+real effect it's the arithmetic+QFT **structure**, not the angle value.
+
+---
+
+## Traps already hit (do not repeat)
+
+1. **Floating-point residue counted as real Pauli terms.** Exact cancellations
+   leave ~1e-16 junk. `pps.py` now floors at `abs(v) > 1e-13` even when δ=0.
+   Before the fix, `experiment.py` §3 was measuring pure fp noise (coefficients
+   reported at 2^-53, 2^-105 — garbage). **`experiment.py` §3 output is stale/
+   invalid**; §1 and §2 are still fine.
+2. **QFT bit-reversal acts on the *input* index (columns), not rows.**
+   `U ≈ phase * F[:, bitrev]`. Cost an hour. `QFT∘QFT⁻¹=I` passing does *not*
+   validate the convention.
+3. **Degenerate observables.** In the H→adder→QFT toy, every a-register
+   observable has `<O> = 0` by symmetry (an adder has no period structure). The
+   only non-zero ones found were ancillas that return to |0>. **Cannot do a real
+   accuracy-vs-δ study without genuine modular exponentiation.** This is the
+   main reason the modexp generator was built — and building it immediately
+   killed F2, so the instinct was right.
+4. **QFT swap network goes BEFORE the body, not after.** The H/CP body puts a
+   bit reversal on the *input* index (`U = phase * F[:, bitrev]`). Forward QFT is
+   therefore `Body . Swaps` — swaps applied to the state first. Getting this
+   backwards silently produces a unitary that still satisfies `QFT∘QFT⁻¹ = I`
+   **and still passes a casual eyeball test**, but breaks Fourier arithmetic
+   (bit reversal does not commute with addition) and *silently changed all of
+   F2/F3*. Costliest bug of the session. `circuits.qft(..., swaps=True)` is now
+   verified against the plain DFT with sign +1.
+5. **(SUPERSEDED — environment changed.)** Run everything with `uv run python`
+   from `research/` (Python 3.14 + `.venv`, numpy 2.4.6, scipy, stim, qiskit,
+   quimb, numba, juliacall). Only `source .env` when Julia/PauliPropagation.jl is
+   needed — its `LD_PRELOAD` of Julia's libstdc++ **segfaults numpy longdouble**
+   (exit 139), which cost a debugging cycle. The old advice to use
+   `/usr/bin/python3` predates the venv and no longer applies.
+6. **`pkill` before a heredoc in the same command kills the write.** Two scripts
+   vanished this way. Write the file first, kill second — or use the Write tool.
+
+---
+
+## Caveats that decide whether F3 is real
+
+- **Scale gap is severe.** Mine: 6–14 qubits, 31–129 T gates. Paper: 127 qubits,
+  5000–8000 gates. Paper says the power law only emerges after ~1/3 of the
+  circuit. My circuits may simply be **pre-asymptotic**, which would make F3 an
+  artifact. This is the single biggest threat to the result.
+- Python dict-based PPS dies around ~15 qubits. Paper's **Appendix B** gives the
+  bit-packed representation (ν_P vectors in uint64 arrays) — that's the fix if
+  scale is needed.
+- `<O>=0` degeneracy above means F3's cliff was measured on a trivial observable.
+
+---
+
+## F6 — C3 RESOLVED: Z-closure is exact, but the benefit is ~8x, not 10^4
+
+`toffoli_arith.py` built and verified (`test_toffoli_arith.py` A–G pass,
+including a cross-check that both compilations give identical `a^e mod N`).
+The matched A/B, N=5 a=2 n_exp=2, observable Z_x0, **δ=0 (exact)**:
+
+```
+compilation  qubits  rots  nonCliff   N_max  N_final  Z-type  non-Z  max|non-Z|
+   Fourier       10  5359      2262  131064   131064     508 130556    4.71e-02
+   Toffoli       15 21247      4074   40774    15476   15476      0    0
+```
+
+**Z-closure is real and exact.** The Toffoli compilation ends with *zero*
+non-Z-type terms — not "small", exactly zero. The Fourier compilation ends with
+130556 non-Z terms carrying real weight (largest 4.7e-2, so not fp noise).
+
+**Why Fourier lacks closure even though it computes a permutation:** Beauregard's
+circuit is a permutation only *on the valid subspace* (b=0, anc=0, x<N). As a
+full 2^n unitary it is not a permutation matrix — the phase rotations only
+conspire on that subspace. Toffoli/CNOT/X is a permutation matrix on the whole
+Hilbert space, unconditionally.
+
+**But the payoff is modest:** 15476 vs 131064 final terms (~8.5x), N_max 40774 vs
+131064 (~3.2x). Not the "four orders of magnitude" the draft abstract claimed.
+
+## F7 — the real cost driver is Walsh sparsity, which is compilation-invariant
+
+Z-closure bounds support to 2^n Z-strings instead of 4^n Paulis — a genuine
+quadratic ceiling. It does **not** make the problem cheap. The Toffoli modexp
+still needs 15476 Z-strings.
+
+Reason: for a permutation π and observable Z_j, `π† Z_j π` is the diagonal
+operator `(-1)^{f(x)}` where f is the Boolean function giving bit j of the
+output. Its Pauli expansion is exactly the **Walsh–Hadamard expansion of f**, so
+the term count is the Walsh sparsity of f.
+
+- ripple adder: output bit = `a0 XOR b0 XOR c0`, **linear** ⟹ 1 Walsh coefficient
+  ⟹ N_final = 1. That, not "permutation", is why F1 collapsed.
+- modexp: bit of `a^e mod N` is **highly nonlinear** ⟹ dense Walsh spectrum
+  ⟹ 15476 terms.
+
+**⟹ Compilation sets the ceiling (2^n vs 4^n); the algorithm's Boolean structure
+sets where you sit under it.** The draft abstract's thesis ("compilation, not
+algorithm") is therefore wrong as stated and needs rewriting — it is *both*, with
+distinct roles. F1's original explanation was also wrong (right conclusion,
+wrong mechanism).
+
+## F8 — truncation destroys the structural advantage
+
+At δ=1e-3 the ordering **reverses**: Toffoli N_max 24692, Fourier 11581. The
+compilation that is better exactly is worse under truncation, because δ-truncation
+discards terms that were going to cancel, so the exact Z-closure cancellation
+never completes. Norm violations appear on both (⟨O⟩ up to +1.109).
+
+Practical reading: telling someone "compile to Toffoli before running PPS" is
+**only** sound advice at δ=0, which is not a regime anyone runs in. This
+substantially weakens the applied claim.
+
+---
+
+## Open threads
+
+1. ~~Real modular exponentiation~~ **DONE** — `modexp.py`, verified end to end
+   (`test_modexp.py` A–G all pass; N=5,7,15; period peaks land exactly).
+2. ~~Re-run F2/F3 on real modexp~~ **DONE** — F2 did not survive. See STATUS block.
+3. **[NOW THE MAIN THREAD] Toffoli-arithmetic vs Fourier-arithmetic A/B.**
+   F4 says the compilation choice, not the logical function, sets PPS cost.
+   Needs: a Toffoli-based modular multiplier to put beside the Beauregard one,
+   so the comparison is like-for-like on the *same* N, a, and observable.
+   Currently only have a Toffoli *adder* (non-modular) — that is the next build.
+   Prediction to test: Toffoli modexp gives small `N_max` (permutation ⟹ Z-type
+   preserved), Fourier modexp gives large `N_max`, identical logical circuit.
+   If that holds cleanly it is a genuine, checkable statement about when PPS is
+   applicable, and it is actionable (compile arithmetic to Toffoli before PPS).
+4. Accuracy study now actually possible: non-degenerate `<O>` exist on the real
+   circuit. Sweep δ, plot error vs `N_max`, use the |<O>| ≤ 1 check as a
+   validity gate. Expect a cliff, but measure it properly this time.
+5. Scale test for the pre-asymptotic worry (needs bit-packed PPS, App. B).
+   Current Python dict PPS: ~15s for 8000 gates at 11 qubits, N_max ~50k.
+
+6. **[HIGHEST VALUE, not started] Weight-truncation as Fourier tail mass.**
+   The Pauli weight of `Z^z` is `popcount(z)`, which is exactly the Fourier
+   degree of that coefficient. So for permutation circuits, **weight-truncation
+   error is literally the Fourier tail mass** of the pulled-back bit function.
+   The current work covers only coefficient-truncation (δ); weight-truncation is
+   the other standard PPS knob and is completely untouched. Measuring
+   mass-by-weight profiles (adder vs modexp vs the binomial profile of a random
+   function) would extend the exact cost model to it. Logged in
+   `experiment_review.py` R3.
+7. **Prove the circuit-level C15 invariance.** The valid-subspace argument does
+   not cover it (added qubits are live). Most promising route: is the support
+   confined to an affine subspace? That would also explain density → ½ exactly.
+   Paper B open problem 1.
+8. Decode *which* qubits carry the 4 dominant Walsh coefficients that reproduce
+   ⟨O⟩ exactly (F13) — would turn the aggressive-truncation rule from empirical
+   to structural.
+
+## Honesty log
+
+Things believed and then killed, in order. Keep adding to this.
+
+- H1 "π/4 angles break truncation" — killed by F1 (it all cancels).
+- H2 "uniform angle breaks the power law" — killed by paper App. C.
+- F2 "the QFT is the PPS bottleneck in Shor" — killed by the real modexp
+  (bit-reversal bug + a toy where the observable never met the arithmetic).
+- F4/F6/F8 "Fourier lacks Z-closure; Toffoli is 8.5x better; truncation
+  reverses it" — **all killed by the θ=π PPS bug.** Both compilations have
+  exact Z-closure; Fourier is cheaper, not dearer; the ⟨O⟩ values were wrong.
+- F1's *explanation* — right conclusion (adder collapses to 1 term), wrong
+  mechanism (permutation-ness). Real reason: the output bit is affine.
+- F7 "Walsh sparsity is the driver, compilation sets the ceiling" — half right.
+  Walsh sparsity is exactly the driver (F9), but there is no separate
+  compilation ceiling; the apparent one was an ancilla-count confound.
+
+**Lessons, in order of how much they cost:**
+1. The toy sandwich (H → adder → QFT) is not a proxy for Shor. Use `modexp.py`.
+2. **Randomised tests only cover the gates they sample.** The θ=π bug survived
+   because no random circuit ever emitted an X. Enumerate the gate *set*, don't
+   sample it.
+3. **An independent exact reference is worth more than more tests.** Walsh
+   caught what six suites missed, because it computes the same quantity by a
+   completely different route.
+4. **Precision-sweep to separate bugs from float error.** Same error in
+   `longdouble` as in `float64` ⟹ it is a bug, full stop.
+5. Matched-instance A/B needs matched *qubit counts*, not just matched logical
+   function.
+
+---
+
+## Literature anchors
+
+- Gharibyan et al., PPS practical guide — [arXiv:2507.10771](https://arxiv.org/pdf/2507.10771).
+  Eq. 8/9 = branching rule. Eq. 11 = power law. Eq. 17 = N_max. App. B =
+  bit-packed rep. App. C = correlated angles (kills H2). App. E = power-law
+  deviations. App. F = trouble estimating m.
+- Dang, Hill & Hollenberg, MPS Shor, 60 qubits — [arXiv:1712.07311](https://arxiv.org/abs/1712.07311).
+  Memory depends on the *factors of r*, not r.
+- Begušić & Chan, sparse Pauli dynamics vs IBM 127q — [arXiv:2306.16372](https://arxiv.org/pdf/2306.16372).
+- Orús & Latorre, entanglement in Shor scales **linearly** in n — [quant-ph/0311017](https://arxiv.org/pdf/quant-ph/0311017).
+  (Efficient MPS needs O(log n). That gap is the whole story.)
+
+## File map
+
+Run everything with `uv run python` from `research/` (see trap 5).
+
+```
+perm_pps.py      permutation-native PPS: X/CNOT/Toffoli as atomic gates,
+                 stays Z-type throughout, 2x lower peak, ~10x faster
+walsh.py         classical_permutation, FWHT, pullback_coefficients,
+                 walsh_sparsity, is_affine, permutation_via_statevector
+toffoli_arith.py Toffoli-compiled modexp (Cuccaro + add/sub-N reduction)
+pauli.py         symplectic algebra, rotation rule
+circuits.py      Circuit (σ,θ list), gate decomps, Cuccaro adder, QFT+swaps,
+                 cswap/ccphase/inverse, brickwork
+statevec.py      O(2^n) per-gate state-vector sim (to_unitary dies past ~12q)
+pps.py           propagate(), exact_expectation(), fit_power_law()
+modexp.py        Beauregard modexp: phi_add -> cc_phi_add_mod -> cmult_mod
+                 -> u_a -> build()/build_shor().  VERIFIED.
+test_core.py     correctness gate — run first, always
+test_modexp.py   modexp layers A-G — run second
+experiment.py    branch weights + coeff distribution  (§3 STALE, trap 1)
+experiment2.py   F1 mechanism + gate verification     (F2 section RETRACTED)
+experiment3.py   old toy scaling                      (RETRACTED, see STATUS)
+```
+
+Order-finding sanity anchor: `ModExp(15, 7, n_exp=4).build_shor()` must give
+exponent-register peaks at y = 0, 4, 8, 12 with p = 0.25 each (r = 4).
