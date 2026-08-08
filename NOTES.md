@@ -528,6 +528,67 @@ degenerate *because* it is the smallest product of two Fermat primes — the sam
 property that makes it the natural smallest demo. The degeneracy is forced by
 the choice of N, not by the choice of a.
 
+## I — IS THERE AN INTERMEDIATE 2-ADIC LAW? (TODO step 6). No. Answer is negative.
+
+N=323 (r = 144 = 16·9) had shown density 0.981 at t=16 rising to 1.000 at t=24,
+which looked like it might be a quantitative law in α rather than C15's binary
+split. It is not.
+
+### Two methodology bugs of my own, both instructive
+
+1. **Degenerate tables.** Testing `g(e) = h[e mod r]` with random h: for r=3
+   there are only 8 possible tables and 2 are constant, so small-r rows were
+   contaminated and appeared *sparse*. Fixed by rejecting constants.
+2. **Varied two things at once.** I drew a *new* random table for each t, so
+   t-dependence was confounded with table variance — a direct violation of the
+   "vary exactly one parameter" rule in `METHOD.md`. Fixed by fixing h and
+   sweeping t.
+
+Both produced confident-looking numbers before being caught. Worth remembering
+that the protocol's rules catch *my* errors, not just other people's.
+
+### What is solid
+
+**β = 1: sparsity exactly constant in t.** Consistent with the C15 proof.
+
+```
+  r= 4 alpha=2 beta=1: sparsity = 4 4 4 4 4 4 4 4 4 4 4 4   (t = 11..22)
+  r= 8 alpha=3 beta=1: sparsity = 4 4 4 4 4 4 4 4 4 4 4 4
+  r=16 alpha=4 beta=1: sparsity = 16 16 16 16 16 16 ...
+```
+
+**β > 1: sparsity is Θ(2^t)** — density bounded well away from 0 at every t.
+
+### What is NOT a law
+
+Density within β>1 does **not** organise by α. With a fixed table and
+consecutive t it shows a strong period-`ord₂(β)` oscillation *plus* a slow
+upward drift, and neither component is a function of α:
+
+```
+  r=12 (beta=3, ord2=2): 1.000 0.625 1.000 0.625 ...   clean period 2
+  r= 5 (beta=5, ord2=4): t≡1 mod 4 gives 0.791, 0.815, 0.832 ...  DRIFTS
+  r= 7 (beta=7, ord2=3): t≡2 mod 3 gives 0.834, 0.831, 0.850, 0.875 ... DRIFTS
+```
+
+So the periodicity hypothesis (H1) is **refuted**: residue classes are not
+constant, they drift. Density is periodic-plus-drifting, and function-dependent.
+
+**Conclusion: there is no clean intermediate law. The robust structure is the
+binary β=1 / β>1 dichotomy that C15 already asserts.** The N=323 observation is
+best explained as sampling aliasing — t = 16, 20, 24 hit residues 4, 2, 0 mod
+ord₂(9)=6, so three different points of the oscillation were read as a trend.
+
+This is a negative result that *protects* the paper: it rules out a complication
+rather than adding one, and it means C15 should be stated as the binary split
+without hedging about intermediate regimes.
+
+**Caveat on scope.** This sub-investigation used `g(e) = h[e mod r]` with random
+h, not the actual modexp bit function, in order to sweep r freely. The real
+function is a *specific* function of e mod r. The β=1 conclusion is unaffected
+(it is proved independently), but the fine structure within β>1 could differ for
+the real function and was not checked.
+
 ## T — DOES C15 SURVIVE TRUNCATION? (TODO step 7). Peak cost: yes. Accuracy: to a point.
 
 Every C15 figure was δ=0, and nobody runs PPS at δ=0 — so the practical claim
@@ -594,6 +655,25 @@ W1's: more exponent qubits means more gates, hence more incremental truncation
 events, so terms that a terminal threshold would have kept are destroyed en
 route. The larger circuit is *more* fragile at the same δ despite having an
 identical exact spectrum.
+
+### T3 — control confirmed under incremental truncation
+
+The β>1 control was cut short by the CPython 3.14 crash (trap 7) but got far
+enough to settle the question:
+
+```
+  N=7 a=3 (r=6, beta=3) CONTROL
+   n_exp   delta     N_max   N_final         <O>
+       3   0e+00     48855     30712   -1.000000
+       4   0e+00     98018     64353   -1.000000
+       5   0e+00    196060    129012   -1.000000     <- doubling per step
+       3   1e-04     48036     30779   -1.001772     <- norm violation
+       4   1e-04     94827     62819   -0.997549
+```
+
+N_max grows ~2× per added qubit, against SAME at every δ for β=1. And δ=1e-4
+produces ⟨O⟩ = −1.001772, i.e. |⟨O⟩| > 1 — another instance of C5, now on the
+control. N=5 a=2 (β=1) likewise gave N_max 48972 at both n_exp=3 and 4.
 
 ### Verdict for Paper B
 
@@ -1210,6 +1290,12 @@ real effect it's the arithmetic+QFT **structure**, not the angle value.
    `/usr/bin/python3` predates the venv and no longer applies.
 6. **`pkill` before a heredoc in the same command kills the write.** Two scripts
    vanished this way. Write the file first, kill second — or use the Write tool.
+7. **CPython 3.14 crashes on long perm_pps runs.**
+   `Fatal Python error: _TAIL_CALL_CACHE: Executing a cache.` — a bug in 3.14's
+   new tail-calling interpreter, not in this code. It killed two background jobs
+   mid-run and looked like a hang or a stray `pkill`. If a long run dies with no
+   traceback, suspect this first. Workaround: rerun (it is intermittent), or use
+   a 3.12/3.13 interpreter for long jobs.
 
 ---
 

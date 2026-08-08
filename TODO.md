@@ -200,11 +200,35 @@ See `NOTES.md` §X; file `experiment_crypto.py`.
 - **C12 correction.** The "0.74 of the bent bound" figure is stable across N at
   fixed n_exp, **not** across widths (0.50 at n_exp=1). Fixed in the abstract.
 
-## 6. `[ ]` The intermediate 2-adic law
+## 6. `[x]` The intermediate 2-adic law — DONE, negative result
 
-N=323 (r=144=16·9) shows partial sparsity at small t (density 0.981 at t=16)
-washing out to 1.000 by t=24. Is there a quantitative law in α versus t, rather
-than the current binary power-of-two / not split?
+**There is no intermediate law.** See `NOTES.md` §I; files
+`experiment_c15_intermediate{,2,3}.py`.
+
+- β=1: sparsity exactly constant in t (4, 4, 16 across t=11..22). Matches the
+  proof.
+- β>1: sparsity is Θ(2^t), density bounded away from 0 — but it does **not**
+  organise by α. With a fixed table and consecutive t it shows a strong
+  period-`ord₂(β)` oscillation plus a slow upward drift, and neither component
+  is a function of α.
+- The periodicity hypothesis was refuted too: residue classes drift rather than
+  staying constant (r=7, t≡2 mod 3: 0.834, 0.831, 0.850, 0.875).
+- **The N=323 "intermediate" observation was sampling aliasing** — t=16,20,24
+  hit residues 4,2,0 mod ord₂(9)=6, so three points of an oscillation were read
+  as a trend.
+
+Net: the binary β=1/β>1 dichotomy is the robust structure and C15 should be
+stated without hedging about intermediate regimes. A negative result that
+protects the paper rather than complicating it.
+
+**Two methodology bugs of my own, caught by the protocol:** degenerate random
+tables at small r (rejected constants), and drawing a new table per t, which
+confounded t-dependence with table variance — a direct violation of "vary
+exactly one parameter". Both produced confident-looking numbers first.
+
+**Scope caveat:** used `g(e)=h[e mod r]` with random h to sweep r freely, not
+the real modexp bit function. The β=1 conclusion is unaffected (proved
+independently); fine structure within β>1 could differ for the real function.
 
 ## 7. `[x]` Does C15 survive truncation? — DONE, mostly yes
 
