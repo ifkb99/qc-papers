@@ -8,3 +8,6 @@ wheels/
 
 # Virtual environments
 .venv
+
+# experiment outputs and measurement cache
+out/
