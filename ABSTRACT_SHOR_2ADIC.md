@@ -1,5 +1,11 @@
 # Draft abstract — Paper B (Shor / 2-adic)
 
+> **SUPERSEDED AS THE DRAFT 2026-08-08 → `PAPER_B.md`.** The full paper draft
+> now lives in `PAPER_B.md`; this file is retained as the abstract workshop and
+> the honesty-note dossier that `PAPER_B.md` §12 condenses. Where the two
+> disagree on wording, `PAPER_B.md` is live; where either disagrees with
+> `CLAIMS.md` on a *status*, `CLAIMS.md` wins.
+
 **Working title:** *The 2-Adic Structure of the Order Determines Pauli-Path
 Simulation Cost for Modular Exponentiation*
 

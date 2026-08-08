@@ -218,8 +218,8 @@ Logged in full in `NOTES.md`; listed here so a fresh session does not burn time.
 
 **Paper A is drafted in full: `PAPER_A.md` (v1, 2026-08-08).** It supersedes
 `ABSTRACT.md` as the live document; `ABSTRACT.md` is retained as the abstract
-workshop and prior-art dossier. Paper B is still abstract-only
-(`ABSTRACT_SHOR_2ADIC.md`). A third paper is now viable and was not before —
+workshop and prior-art dossier. **Paper B is drafted in full too: `PAPER_B.md` (v1)**, superseding
+`ABSTRACT_SHOR_2ADIC.md`, which is retained as the abstract workshop. A third paper is now viable and was not before —
 the compilation-dependence results (C30–C32, C33–C35, C36–C39) acquired a
 spine in C40/C41 and are currently scattered as caveats inside A and B.
 

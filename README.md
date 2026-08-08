@@ -11,7 +11,7 @@ bit function. Cost is therefore computable in closed form rather than
 extrapolated. Verified to machine precision, supports identical, on 6/6
 instances across two independent compilations.
 
-**Paper B — `ABSTRACT_SHOR_2ADIC.md`.** Applying that identity to modular
+**Paper B — `PAPER_B.md`** (full draft; `ABSTRACT_SHOR_2ADIC.md` is now the abstract workshop). Applying that identity to modular
 exponentiation: PPS cost is governed by the 2-adic structure of the
 multiplicative order r. Writing r = β·2^α with β odd, cost is independent of
 exponent-register width when β = 1 and Θ(2^n) otherwise. Verified in a
@@ -76,6 +76,7 @@ peaks at y = 0, 4, 8, 12 with p = 0.25 each (r = 4).
 | `statevec.py` | O(2ⁿ)-per-gate state-vector simulation (batched) |
 | `modexp.py` | Beauregard (Fourier-arithmetic) modular exponentiation |
 | `PAPER_A.md` | **the Paper A draft** — full paper, supersedes `ABSTRACT.md` |
+| `PAPER_B.md` | **the Paper B draft** — full paper, supersedes `ABSTRACT_SHOR_2ADIC.md` |
 | `toffoli_arith.py` | Toffoli-compiled modular exponentiation |
 | `windowed_arith.py` | windowed modexp: `WindowedModExp` (table lookup) and `SelectModExp` (select-multiply, with the `skip_zero` knob); `replay` for circuits too wide to hold a permutation array |
 | `lab/` | experiment engine: protocol harness, cached measurement, GF(2)/structure analysis, modexp variants, null models |
