@@ -223,9 +223,22 @@ Measured (verified against Walsh and against rotation-level PPS,
      modexp N=15   31176      128138        64070     2.0x
 ```
 
-**Exactly 2.0x everywhere** — at the peak the rotation-level run holds Z and
-non-Z terms in equal measure, so dropping the non-Z half is precisely a factor
-of two. Modest, but two things matter more than the constant:
+> **CORRECTED 2026-08-08 — "exactly 2.0x everywhere" is a ROUNDING ARTIFACT of
+> the `%.1f` in the table above.** The true ratios are **2.000000** for the
+> adders (128/64, 512/256, 2048/1024) but **1.9997** for modexp:
+> 13666/6834, 16386/8194, 128138/64070. Every modexp instance satisfies
+> `rot = 2·perm − 2` exactly, 3/3 — a clean regularity we have **not**
+> explained. The upper bound of 2 is arguable from the gadget's H exchanging
+> the Z- and X-sectors (strings containing Z_c get a mirrored partner, strings
+> without Z_c do not), which also explains why the adders attain it and modexp
+> does not; the constant deficit of 2 is unexplained. Claim C17 regraded: the
+> factor is **empirical, not proved**. Caught by Fable reviewing `PAPER_A.md`
+> — the abstract said "halves peak memory exactly" while §5 supported only
+> "2.0× on all 6 instances", which are different epistemic states.
+
+At the peak the rotation-level run holds Z and non-Z terms in near-equal
+measure, so dropping the non-Z part is close to a factor of two. Modest, but two
+things matter more than the constant:
 
 1. The peak becomes a **well-defined Walsh quantity**: after k gates the term
    count *is* the Walsh sparsity of the k-gate suffix's pullback, so
@@ -2277,6 +2290,13 @@ Things believed and then killed, in order. Keep adding to this.
 - F7 "Walsh sparsity is the driver, compilation sets the ceiling" — half right.
   Walsh sparsity is exactly the driver (F9), but there is no separate
   compilation ceiling; the apparent one was an ancilla-count confound.
+- C17 "permutation-native PPS halves peak memory **exactly**" — **rounding
+  artifact**, corrected 2026-08-08. The test table printed `%.1f`, so 1.9997
+  displayed as "2.0x" and the phrase "exactly" was written from the display
+  rather than the numbers. True: 2.000000 for adders, 1.9997 for modexp with
+  `rot = 2·perm − 2` in 3/3. **The lesson is narrow and worth keeping: never
+  write a precision claim from a rounded display.** Caught by external review
+  noticing the abstract claimed more than the section delivered.
 - C29 "V²=id is the entire condition" (§G, TODO 9) — **over-claimed, narrowed
   by §WD.** Not wrong about anything it tested; wrong about what it had tested.
   Every synthetic block in step 9 was controlled on exactly one fresh qubit, so

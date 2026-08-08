@@ -29,19 +29,27 @@ operator in the Pauli basis is precisely the Walsh–Hadamard transform of
 spectrum of g, and its size is the Walsh sparsity of that Boolean function.
 
 Four consequences follow. **(i)** PPS cost for reversible arithmetic is a
-property of the Boolean function computed, not of the gate set computing it: we
-verify exact Z-closure for both Toffoli-compiled and Fourier-compiled
-(Beauregard) modular exponentiation. **(ii)** The tractability of linear
-arithmetic is explained rather than observed — a ripple-carry adder's low output
-bit is XOR-affine, Walsh sparsity 1 characterises affineness, and PPS collapses
-to a single term. **(iii)** Peak memory is a distinct and larger quantity than
-final support, and its excess is an artifact of Clifford+T decomposition;
-propagating X, CNOT and Toffoli as atomic permutations keeps the expansion
-Z-type at every step, halves peak memory exactly, and makes the peak itself a
-Walsh quantity. **(iv)** Walsh sparsity and nonlinearity are the same object
-linear cryptanalysis studies, giving a transfer: any published nonlinearity
-lower-bounds PPS cost for *every* circuit computing that function, with no
-simulation.
+property of the **full-space basis permutation implemented** — including its
+action on ancillas — and not of the gate set implementing it: we verify exact
+Z-closure for both Toffoli-compiled and Fourier-compiled (Beauregard) modular
+exponentiation, which implement the same permutation by very different means.
+**(ii)** The tractability of linear arithmetic is explained rather than observed
+— a ripple-carry adder's low output bit is XOR-affine, Walsh sparsity 1
+characterises affineness, and PPS collapses to a single term. **(iii)** Peak
+memory is a distinct and larger quantity than final support, and its excess is an
+artifact of Clifford+T decomposition; propagating X, CNOT and Toffoli as atomic
+permutations keeps the expansion Z-type at every step, reduces peak memory by a
+measured factor of 2.000 (adders) to 1.9997 (modular exponentiation), and makes
+the peak itself a Walsh quantity. **(iv)** Walsh sparsity and nonlinearity are
+the same object linear cryptanalysis studies, giving a transfer: any published
+nonlinearity lower-bounds PPS cost for *every* circuit computing that function,
+with no simulation.
+
+The quantity the model computes is the size of the **Heisenberg representation
+PPS maintains** — its memory footprint — not the difficulty of the expectation
+value it is used to estimate; §1.1 states the target task and input-state regime
+explicitly, since for some inputs the expectation is obtainable by other means
+entirely.
 
 These results are diagnostic, not a simulation speedup. The Walsh transform is
 itself exponential, and nothing here bears on the classical hardness of
@@ -71,13 +79,45 @@ random.
 We show that for this family the question has an exact answer rather than a
 better extrapolation.
 
+### 1.1 What is being predicted, and for which task
+
+A cost model must say what it costs. Ours predicts the **size of the Heisenberg
+representation PPS maintains** — the number of Pauli terms held in memory — at
+δ = 0. That is a statement about a data structure, and it is deliberately
+separate from two things it could be confused with.
+
+**It is not a claim that the expectation value is hard to obtain.** PPS estimates
+⟨ψ|π†Z_jπ|ψ⟩ for a specific input state, and for some input states that number is
+available by other means. For a computational-basis input |y⟩ the operator is
+diagonal with ±1 entries, so ⟨O⟩ = (−1)^{g(y)} *exactly and trivially* — one
+evaluation of π settles it. At the opposite extreme, for |+⟩^n every Z^z with
+z ≠ 0 has zero expectation, so only ĉ_0 survives and the sum collapses to a
+single coefficient. In both regimes the *answer* is cheap while the
+*representation* is not, and it is the representation that determines whether a
+run fits in memory.
+
+**Why that is the useful quantity.** Permutation circuits occur as subcircuits of
+larger circuits that are not permutations — Shor's algorithm surrounds its
+arithmetic with Hadamards and an inverse QFT — and a PPS run through the whole
+thing must carry the arithmetic block's representation whether or not the
+surrounding structure eventually collapses it. Memory is the binding constraint
+in practice, and it is set by the peak representation size, not by the difficulty
+of the final number. A companion result quantifies exactly this gap: for the
+genuine Shor initial state, a determinate fraction of the carried terms
+contribute nothing to the expectation value, yet cannot be discarded early
+because the property is not monotone under back-propagation.
+
+Readers who want a sharper "so what" should read §5 (peak memory, where the model
+changes what one should actually do), §7 (truncation, where it exposes a
+pathology), and §8 (a bound requiring no simulation at all).
+
 **Contribution.** The technical core is a single identity (§3) whose ingredients
 are individually standard and whose composition, as far as we can find, is not
 stated: for permutation circuits with computational-basis observables, the
 Pauli-spectrum/Boolean-Fourier analogy becomes an *exact identity*, and that
 identity is a cost model. What we claim is that composition and what follows
 from it — compilation invariance, the affine explanation of adder collapse,
-permutation-native propagation with its exact factor-of-two, the cryptanalytic
+permutation-native propagation and its near-exact factor of two, the cryptanalytic
 transfer, and the structural caps of §6. We are explicit in §10 about which
 ingredients are prior art.
 
@@ -143,13 +183,38 @@ The proof is elementary. Its content is not the derivation but the
 identification: the quantity PPS practitioners estimate by extrapolation is a
 named, exactly computable invariant of a Boolean function.
 
+### 3.2 Which Boolean function — a definition that must be stated precisely
+
+Throughout, g is bit j of π(y) where **y ranges over the entire register,
+ancillas and scratch included**, and π is the **full-space** permutation. This is
+not a technicality; getting it wrong makes two of our results look contradictory.
+
+Two circuits can compute the same arithmetic result on the subspace one cares
+about — the "valid subspace" where scratch registers start and end at |0⟩ — while
+implementing *different* full-space permutations, because they leave different
+intermediate garbage off that subspace. Their g's differ, so their Walsh spectra
+differ, and Theorem 1 assigns them different costs. That is a consequence of the
+theorem, not an exception to it.
+
+We therefore state compilation invariance in the only form that is true:
+
+> **PPS cost is invariant among circuits implementing the same full-space
+> permutation π, and is not invariant among circuits that merely agree on the
+> valid subspace.**
+
+§4.1 exhibits the first case: two compilations of modular exponentiation, built
+from entirely different gate sets, implementing the same π and having the same
+cost. §6.3 exhibits the second: two circuits computing the same a^e mod N whose
+π's diverge off the valid subspace, with a ~51% cost difference. Both are
+predictions of Theorem 1.
+
 **Verification (C8).** Confirmed to machine precision on 6/6 instances spanning
 modular exponentiation and ripple-carry addition, across both compilations, with
 **maximum error ≤ 6.7 × 10⁻¹⁶**. We check not merely that the counts agree but
 that the *support sets are identical* — the stronger statement, and the one that
 would fail first under a coincidence.
 
-### 3.2 Scope: exactly where this holds and where it stops
+### 3.3 Scope: exactly where this holds and where it stops
 
 The theorem needs two things: the unitary is a basis permutation, and the
 observable is diagonal.
@@ -171,8 +236,10 @@ observable is diagonal.
 
 ### 4.1 Compilation invariance (C1, C2, C6)
 
-Because the identity depends only on π and j, PPS cost for a permutation circuit
-is a property of the Boolean function computed, not of the gates used.
+Because the identity depends only on π and j, PPS cost is a property of the
+full-space permutation implemented, not of the gates used to implement it (§3.2).
+This section is the invariance half; §6.3 is the non-invariance half, and they are
+the same statement applied to circuits that do and do not share a π.
 
 This contradicts a natural intuition — that Clifford+T compilation of reversible
 arithmetic is distinguished, because such a circuit is a permutation matrix
@@ -229,15 +296,30 @@ end of the gadget. The excursion is real, costs memory, and cancels exactly.
 Propagating X, CNOT and Toffoli as **atomic permutation primitives** removes the
 excursion. The expansion is then Z-type at *every* intermediate step, and:
 
-- peak memory drops by a factor of exactly **2.0× on all 6 instances** tested;
+- peak memory drops by a measured factor of **2.000000** for ripple-carry adders
+  (128→64, 512→256, 2048→1024) and **1.9997** for modular exponentiation
+  (13666→6834, 16386→8194, 128138→64070). The modexp instances satisfy
+  `rot = 2·perm − 2` exactly, in 3 of 3 cases;
 - the peak becomes a Walsh quantity in its own right — the maximum over circuit
   suffixes of the corresponding sparsity — so it is predictable by the same
   model;
 - propagation runs about **10× faster** than rotation-level propagation on the
   same circuits, since no branch is created only to be cancelled.
 
-This is a genuine practical recommendation: for permutation circuits, do not
-decompose to Clifford+T before propagating.
+**Is the factor of two a theorem or an observation? Currently an observation,
+and we state it as one.** The mechanism is clear enough to suggest a proof: the
+gadget's Hadamard on the target qubit c exchanges the Z-sector with an X-sector,
+and a Z-type string containing Z_c is carried into a mirrored partner while a
+string without Z_c is untouched — so the doubling applies to the Z_c-containing
+subset and bounds the ratio above by 2. That accounts for the adders hitting
+2.000000 exactly and for modexp falling just short. It does **not** yet account
+for the deficit being exactly 2 in all three modexp instances, which is a clean
+regularity we have not explained. Until it is proved we claim only:
+*the ratio is at most 2, is attained for the adders tested, and is
+2 − O(1/peak) for the modular exponentiation instances tested.*
+
+This is a genuine practical recommendation regardless: for permutation circuits,
+do not decompose to Clifford+T before propagating.
 
 ---
 
@@ -307,19 +389,45 @@ independent structure vector, or introducing an odd dependency.
 
 ### 6.3 A compilation choice with a real cost (C32)
 
-Everything above is compilation-invariant. Exactly one effect is not. The
-standard Beauregard/Vedral modular reduction is *accidentally* friendly to PPS:
-its ½ cap is a byproduct of the msb being excluded from the swap network while
-commuting with the adder. A reduction that touches the msb *nonlinearly* —
-a single Toffoli — destroys the linear structure and raises density from 0.473
-to 0.716, a **~51% cost increase from a modification that changes nothing about
-the computed function**. Linear couplings (CNOT, cswap) leave it intact; only
-nonlinearity breaks it.
+§4.1 showed cost is invariant among circuits sharing a full-space permutation.
+This section is the other half of §3.2: two circuits that agree on the *valid
+subspace* but not off it, and therefore do not share a π.
+
+The standard Beauregard/Vedral modular reduction is *accidentally* friendly to
+PPS: its ½ cap is a byproduct of the msb being excluded from the swap network
+while commuting with the adder. Replace the reduction with one that touches the
+msb *nonlinearly* — a single Toffoli conjugating the reduction, controlled on
+scratch qubits that are |0⟩ on the valid subspace — and the linear structure is
+destroyed, raising density from 0.473 to 0.716: a **~51% cost increase**. Linear
+couplings (CNOT, cswap) leave it intact; only nonlinearity breaks it.
+
+**Where the two permutations diverge, precisely.** The modified circuit computes
+the same a^e mod N — verified for every exponent, with all scratch returned to
+|0⟩ — and the two circuits agree on every valid input. But they are **different
+full-space permutations**: at N = 5, a = 2, n_exp = 2 they differ on **8554 of
+32768 basis states (26.1%)**, all of them off the valid subspace, where the
+modified reduction leaves different garbage in scratch. Their g's therefore
+differ, and Theorem 1 correctly assigns them different Walsh spectra — 15493
+against 23464 terms.
+
+This is worth stating explicitly because the loose version of the sentence —
+"a modification that changes nothing about the computed function" — appears to
+contradict §4.1 and does not survive contact with the definition in §3.2. It
+changes nothing about the *arithmetic result on the valid subspace*; it changes
+π, and hence g, and hence the cost. Note also that the quantity differing here is
+**final support**, exactly what Theorem 1 computes, not a peak or intermediate
+quantity — so this is a prediction of the theorem rather than a measurement of
+something else.
 
 The framing worth keeping is the reverse of the usual one: not "compile to X to
 make PPS cheaper", but "the standard construction is already cheaper than it
 needs to be, for a reason nobody designed". This is a constant-factor effect;
 the asymptotics are unaffected.
+
+The practical reading is sharper than it first appears: since scratch behaviour
+off the valid subspace is invisible to correctness testing, two implementations
+that pass identical verification suites can differ by ~51% in PPS cost. Ancilla
+discipline is a cost parameter, not merely a hygiene concern.
 
 ---
 
@@ -329,9 +437,16 @@ The identity is exact at δ = 0. Practical PPS truncates, and the model's
 relationship to truncated runs is not the naive one.
 
 - **Coefficient (δ) truncation is the right knob (C16).** The spectrum is
-  heavy-tailed in a specific way: on a representative instance, the 4 terms with
-  |c| > 0.1 (of 3086) sum to **exactly** ⟨O⟩ = −1.00000000, and the remaining
-  3082 sum to **exactly** 0. The split is clean.
+  heavy-tailed in a specific way: on a representative instance the 4 terms with
+  |c| > 0.1 (of 3086) already reproduce ⟨O⟩ exactly, and the remaining 3082 sum
+  to **exactly** 0.
+  *Read this carefully — the total is not the surprising part.* For a
+  computational-basis input the operator is diagonal with ±1 entries, so
+  ⟨O⟩ = ±1 is guaranteed a priori (§1.1) and "−1.00000000" is not evidence of
+  anything. The content is the **concentration**: that 4 coefficients of 3086
+  suffice, and that the other 3082 cancel to zero rather than merely to
+  something small. That is a structural statement about the spectrum, and it is
+  what makes δ-truncation viable here.
 - **Weight truncation is the wrong knob**, and structurally so. Signed sums per
   weight level are large and alternating, cancelling only over all levels, so any
   cutoff slices the cancellation; the dominant coefficients sit at weights 1, 2,
@@ -488,7 +603,13 @@ recorded because the reasons are instructive.
    plus a toy circuit that was not a proxy for Shor — the observable never met
    the arithmetic.
 
-A third correction is methodological and worth stating: the collapse of adders
+3. **"Permutation-native propagation halves peak memory exactly."** The factor
+   is 2.000000 for adders but 1.9997 for modular exponentiation; the phrase was
+   written from a table rounded to one decimal place. Corrected in §5, where the
+   claim is now an upper bound of 2 with the measured values given. The
+   `rot = 2·perm − 2` regularity in 3/3 modexp instances remains unexplained.
+
+A further correction is methodological and worth stating: the collapse of adders
 was originally explained by permutation-ness. That conclusion was right and the
 mechanism wrong; the real reason is affineness (§4.2). A right conclusion via a
 wrong mechanism is a failure, and is logged as one.
