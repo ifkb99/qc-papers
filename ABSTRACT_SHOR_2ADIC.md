@@ -41,10 +41,12 @@ relative to powers of two controls the spectrum directly. Writing r = β·2^α w
 β odd, the idealised bit function e ↦ bit_j(a^e mod N) is a function of the low α
 bits of the exponent alone when β = 1, giving a spectrum of *constant* size
 independent of exponent-register width; any odd factor β > 1 makes the period
-incommensurate with the Walsh basis and the spectrum becomes maximally spread.
-We measure exactly this: at t = 24 the spectrum has 4 nonzero coefficients for
-N = 15, a = 7 (r = 4), and is fully dense — density 1.000000 — for every instance
-with an odd factor tested.
+incommensurate with the Walsh basis and the spectrum is Θ(2^t) with density
+bounded away from zero. We measure exactly this: at t = 24 the spectrum has 4
+nonzero coefficients for N = 15, a = 7 (r = 4). Density for β > 1 need not be
+1 — it oscillates with period ord₂(β) and can sit at exactly one half: N = 7,
+a = 3 (r = 6) gives exactly 0.500000 on even t, including t = 24, while N = 21,
+a = 2 gives 1.000000 at t = 24.
 
 We then verify the effect on complete, end-to-end verified reversible modular
 exponentiation circuits in a controlled design that holds the modulus, ancilla
@@ -193,16 +195,25 @@ windowed/table-lookup arithmetic qualifies is a well-posed open question.
 
 ## Open problems
 
-1. **Prove the circuit-level invariance.** The valid-subspace argument does not
-   cover it. This is the paper's main gap.
-2. **Intermediate 2-adic structure.** N = 323, r = 144 = 16·9 shows partial
-   sparsity at small t (density 0.981 at t = 16) washing out to 1.000 by t = 24.
-   Is there a quantitative law in α versus t, rather than the current binary
-   split?
-3. **Does the criterion survive noise/truncation?** All figures here are δ = 0.
-   Paper A's C14 shows truncation behaves non-monotonically on these circuits.
+1. ~~Prove the circuit-level invariance.~~ **RESOLVED.** Proved: a parity
+   reduction via an involution (C23/C24/C29). See the honesty note above.
+2. **Intermediate 2-adic structure — RESOLVED, negative.** There is no
+   intermediate law. The N = 323 reading (density 0.981 at t = 16 washing out
+   to 1.000 by t = 24) was sampling aliasing: t = 16, 20, 24 hit residues
+   4, 2, 0 mod ord₂(9) = 6, three points on an oscillation misread as a trend.
+   The robust structure remains the binary β = 1 / β > 1 split. See
+   `NOTES.md` §I.
+3. **Does the criterion survive noise/truncation? — RESOLVED.** Peak memory
+   (N_max) is unchanged at every δ tested; accuracy holds up to moderate δ but
+   degrades first for the wider circuit at aggressive δ (C27/C28). See
+   `NOTES.md` §T.
 4. Whether the MPS correspondence extends to other methods (decision diagrams,
    tensor-network contraction orders) or is specific to these two.
+5. **What is the residual non-linear structure?** Breaking the linear
+   structure w = b_msb ⊕ anc (by coupling the msb nonlinearly) raises density
+   to 0.716–0.721, not to 1.000 as a random function would give. Some
+   non-linear structure survives the destruction of the linear one, and it is
+   unidentified. See `NOTES.md` §L2, "Still open".
 
 ## Literature anchors
 

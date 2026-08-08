@@ -162,7 +162,7 @@ All figures below are **post-bugfix**. Anything citing pre-fix numbers is void.
 
 | # | Claim | Status | Evidence |
 |---|---|---|---|
-| **C8** | **PPS term count = Walsh sparsity of the pulled-back bit function, exactly** | **PROVEN (numerically)** | 6/6 instances, supports identical, maxerr ≤ 6.7e-16 |
+| **C8** | **PPS term count = Walsh sparsity of the pulled-back bit function, exactly** | **PROVEN (analytic, numerically confirmed)** | 6/6 instances, supports identical, maxerr ≤ 6.7e-16 |
 | C1 | Toffoli-compiled arithmetic has exact Z-closure | **established** | 0 non-Z terms |
 | C2 | Fourier-compiled modexp **also** has exact Z-closure | **established** (reverses old C2) | 0 non-Z terms |
 | C6 | Z-closure follows from the *unitary* being a basis permutation, not from the gate set | **established** | holds for both compilations |
@@ -184,7 +184,6 @@ All figures below are **post-bugfix**. Anything citing pre-fix numbers is void.
 | C3 | Matched-instance A/B across compilations | **INVALID as run** | qubit counts differ (10 vs 15) — ancilla confound |
 | C4 | Compilation gap is ~4 orders of magnitude | **REFUTED** | direction reverses; mostly an ancilla artifact |
 | C9 | Truncation reverses the compilation advantage | **REFUTED** | rested on wrong ⟨O⟩ |
-| C7 | Result is pre-asymptotic / artifact of small n | **THREAT, untested** | ≤ 15 qubits vs paper's 127 |
 
 ### Prior-art check on C8 — DONE, result is favourable but qualified
 
@@ -239,13 +238,11 @@ is over U(1)/U(4) with approximate truncated guarantees rather than over GF(2)�
 with exact support counts.
 
 ### What to do next, in order
-2. **C12 is the highest-upside thread.** If PPS cost on reversible circuits is
-   literally the linearity measure from cryptanalysis, decades of results on
-   bent functions, nonlinearity bounds and linear approximation transfer
-   directly into PPS resource estimation.
-3. **Redo C3 honestly** with matched qubit counts, or drop the compilation
-   comparison entirely — C8 makes it largely moot.
-4. **C7** still needs the bit-packed core (paper's App. B).
+
+This list is stale: the C12 crypto import was completed (TODO step 5, see the
+X section of `NOTES.md` and C25/C26 above); the C3 redo was mooted by C8 and
+never done; and C7's bit-packed core became unnecessary once the Walsh route
+reached 24 qubits. `TODO.md` is the live ranking of remaining work.
 
 ## Related work to position against
 
