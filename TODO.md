@@ -298,6 +298,24 @@ observable was Z_x0, so both block types came out constant for a trivial reason.
 The tell was the must-fail control failing to fail. Without it, a vacuous test
 would have "confirmed" the conjecture for the wrong reason.
 
+## 10. `[ ]` Does a different modular reduction lift the density ceiling?
+
+The ½ density ceiling is explained (`NOTES.md` §L): the support carries a linear
+structure **w = b_msb ⊕ anc**, from the CNOT pairing in `cc_add_mod` that sets
+and uncomputes the comparison flag. It is observable-independent and present in
+both compilations, so it comes from the shared add/subtract-N/restore reduction.
+
+Question: does a reduction that computes its comparison flag *without* the
+msb↔anc CNOT pairing remove the linear structure and lift the density toward 1?
+
+If yes, that is the **first genuine cost increase from a compilation choice**
+found in this project — everything else has been compilation-invariant — and it
+would confirm the diagnosis. If no, the structure is deeper than the ancilla
+discipline and worth chasing.
+
+Also worth checking: do *several* independent linear structures accumulate for
+larger circuits (the adder already shows kernel dimension 5, density ≤ 2⁻⁵)?
+
 ## Housekeeping
 
 - `[x]` Yao.jl backend — closed as far as possible without installing it. Its

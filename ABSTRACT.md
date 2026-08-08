@@ -173,6 +173,7 @@ All figures below are **post-bugfix**. Anything citing pre-fix numbers is void.
 | C12 | PPS-hardness ≡ linear-cryptanalysis resistance | **VALIDATED, with caveat** | endpoints exact; Parseval relation is a bound, tight only for flat spectra. NB the 0.74 figure is stable across N at fixed n_exp, **not** across widths (0.50 at n_exp=1) |
 | **C25** | **S ≥ (1 − NL/2ⁿ⁻¹)⁻²**: published nonlinearity ⟹ PPS cost lower bound, compilation-independent | **PROVED + verified** | tight at affine (1) and bent (2ⁿ); AES NL=112 reproduced; bent circuits give full support end-to-end (64/256/1024) |
 | C26 | The bound is weak away from the extremes | **established, must be stated** | AES 64 vs 239 actual; modexp 4 vs 3086. Uses only max\|c\|, discarding the rest of the spectrum |
+| **C30** | Reversible-arithmetic pullbacks can carry **linear structures**, capping density at 2^−k and bounding them away from bent | **established** | modexp: GF(2) rank n−1, w = b_msb⊕anc, g(y⊕w)=g(y); adder: kernel dim 5 ⟹ density ≤ 2⁻⁵. Bent functions have none, which partly explains modexp's 0.74 vs random's 0.97 |
 | C7 | Results are pre-asymptotic | **REFUTED** → *moved to Paper B* | reached 24q via Walsh: density 0.473→0.498 → ½, slope 1.008 bits/qubit ⟹ Θ(2ⁿ) |
 | C15 | 2-adic structure of r sets cost | **→ moved to Paper B** | see `ABSTRACT_SHOR_2ADIC.md` |
 | C16 | Heavy-tailed spectrum explains the δ non-monotonicity (C14) | **established** | 4 of 15493 coefficients give ⟨O⟩ exactly; the other 15489 sum to zero |
