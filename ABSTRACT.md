@@ -195,12 +195,34 @@ Searched and read. Nothing found that states the claim. What exists nearby:
   Cannot propagate Toffoli at all, so it cannot express this. Ruled out.
 
 **Honest caveat that must go in the paper.** The *ingredient* — a diagonal
-operator's Pauli-Z expansion is the WHT of its diagonal — is standard and
-appears in state-preparation and quantum-finance work. The claimed contribution
-is narrower: recognising it as an **exact cost model for Pauli propagation on
-permutation circuits**, and the consequences that follow (compilation
-invariance, the affine/sparsity-1 explanation of adder collapse, the
-cryptanalysis bridge). Frame it that way or a referee will, less kindly.
+operator's Pauli-Z expansion is the WHT of its diagonal — is standard, and now
+has a specific citation: Welch et al., *Efficient Quantum Circuits for Diagonal
+Unitaries Without Ancillas* ([arXiv:1306.3991](https://arxiv.org/pdf/1306.3991)),
+states that "the diagonals of Pauli basis operators correspond to Walsh
+functions". The Pauli-spectrum ↔ Boolean-Fourier-spectrum *analogy* is also
+established (*On the Pauli Spectrum of QAC0*,
+[arXiv:2311.09631](https://arxiv.org/pdf/2311.09631)).
+
+The claimed contribution is therefore narrower and must be stated as: for
+permutation circuits with computational-basis observables the analogy becomes an
+**exact identity**, which turns it into a **cost model for Pauli propagation** —
+plus what follows (compilation invariance, the affine/sparsity-1 explanation of
+adder collapse, permutation-native propagation, the cryptanalysis bridge).
+Frame it that way or a referee will, less kindly.
+
+**Second prior-art round (source-level, not docs).** No implementation found
+that propagates permutation gates natively: Qiskit `pauli-prop` accepts *only*
+Pauli rotation gates and rejects Toffoli; PauliPropagation.jl's `clifford_map`
+has no Toffoli; stim is Clifford-only. Yao.jl's docs list Toffoli but under
+"two-qubit gates", which is wrong on its face — **source-level check still
+owed**. Must also cite and distinguish **Quipu / stabilizer frames**
+([arXiv:1712.03554](https://arxiv.org/pdf/1712.03554)), which simulates
+reversible ripple-carry adders efficiently by a different mechanism
+(Schrödinger-picture stabilizer superpositions, specific input states, no
+Fourier characterisation), and **Cîrstoiu**
+([arXiv:2410.13856](https://arxiv.org/pdf/2410.13856)), whose harmonic analysis
+is over U(1)/U(4) with approximate truncated guarantees rather than over GF(2)ⁿ
+with exact support counts.
 
 ### What to do next, in order
 2. **C12 is the highest-upside thread.** If PPS cost on reversible circuits is
