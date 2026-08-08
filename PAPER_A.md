@@ -416,6 +416,27 @@ and **zero violations**; shown invariant under a random GF(2) change of basis
 condition is sharp: at the same cell count, an odd dependency gives density
 0.9845 against 0.8671 for an even one.
 
+**At scale.** The propositions are proved, so size demonstrates rather than
+establishes — but the check is cheap and forecloses the obvious objection.
+Repeating the decisive cases up to **n = 30 (2³⁰ = 1.07 × 10⁹ points)**:
+
+| case | d | cap | density at n=26 | n=28 | n=30 | violations |
+|---|---|---|---|---|---|---|
+| d=1 (linear structure) | 1 | 0.5000 | 0.4978 | 0.4953 | 0.4908 | **0** |
+| d=2, two cells | 2 | 0.7500 | 0.7455 | 0.7411 | 0.7323 | **0** |
+| d=3, four cells | 3 | 0.8750 | 0.8696 | 0.8640 | 0.8531 | **0** |
+| odd dependency | 2 | *none* | 0.9927 | 0.9851 | 0.9703 | **0** |
+| even dependency | 3 | 0.8750 | 0.8696 | 0.8640 | 0.8531 | **0** |
+
+**The densities drift below their caps with n, and that drift is a measurement
+artifact, not structure.** With an absolute coefficient cut of 10⁻⁶ and
+random-function coefficients distributed as N(0, 2^(−n/2)), the expected erased
+fraction is erf(tol/(σ√2)) = 0.7%, 1.3%, 2.6% at n = 26, 28, 30. The
+odd-dependency row is the clean test, since its true density is exactly 1: it
+should read 0.9935 / 0.9869 / 0.9739 and reads 0.9927 / 0.9851 / 0.9703. The
+decisive quantity is unaffected — **zero support elements inside E at every
+size**, because E-membership is combinatorial rather than a magnitude test.
+
 The cap is governed by the **span dimension** of the per-cell structures, not by
 the depth of conditioning. This matters practically: it says which modifications
 to a construction can possibly change its cost — only those adding an
@@ -633,7 +654,12 @@ arithmetic constructions used.
   Shor's measurement follows an inverse QFT and is outside this analysis.
 - **Truncation is not covered by the exact statement** (§7), and behaves badly
   enough on this family to warrant the admissibility check we propose.
-- **Instance sizes are modest.** Results reach 24 qubits via the Walsh route.
+- **Instance sizes are asymmetric, and we say so.** Circuit-level results reach
+  **24 qubits** via the Walsh route and stall near 17 for propagation — bounded
+  by gate count, not memory, so pushing further is a matter of engineering
+  rather than insight. The *structural* results of §6.2, being function-level,
+  reach **n = 30 (10⁹ points)**. A referee should read the circuit series as
+  modest and the structural series as not.
 
 ### 11.2 Retractions
 
