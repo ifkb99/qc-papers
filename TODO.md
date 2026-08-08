@@ -512,6 +512,41 @@ is easy: the β>1 case should show no such structure.
 Related: the same framing applies to any input state via ⟨O⟩ = Σ_z c_z ∏ δ_i,
 so a partially-biased register interpolates between "free" and "carried".
 
+## 12d. `[ ]` Why is the peak ratio exactly `rot = 2·perm − 2` for modexp?
+
+Opened 2026-08-08 by the C17 correction. The permutation-native peak reduction
+is **2.000000 exactly** for ripple-carry adders (128/64, 512/256, 2048/1024) but
+**1.9997** for modular exponentiation — and every modexp instance satisfies
+
+```
+  rot = 2·perm − 2       13666 = 2·6834 − 2
+                         16386 = 2·8194 − 2
+                        128138 = 2·64070 − 2
+```
+
+exactly, 3 of 3, across N = 5, 7, 15 and wildly different peak magnitudes. A
+constant additive deficit of exactly 2 that is independent of instance size is
+not a coincidence and is currently **unexplained**.
+
+**The half that is understood.** At the gadget's Hadamard on target qubit c, a
+Z-type string containing Z_c is carried to a mirrored X-sector partner while a
+string without Z_c is untouched. So the doubling applies only to the
+Z_c-containing subset, which bounds the ratio above by 2 and explains why the
+adders attain it (there, at the peak, every string apparently contains Z_c) and
+modexp does not.
+
+**The half that is not.** Why the shortfall is exactly 2 rather than
+instance-dependent. Two obvious candidates, neither checked: the identity string
+Z^0 (which cannot acquire Z_c and so never doubles) plus one partner; or a
+parity constraint pinning a second string. Cheapest first move is to dump the
+peak-time Pauli set for the smallest modexp instance and simply *look at* which
+two strings fail to double — this is a 2-line diagnostic, not a research
+programme, and it either resolves in an afternoon or reveals something.
+
+If it resolves, `PAPER_A.md` §5 upgrades from "upper bound of 2, empirical" to a
+theorem, which is worth having: it is currently the only quantitative claim in
+Paper A that is measured rather than derived.
+
 ## 13. `[ ]` Third simulation method on the r = β·2^α invariant
 
 Paper B open problem 4. Two structurally unrelated methods (PPS, MPS) keying

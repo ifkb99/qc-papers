@@ -2,10 +2,10 @@
 
 **Ian Baker**
 
-*Draft v1, 2026-08-08. Status markers are load-bearing and must survive to
-submission; see §11. Every quantitative claim carries its ledger ID from
-`CLAIMS.md`, which is the single source of truth for claim status. Numbers
-here are post-bugfix (see §11.2).*
+*Draft v2, 2026-08-08. The limitations and retraction material in §11 is
+load-bearing and should survive to submission. Claim identifiers have been moved
+out of the prose into Appendix A; the working ledger `CLAIMS.md` is supplementary
+material. Numbers here are post-bugfix (see §11.2).*
 
 ---
 
@@ -19,8 +19,8 @@ require: a question currently answered by empirical power-law extrapolation
 calibrated on brickwork and Trotterised circuits with generic rotation angles.
 
 We show that for circuits implementing a permutation of the computational basis
-— all reversible arithmetic, and hence the bulk of Shor's algorithm and of
-quantum algorithms generally — this quantity is not merely predictable but
+— all reversible arithmetic, and hence the arithmetic core of Shor's algorithm
+and similar algorithms — this quantity is not merely predictable but
 *exactly computable in closed form*, with no extrapolation and no fitting. For a
 circuit implementing basis permutation π, the Heisenberg pullback π†Z_jπ is the
 diagonal operator (−1)^{g(y)} with g(y) = bit j of π(y); expanding a diagonal
@@ -162,7 +162,7 @@ nonlinearity and full support.
 
 ### 3.1 Statement and proof
 
-**Theorem 1 (C8).** *Let a circuit implement a permutation π of the
+**Theorem 1.** *Let a circuit implement a permutation π of the
 computational basis, so that the unitary acts as |y⟩ ↦ |π(y)⟩. Let Z_j be a
 computational-basis observable. Then*
 
@@ -208,7 +208,7 @@ cost. §6.3 exhibits the second: two circuits computing the same a^e mod N whose
 π's diverge off the valid subspace, with a ~51% cost difference. Both are
 predictions of Theorem 1.
 
-**Verification (C8).** Confirmed to machine precision on 6/6 instances spanning
+**Verification.** Confirmed to machine precision on 6/6 instances spanning
 modular exponentiation and ripple-carry addition, across both compilations, with
 **maximum error ≤ 6.7 × 10⁻¹⁶**. We check not merely that the counts agree but
 that the *support sets are identical* — the stronger statement, and the one that
@@ -219,14 +219,14 @@ would fail first under a coincidence.
 The theorem needs two things: the unitary is a basis permutation, and the
 observable is diagonal.
 
-- **Diagonal observables of any weight are covered (C13).** Multi-qubit Z-type
+- **Diagonal observables of any weight are covered.** Multi-qubit Z-type
   observables work identically; verified exact on 4/4 Z-type observables tested.
-- **X and Y observables are not covered (C13, F10).** Their pullbacks leave the
+- **X and Y observables are not covered.** Their pullbacks leave the
   diagonal and the expansion is fully non-diagonal. This is a hard boundary, not
   a gap in the analysis, and it is where the present paper stops. Real Shor
   measures the exponent register after an inverse QFT, which is outside this
   scope; we do not address it.
-- **Permutation-ness is required of the *unitary*, not of the gate set (C6).**
+- **Permutation-ness is required of the *unitary*, not of the gate set.**
   A circuit whose individual gates are not permutations may still implement one,
   and the identity applies. This is the point of §4.1.
 
@@ -234,7 +234,7 @@ observable is diagonal.
 
 ## 4. Consequences
 
-### 4.1 Compilation invariance (C1, C2, C6)
+### 4.1 Compilation invariance
 
 Because the identity depends only on π and j, PPS cost is a property of the
 full-space permutation implemented, not of the gates used to implement it (§3.2).
@@ -250,13 +250,10 @@ permutations. We verify that **both** compilations exhibit exact closure of the
 Z-type Pauli subalgebra (0 non-Z terms in each), because both implement the same
 basis permutation.
 
-> **Retraction note.** An earlier version of this work claimed the opposite —
-> that compilation determines simulability, with a four-order-of-magnitude gap
-> between the two compilations. That claim was false, killed by a propagator bug
-> (θ = π gates treated as no-ops) compounded by an ancilla-count confound in the
-> matched comparison. It is retracted in full. See §11.2.
+> An earlier version of this work claimed the opposite — that compilation
+> determines simulability. It is retracted in full; see §11.2 for what killed it.
 
-### 4.2 Affine collapse is exactly sparsity one (C10)
+### 4.2 Affine collapse is exactly sparsity one
 
 It is folklore that adders are easy for Heisenberg-picture methods. The identity
 makes this exact: sparsity 1 characterises affine functions, so a PPS collapse
@@ -272,18 +269,55 @@ retract — but about algebraic degree.
 
 Computing the Walsh spectrum requires one pass to extract π and one fast
 Walsh–Hadamard transform, i.e. **O(2ⁿ n)** time. This is exponential and no
-speedup; the point is that it is *cheaper than the run it predicts*, by roughly
-three orders of magnitude on our instances (C11), because it does no branching
-bookkeeping and no coefficient arithmetic. It answers "will this run fit in
-memory" before the run.
+speedup; the point is that it is *cheaper than the run it predicts* — measured
+**143× to 219×** on the modular-exponentiation instances of Table 1 — because it
+does no branching bookkeeping and no coefficient arithmetic. It answers "will
+this run fit in memory" before the run.
 
 Two things must be stated with it. First, the model gives the **final** support
 exactly; peak memory is a different and larger quantity (§5). Second, it is
 exact only at δ = 0; under truncation the relationship is more subtle (§7).
 
+### 4.4 The instances
+
+Every claim in this paper is measured on the following set. Walsh sparsity is
+computed by the identity; the peak columns come from propagation; the three
+timing columns are wall-clock on one core.
+
+**Table 1 — instances, exact costs, and wall-clock.**
+
+| instance | qubits | final *S* | density | peak (perm) | peak (rot) | ratio | Walsh (s) | perm-PPS (s) | rot-PPS (s) |
+|---|---|---|---|---|---|---|---|---|---|
+| 3-bit adder, Z(b₀) | 8 | 1 | 0.0039 | 64 | 128 | 2.0000 | <0.001 | <0.01 | <0.01 |
+| 4-bit adder, Z(b₀) | 10 | 1 | 0.0010 | 256 | 512 | 2.0000 | <0.001 | <0.01 | 0.01 |
+| 5-bit adder, Z(b₀) | 12 | 1 | 0.0002 | 1,024 | 2,048 | 2.0000 | <0.001 | <0.01 | 0.04 |
+| 4-bit adder, Z(b₂) | 10 | 10 | 0.0098 | 16 | 32 | 2.0000 | <0.001 | <0.01 | <0.01 |
+| modexp N=5, a=2 | 14 | 3,086 | 0.1884 | 6,834 | 13,666 | 1.9997 | 0.011 | 0.05 | 1.57 |
+| modexp N=7, a=3 | 14 | 3,206 | 0.1957 | 8,194 | 16,386 | 1.9998 | 0.011 | 0.07 | 2.24 |
+| modexp N=15, a=7 | 17 | 31,176 | 0.2379 | 64,070 | 128,138 | 2.0000* | 0.215 | 1.27 | 46.98 |
+
+\* 1.999969 — displayed to four places. **All three modular-exponentiation rows
+satisfy `rot = 2·perm − 2` exactly**, while all four adder rows satisfy
+`rot = 2·perm`. See §5.
+
+Four things to read off it. **(a)** Final *S* matches the propagated term count
+on every row — this is Theorem 1, and it is the support *set* that matches, not
+merely its size. **(b)** The two adder rows with *S* = 1 are the affine collapse
+of §4.2, with Z(b₂) = 10 as the control that must not collapse. **(c)** The
+Walsh route is 143–219× faster than rotation-level propagation on the modexp
+rows, and the gap widens with size. **(d)** Density stays well below ½ — the
+structural cap of §6, which is why these numbers are not those of a random
+function.
+
+The largest instance reached by the Walsh route elsewhere in this work is **24
+qubits**; propagation stalls near 17, which is why the table's rot-PPS column
+stops there. We note this as a limitation in §11.1 rather than dressing it up:
+the structural results are proved and do not depend on instance size, but the
+measured scaling series is modest.
+
 ---
 
-## 5. Peak versus final cost, and permutation-native propagation (C17, C18)
+## 5. Peak versus final cost, and permutation-native propagation
 
 The final Pauli support is what Theorem 1 computes. What bounds memory in
 practice is the *peak* over the propagation.
@@ -329,7 +363,7 @@ The identity converts PPS cost questions into Boolean-function questions, which
 lets known structure do work. Reversible-arithmetic pullbacks turn out to be
 markedly non-generic, and the deviations are exactly characterisable.
 
-### 6.1 Linear structures cap the density (C30, C31)
+### 6.1 Linear structures cap the density
 
 A **linear structure** of g is a w with g(y ⊕ w) = g(y) for all y. The relevant
 classical fact is due to Carlet (*Boolean Functions for Cryptography and Coding
@@ -344,22 +378,22 @@ modexp pullbacks and reading it as a cost cap. Modular exponentiation carries
 the linear structure w = b_msb ⊕ anc: GF(2) rank n−1 in every instance,
 g(y ⊕ w) = g(y) verified pointwise, present in *both* compilations, and absent
 from random f. Consequently density is capped at exactly ½ — which is why
-measured density converges to 0.498 *from below* and never crosses (C7). A
+measured density converges to 0.498 *from below* and never crosses. A
 ripple-carry adder has a kernel of dimension 5, capping its density at 2⁻⁵.
 
-**Mechanism (C31).** The structure is forced by three ingredients acting
+**Mechanism.** The structure is forced by three ingredients acting
 together: flipping the accumulator's msb *is* adding 2^{m−1}, which commutes
 with mod-2^m addition (verified exhaustively, 0/256 violations); the ancilla is
 coupled to the msb only by XOR, so flipping both restores it; and the msb is
 excluded from the swap network, so it never reaches the observed register.
 
-### 6.2 A conditional generalisation (C40, C41)
+### 6.2 A conditional generalisation
 
 The above has a natural extension we did not find stated, and which we present
 at corollary altitude: it follows from Proposition 29 plus the standard
 decomposition of the Walsh transform over a coset partition.
 
-**Proposition 2 (C40).** *Let a coset partition split F₂ⁿ into cells H_u, and
+**Proposition 2.** *Let a coset partition split F₂ⁿ into cells H_u, and
 suppose g restricted to H_u has linear structure w_u. Then the Walsh support
 avoids E = {z : w_u·z = 1 for every u}, and hence*
 
@@ -372,7 +406,7 @@ c_z = 2^{−n} Σ_u (−1)^{u·z_C} A_u(z′) with A_u the transform of the rest
 Proposition 29 kills A_u(z′) whenever w_u·z′ = 1. If every A_u vanishes, so does
 c_z. ∎
 
-**Proposition 3 (C41).** *That system is consistent iff every linear dependency
+**Proposition 3.** *That system is consistent iff every linear dependency
 among the w_u has even support. An odd dependency makes E empty and removes the
 cap entirely.*
 
@@ -387,7 +421,7 @@ the depth of conditioning. This matters practically: it says which modifications
 to a construction can possibly change its cost — only those adding an
 independent structure vector, or introducing an odd dependency.
 
-### 6.3 A compilation choice with a real cost (C32)
+### 6.3 A compilation choice with a real cost
 
 §4.1 showed cost is invariant among circuits sharing a full-space permutation.
 This section is the other half of §3.2: two circuits that agree on the *valid
@@ -436,7 +470,7 @@ discipline is a cost parameter, not merely a hygiene concern.
 The identity is exact at δ = 0. Practical PPS truncates, and the model's
 relationship to truncated runs is not the naive one.
 
-- **Coefficient (δ) truncation is the right knob (C16).** The spectrum is
+- **Coefficient (δ) truncation is the right knob.** The spectrum is
   heavy-tailed in a specific way: on a representative instance the 4 terms with
   |c| > 0.1 (of 3086) already reproduce ⟨O⟩ exactly, and the remaining 3082 sum
   to **exactly** 0.
@@ -455,10 +489,10 @@ relationship to truncated runs is not the naive one.
   truncation is basis-dependent by construction. (Independently, Gangopadhyay et
   al., *J. Appl. Math. Comput.* 69:3337–3357, 2023, show the analogous
   weight-graded spectrum is not invariant under extended affine equivalence.)
-- **Truncation error is non-monotonic in δ (C14).** On one instance δ = 10⁻¹ is
+- **Truncation error is non-monotonic in δ.** On one instance δ = 10⁻¹ is
   *exact* with 34 terms while δ = 10⁻³ is off by 0.285 with 23482 terms. Small
   coefficients cancel as a set; removing some of them is worse than removing all.
-- **Truncated estimates can be inadmissible (C5).** We observed |⟨O⟩| > 1 in
+- **Truncated estimates can be inadmissible.** We observed |⟨O⟩| > 1 in
   4 of 18 runs, all at *mild* δ. We propose the operator-norm bound as a
   zero-cost admissibility check on PPS output.
 
@@ -468,12 +502,12 @@ rather than trusted.
 
 ---
 
-## 8. The cryptanalytic bridge (C25, C26, C12)
+## 8. The cryptanalytic bridge
 
 Walsh sparsity and nonlinearity are the central quantities of linear
 cryptanalysis. The identity turns that coincidence into a transfer.
 
-**Proposition 4 (C25).** *For any Boolean function g with nonlinearity NL,*
+**Proposition 4.** *For any Boolean function g with nonlinearity NL,*
 
 > S ≥ (1 − NL/2^{n−1})^{−2}.
 
@@ -494,7 +528,7 @@ and independent of compilation.
   **112** over all 255 nonzero linear combinations, reproducing the published
   constant. This is an independent check on the whole Walsh pipeline, not just
   on the bound.
-- **Honest limitation (C26).** The bound is loose away from the extremes,
+- **Honest limitation.** The bound is loose away from the extremes,
   because it uses only max|ĉ_z| and discards the rest of the spectrum: for AES it
   certifies 64 against an actual 239; for modexp, 4 against 3086. For the
   cryptographic families whose *complete* Walsh value/multiplicity distribution
@@ -506,15 +540,11 @@ and independent of compilation.
 ## 9. Demonstration of reach
 
 Applied to modular exponentiation, the exact model yields a sharp arithmetic
-criterion: PPS cost is controlled by the 2-adic structure of the multiplicative
-order r. Writing r = β·2^α with β odd, cost is independent of exponent-register
-width when β = 1 and Θ(2ⁿ) otherwise, with the invariance switching on exactly
-at n_exp = α + 1.
-
-That analysis is developed separately and **is not claimed here**. We note it
-only as evidence that an exact cost model buys structural results that
-extrapolation cannot: the criterion is a statement about arithmetic, and it is
-not visible to a fitted power law.
+criterion — cost is controlled by the 2-adic structure of the multiplicative
+order, being independent of exponent-register width for one branch and Θ(2ⁿ) for
+the other. That analysis is developed separately and is not claimed here; we note
+it only as evidence that an exact cost model buys structural results a fitted
+power law cannot see.
 
 ---
 
@@ -554,6 +584,22 @@ the analogy becomes an identity, and its use as a cost model.
   (arXiv:2510.22311) is the closest competitor in intent — it is about PPS cost —
   but uses operator stabilizer Rényi entropy and gives approximate asymptotic
   bounds, with no exact formula for any circuit class.
+- **Stabilizer rank, stabilizer extent, and magic monotones.** The
+  Clifford+Toffoli / CNOT-dihedral simulation literature (Bravyi–Gosset and
+  successors) measures a *different* cost in a *different* picture:
+  Schrödinger-picture decomposition of the state into stabilizer terms, with
+  cost exponential in non-Clifford count. The contrast is instructive rather
+  than competitive, and sharpens our claim: **the circuits that are expensive
+  for stabilizer-rank methods — Toffoli-heavy reversible arithmetic — are
+  precisely the ones for which Heisenberg propagation of a diagonal observable
+  is exactly characterised.** Neither cost measure bounds the other, and nothing
+  in that literature computes a per-function Pauli support. Magic-monotone work
+  on permutation-plus-diagonal classes is adjacent for the same reason and
+  equally does not state the identity.
+- **Boolean-function side.** Work computing complete Walsh spectra for
+  structured families (e.g. permutation-inverse families) is the right
+  neighbourhood for §6 and should be surveyed before submission; our §6.2 is an
+  easy corollary of Carlet's Proposition 29 and may be folklore there.
 - **Implementations.** No available implementation propagates permutation gates
   natively. Qiskit `pauli-prop` accepts only Pauli rotation gates and rejects
   Toffoli; PauliPropagation.jl's Clifford map contains no Toffoli; stim is
@@ -643,3 +689,26 @@ power law cannot see.
 The natural next question is the one the method itself asks and we do not
 answer: what happens through the inverse QFT, where the observable leaves the
 diagonal and the exact model stops.
+
+---
+
+## Appendix A — claim map
+
+The working ledger `CLAIMS.md` records every claim's status, evidence and
+location, and is supplied as supplementary material. Inline identifiers are
+kept out of the prose; this table is the mapping.
+
+| section | claims |
+|---|---|
+| 3.1 Statement and proof | C8 |
+| 3.2 Which Boolean function — a definition that must be stated precisely | C8 |
+| 3.3 Scope: exactly where this holds and where it stops | C6, C13 |
+| 4.1 Compilation invariance | C1, C2, C6 |
+| 4.2 Affine collapse is exactly sparsity one | C10 |
+| 5. Peak versus final cost, and permutation-native propagation | C17, C18 |
+| 6.1 Linear structures cap the density | C7, C30, C31 |
+| 6.2 A conditional generalisation | C40, C41 |
+| 6.3 A compilation choice with a real cost | C32 |
+| 7. Truncation: what the model does and does not say | C5, C14, C16 |
+| 8. The cryptanalytic bridge | C12, C25, C26 |
+| 10. Related work, and what is prior art | C1, C6 |
