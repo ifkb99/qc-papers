@@ -347,3 +347,7 @@ destroyed. Unidentified — a natural next thread.
 - `[ ]` `experiment.py` §3, `experiment2.py` §§2–3 and all of `experiment3.py`
   are retracted. They carry warning headers; consider deleting once the papers
   are drafted and nothing references them.
+- `[ ]` Organize experiments into a proper file structure, with a general engine to keep the codebase DRY
+- `[ ]` Split claims into a separate file to keep a single source of truth
+  - Are there other files that should be split out as well? Perhaps create some sort of wiki?
+- `[ ]` Check if julia and dependencies are still needed. Remove to simplify project if not
