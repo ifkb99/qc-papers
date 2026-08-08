@@ -28,6 +28,10 @@ redo.
 the failure modes hit, and the techniques that earned their keep. Worth reading
 before extending anything, since several of the lessons cost real time.
 
+`CLAIMS.md` is the single source of truth for claim statuses (C-numbers,
+F-numbers, and the retracted/dead ones). Both abstracts point at it rather than
+carrying ledgers of their own.
+
 `NOTES.md` is the working record — conventions, verified results, retracted
 claims, traps, and an honesty log of everything believed and then killed. Read
 it before trusting any number. Several early findings (F1–F8) are retracted;

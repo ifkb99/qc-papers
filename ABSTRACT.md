@@ -8,7 +8,7 @@ Baker, I.
 > **Split note.** The modular-exponentiation / 2-adic results (C15, C18, C7,
 > F12, C19, C20) now live in **`ABSTRACT_SHOR_2ADIC.md` ("Paper B")**. They use
 > this paper's identity as an instrument but make a separate claim to a separate
-> audience. Rows for them below are retained only as pointers.
+> audience. Their ledger rows sit in Paper B's section of `CLAIMS.md`.
 
 ---
 
@@ -156,34 +156,14 @@ to structured arithmetic without re-validation.
 
 ## Claims ledger
 
-Each row must be independently reproducible before the abstract goes anywhere.
-
-All figures below are **post-bugfix**. Anything citing pre-fix numbers is void.
-
-| # | Claim | Status | Evidence |
-|---|---|---|---|
-| **C8** | **PPS term count = Walsh sparsity of the pulled-back bit function, exactly** | **PROVEN (analytic, numerically confirmed)** | 6/6 instances, supports identical, maxerr ≤ 6.7e-16 |
-| C1 | Toffoli-compiled arithmetic has exact Z-closure | **established** | 0 non-Z terms |
-| C2 | Fourier-compiled modexp **also** has exact Z-closure | **established** (reverses old C2) | 0 non-Z terms |
-| C6 | Z-closure follows from the *unitary* being a basis permutation, not from the gate set | **established** | holds for both compilations |
-| C10 | Adder collapse is affineness, not permutation-ness | **established** | sparsity 1 ⟺ affine; `test_walsh.py` [E] |
-| C11 | Walsh gives an exact cost model ~10³× cheaper than the PPS run | **RESTATED** | exact for *final* support; peak is a distinct larger quantity — see C17 |
-| **C17** | Peak ≠ final; permutation-native PPS halves peak exactly and makes it a Walsh quantity | **established** | 2.0× on all 6 instances; `perm_pps.py`, `test_perm_pps.py` |
-| C18 | C15 constancy holds for peak memory | **→ moved to Paper B** | see `ABSTRACT_SHOR_2ADIC.md` |
-| C12 | PPS-hardness ≡ linear-cryptanalysis resistance | **VALIDATED, with caveat** | endpoints exact; Parseval relation is a bound, tight only for flat spectra. NB the 0.74 figure is stable across N at fixed n_exp, **not** across widths (0.50 at n_exp=1) |
-| **C25** | **S ≥ (1 − NL/2ⁿ⁻¹)⁻²**: published nonlinearity ⟹ PPS cost lower bound, compilation-independent | **PROVED + verified** | tight at affine (1) and bent (2ⁿ); AES NL=112 reproduced; bent circuits give full support end-to-end (64/256/1024) |
-| C26 | The bound is weak away from the extremes | **established, must be stated** | AES 64 vs 239 actual; modexp 4 vs 3086. Uses only max\|c\|, discarding the rest of the spectrum |
-| **C30** | Reversible-arithmetic pullbacks can carry **linear structures**, capping density at 2^−k and bounding them away from bent | **established** | modexp: GF(2) rank n−1, w = b_msb⊕anc, g(y⊕w)=g(y); adder: kernel dim 5 ⟹ density ≤ 2⁻⁵. Bent functions have none, which partly explains modexp's 0.74 vs random's 0.97 |
-| **C32** | **The only compilation-dependent cost effect found.** Destroying the linear structure costs ~51% (density 0.473 → 0.716) with the computed function unchanged | **established** | needs nonlinear coupling to the msb; linear couplings (CNOT, cswap) leave it intact. Constant-factor only — Θ(2ⁿ) unaffected |
-| C7 | Results are pre-asymptotic | **REFUTED** → *moved to Paper B* | reached 24q via Walsh: density 0.473→0.498 → ½, slope 1.008 bits/qubit ⟹ Θ(2ⁿ) |
-| C15 | 2-adic structure of r sets cost | **→ moved to Paper B** | see `ABSTRACT_SHOR_2ADIC.md` |
-| C16 | Heavy-tailed spectrum explains the δ non-monotonicity (C14) | **established** | 4 of 15493 coefficients give ⟨O⟩ exactly; the other 15489 sum to zero |
-| C13 | Identity covers **all** Z-type observables (multi-qubit too), fails for X/Y | **established** | 4/4 Z-type exact; X/Y pullback fully non-diagonal |
-| C14 | Truncation error is **non-monotonic** in δ: δ=1e-1 exact w/ 34 terms, δ=1e-3 off by 0.285 w/ 23482 | **established** | mechanism: small coefficients cancel as a set |
-| C5 | Truncation can violate \|⟨O⟩\| ≤ 1 | **survives, quantified** | 4/18 runs inadmissible, all at mild δ |
-| C3 | Matched-instance A/B across compilations | **INVALID as run** | qubit counts differ (10 vs 15) — ancilla confound |
-| C4 | Compilation gap is ~4 orders of magnitude | **REFUTED** | direction reverses; mostly an ancilla artifact |
-| C9 | Truncation reverses the compilation advantage | **REFUTED** | rested on wrong ⟨O⟩ |
+The claims ledger lives in **`CLAIMS.md`**, which is the single source of truth
+for claim statuses; each row there must be independently reproducible before
+this abstract goes anywhere, and all figures are post-bugfix (anything citing
+pre-fix numbers is void). The claims this paper rests on are **C8, C1, C2, C6,
+C10, C11, C17, C12, C25, C26, C16, C13, C14, C5**, plus **C7, C15, C18, C30,
+C31, C32** whose rows sit in Paper B's section of that file. The dead ones
+retired here — **C3, C4, C9**, and the F/H findings that preceded them — are in
+`CLAIMS.md` under "Retracted / dead".
 
 ### Prior-art check on C8 — DONE, result is favourable but qualified
 
@@ -240,7 +220,7 @@ with exact support counts.
 ### What to do next, in order
 
 This list is stale: the C12 crypto import was completed (TODO step 5, see the
-X section of `NOTES.md` and C25/C26 above); the C3 redo was mooted by C8 and
+X section of `NOTES.md` and C25/C26 in `CLAIMS.md`); the C3 redo was mooted by C8 and
 never done; and C7's bit-packed core became unnecessary once the Walsh route
 reached 24 qubits. `TODO.md` is the live ranking of remaining work.
 

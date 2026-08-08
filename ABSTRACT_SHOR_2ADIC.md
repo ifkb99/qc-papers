@@ -165,26 +165,14 @@ windowed/table-lookup arithmetic qualifies is a well-posed open question.
 
 ## Claims ledger (Paper B)
 
-| # | Claim | Status | Evidence |
-|---|---|---|---|
-| **C15** | Cost is set by the 2-adic structure of r, at circuit level | **CONFIRMED, controlled** | fix N vary a: r=2 ⟹ support *exactly* 15549 over 256× dim growth; r=6 ⟹ 4.00×/step; reproduced at N=21 and N=5 |
-| **C21** | Invariance has a precise onset: support locks at **n_exp = v₂(r)+1** | **established** | α=1,2 exact (α=2 grows 15493→32143 then freezes); α=3,4 still growing at max reachable width, as predicted |
-| C22 | λ(N) a power of two ⟹ **every** base free; ⟺ N = 2^a × distinct Fermat primes | **established** | N=15: 7/7 bases free; N=21: 3/11. Odd semiprimes = p·q both Fermat, smallest 15 |
-| **C18** | Holds for **peak memory**, not just final support | **established** | N_max exactly 24369 at n_exp = 2,4,6,8 (64× dim growth); control r=6 grows 4.02×/step |
-| C7 | Generic r ⟹ Θ(2ⁿ); results are not pre-asymptotic | **established** | 24 qubits via Walsh; density 0.473→0.498→½, slope 1.008 bits/qubit |
-| **C30** | The ½ ceiling is a **linear structure** w = b_msb ⊕ anc, not an algorithmic constant | **established** | GF(2) rank n−1 in every instance; g(y⊕w)=g(y) pointwise; observable-independent; present in both compilations; random f has full rank |
-| **C31** | The structure is forced by (a) msb-flip commuting with mod-2^m addition, (b) XOR-only coupling to anc, (c) msb excluded from the cswaps | **established** | (a) verified exhaustively, 0/256 violations; adding further XOR couplings leaves it intact |
-| **C32** | Breaking it needs **nonlinearity in the msb**, and costs ~51%: density 0.473 → 0.716 | **established** | Toffoli variants break it (full rank); cswap variant does not (linear); all four still compute a^e mod N |
-| **C27** | Invariance survives truncation: exact for terminal thresholding at every δ; peak cost unchanged under incremental | **established** | counts identical across n_exp at all 7 δ values; N_max SAME at every δ; control diverges |
-| C28 | Accuracy degrades first for the *wider* circuit at aggressive δ | **established, must be stated** | ⟨O⟩ → 0 at δ=1e-1 for n_exp=4,5 while n_exp=3 stays exact; more gates ⟹ more incremental truncation |
-| F12 | Function-level dichotomy is absolute | **established** | r=4: sparsity 4 constant to t=24; odd factor: density 1.000000 |
-| C19 | Same r = β·2^α invariant governs MPS simulation | **established, cited** | Dang et al. §4: α = trailing zeros, β = odd part "cannot be localised"; §5.2: memory ∝ β² |
-| C20 | N=15 is a degenerate benchmark **for every base**, forced by the modulus | **established, strengthened** | 100% of its bases free; smallest product of two Fermat primes |
-| **C23** | Mechanism: identity blocks apply one involution V, so the circuit depends on the identity tail only through a **parity bit** | **PROVED** | V²=id since V=A⁻¹SA with S disjoint transpositions; blocks commute; character averaging confines support to z_I ∈ {0,1_I} |
-| **C24** | Consequence: support confined to z_I ∈ {0, all-ones}, so size is independent of tail length | **PROVED + verified** | derived before testing; 0 violations in 7/7 β=1 instances, halves individually constant; controls fail with 48189 / 1556046 |
-| **C29** | The theorem needs only **V²=id**; it covers any construction with an involutive repeated block | **PROVED + verified** | synthetic involution constant across k=1..4 at two moduli; synthetic order-3 block grows ~2× per block; vacuity check passes |
-| — | *Earlier guess:* support confined to low exponent bits | **DISPROVED** | added qubits live in ~half the support terms — superseded by C23 |
-| — | *Earlier guess:* identity block is affine over GF(2) | **DISPROVED** | 14336/32768 violations |
+The claims ledger lives in **`CLAIMS.md`**, which is the single source of truth
+for claim statuses. The claims this paper rests on are **C15, C21, C22, C18, C7,
+C30, C31, C32, C27, C28, F12, C19, C20, C23, C24, C29**, plus **C8** (the Walsh
+identity, used as the measurement instrument) and **C17** (`perm_pps.py`, which
+supplies the peak-memory numbers), whose rows sit in Paper A's section of that
+file. The two earlier guesses disproved along the way — support confined to the
+low exponent bits, and affineness of the identity block — are recorded in
+`CLAIMS.md` under "Retracted / dead".
 
 ## Dependencies on Paper A
 

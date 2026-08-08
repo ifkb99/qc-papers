@@ -407,6 +407,13 @@ structureless — but it is the natural next question the method itself asks.
   are retracted. They carry warning headers; consider deleting once the papers
   are drafted and nothing references them.
 - `[ ]` Organize experiments into a proper file structure, with a general engine to keep the codebase DRY
-- `[ ]` Split claims into a separate file to keep a single source of truth
-  - Are there other files that should be split out as well? Perhaps create some sort of wiki?
+- `[x]` Split claims into a separate file to keep a single source of truth —
+  **DONE.** `CLAIMS.md` is now canonical: Paper A claims, Paper B claims, and a
+  retracted/dead section, one full row per claim with a pointer to where it is
+  established. Both abstracts replaced their tables with a one-line pointer, so
+  the duplicate-row drift that produced a stale C7 cannot recur. `NOTES.md` is
+  untouched and remains the historical narrative — statuses in its prose may be
+  superseded; `CLAIMS.md` wins.
+  - Still open: are there other files that should be split out as well? Perhaps
+    create some sort of wiki?
 - `[ ]` Check if julia and dependencies are still needed. Remove to simplify project if not

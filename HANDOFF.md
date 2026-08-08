@@ -134,7 +134,11 @@ and degenerate random inputs at small sizes.
    points is now marked dead, with the reason.
 5. `TODO.md` — ranked, with rationale, so it can be re-ranked rather than
    followed blindly.
-6. The two abstracts, when writing.
+6. `CLAIMS.md` — the canonical ledger of every claim ID and its status, split
+   into Paper A, Paper B and retracted/dead. Read it before citing any claim:
+   where `NOTES.md` prose disagrees, `CLAIMS.md` wins.
+7. The two abstracts, when writing. They carry no ledgers of their own; both
+   point at `CLAIMS.md`.
 
 ---
 
@@ -177,8 +181,8 @@ Logged in full in `NOTES.md`; listed here so a fresh session does not burn time.
 
 ## Publication state
 
-Both abstracts are drafted with claims ledgers, honest status markers, and
-scope caveats. Before submitting anything:
+Both abstracts are drafted with honest status markers and scope caveats; the
+claims ledger they both point at is `CLAIMS.md`. Before submitting anything:
 
 - The **prior-art position is settled and narrowed**: the diagonal↔Walsh
   ingredient is standard ([arXiv:1306.3991](https://arxiv.org/pdf/1306.3991))
