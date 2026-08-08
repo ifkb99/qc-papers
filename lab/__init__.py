@@ -16,7 +16,7 @@ Finished experiment scripts under experiments/ are lab-notebook records and
 do NOT get retrofitted onto this engine; it exists for the next experiment.
 """
 from lab.harness import Experiment
-from lab.measure import (pullback, support, sparsity, density, peak_pps,
+from lab.measure import (pullback, support, sparsity, density, stats, peak_pps,
                          fn_spectrum, fn_support)
 from lab.gf2 import (rank_kernel, structures, find_structures,
                      check_structure, coset_split, quadrant_counts, slice_fn)

@@ -66,6 +66,11 @@ PREDICTIONS, WRITTEN BEFORE MEASURING THE SWEEPS.
   C2  MUST-FAIL: a LIVE window block must READ its window register. Without
       this, P1's independence result would hold for a trivial reason.
 
+EXTENDED (2026-08-08): P2's 2-periodicity was measured here only to K = 3 --
+two periods, the minimum that can be called a period. `experiment_windowed_
+scale.py` takes it to K = 5 (q = 29) at both moduli, with the K=0/K=4 and
+K=1/K=5 support *sets* identical, and confirms C37's dead tail there too.
+
 OUTCOME (2026-08-08): 8/9 checks pass. **P5 FAILS BY DESIGN and the file exits
 nonzero because of it** -- P5 was a conjunction, its flatness half held exactly
 and its dead-bit half was refuted by an activation-ancilla artifact diagnosed

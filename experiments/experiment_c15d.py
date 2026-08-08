@@ -14,6 +14,12 @@ Predictions:
   alpha=1 (r=2): constant for n_exp >= 2
   alpha=2 (r=4): constant for n_exp >= 3, and n_exp=2 differs
   alpha=3 (r=8): constant for n_exp >= 4, n_exp=2 and 3 differ
+
+RESOLVED 2026-08-08 for alpha = 3 and 4. This file skips q > 22, which is
+exactly where the alpha=3 and alpha=4 lock points live, so it could only
+report "still growing, as predicted". `experiment_c21_onset.py` runs them on
+the GPU (q up to 27) and both lock at exactly n_exp = alpha + 1, at two moduli
+for alpha = 3. See NOTES.md SS OS1.
 """
 from __future__ import annotations
 import numpy as np, math, time

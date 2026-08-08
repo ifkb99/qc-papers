@@ -309,11 +309,12 @@ rows, and the gap widens with size. **(d)** Density stays well below ½ — the
 structural cap of §6, which is why these numbers are not those of a random
 function.
 
-The largest instance reached by the Walsh route elsewhere in this work is **24
-qubits**; propagation stalls near 17, which is why the table's rot-PPS column
-stops there. We note this as a limitation in §11.1 rather than dressing it up:
-the structural results are proved and do not depend on instance size, but the
-measured scaling series is modest.
+The largest instance reached by the Walsh route elsewhere in this work is **30
+qubits** (|S| = 536,271,623 for N = 143, exactly counted); propagation stalls
+near 17, which is why the table's rot-PPS column stops there. The asymmetry is
+noted in §11.1 rather than dressed up: the structural results are proved and do
+not depend on instance size, and the circuit series now spans a 32768-fold
+range of Hilbert-space dimension.
 
 ---
 
@@ -655,11 +656,13 @@ arithmetic constructions used.
 - **Truncation is not covered by the exact statement** (§7), and behaves badly
   enough on this family to warrant the admissibility check we propose.
 - **Instance sizes are asymmetric, and we say so.** Circuit-level results reach
-  **24 qubits** via the Walsh route and stall near 17 for propagation — bounded
-  by gate count, not memory, so pushing further is a matter of engineering
-  rather than insight. The *structural* results of §6.2, being function-level,
-  reach **n = 30 (10⁹ points)**. A referee should read the circuit series as
-  modest and the structural series as not.
+  **30 qubits** via the Walsh route (q = 15…30 across two series varying the
+  modulus at fixed exponent width; density 0.4728 → 0.4994, growth exponent
+  1.006 bits/qubit) and stall near 17 for propagation — bounded by gate count,
+  not memory, so pushing that further is a matter of engineering rather than
+  insight. The *structural* results of §6.2, being function-level, also reach
+  **n = 30 (10⁹ points)**. The remaining asymmetry is between the Walsh route
+  and rotation-level propagation, not between circuit and function level.
 
 ### 11.2 Retractions
 

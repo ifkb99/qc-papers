@@ -22,11 +22,23 @@ extrapolation. Paper B: applied to modular exponentiation, cost is governed by
 the 2-adic structure of the multiplicative order r = β·2^α — independent of
 exponent-register width when β = 1, Θ(2ⁿ) otherwise, with the mechanism proved.
 
-**No live research thread is blocked.** TODO items 1–12b are closed; 12c–12e,
-13 and 14 are open and each states its own rationale. The highest-value open
-item is **12e**, and specifically **C21's onset at α = 3 and 4**: a
-pre-registered prediction that went unmeasured only because it was too slow,
-and is now cheap (see GPU, below).
+**No live research thread is blocked.** TODO items 1–12b **and 12e** are
+closed; 12c, 12d, 12f, 13 and 14 are open and each states its own rationale.
+
+> **12e closed 2026-08-08 — see `NOTES.md` §OS.** Every sweep that had been
+> deferred for want of compute is now run. C21's onset is **measured** at
+> α = 3 (two moduli) and α = 4, not merely predicted; C24 strengthened to set
+> level (**C43**); C7's circuit series reaches **30 qubits** (|S| =
+> 536,271,623, slope 1.006 bits/qubit); C38's 2-periodicity holds to K = 5.
+> `PAPER_A.md` §11.1 and `PAPER_B.md` §6 and §12.1 were updated accordingly.
+> One method note is worth carrying: the must-fail control caught a **vacuous**
+> test of mine (the tail-confinement check has only one possible answer at
+> |I| = 1), the second time that rule specifically has earned its place.
+
+The best remaining candidates are **12d** (why the peak ratio is exactly
+`rot = 2·perm − 2`; explicitly "an afternoon or a discovery", and the only
+quantitative claim in Paper A that is measured rather than derived) and **14**
+(through the inverse QFT — highest risk, highest reach, a Paper C candidate).
 
 ---
 
@@ -51,6 +63,13 @@ LAB_GPU=1 uv run python -m experiments.<name>     # that is the whole interface
 - **Capacity: n ≤ 30** on one 20 GiB card (`accel.MAX_QUBITS`); it raises rather
   than thrashing past that. Measured: float64 FWHT at n = 30 needs 12 GiB and
   fits; n = 31 needs 24 GiB and does not.
+- **The binding constraint is the REPLAY, not the transform** (found 2026-08-08
+  while doing TODO 12e). `idx ^= ((idx >> c) & 1) << t` keeps the array plus two
+  temporaries live, so an int64 index array needs ~24 GiB at n = 30 and fails.
+  Images are < 2ⁿ, so `accel._replay` builds it in **int32** for n ≤ 30 (~12
+  GiB), which is what makes a q = 30 circuit-level run possible at all. Gated
+  against the CPU int64 reference in `test_accel.py` [A]. A real q = 30 modexp
+  now takes ~14 min end to end.
 - **Does the second card scale it further? Only by +1 qubit, and there is a
   cheaper way.** Memory doubles per qubit, so 40 GiB buys exactly one more than
   20 GiB. A split would be genuinely easy — with the array halved by its top
@@ -66,8 +85,12 @@ LAB_GPU=1 uv run python -m experiments.<name>     # that is the whole interface
   §GF and `experiment_gf2law_scale.py`). Safe to n = 30, since intermediate
   magnitudes are bounded by 2ⁿ and 2³⁰ < 2³¹.
 - The best use of the second card is **throughput**: two independent sweeps at
-  once, one per device, via `CUDA_VISIBLE_DEVICES=0` / `=1`. Zero new code, and
-  it is what TODO 12e actually wants.
+  once, one per device, via `CUDA_VISIBLE_DEVICES=0` / `=1`. Zero new code —
+  and it is how 12e was actually run, two sweeps in parallel throughout. The
+  measurement cache is content-addressed, so concurrent writers cannot collide
+  and a later single-process run of the experiment replays everything for free.
+  That is the pattern to reuse: **warm the cache in parallel, then run the
+  experiment file once for the record.**
 - **Install is machine-specific.** `pyproject.toml` pins `cupy-cuda13x` to match
   this machine's CUDA 13.3. On a CUDA 12 host swap to `cupy-cuda12x`; both were
   tested and perform identically. Without cupy everything still works on CPU.
@@ -193,10 +216,11 @@ won't look. Also: a bug-check procedure ordered by cost, derive-then-test,
 always including a control that must fail, promoting regularities to proofs by
 reading the construction rather than measuring more, and explicit claim grading.
 
-It is not decoration. In this session its rules caught three of my own errors
-that had already produced confident-looking numbers: a vacuous test whose
-must-fail control failed to fail, a sweep that varied two parameters at once,
-and degenerate random inputs at small sizes.
+It is not decoration. Its rules have now caught four of my own errors that had
+already produced confident-looking numbers: **two** vacuous tests whose
+must-fail control failed to fail (step 9, and TODO 12e's |I| = 1 tail check),
+a sweep that varied two parameters at once, and degenerate random inputs at
+small sizes.
 
 ## Reading order
 

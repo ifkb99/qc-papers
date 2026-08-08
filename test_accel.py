@@ -52,6 +52,20 @@ for label, qc, tq in cases:
           f"{pc.size:,} entries, exact")
     del pc, pg
 
+# The replay computes in int32 for n <= 30 (halves the working set, which is
+# what makes q = 30 fit). Bit twiddling is only safe if every image really is
+# below 2^31, and if the high-index gates survive the narrower type -- so check
+# both directly rather than trusting the argument.
+qc_hi, tq_hi = cases[2][1], cases[2][2]
+check("replay index dtype is int32 for n <= 30",
+      accel._index_dtype(30) == np.int32 and accel._index_dtype(31) == np.int64)
+_pg = accel.classical_permutation(qc_hi)
+check("int32 replay stays in range", int(_pg.max()) < (1 << qc_hi.n),
+      f"max image {int(_pg.max()):,} < 2^{qc_hi.n}")
+check("int32 replay is a permutation",
+      np.array_equal(np.sort(_pg), np.arange(1 << qc_hi.n)))
+del _pg
+
 print("\n[B] FWHT: allclose on values, EXACT on the support set")
 rng = np.random.default_rng(0)
 for n in (12, 16, 20):
@@ -93,6 +107,24 @@ check("FWHT of +/-1 data is exactly integer-valued",
 check("int32 FWHT reproduces float64 bit-for-bit",
       np.array_equal(accel.wht_exact(chi.astype(np.int32)).astype(np.int64),
                      w.astype(np.int64)))
+
+print("\n[G] pullback_stats: aggregates match counting the support by hand")
+me_s = ToffoliModExp(N=5, a=2, n_exp=1)
+qc_s, tq_s = me_s.build(), me_s.x[0]
+w_lin = (1 << me_s.b[me_s.m - 1]) | (1 << me_s.anc)      # the C30 structure
+w_bad = 1 << me_s.x[1]                                   # not a structure
+zs_s = accel.pullback_support_exact(qc_s, tq_s)
+st = accel.pullback_stats(qc_s, tq_s, masks=(w_lin, w_bad))
+check("stats count == |support|", st["count"] == zs_s.size, f"{st['count']:,}")
+check("stats density == count / 2^n",
+      abs(st["density"] - zs_s.size / (1 << qc_s.n)) < 1e-15)
+for w in (w_lin, w_bad):
+    ref = sum((int(z) & w).bit_count() & 1 for z in zs_s.tolist())
+    check(f"stats odd[{w}] matches host popcount", st["odd"][w] == ref,
+          f"{st['odd'][w]:,} vs {ref:,}")
+check("C30 structure has odd-count 0 (pinned), control does not",
+      st["odd"][w_lin] == 0 and st["odd"][w_bad] > 0)
+del zs_s
 
 print("\n[D] control: a non-permutation circuit must be REJECTED, not silently wrong")
 from circuits import Circuit

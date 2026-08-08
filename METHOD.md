@@ -73,6 +73,28 @@ confirmed with zero violations. Evidence from a prediction is worth far more
 than an explanation fitted to data already seen — and it is the only way to
 avoid dressing up a curve fit as a mechanism.
 
+**Every experiment carries a control that must FAIL.** The one rule it is most
+tempting to skip once a hypothesis is going well, and it has now caught two
+vacuous measurements of mine that had already produced confident-looking
+numbers:
+
+- *step 9* — synthetic blocks acted only on b-qubits while the observable was
+  `Z_x0`, so both block types came out constant for a trivial reason;
+- *TODO 12e* — the tail-confinement test `z_I ∈ {0, 1_I}` is vacuous at
+  |I| = 1, because one bit *is* all-zeros or all-ones. The β>1 control passed
+  when it had to fail, which is the only reason it was noticed — and three
+  rows of the positive result were being read as evidence too.
+
+In both cases nothing measured was wrong. What was wrong was how much the
+measurement was entitled to say, and only the control could tell the
+difference. `lab.harness` warns when no must-fail control is registered.
+
+(The project's other two self-caught errors came from different rules, not
+this one: "vary exactly one parameter" caught a sweep that drew a new random
+table per t, and null-model hygiene caught random tables degenerating to
+constants at small r. Worth keeping straight — the rules are not
+interchangeable.)
+
 **Precision sweep to separate bug from float error.** Re-run in `longdouble`.
 If the error is *identical*, it is a logic bug, full stop. This caught the θ=π
 bug that six test suites had missed.
@@ -117,6 +139,7 @@ measurement would have produced that.
 | **Lucky sampling hiding a threshold** | every sweep started at n_exp = α+1. |
 | **Trusting a summary over source** | web summaries claimed Qiskit `pauli-prop` supports Toffoli; the source rejects it. |
 | **Reading an abstract, not the body** | Dang et al.'s abstract says "factors of r"; §4 is explicitly 2-adic. Nearly caused a wrong retraction. |
+| **A test with only one possible answer** | `z_I ∈ {0, 1_I}` at \|I\| = 1. Caught by the must-fail control, which passed. See §OS3. |
 
 ---
 

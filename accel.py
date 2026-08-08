@@ -33,6 +33,12 @@ array + 4 GiB temp = 12 GiB) and fails at n = 31 (24 GiB). Memory doubles per
 qubit, so a second card buys exactly ONE more qubit -- see `wht_exact` for a
 cheaper lever that buys the same thing without the complexity, by exploiting
 the fact that the transform of +/-1 data is exactly integer-valued.
+
+The *replay* has the tighter budget of the two, because an elementwise
+`idx ^= ((idx >> c) & 1) << t` keeps the array and two temporaries live: int64
+would need ~24 GiB at n = 30 and fail. Images are < 2^n, so for n <= 30 the
+index array is built in **int32** (`_replay`), ~12 GiB at n = 30, which is what
+makes a q = 30 circuit-level sweep possible at all.
 """
 from __future__ import annotations
 
@@ -77,6 +83,32 @@ def free_pool():
 
 # ---------------------------------------------------------------------------
 
+def _replay(circuit, dtype):
+    """Shared GPU replay kernel: returns the device array of images.
+
+    dtype is int32 whenever the register fits (n <= 30, so every image is
+    < 2^30 < 2^31). That halves the working set, and the working set is what
+    actually binds: an elementwise `idx ^= ((idx >> c) & 1) << t` holds the
+    array plus two temporaries live at once, so int64 needs ~3 x 8 GiB at
+    n = 30 and does not fit on a 20 GiB card, while int32 needs ~3 x 4 GiB and
+    does. This is what puts a q = 30 circuit-level sweep in range.
+    """
+    idx = _cp.arange(1 << circuit.n, dtype=dtype)
+    for op in circuit.logical:
+        if op[0] == "x":
+            idx ^= dtype(1 << op[1])
+        elif op[0] == "cnot":
+            idx ^= ((idx >> op[1]) & dtype(1)) << dtype(op[2])
+        else:
+            idx ^= (((idx >> op[1]) & dtype(1))
+                    & ((idx >> op[2]) & dtype(1))) << dtype(op[3])
+    return idx
+
+
+def _index_dtype(n: int):
+    return _cp.int32 if n <= 30 else _cp.int64
+
+
 def classical_permutation(circuit) -> np.ndarray:
     """GPU replay of a classical circuit; returns a host array.
 
@@ -93,17 +125,8 @@ def classical_permutation(circuit) -> np.ndarray:
     if n > MAX_QUBITS:
         raise MemoryError(f"n={n} exceeds MAX_QUBITS={MAX_QUBITS}")
 
-    idx = _cp.arange(1 << n, dtype=_cp.int64)
-    for op in circuit.logical:
-        if op[0] == "x":
-            idx ^= (1 << op[1])
-        elif op[0] == "cnot":
-            c, t = op[1], op[2]
-            idx ^= ((idx >> c) & 1) << t
-        else:
-            a, b, c = op[1], op[2], op[3]
-            idx ^= (((idx >> a) & 1) & ((idx >> b) & 1)) << c
-    out = _cp.asnumpy(idx)
+    idx = _replay(circuit, _index_dtype(n))
+    out = _cp.asnumpy(idx).astype(np.int64, copy=False)
     del idx
     free_pool()
     return out
@@ -185,14 +208,7 @@ def pullback_support_exact(circuit, target_qubit: int, perm=None) -> np.ndarray:
     if perm is None:
         if not circuit.is_classical():
             raise ValueError("circuit is not a permutation")
-        idx = _cp.arange(1 << n, dtype=_cp.int64)
-        for op in circuit.logical:
-            if op[0] == "x":
-                idx ^= (1 << op[1])
-            elif op[0] == "cnot":
-                idx ^= ((idx >> op[1]) & 1) << op[2]
-            else:
-                idx ^= (((idx >> op[1]) & 1) & ((idx >> op[2]) & 1)) << op[3]
+        idx = _replay(circuit, _index_dtype(n))
     else:
         idx = _cp.asarray(perm)
     g = ((idx >> target_qubit) & 1).astype(_cp.int32)
@@ -217,6 +233,64 @@ def pullback_support_exact(circuit, target_qubit: int, perm=None) -> np.ndarray:
     return out
 
 
+def pullback_stats(circuit, target_qubit: int, masks=(), perm=None) -> dict:
+    """Aggregate statistics of the Walsh support, computed without ever
+    materialising it on the host.
+
+    At q = 30 the support is ~5e8 entries -- 4 GiB as int64 -- so the usual
+    "return the support, then count things" pattern moves gigabytes and fills
+    the cache with files nobody reads. Everything a density sweep actually
+    needs is a handful of scalars, so compute them on the card:
+
+        count      -- |support| (exact, `!= 0`, no tolerance)
+        density    -- count / 2^n
+        odd[w]     -- #{z in support : <z, w> = 1 over GF(2)}, per mask w
+
+    `odd[w] == 0` is exactly the statement that w is a linear structure of the
+    pulled-back bit function (C30/C33), which is the confinement that caps the
+    density at 1/2 -- so it is the check a density sweep wants alongside the
+    count, and it costs one extra pass.
+    """
+    if not HAVE_GPU:
+        raise RuntimeError("no CUDA device available")
+    n = circuit.n
+    if n > 30:
+        raise ValueError(f"n={n} > 30; exact integer path is only safe to 30")
+    if perm is None:
+        if not circuit.is_classical():
+            raise ValueError("circuit is not a permutation")
+        idx = _replay(circuit, _index_dtype(n))
+    else:
+        idx = _cp.asarray(perm)
+    a = (1 - 2 * ((idx >> target_qubit) & 1)).astype(_cp.int32)
+    del idx
+    size = a.size
+    h = 1
+    while h < size:
+        a = a.reshape(-1, 2, h)
+        t = a[:, 0, :] - a[:, 1, :]
+        a[:, 0, :] += a[:, 1, :]
+        a[:, 1, :] = t
+        del t
+        a = a.reshape(-1)
+        h *= 2
+    zs = _cp.nonzero(a)[0].astype(_cp.int64)
+    del a
+    out = {"count": int(zs.size), "density": float(zs.size) / size, "odd": {}}
+    for w in masks:
+        par = _cp.zeros(zs.size, dtype=_cp.int8)
+        m = int(w)
+        while m:
+            b = m & -m
+            par ^= ((zs & b) != 0).astype(_cp.int8)
+            m ^= b
+        out["odd"][int(w)] = int(par.sum())
+        del par
+    del zs
+    free_pool()
+    return out
+
+
 def pullback_support(circuit, target_qubit: int, tol: float = 1e-12,
                      perm=None) -> np.ndarray:
     """Walsh support of the pulled-back Z_target, end to end on the GPU.
@@ -230,14 +304,7 @@ def pullback_support(circuit, target_qubit: int, tol: float = 1e-12,
     if perm is None:
         if not circuit.is_classical():
             raise ValueError("circuit is not a permutation")
-        idx = _cp.arange(1 << n, dtype=_cp.int64)
-        for op in circuit.logical:
-            if op[0] == "x":
-                idx ^= (1 << op[1])
-            elif op[0] == "cnot":
-                idx ^= ((idx >> op[1]) & 1) << op[2]
-            else:
-                idx ^= (((idx >> op[1]) & 1) & ((idx >> op[2]) & 1)) << op[3]
+        idx = _replay(circuit, _index_dtype(n))
     else:
         idx = _cp.asarray(perm)
 

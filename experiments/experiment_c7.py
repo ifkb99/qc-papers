@@ -1,5 +1,12 @@
 """C7: are the small-n results pre-asymptotic?
 
+SUPERSEDED IN RANGE, NOT IN CONTENT (2026-08-08). This file's circuit series
+stops at 24 qubits because that was the CPU limit. `experiment_c7_scale.py`
+re-runs it on the exact integer path -- all six rows reproduce bit-for-bit --
+and extends it to **30 qubits** in two series, slope 1.006 bits/qubit. Cite
+that one for the scaling numbers; this one is still the record of how C7 was
+answered.
+
 This was the standing threat to the whole project: every instance so far is
 <= 15 qubits, against the 127 qubits of the circuits the PPS resource framework
 was calibrated on.

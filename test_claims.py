@@ -74,6 +74,24 @@ n1 = int(np.count_nonzero(zi == mask))
 t("halves 7770/7779, other = 0",
   (n0, n1) == (7770, 7779) and n0 + n1 == zs.size)
 
+print("[C43] C24 at SET level: the supports coincide, not merely their sizes")
+# Pinned at alpha=2 (N=5, a=2, r=4) because it is cheap; the claim was
+# established at alpha=3 and 4 in experiments/experiment_c21_onset.py, where
+# the instances are q=23..27 and belong in a GPU sweep, not in the gate.
+_al, _ = v2_split(order(2, 5))
+_sigs = []
+for _ne in (_al + 1, _al + 2):
+    _me = build_modexp(N=5, a=2, n_exp=_ne)
+    _zs = support(_me.build(), _me.x[0])
+    _tm = 0
+    for _q in _me.exp[_al:]:
+        _tm |= 1 << _q
+    _rest = (1 << _me.exp[_al]) - 1
+    _sigs.append(np.sort((_zs & _rest)
+                         | (((_zs & _tm) == _tm).astype(np.int64) << _me.exp[_al])))
+t("N=5 a=2: (z_rest, tailflag) sets identical at n_exp = 3 and 4",
+  _sigs[0].size == 32143 and bool(np.array_equal(_sigs[0], _sigs[1])))
+
 print("[C30] the 1/2 ceiling is the linear structure w = b_msb^anc")
 me = build_modexp(N=5, a=2, n_exp=1)
 qc = me.build()

@@ -87,10 +87,12 @@ peaks at y = 0, 4, 8, 12 with p = 0.25 each (r = 4).
 | `out/` | gitignored: logs and the measurement cache |
 
 Notable experiments: `experiment_c8` (the Walsh identity, Paper A core),
-`experiment_c7` (scaling to 24 qubits, density → ½), `experiment_c15{,b}` (the
-2-adic result, Paper B core), `experiment_resid{1,2}` + `experiment_affstruct`
-(the conditional-structure resolution, C33–C35). `experiment.py` and
-`experiment2.py` are partially retracted — see their headers.
+`experiment_c7` + `experiment_c7_scale` (scaling to 30 qubits, density → ½),
+`experiment_c15{,b}` (the 2-adic result, Paper B core), `experiment_c21_onset`
+(the invariance onset measured at α = 3 and 4), `experiment_resid{1,2}` +
+`experiment_affstruct` (the conditional-structure resolution, C33–C35).
+`experiment.py` and `experiment2.py` are partially retracted — see their
+headers.
 
 ## Scope and limits
 

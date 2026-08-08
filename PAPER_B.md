@@ -115,7 +115,7 @@ Z-type, and its coefficient vector is exactly the Walsh–Hadamard transform of
 
 Two consequences make this paper possible.
 
-1. **Cost is computable without simulating.** We reach 24 qubits by computing
+1. **Cost is computable without simulating.** We reach 30 qubits by computing
    spectra directly, where rotation-level propagation stalls near 17.
 2. **Peak memory is measurable at scale.** Propagating X, CNOT and Toffoli as
    atomic permutations (Paper A, C17) keeps the expansion Z-type throughout and
@@ -202,10 +202,30 @@ a^(2^i) mod N, which is the identity on the valid subspace exactly when i ≥ α
 The first such block therefore appears at **n_exp = α + 1**, and the support
 locks there and not before.
 
-Confirmed for α = 1 and α = 2. The α = 2 case is the discriminating one: N = 5
-with a = 2 (r = 4) **grows once**, 15493 → 32143, and then freezes — exactly one
-step of growth before the lock, as predicted. For α = 3 and α = 4 the support is
-still growing at the largest width we can reach, also as predicted.
+**Confirmed for α = 1, 2, 3 and 4.** The α = 2 case is the first discriminating
+one: N = 5 with a = 2 (r = 4) **grows once**, 15493 → 32143, and then freezes —
+exactly one step of growth before the lock. α = 3 and α = 4 were for a long
+time only "still growing at the largest width we can reach, as predicted"; they
+are now measured:
+
+| N | a | r | α | \|support\| by n_exp = 1, 2, … | locks at |
+|---|---|---|---|---|---|
+| 17 | 2 | 8 | 3 | 255,104 · 1,037,405 · 2,093,137 · **4,188,525 · 4,188,525** | 4 = α+1 |
+| 41 | 3 | 8 | 3 | 2,070,878 · 8,346,567 · 16,766,478 · **33,539,711 · 33,539,711** | 4 = α+1 |
+| 17 | 3 | 16 | 4 | 255,356 · … · 4,188,537 · **8,379,626 · 8,379,626** | 5 = α+1 |
+| 41 | 6 | 40 | 3 | 2,072,174 · 8,346,761 · 16,766,484 · 33,539,777 · 67,086,624 | never (β=5) |
+
+Growth is strict at every one of the seven steps below the onset, so the lock
+is not an artifact of a flat measurement. The last row is the matched control:
+**same modulus, same α, same circuit width, only β differs.** N = 41 admits
+both r = 8 and r = 40 = 5·2³, which makes the comparison exact rather than
+merely careful.
+
+> **A caution for anyone benchmarking.** At n_exp = 4 the β = 1 and β = 5 rows
+> of that table differ by 66 terms in 3.4 × 10⁷ — 2 parts per million. **The
+> invariant is invisible in a cost measurement at any single width.** Only the
+> growth separates the two regimes, which is why every claim here is stated
+> over a swept n_exp and not at a fixed size.
 
 > **Why this was nearly missed, and what it cost.** Every earlier sweep used
 > α = 1 and started at n_exp = 2 = α + 1 — exactly on the threshold. The
@@ -259,6 +279,22 @@ character, exact on 100% of the support. Corollary 3's confinement was **derived
 before being tested** and then confirmed with **zero violations across 7/7 β = 1
 instances**, with the two halves individually constant (7770/7779), against 48189
 and 1556046 violations for the β > 1 controls.
+
+> **A caveat on how that confinement is tested, which cost us a vacuous
+> measurement.** At |I| = 1 the statement "z_I ∈ {0, 1_I}" is a tautology: a
+> single bit is either all-zeros or all-ones. Rows at the onset width therefore
+> carry no evidence, and a β > 1 control evaluated there *passes*. Only widths
+> with |I| ≥ 2 test anything. All counts quoted here are from such widths.
+
+**Corollary 3 is in fact stronger than a statement about size (C43).** Step
+(iv) computes the surviving coefficient explicitly and the expression contains
+no |I|, so the supports at consecutive widths must coincide as *sets*, not
+merely in cardinality. Writing each element as (z_rest, tailflag) with the flag
+recording whether z_I = 0 or 1_I, the sets are bit-for-bit identical at α = 3
+(two moduli) and α = 4, over supports of 4.2, 8.4 and 33.5 million elements.
+Predicted before measuring. The two halves are individually constant but
+unequal to each other (2,094,285 against 2,094,240): the invariance is per
+half, not a symmetry between halves.
 
 **Two failed routes, recorded so they are not retried:** affineness of the
 identity block (refuted, 14336 of 32768 violations) and the (z, z⊕e) pairing (an
@@ -349,9 +385,10 @@ The honest practical claim: **peak cost is free in the exponent register at ever
 ## 9. The generic case, and what sets its constant
 
 For instances with an odd factor — the generic and cryptographically relevant
-case — Walsh density converges monotonically to one half: 0.473 → 0.498 over 15
-to 24 qubits, growth **1.008 bits per qubit** (C7). PPS cost is therefore Θ(2ⁿ),
-asymptotically no better than state-vector simulation.
+case — Walsh density converges monotonically to one half: 0.473 → 0.4994 over 15
+to **30** qubits, growth **1.006 bits per qubit** (C7, two series varying the
+modulus at fixed exponent width). PPS cost is therefore Θ(2ⁿ), asymptotically no
+better than state-vector simulation.
 
 **The limiting constant of ½ is neither accidental nor algorithmic (C30, C31).**
 The support carries a linear structure w = b_msb ⊕ anc, pairing the accumulator's
@@ -442,8 +479,9 @@ would make it hard to argue with, and remains open (§13).
   does not transfer automatically to a modexp built otherwise.
 - **Observables.** Computational-basis only. Real Shor measures after an inverse
   QFT, which leaves the diagonal and is outside both this paper and Paper A.
-- **Sizes.** 24 qubits via the Walsh route, n_exp = 8 for peak memory. The α = 3
-  and α = 4 onsets are consistent-with but not confirmed at reachable widths.
+- **Sizes.** 30 qubits via the Walsh route, n_exp = 8 for peak memory. The α = 3
+  onset is confirmed at two moduli and the α = 4 onset at one (§6); α ≥ 5 needs
+  r = 32, whose smallest instance is out of reach.
 - **No implication for factoring.** Efficient classical simulation of Shor's
   algorithm on general inputs would be a classical factoring algorithm. Nothing
   here bears on that; these are diagnostic results about where PPS breaks, and
@@ -474,6 +512,8 @@ of "vary exactly one parameter".
 uv run python -m experiments.experiment_c15    # controlled: fix N, vary a (N=7, N=21)
 uv run python -m experiments.experiment_c15b   # exact constancy sweep, n_exp 2..10
 uv run python -m experiments.experiment_c7     # scaling to 24 qubits, density -> 1/2
+LAB_GPU=1 uv run python -m experiments.experiment_c21_onset  # the onset at alpha = 3, 4
+LAB_GPU=1 uv run python -m experiments.experiment_c7_scale   # the same series to 30 qubits
 uv run python -m experiments.experiment_windowed   # the windowed criterion (TODO 12)
 uv run python test_claims.py                   # headline rows, pinned, ~15 s
 ```
