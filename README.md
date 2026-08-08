@@ -15,10 +15,14 @@ instances across two independent compilations.
 exponentiation: PPS cost is governed by the 2-adic structure of the
 multiplicative order r. Writing r = β·2^α with β odd, cost is independent of
 exponent-register width when β = 1 and Θ(2^n) otherwise. Verified in a
-controlled design (fix modulus, vary base) at two moduli, for both final support
-and peak memory.
+controlled design (fix modulus, vary base) at three moduli, for both final
+support and peak memory, and **proved** via a parity-reduction argument.
 
 ## Start here
+
+`METHOD.md` records how this work was actually conducted — the research loop,
+the failure modes hit, and the techniques that earned their keep. Worth reading
+before extending anything, since several of the lessons cost real time.
 
 `NOTES.md` is the working record — conventions, verified results, retracted
 claims, traps, and an honesty log of everything believed and then killed. Read
