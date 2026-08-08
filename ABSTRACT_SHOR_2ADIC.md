@@ -89,7 +89,17 @@ accumulator's sign bit with the modular-reduction comparison ancilla, which
 confines it to a hyperplane. We verify this is observable-independent and shared
 by both compilations, which use the same add/subtract/restore reduction, so the
 Θ(2^n) conclusion is robust while the constant should be read as a property of
-the reduction discipline rather than of modular exponentiation. Reaching 24 qubits is possible only because the Walsh route computes
+the reduction discipline rather than of modular exponentiation. The structure is
+forced by three features of the standard construction acting together: flipping
+the accumulator's most significant bit is the same operation as adding a power
+of two and therefore commutes with the modular adder; the comparison ancilla is
+coupled to that bit only through exclusive-or; and the swap network transferring
+the accumulator into the multiplicand register excludes the most significant bit
+entirely, so it never reaches the measured register. We confirm the diagnosis by
+substituting reductions that couple the sign bit nonlinearly, which leaves the
+computed function unchanged but destroys the linear structure and raises the
+density from 0.473 to 0.716 — a cost increase of roughly one half arising purely
+from a compilation choice, and the only such effect we observe. Reaching 24 qubits is possible only because the Walsh route computes
 the exact cost without running the simulation, which stalls near 17.
 
 Finally, we observe that the same decomposition r = β·2^α governs
@@ -161,6 +171,8 @@ windowed/table-lookup arithmetic qualifies is a well-posed open question.
 | **C18** | Holds for **peak memory**, not just final support | **established** | N_max exactly 24369 at n_exp = 2,4,6,8 (64× dim growth); control r=6 grows 4.02×/step |
 | C7 | Generic r ⟹ Θ(2ⁿ); results are not pre-asymptotic | **established** | 24 qubits via Walsh; density 0.473→0.498→½, slope 1.008 bits/qubit |
 | **C30** | The ½ ceiling is a **linear structure** w = b_msb ⊕ anc, not an algorithmic constant | **established** | GF(2) rank n−1 in every instance; g(y⊕w)=g(y) pointwise; observable-independent; present in both compilations; random f has full rank |
+| **C31** | The structure is forced by (a) msb-flip commuting with mod-2^m addition, (b) XOR-only coupling to anc, (c) msb excluded from the cswaps | **established** | (a) verified exhaustively, 0/256 violations; adding further XOR couplings leaves it intact |
+| **C32** | Breaking it needs **nonlinearity in the msb**, and costs ~51%: density 0.473 → 0.716 | **established** | Toffoli variants break it (full rank); cswap variant does not (linear); all four still compute a^e mod N |
 | **C27** | Invariance survives truncation: exact for terminal thresholding at every δ; peak cost unchanged under incremental | **established** | counts identical across n_exp at all 7 δ values; N_max SAME at every δ; control diverges |
 | C28 | Accuracy degrades first for the *wider* circuit at aggressive δ | **established, must be stated** | ⟨O⟩ → 0 at δ=1e-1 for n_exp=4,5 while n_exp=3 stays exact; more gates ⟹ more incremental truncation |
 | F12 | Function-level dichotomy is absolute | **established** | r=4: sparsity 4 constant to t=24; odd factor: density 1.000000 |
