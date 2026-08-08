@@ -1,36 +1,108 @@
 # Handoff — pick up here
 
-Written for a session with **no prior context**. Read this first, then
-`NOTES.md`. Everything is committed; working tree clean at 16 commits.
+Written for a session with **no prior context**. Read this file, then
+`PAPER_A.md` / `PAPER_B.md` if writing, or `TODO.md` if experimenting.
+Everything is committed; working tree clean.
 
 ---
 
-## Where things stand in one paragraph
+## Where things stand
 
-Two papers' worth of results, both with their central claims **proved**, not
-merely observed. Paper A (`ABSTRACT.md`): for any circuit implementing a
-permutation of the computational basis, the Pauli support carried by Pauli-path
-simulation with a computational-basis observable is *exactly* the
-Walsh–Hadamard spectrum of the corresponding output-bit Boolean function — an
-exact cost model where the field currently uses empirical extrapolation. Paper B
-(`ABSTRACT_SHOR_2ADIC.md`): applied to modular exponentiation, cost is governed
-by the 2-adic structure of the multiplicative order r; writing r = β·2^α with β
-odd, cost is independent of exponent-register width when β=1 and Θ(2ⁿ)
-otherwise. Thirteen of fifteen TODO items are closed. **One live thread**, below.
+**Both papers are drafted in full.** `PAPER_A.md` (the exact cost model) and
+`PAPER_B.md` (the 2-adic result for modular exponentiation) supersede
+`ABSTRACT.md` and `ABSTRACT_SHOR_2ADIC.md`, which are retained as abstract
+workshops and prior-art dossiers. `CLAIMS.md` remains the single source of truth
+for claim *status*; where a paper and the ledger disagree, the ledger wins.
 
-> **2026-08-08, TODO 12 (windowed arithmetic) closed — and it corrected a
-> claim.** C29 said "V²=id is the entire condition". That is **not
-> sufficient**: `windowed_arith.SelectModExp`'s identity-tail block satisfies
-> V²=id exhaustively and still loses the invariance, because it is gated on
-> OR(window) rather than on a single qubit. Repaired criterion (C36): the
-> block's dependence on the exponent register must be **affine**. Gidney-style
-> table lookup passes, and more strongly than expected — the tail goes *dead*
-> (C37) rather than surviving through a parity bit as in C24 — but the cost is
-> **2-periodic, not exactly constant** (C38). See `NOTES.md` §WD.
+Paper A: for any circuit implementing a permutation of the computational basis,
+the Pauli support carried by Pauli-path simulation with a computational-basis
+observable is *exactly* the Walsh–Hadamard spectrum of the corresponding
+output-bit Boolean function — an exact cost model where the field uses empirical
+extrapolation. Paper B: applied to modular exponentiation, cost is governed by
+the 2-adic structure of the multiplicative order r = β·2^α — independent of
+exponent-register width when β = 1, Θ(2ⁿ) otherwise, with the mechanism proved.
+
+**No live research thread is blocked.** TODO items 1–12b are closed; 12c–12e,
+13 and 14 are open and each states its own rationale. The highest-value open
+item is **12e**, and specifically **C21's onset at α = 3 and 4**: a
+pre-registered prediction that went unmeasured only because it was too slow,
+and is now cheap (see GPU, below).
 
 ---
 
-## THE LIVE THREAD — residual non-linear structure
+## GPU — read this before running anything slow
+
+The two hot paths (permutation replay, FWHT) are memory-bound array passes, and
+a CUDA backend gives **7–15×, growing with n**. This is already built, gated and
+wired in. It will save hours.
+
+```bash
+LAB_GPU=1 uv run python -m experiments.<name>     # that is the whole interface
+```
+
+- **`accel.py`** is the backend; **`test_accel.py`** (suite 9) gates it against
+  the CPU reference and skips cleanly with no card.
+- **Opt-in by design.** `walsh.py` stays the reference and is never silently
+  substituted. `LAB_GPU=1` routes `lab.measure.support` through the GPU; nothing
+  else changes behaviour.
+- **Measured** (RTX A4500): permutation replay 7.1× / 6.9× / **11.5×** at
+  q = 17 / 19 / 21 (29.3 s → 2.6 s at q = 21); FWHT 11.8× / 12.8× / **14.7×** at
+  2²⁴ / 2²⁶ / 2²⁸ (18.1 s → 1.2 s at 2²⁸).
+- **Capacity: n ≤ 30** on one 20 GiB card (`accel.MAX_QUBITS`); it raises rather
+  than thrashing past that. Measured: float64 FWHT at n = 30 needs 12 GiB and
+  fits; n = 31 needs 24 GiB and does not.
+- **Does the second card scale it further? Only by +1 qubit, and there is a
+  cheaper way.** Memory doubles per qubit, so 40 GiB buys exactly one more than
+  20 GiB. A split would be genuinely easy — with the array halved by its top
+  bit, every FWHT level except the last is local to a half, and only the final
+  butterfly crosses cards — but +1 qubit is a poor return, so it is **not
+  implemented** (logged as TODO 12f).
+  **Use `wht_exact` / `pullback_support_exact` instead:** the FWHT of ±1 data is
+  *exactly integer-valued* (verified bit-for-bit), so int32 gives the same
+  answer in half the memory — the same +1 qubit, no complexity — **and it makes
+  the support test exact (≠ 0) rather than a magnitude threshold.** That second
+  property matters: it removes the thresholding artifact that otherwise makes
+  measured densities drift below their true value as n grows (see `NOTES.md`
+  §GF and `experiment_gf2law_scale.py`). Safe to n = 30, since intermediate
+  magnitudes are bounded by 2ⁿ and 2³⁰ < 2³¹.
+- The best use of the second card is **throughput**: two independent sweeps at
+  once, one per device, via `CUDA_VISIBLE_DEVICES=0` / `=1`. Zero new code, and
+  it is what TODO 12e actually wants.
+- **Install is machine-specific.** `pyproject.toml` pins `cupy-cuda13x` to match
+  this machine's CUDA 13.3. On a CUDA 12 host swap to `cupy-cuda12x`; both were
+  tested and perform identically. Without cupy everything still works on CPU.
+- `accel.device_info()` prints what was detected; `accel.enabled()` tells you
+  whether `LAB_GPU` actually took effect.
+
+---
+
+## Getting running (2 minutes)
+
+```bash
+cd /home/djneko/Workspace/qsim-test/QuantumSimTest-master/research
+uv run python test_core.py          # correctness gate — run first, always
+uv run python test_claims.py        # headline results, pinned to logged numbers
+```
+
+**Traps that will bite immediately:**
+
+1. **Run with `uv run python` from `research/`.** Not bare `python3`.
+2. ~~`source .env` only for Julia work~~ — **TRAP RETIRED 2026-08-08.** Julia
+   was unused (no `.py` imported `juliacall`); `juliacall`, the 1.1 GB depot and
+   `.env` are all deleted, so the `LD_PRELOAD`/`longdouble` segfault cannot
+   recur. The venv went 1.6 GB → 534 MB.
+3. **CPython 3.14 crashes on long `perm_pps` runs** —
+   `Fatal Python error: _TAIL_CALL_CACHE`. A 3.14 interpreter bug, not this
+   code. Presents as a hang or a mysterious death with no traceback. Rerun (it
+   is intermittent) or use 3.12/3.13 for long jobs.
+4. **Do not `pkill` in the same command as a heredoc write** — it kills the
+   write. Two scripts vanished this way.
+5. **A GPU run needs `LAB_GPU=1`** — `accel.enabled()` returns False without
+   it and everything silently runs on CPU at 1/10th the speed.
+
+---
+
+## HISTORICAL — the former live thread (RESOLVED; kept for context)
 
 > **RESOLVED 2026-08-08 (post-handoff).** The residue is a **conditional
 > linear structure**: the support exactly avoids the quadrant
@@ -105,42 +177,6 @@ destroyed, and it is unidentified.**
 
 ---
 
-## Getting running (2 minutes)
-
-```bash
-cd /home/djneko/Workspace/qsim-test/QuantumSimTest-master/research
-uv run python test_core.py          # correctness gate — run first, always
-uv run python test_claims.py        # headline results, pinned to logged numbers
-```
-
-All nine suites must pass before trusting anything:
-`test_core`, `test_modexp`, `test_toffoli_arith`, `test_walsh`,
-`test_perm_pps`, `test_windowed` (the windowed constructions and their
-tail-block structure), `test_accel` (CUDA backend vs the CPU reference; skips
-cleanly with no card), `test_lab` (engine vs historical numbers), `test_claims`
-(executable reproductions of the CLAIMS.md headline rows).
-
-**Slow sweeps: set `LAB_GPU=1`.** `accel.py` routes the two hot paths through
-CUDA — 7–15× measured on an RTX A4500, and the speedup *grows* with n. Opt-in
-by design; `walsh.py` remains the reference and `test_accel.py` gates the GPU
-path against it (exact equality for permutations, identical support sets).
-
-**Traps that will bite immediately:**
-
-1. **Run with `uv run python` from `research/`.** Not bare `python3`.
-2. ~~`source .env` only for Julia work~~ — **TRAP RETIRED 2026-08-08.** Julia
-   was unused (no `.py` imported `juliacall`); `juliacall`, the 1.1 GB depot and
-   `.env` are all deleted, so the `LD_PRELOAD`/`longdouble` segfault cannot
-   recur. The venv went 1.6 GB → 534 MB.
-3. **CPython 3.14 crashes on long `perm_pps` runs** —
-   `Fatal Python error: _TAIL_CALL_CACHE`. A 3.14 interpreter bug, not this
-   code. Presents as a hang or a mysterious death with no traceback. Rerun (it
-   is intermittent) or use 3.12/3.13 for long jobs.
-4. **Do not `pkill` in the same command as a heredoc write** — it kills the
-   write. Two scripts vanished this way.
-
----
-
 ## The `computational-research` skill
 
 There is a skill at `~/.claude/skills/computational-research/SKILL.md`
@@ -178,8 +214,10 @@ and degenerate random inputs at small sizes.
 6. `CLAIMS.md` — the canonical ledger of every claim ID and its status, split
    into Paper A, Paper B and retracted/dead. Read it before citing any claim:
    where `NOTES.md` prose disagrees, `CLAIMS.md` wins.
-7. The two abstracts, when writing. They carry no ledgers of their own; both
-   point at `CLAIMS.md`.
+7. `PAPER_A.md` / `PAPER_B.md` — the full drafts, when writing. `ABSTRACT.md`
+   and `ABSTRACT_SHOR_2ADIC.md` are demoted to abstract workshops and prior-art
+   dossiers. None carries a ledger; all point at `CLAIMS.md`.
+8. `accel.py` — before running anything large. See the GPU section above.
 
 ---
 
@@ -204,7 +242,7 @@ Logged in full in `NOTES.md`; listed here so a fresh session does not burn time.
 
 ---
 
-## Remaining TODO items besides the live thread
+## Remaining TODO items (see `TODO.md` for the ranked list)
 
 - **Exact-spectrum crypto import.** The bound S ≥ (1 − NL/2ⁿ⁻¹)⁻² is tight only
   at the extremes (AES: bound 64, actual 239). For crypto families whose *full*

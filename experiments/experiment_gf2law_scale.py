@@ -31,7 +31,8 @@ import numpy as np
 import walsh
 from lab import rank_kernel
 
-N = int(sys.argv[1]); CH = 1 << 24
+N = int(sys.argv[1]) if len(sys.argv) > 1 else 26
+CH = min(1 << 24, 1 << N)      # chunk must not exceed the array
 RNG = np.random.default_rng(20260808)
 
 def wht_inplace(a):

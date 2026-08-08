@@ -73,6 +73,27 @@ for label, qc, tq in cases:
           f"{zc.size:,} terms")
     del zc, zg
 
+print("\n[F] exact integer path: identical support, no tolerance involved")
+for label, qc, tq in cases:
+    if qc.n > 30:
+        continue
+    ref = np.nonzero(np.abs(walsh.pullback_coefficients(qc, tq)) > 1e-12)[0]
+    ex = accel.pullback_support_exact(qc, tq)
+    check(f"{label}: exact-int support == float64 support",
+          np.array_equal(ref.astype(np.int64), ex), f"{ref.size:,} terms")
+    del ref, ex
+
+# the property the exact path relies on: the FWHT of +/-1 data is integral
+rng2 = np.random.default_rng(1)
+chi = np.where(rng2.integers(0, 2, size=1 << 16) == 1, -1.0, 1.0)
+w = walsh.wht(chi)
+check("FWHT of +/-1 data is exactly integer-valued",
+      np.array_equal(w, np.round(w)),
+      f"max|W| = {int(np.abs(w).max()):,}, int32 bound 2^31")
+check("int32 FWHT reproduces float64 bit-for-bit",
+      np.array_equal(accel.wht_exact(chi.astype(np.int32)).astype(np.int64),
+                     w.astype(np.int64)))
+
 print("\n[D] control: a non-permutation circuit must be REJECTED, not silently wrong")
 from circuits import Circuit
 bad = Circuit(4)
