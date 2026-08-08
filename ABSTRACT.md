@@ -19,8 +19,9 @@ Baker, I.
 > and both compilations tested have exact Z-closure. The current claim (Walsh
 > sparsity = PPS term count) is verified to machine precision on 6/6 instances
 > across both compilations, with supports identical rather than merely counts
-> matching. Instances are ≤ 15 qubits; C7 (pre-asymptotic) remains untested.
-> See `NOTES.md` STATUS 2 and the honesty log.
+> matching. C7 (pre-asymptotic) is since **refuted** — the Walsh route reached
+> 24 qubits and density converges to ½ with slope 1.008 bits/qubit. See
+> `NOTES.md` STATUS 2 and the honesty log.
 
 ---
 
@@ -79,12 +80,21 @@ That analysis is developed separately (Paper B, `ABSTRACT_SHOR_2ADIC.md`) and is
 not claimed here; we note it only as evidence that an exact cost model buys
 structural results that extrapolation-based estimates cannot.
 
-We further observe that Walsh sparsity and nonlinearity are the central
-quantities of linear cryptanalysis, so that "reversible circuits that are hard
-for Pauli-path simulation" and "Boolean functions resistant to linear
-approximation" are closely related classes; measured against the bent bound,
-modular exponentiation sits at a stable 0.74 across problem sizes, well short of
-the 0.97–0.99 of random functions.
+Walsh sparsity and nonlinearity are the central quantities of linear
+cryptanalysis, and the identity turns that coincidence into a transfer. Since
+nonlinearity satisfies NL = 2^(n-1)(1 - max_z |c_z|) and Parseval forces
+sum_z c_z^2 = 1, the support obeys S >= (1 - NL/2^(n-1))^(-2): any published
+nonlinearity is a lower bound on Pauli-path cost for *every* circuit computing
+that function, obtained without simulation. The bound is attained exactly at
+both extremes — affine functions (support one) and bent functions (support 2^n,
+flat spectrum) — and we verify the latter end to end, propagating through
+reversible circuits computing an inner product and recovering full support with
+no truncation available. Applied to the AES S-box, whose nonlinearity of 112 at
+n = 8 we reproduce independently, the bound certifies at least 64 Pauli terms
+for any circuit computing an output bit. We note the bound is loose away from
+the extremes, since it uses only the largest coefficient; for the several
+cryptographic families whose complete Walsh spectrum is published, the support
+is determined exactly rather than bounded.
 
 These results are diagnostic, not a simulation speedup: the Walsh transform is
 itself exponential, and nothing here bears on the classical hardness of
@@ -160,7 +170,9 @@ All figures below are **post-bugfix**. Anything citing pre-fix numbers is void.
 | C11 | Walsh gives an exact cost model ~10³× cheaper than the PPS run | **RESTATED** | exact for *final* support; peak is a distinct larger quantity — see C17 |
 | **C17** | Peak ≠ final; permutation-native PPS halves peak exactly and makes it a Walsh quantity | **established** | 2.0× on all 6 instances; `perm_pps.py`, `test_perm_pps.py` |
 | C18 | C15 constancy holds for peak memory | **→ moved to Paper B** | see `ABSTRACT_SHOR_2ADIC.md` |
-| C12 | PPS-hardness ≡ linear-cryptanalysis resistance | **VALIDATED, with caveat** | endpoints exact; modexp at 0.74 of bent bound, stable 15→21q; Parseval relation is a bound (35% over-estimate), tight only for flat spectra |
+| C12 | PPS-hardness ≡ linear-cryptanalysis resistance | **VALIDATED, with caveat** | endpoints exact; Parseval relation is a bound, tight only for flat spectra. NB the 0.74 figure is stable across N at fixed n_exp, **not** across widths (0.50 at n_exp=1) |
+| **C25** | **S ≥ (1 − NL/2ⁿ⁻¹)⁻²**: published nonlinearity ⟹ PPS cost lower bound, compilation-independent | **PROVED + verified** | tight at affine (1) and bent (2ⁿ); AES NL=112 reproduced; bent circuits give full support end-to-end (64/256/1024) |
+| C26 | The bound is weak away from the extremes | **established, must be stated** | AES 64 vs 239 actual; modexp 4 vs 3086. Uses only max\|c\|, discarding the rest of the spectrum |
 | C7 | Results are pre-asymptotic | **REFUTED** → *moved to Paper B* | reached 24q via Walsh: density 0.473→0.498 → ½, slope 1.008 bits/qubit ⟹ Θ(2ⁿ) |
 | C15 | 2-adic structure of r sets cost | **→ moved to Paper B** | see `ABSTRACT_SHOR_2ADIC.md` |
 | C16 | Heavy-tailed spectrum explains the δ non-monotonicity (C14) | **established** | 4 of 15493 coefficients give ⟨O⟩ exactly; the other 15489 sum to zero |

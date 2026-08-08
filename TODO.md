@@ -178,17 +178,27 @@ Cheap, and it paid for itself twice. See `NOTES.md` "C15 REFINED" and
 
 Also raised the controlled design from two moduli to three (N = 5, 7, 21).
 
-## 5. `[ ]` Import actual cryptanalytic results (C12 follow-through)
+## 5. `[x]` Import actual cryptanalytic results — DONE, bound is real but weak
 
-Feed functions with *published* nonlinearity bounds — multiplicative inverse /
-AES S-box core, bent functions — through as reversible circuits. Turns "modexp
-sits at 0.74 of the bent bound" from an observation into a genuine transfer of a
-large existing literature. Highest upside, most speculative.
+See `NOTES.md` §X; file `experiment_crypto.py`.
 
-Also worth building: a **degree ladder** (affine → quadratic → dense) of
-functions with known algebraic degree, as a controlled knob validating the
-sparsity ↔ nonlinearity relation. The adder bits already hint at it
-(b0:1, b1:4, b2:10, b4:46).
+- **C25.** Derived and verified **S ≥ (1 − NL/2ⁿ⁻¹)⁻²** from Parseval. Converts
+  any published nonlinearity into a PPS cost lower bound for *every* circuit
+  computing the function, with no simulation. Tight at both extremes.
+- **Validation.** AES S-box nonlinearity comes out at exactly **112** over all
+  255 nonzero linear combinations — the published constant. An external check on
+  the whole Walsh pipeline.
+- **End-to-end.** Built reversible circuits computing the inner product (bent)
+  and propagated them: support exactly 2^(2m) (64/256/1024), matching the bent
+  prediction. No truncation is available when every coefficient has the same
+  magnitude — the clean worst-case statement.
+- **C26, the honest limit.** Loose away from the extremes: AES bound 64 vs 239
+  actual, modexp 4 vs 3086. NL uses only `max|c|` and throws away the rest of the
+  spectrum. Follow-up worth doing: for crypto families whose **full** Walsh
+  value/multiplicity distribution is published (the AES inverse among them), S is
+  determined *exactly* rather than bounded — a much stronger import.
+- **C12 correction.** The "0.74 of the bent bound" figure is stable across N at
+  fixed n_exp, **not** across widths (0.50 at n_exp=1). Fixed in the abstract.
 
 ## 6. `[ ]` The intermediate 2-adic law
 
@@ -212,6 +222,35 @@ x-register bit being measured plus one exponent qubit. Whether that generalises
 across N, a and observable is untested and would be cheap to check.
 
 ---
+
+## 9. `[ ]` Extend the C15 proof to ANY modexp construction
+
+The proof of C15/C23 uses only that the controlled-multiplier block has the
+**multiply–swap–unmultiply** form: `u_a(ctrl,a) = M(a) ; SWAP ; M(a⁻¹)⁻¹`. At
+a=1 that collapses to `V = A⁻¹SA`, a conjugate of an involution, and everything
+follows. This covers both compilations studied here and any
+Vedral/Beauregard-style construction — but *not* automatically a modular
+exponentiation built some other way.
+
+Question: is the invariance a property of the algorithm or of this circuit
+family? Routes:
+- Survey other modexp constructions (Zalka, Takahashi–Kunihiro, Gidney's
+  windowed/lookup-based arithmetic, Häner–Roetteler–Svore) and check which have
+  a block that is an involution at a=1. Windowed arithmetic in particular does
+  *not* obviously have the multiply–swap–unmultiply shape.
+- Find the weakest sufficient condition. Conjecture: it suffices that the block
+  at a=1 be **any** involution on the full space, since (i)–(iv) never use the
+  internal structure of V beyond V²=id. If so, the theorem generalises to every
+  construction whose a=1 block is self-inverse, which is a much larger class and
+  a cleanly checkable criterion.
+- Failing that, find a construction where the invariance genuinely **fails**.
+  That would be as valuable as generalising it — it would show the effect is
+  compilation-dependent, and would need saying loudly in Paper B, whose current
+  framing implies it is a property of the arithmetic.
+
+Note the conjecture above is cheap to test: take an existing block, replace it
+with a hand-built non-involutive permutation that is still identity on the valid
+subspace, and see whether constancy breaks.
 
 ## Housekeeping
 
