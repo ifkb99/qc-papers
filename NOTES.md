@@ -912,14 +912,71 @@ skeleton is the same n modular additions per multiply whatever w is, the
 lookups reduce to the same net permutation, and the extra qubits w = 3 needs
 are untouched — so it is literally the same function in a bigger space.
 
+### VALIDATED AGAINST THE SOURCE (2026-08-08, after the fact)
+
+`WindowedModExp` was built from a reconstruction of Gidney's construction, not
+from his papers — the single load-bearing unverified premise in this section.
+Now checked against **arXiv:1905.07682 §3.5** (pseudocode `times_equal_exp_mod`)
+and **arXiv:1905.09749 §"windowed arithmetic"**. The model holds, and one claim
+is stated outright in the source.
+
+**C39's mechanism is Gidney's own design rationale, verbatim:**
+
+> *"We can reduce the number of multiplications that are needed by iterating
+> over small windows of the exponent and looking up the corresponding factor to
+> multiply by for each one. **This also removes the need for the
+> multiplications to be controlled, because the table lookup can evaluate to
+> the factor 1 in cases where none of the exponent qubits are set.**"*
+> — 1905.07682 §3.5
+
+and 09749: *"the n_e controlled multiplications we needed to perform become
+n_e/c_exp **uncontrolled** multiplications"*. So the real construction is the
+unconditional-multiply one; `SelectModExp` is precisely what Gidney's design
+avoids. **C37–C39 are about the construction people actually propose to run.**
+
+This is §L2/C32's framing a second time, and stronger: Gidney made the
+multiply uncontrolled to save Toffolis, and that choice — made for a completely
+unrelated reason — is exactly what preserves the β=1 PPS advantage. Nobody
+designed it for that.
+
+**The joint-table simplification is confirmed harmless.** Gidney's lookup is
+indexed jointly, `table[ei, mi]` with entries `(ke·f·2^j) mod N` over
+`ke in kes`. In a tail window every `ke = 1`, so the entries stop depending on
+`ei`: the outer index goes degenerate and the lookup does not read the exponent
+window — regardless of the multiplication window size. That is the argument
+§WD gave from reasoning; it is now checked against the real construction. Our
+`m_window = 1` costs nothing here.
+
+**A detail we did NOT model, and it corroborates C38.** Gidney uses a
+*relabelling* swap (`a, b = b, a`, free at compile time) where we emit a
+physical swap network. It matters for the involution: his block without the
+relabel is `(a,b) → (−b, a+b)`, which squares to `(−(a+b), a)` — **not** an
+involution. Counting the relabel gives `(a,b) → (a+b, −b)`, which does square
+to the identity. So W²=id needs the relabelling included, and our physical-swap
+model captures the right permutation. Better: because the relabelling alternates
+with block count, his code ends with
+
+> `if a is not target: swap(a, b)`
+
+— i.e. the real compiler emits a physical swap **exactly when the block count
+is odd**. C38's 2-periodicity is not an artifact of our modelling; it is
+visible in Gidney's own source.
+
+**The unlookup caveat is correct and now precisely sourced.** Gidney uncomputes
+a lookup by measuring the output qubits in the X basis and repairing the
+resulting phase negations with a smaller fixup lookup (1905.07682, "Uncomputing
+a table lookup"; 1905.09749 cites appendix C of [8]), at √L instead of L
+Toffolis. That is **not unitary**, so C8's Walsh identity does not apply to it
+as written. The logical map is unchanged (deferred measurement), but the object
+PPS would propagate is not the same object. Keep the caveat.
+
 ### Scope limits to carry into Paper B
 
-- The construction windows the **exponent** and multiplies bit-by-bit over x.
-  Gidney also windows the multiplication; that does not affect the argument,
-  since a tail window's tables are constant in j however the multiply is
-  arranged. Not measured, though — stated as reasoning, not as a result.
+- The construction windows the **exponent** and multiplies bit-by-bit over x
+  (m_window = 1). Gidney also windows the multiplication — **checked at source
+  and it does not affect the argument**, see the validation subsection above.
 - The analysis assumes a **unitary** unlookup. Gidney's measurement-based
-  uncomputation is outside it.
+  uncomputation is genuinely outside it, and this is the one real gap.
 - N = 5, 7 at w = 1, 2, 3 and K ≤ 3. The mechanism arguments are exact and
   exhaustive over the state space; the sweeps are two moduli.
 
@@ -977,6 +1034,14 @@ be dead once propagation is finished. It does **not** reduce peak memory (C18)
 as stated. What it does is separate *cost* from *useful work*: at α=2 seven of
 every eight Pauli terms carried are irrelevant to the answer. Whether the dead
 set can be predicted early enough to prune is open and worth asking.
+
+### Reference for the p-biased machinery
+
+O'Donnell, *Analysis of Boolean Functions*, is free on arXiv
+([arXiv:2105.10386](https://arxiv.org/abs/2105.10386)) — **Chapter 8** is the
+p-biased Fourier expansion, which is the proper setting for the dictionary
+above and for anything further in this direction. Use it rather than
+re-deriving.
 
 ### Why §W's negative result was structural, not bad luck
 

@@ -64,12 +64,21 @@ Cite all three; do not let a referee find them first.**
   permutation circuits where the analogy becomes an identity.
 - **Cîrstoiu, "A Fourier analysis framework for approximate classical
   simulations of quantum circuits"**
-  ([arXiv:2410.13856](https://arxiv.org/pdf/2410.13856)) — closest on the name,
-  but checked and genuinely different: harmonic analysis over **U(1)/U(4)**
-  (continuous rotation parameters), **not GF(2)ⁿ**; gives **approximate,
-  truncated** estimates of expectation values with asymptotic guarantees, not
-  exact Pauli-support counts. Must be distinguished explicitly — the titles are
-  close enough that a referee will ask.
+  ([arXiv:2410.13856](https://arxiv.org/pdf/2410.13856)) — closest on the name.
+  Still genuinely different, but **the reason first given here was wrong and is
+  corrected** (2026-08-08, body read): it does *not* require continuous
+  parameters — §II explicitly covers "compact **or finite** groups (or
+  homogeneous spaces)". The real distinction is **what is being transformed**:
+  their circuits are `C(g) = U₁(g₁)W₁ … U_D(g_D)W_D` with the `U_i` forming a
+  representation of a group G, and the function Fourier-analysed is
+  `g ↦ ⟨O⟩_{C(g)}` — the expectation value as a function of **circuit
+  parameters**, over an **ensemble**. Ours is `y ↦ bit_j(perm(y))`, a function
+  of the **input basis state**, for a **single fixed** circuit. Their results
+  are approximate, average-case, mean-square-convergent, and often lean on noise
+  to supply a spectral gap; ours are exact and worst-case. Different domain,
+  different object, different regime. Must still be distinguished explicitly —
+  the titles are close enough that a referee will ask — but distinguish it on
+  *domain*, not on discreteness.
 
 **Net: the claims survive, with narrowed framing.**
 
@@ -414,11 +423,18 @@ cancels it (2^w CNOT contributions into s XOR an even number of times), the
 select design does not (the ancilla gates a block). Confirmed by checking the
 block on the act=0 half-space, where the e1 dependence vanishes.
 
-**Scope limits to state in Paper B.** The construction windows the exponent and
-does the multiply bit-by-bit over x; Gidney also windows the multiplication,
-which does not affect the argument (a tail window's tables are constant in j
-however the multiply is arranged). The analysis assumes a **unitary** unlookup;
-Gidney's measurement-based uncomputation is outside it.
+**VALIDATED AT SOURCE** (arXiv:1905.07682 §3.5, arXiv:1905.09749). C39's
+mechanism is Gidney's own stated rationale — *"this also removes the need for
+the multiplications to be controlled, because the table lookup can evaluate to
+the factor 1 in cases where none of the exponent qubits are set"* — so C37–C39
+describe the construction people actually propose. The joint `table[ei, mi]`
+indexing we simplified away is confirmed harmless (in a tail window every
+ke = 1, so the outer index goes degenerate). His *relabelling* swap, which we
+modelled as a physical swap, turns out to be what makes the block an involution
+at all, and his `if a is not target: swap(a, b)` line is C38's 2-periodicity
+appearing in the real compiler. **Remaining real gap:** the analysis assumes a
+**unitary** unlookup; Gidney's measurement-based uncomputation is not unitary,
+so C8 does not apply to it as written.
 
 ## 12b. `[x]` Is the recurring GF(2) linear/nonlinear pattern one theorem?
 
@@ -506,6 +522,15 @@ so only r changes) and see whether memory keys on β. Mostly integration work,
 no new theory.
 
 ## 14. `[ ]` Through the inverse QFT — the frontier of the exact model
+
+> **Cîrstoiu checked and it does NOT help here** (2026-08-08, body read). It was
+> pulled specifically on the guess that a mixed GF(2)^t × Z/2^t character basis
+> would bring it into range. It does not: their group indexes **circuit
+> parameters** and their results are about **ensembles** of circuits, and Shor's
+> circuit is fixed with no free parameters — there is no ensemble to average
+> over. Useful for framing (Pauli-path methods as harmonic analysis on a group,
+> which strengthens Paper A's "the analogy becomes an identity" positioning),
+> not for the technical problem. Do not re-pull it for this.
 
 Highest risk, highest reach; a Paper C candidate. Everything so far stops
 where the identity stops (F10: X/Y pullbacks leave the diagonal and blow up),
