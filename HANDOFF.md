@@ -16,7 +16,17 @@ exact cost model where the field currently uses empirical extrapolation. Paper B
 (`ABSTRACT_SHOR_2ADIC.md`): applied to modular exponentiation, cost is governed
 by the 2-adic structure of the multiplicative order r; writing r = β·2^α with β
 odd, cost is independent of exponent-register width when β=1 and Θ(2ⁿ)
-otherwise. Twelve of fifteen TODO items are closed. **One live thread**, below.
+otherwise. Thirteen of fifteen TODO items are closed. **One live thread**, below.
+
+> **2026-08-08, TODO 12 (windowed arithmetic) closed — and it corrected a
+> claim.** C29 said "V²=id is the entire condition". That is **not
+> sufficient**: `windowed_arith.SelectModExp`'s identity-tail block satisfies
+> V²=id exhaustively and still loses the invariance, because it is gated on
+> OR(window) rather than on a single qubit. Repaired criterion (C36): the
+> block's dependence on the exponent register must be **affine**. Gidney-style
+> table lookup passes, and more strongly than expected — the tail goes *dead*
+> (C37) rather than surviving through a parity bit as in C24 — but the cost is
+> **2-periodic, not exactly constant** (C38). See `NOTES.md` §WD.
 
 ---
 
@@ -88,6 +98,10 @@ destroyed, and it is unidentified.**
   modified reductions while preserving correctness (now `lab.variants`).
 - `perm_pps.py` — permutation-native propagation, ~10× faster than
   rotation-level, with `delta` and `max_weight` truncation.
+- `windowed_arith.py` — the two windowed modexp constructions (`WindowedModExp`
+  table-lookup, `SelectModExp` select-multiply with the `skip_zero` knob), plus
+  `replay` (single-basis-state image, for circuits too wide to hold a
+  permutation array) and `verify_modexp`. Gated by `test_windowed.py`.
 
 ---
 
@@ -99,9 +113,10 @@ uv run python test_core.py          # correctness gate — run first, always
 uv run python test_claims.py        # headline results, pinned to logged numbers
 ```
 
-All seven suites must pass before trusting anything:
+All eight suites must pass before trusting anything:
 `test_core`, `test_modexp`, `test_toffoli_arith`, `test_walsh`,
-`test_perm_pps`, `test_lab` (engine vs historical numbers), `test_claims`
+`test_perm_pps`, `test_windowed` (the windowed constructions and their
+tail-block structure), `test_lab` (engine vs historical numbers), `test_claims`
 (executable reproductions of the CLAIMS.md headline rows).
 
 **Traps that will bite immediately:**
@@ -187,10 +202,12 @@ Logged in full in `NOTES.md`; listed here so a fresh session does not burn time.
   at the extremes (AES: bound 64, actual 239). For crypto families whose *full*
   Walsh value/multiplicity distribution is published, S is determined **exactly**
   rather than bounded — a much stronger import.
-- **Does windowed / table-lookup arithmetic satisfy the involution criterion?**
-  The C15 theorem now covers any construction whose a=1 block is an involution
-  (V²=id is the entire condition). Gidney-style windowed arithmetic is the
-  natural test; it is a well-posed question, not a survey.
+- ~~Does windowed / table-lookup arithmetic satisfy the involution criterion?~~
+  **Closed 2026-08-08 — see the box at the top and `NOTES.md` §WD.** The
+  answer forced C29 to be narrowed and produced C36–C39. What it leaves open:
+  the cost is 2-periodic rather than constant, and nothing here says whether
+  that survives Gidney's *measurement-based* unlookup, which is not unitary and
+  so is outside every argument in this project so far.
 - **Yao.jl source-level check.** Closed as far as possible without installing
   it; its docs list Toffoli under "Clifford Gates: Two-qubit gates", wrong on
   both counts. Low value.

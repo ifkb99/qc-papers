@@ -666,6 +666,16 @@ exact ¾ density cap; the quadrant {z_msb=1, z_anc=0} is exactly empty.
 
 ## G — THE THEOREM GENERALISES (TODO step 9). V²=id is the whole condition.
 
+> **PARTIALLY SUPERSEDED 2026-08-08 by §WD (TODO 12).** The heading overstates.
+> V²=id is the whole condition *among block families of the form tested here* —
+> each block controlled on its own fresh qubit. It is **not sufficient in
+> general**: `windowed_arith.SelectModExp`'s identity-tail block satisfies
+> V²=id exhaustively and still loses the invariance, because it is gated on
+> OR(window) rather than on a single qubit. The second hypothesis of the
+> theorem below ("controlled on its own qubit") is load-bearing and was
+> invisible at step 9 because every block tested there had exactly one control.
+> The repaired criterion is in §WD. C29 is regraded accordingly in `CLAIMS.md`.
+
 The C15 proof was stated for the multiply–swap–unmultiply construction. But
 re-reading it, steps (i)–(iv) never use V's internals beyond **V² = id** —
 "identity on the valid subspace" was context for *why* `a^(2^i)=1` produces such
@@ -707,6 +717,12 @@ is a property one can check of a given construction rather than a family one has
 to belong to. Multiply–swap–unmultiply satisfies it because `A⁻¹SA` is a
 conjugate of a product of disjoint transpositions.
 
+> **Correction (§WD).** The criterion as stated in this paragraph is
+> **necessary but not sufficient**. It must also require that the block's
+> dependence on its control qubits is *affine* — satisfied trivially by "one
+> fresh control qubit" (the identity function) and by "no control at all" (a
+> constant function), violated by OR. See §WD.
+
 Worth checking against windowed / table-lookup arithmetic (Gidney-style), where
 the a=1 block is not obviously self-inverse — that is now a well-posed question
 rather than an open-ended survey.
@@ -720,6 +736,401 @@ pullback was unchanged for a trivial reason — both the involution *and* the
 fail**. Fixed by making the blocks act on x0 and adding an explicit vacuity
 check (k=0 vs k=1 must differ). Without the must-fail control the vacuous test
 would have "confirmed" the conjecture for the wrong reason.
+
+## WD — TODO 12: WINDOWED ARITHMETIC. The criterion was incomplete.
+
+`windowed_arith.py`, `test_windowed.py`, `experiments/experiment_windowed.py`.
+All predictions declared before the sweeps; two must-fail controls, both failed
+as required.
+
+### The question, and why it had a trap in it
+
+Step 9 (§G, C29) reduced Paper B's scope caveat to "the a=1 block is an
+involution". TODO 12 asked whether Gidney-style windowed / table-lookup
+arithmetic qualifies. **It does — and so does a construction that loses the
+invariance completely.** The criterion as stated does not discriminate.
+
+Windowing consumes w exponent bits per block, and there are two natural ways:
+
+- **LOOKUP** (`WindowedModExp`, Gidney-style). Always look up
+  `T[j] = a^(j·2^(kw)) mod N` into a scratch register, always multiply x by the
+  looked-up *register*, always unlook it up.
+- **SELECT** (`SelectModExp`, `skip_zero=True`). Apply the constant multiplier
+  `u_a(a^(j·2^(kw)))` controlled on `[window == j]`, **skipping j = 0** because
+  multiplying by 1 does nothing. At w = 1 this is exactly `ToffoliModExp`.
+
+Both compute `a^e mod N` with every scratch qubit returned to |0⟩ (checked for
+all exponents at N = 5, 7, 9, w = 1, 2, 3; cross-checked against the state
+vector and against the unrelated `ToffoliModExp` on the valid subspace).
+
+In the identity tail (`a^(2^(kw)) = 1`, i.e. every window past α when β = 1):
+
+```
+                       tail block   V² = id   reads the window?   gated on
+  LOOKUP               nontrivial   YES       NO                  (constant)
+  SELECT skip_zero=T   nontrivial   YES       YES                 OR(window)
+```
+
+Exhaustive over the whole state space at N=5 a=4 (`test_windowed.py` [D]/[E]):
+LOOKUP moves 458752 of 524288 states, V²=id, and `V_j` is the *same*
+permutation for all four window values including j = 0. SELECT moves 28672 of
+65536, V²=id, and `V_0 ≠ V_1 = V_2 = V_3` — i.e. the block is V gated on
+OR(window). Control: a **live** window block does read its window, so the
+independence result is not vacuous.
+
+### C36 — the repaired criterion
+
+> **V² = id is necessary but NOT sufficient.** C29's other hypothesis — each
+> block controlled on **its own qubit** — is load-bearing. The general
+> condition is that the identity-tail block's dependence on the exponent
+> register be **affine**: the identity function (one fresh control qubit, the
+> standard construction) or a constant function (no control at all, the lookup
+> construction) both qualify; **OR is nonlinear and does not.**
+
+Step 9 could not see this because every block it tested had exactly one
+control, where the two hypotheses coincide. §G is annotated accordingly.
+
+This is the same linear/nonlinear dichotomy that runs through §L2 (a linear
+wrap leaves the ½ structure intact, a nonlinear one destroys it) and §AF/§RS,
+now appearing one level up — in how a block reads its controls rather than in
+how it mixes its data.
+
+### C37 — LOOKUP: the tail is not merely constant, it is DEAD
+
+Because the tail table is all-ones, the QROM permutation is `s ^= 1` regardless
+of j, so the tail block never reads its window qubits at all. Predicted before
+measuring: the pullback is *constant* in every tail exponent bit, so the Walsh
+support is confined to `z_exp` supported on bits `{0 … α−1}` only.
+
+```
+  lookup design, live exponent bits in the support   (predicted, then measured)
+    N=5 a=4  r=2  α=1   ->  [0]      K=1 |S|=62680    K=2 |S|=28078
+    N=7 a=6  r=2  α=1   ->  [0]      K=1 |S|=62570    K=2 |S|=13563
+    N=5 a=2  r=4  α=2   ->  [0,1]    K=1 |S|=252111   K=2 |S|=56867
+```
+
+**This is a strictly sharper confinement than C24, and the two are directly
+distinguishable.** C24 says the standard construction's support *contains* the
+all-ones-on-tail vector `1_I` — the tail is alive, through one parity bit. The
+lookup design contains **no z with any tail bit set at all**. Measured at the
+same modulus and base (N=5, a=4): standard has `1_I` present; lookup has zero
+tail bits present. Same logical map, opposite support geometry in the exponent.
+
+### C38 — the invariance survives, but 2-periodic, not exactly constant
+
+The tail applies the fixed involution W **unconditionally**, so the circuit is
+`W^K ∘ P_live` and depends on K only through its parity.
+
+```
+  |support| vs tail-window count K (w = 2)
+    N=5 a=4 (β=1)    28078   62680   28078   62680     2-periodic
+    N=7 a=6 (β=1)    13563   62570   13563   62570     2-periodic
+    N=7 a=3 (β=3)    84827 1009765 4156585    --       CONTROL: grows
+```
+
+Stronger than equal counts: at N=5 a=4 the K=0 and K=2 support **sets are
+identical** after dropping the dead tail coordinates — the same function, not
+merely the same size. Density falls to zero (0.054 → 0.030 → 0.0033 → 0.0019)
+while the β=3 control climbs to the generic ~½ (0.162 → 0.481 → 0.496).
+
+So Paper B's headline survives windowing — cost independent of exponent-register
+width when β = 1 — but for this construction it must be stated as **bounded and
+2-periodic**, not as the exact constant C24 gives. The two values differ by
+2.2× (N=5) and 4.6× (N=7).
+
+### C39 — the cause is the multiply-by-1 branch, not the window
+
+The decisive control is **w = 1**, where there is no window at all, yet the
+lookup form still writes `T[0] = T[1] = 1` and multiplies unconditionally.
+Predicted before measuring: the tail should still be dead. It is —
+N=5 a=4, w=1, K=3: live exponent bits `[0]`, |S| = 62680 (the odd-K value).
+So the effect is not "consume several exponent bits at once"; it is
+**emitting the multiply-by-1 branch instead of optimising it away.**
+
+### SELECT: skipping j = 0 forfeits the 2-adic advantage entirely
+
+```
+  |support| vs K, select design, β = 1
+    N=5 a=4    32123  128981  515526  2061438     ×4.02 ×4.00 ×4.00
+    N=7 a=6    32098  128956  515388  2060884     ×4.02 ×4.00 ×4.00
+```
+
+Exactly **×4.00 = 2^w per window**, which is the derived rate: the tail
+dependence runs through `⊕_k OR(window_k)`, and OR of w bits has Walsh sparsity
+2^w. In density terms the support is pinned at **0.491–0.492 at every K** —
+that is C30's ½ linear-structure cap, i.e. the *generic* β>1 behaviour. So
+select-multiply windowing does not merely weaken the β=1 saving, it **removes
+it**: a free instance is put onto the same Θ(2^n_exp) curve as a generic one.
+
+Framing worth keeping, and it is the mirror image of §L2/C32: there the
+standard reduction was *accidentally cheap*; here the standard practice of
+skipping a trivial branch would be *accidentally expensive*. Both are
+compilation choices that leave the computed function untouched.
+
+### Putting the j = 0 branch back — the sharpest number in the section
+
+`SelectModExp(skip_zero=False)` emits the multiply-by-1 branch. In the tail all
+2^w branches are then the *same* block u_a(·,1) and exactly one fires for any
+window value, so the block degenerates to an uncontrolled V. Predicted before
+measuring; the flatness half confirmed exactly:
+
+```
+  |S| vs K, select design, N=5 a=4, beta=1
+    skip_zero=True    32123   128981   515526   2061438      x4.00 per window
+    skip_zero=False   32056    32075    32056     32075      2-periodic, flat
+    N=7 a=6, False    32024    32072    32024     32072      2-periodic, flat
+```
+
+**64× at K=3, and the gap grows as 4^K without bound — from adding a branch
+that computes nothing.** Same arithmetic, same qubit count, same everything a
+compiler would report.
+
+### An honest split: half of P5 was refuted, and the refutation was useful
+
+P5 was a conjunction — "2-periodic **and** tail bits dead". The first held; the
+second **failed**: the live window's other bit (e1) stays in the support, where
+α = 1 predicts only e0. Not waved away:
+
+> The **activation ancilla is itself a scratch qubit**, and the pullback ranges
+> over all its values. In the LOOKUP design every branch contributes a CNOT
+> into s, so the 2^w contributions XOR the ancilla an even number of times and
+> it cancels. In SELECT the ancilla *gates* a block, so it does not.
+
+Checked directly on window 0 at N=5 a=4, where the multiplier depends only on
+e0: the select block is **not** independent of e1 in general but **is**
+independent of e1 on the act = 0 half-space; the lookup block is independent
+everywhere. So the refuted half is an ancilla artifact of this particular
+activation scheme, not a failure of the mechanism — and it is a reminder that
+in this project the pullback sees scratch qubits in every state, which is the
+same fact that made the LOOKUP/SELECT distinction exist at all.
+
+### Consistency worth noting: |S| does not depend on w
+
+At matched tail-block parity the lookup design gives **62680 at w = 1, 2 and
+3** (21, 21 and 24 qubits). Not a coincidence and not a bug: the arithmetic
+skeleton is the same n modular additions per multiply whatever w is, the
+lookups reduce to the same net permutation, and the extra qubits w = 3 needs
+are untouched — so it is literally the same function in a bigger space.
+
+### Scope limits to carry into Paper B
+
+- The construction windows the **exponent** and multiplies bit-by-bit over x.
+  Gidney also windows the multiplication; that does not affect the argument,
+  since a tail window's tables are constant in j however the multiply is
+  arranged. Not measured, though — stated as reasoning, not as a result.
+- The analysis assumes a **unitary** unlookup. Gidney's measurement-based
+  uncomputation is outside it.
+- N = 5, 7 at w = 1, 2, 3 and K ≤ 3. The mechanism arguments are exact and
+  exhaustive over the state space; the sweeps are two moduli.
+
+## BI — BIASED INPUTS (Gangopadhyay–Kumar–Stănică–Gangopadhyay, JAMC 2023)
+
+Paper dropped in the repo root:
+`Stability-of-the-Walsh-Hadamard-spectrum-of-cryptographic-Boolean-functions-with-biased-inputs.pdf`
+(J. Appl. Math. Comput. 69:3337–3357, 2023). Read; two things in it are
+directly ours, one is a warning, and one earlier negative result of ours now
+has a principled explanation.
+
+### The dictionary — their biased inputs ARE our biased input STATES
+
+They study `W_f^{(1+ε)}(u) = Σ_x (1+ε)^{wt(x)} (−1)^{f(x)⊕u·x}`, the WHT when
+inputs are i.i.d. Bernoulli(½+δ), and define the **stability transform**
+`S_f(u) = Σ_x wt(x)(−1)^{f(x)⊕u·x}` as its first-order term in ε.
+
+In our setting the same object appears for a completely different reason. For a
+**product input state** `⊗_i (cos θ_i|0⟩ + sin θ_i|1⟩)` we have
+`⟨Z^z⟩ = ∏_{i∈z} δ_i` with `δ_i = cos 2θ_i`, so
+
+> **⟨O⟩ = Σ_z c_z ∏_{i∈z} δ_i**
+
+— the PPS expectation is exactly a δ-biased evaluation of the Walsh spectrum,
+graded by wt(z). **Verified numerically**: random product state, N=7 a=6
+n_exp=3, 16 qubits — direct statevector 0.133418110567 vs the weighted Walsh
+sum 0.133418110567, err 8.2e-14. So their whole framework is "PPS with a biased
+product input", and their stability spectrum is the sensitivity of a PPS
+estimate to input-state bias. Their δ = 0 is our maximally-mixed direction and
+δ = 1 is the computational basis.
+
+### C42 — for the REAL Shor input, most of the support is dead weight
+
+Shor's initial state puts the exponent register in |+⟩, i.e. **δ = 0 on those
+qubits**, so *every* z with any exponent-register support contributes **exactly
+zero** to ⟨O⟩. Combined with C24 (`z_I ∈ {0, 1_I}` on the tail, exp bits below α
+free) this predicts a useful fraction of exactly **2^−(α+1)**. Derived, then
+measured:
+
+```
+  N=7 a=6  α=1   n_exp=2,3,4:  |S|=15549   dead 75.03%   useful 3883
+  N=5 a=4  α=1   n_exp=2,3,4:  |S|=15509   dead 74.99%   useful 3879
+  N=5 a=2  α=2   n_exp=2:      |S|=15493   dead 75.00%   useful 3873
+  N=5 a=2  α=2   n_exp=3,4:    |S|=32143   dead 87.51%   useful 4014
+```
+
+75% at α=1 and 87.5% at α=2 = 1 − 2^−(α+1), and the α=2 row **jumps exactly at
+n_exp = 3 = α+1**, reproducing C21's onset from an independent direction. The
+useful count is itself constant in n_exp, so C15 holds for useful work as well
+as for total cost.
+
+**Honest limit — this is not a free speedup.** PPS propagates the observable
+backwards and only meets the input state at the end, so a term is only known to
+be dead once propagation is finished. It does **not** reduce peak memory (C18)
+as stated. What it does is separate *cost* from *useful work*: at α=2 seven of
+every eight Pauli terms carried are irrelevant to the answer. Whether the dead
+set can be predicted early enough to prune is open and worth asking.
+
+### Why §W's negative result was structural, not bad luck
+
+§W concluded that weight truncation is the wrong knob while δ (magnitude)
+truncation is exactly right. Their **Theorem 10** gives the reason: the
+S-spectrum is covariant only under **weight-preserving orthogonal** A, and they
+exhibit a counterexample showing it is **not invariant under extended affine
+equivalence**. Hamming weight is not an affine invariant; the Walsh support and
+|c_z| are. So a weight-graded truncation is basis-dependent by construction,
+whereas everything else in this project (C8, C40, the PPS cost model) is affine
+covariant. §W's failure was forced.
+
+Their grading is on wt(x) and ours on wt(z), but the transform swaps the two
+sides and the argument is the same either way. Ties directly to §GF: affine
+structure is what the Walsh basis respects, and weight is not part of it.
+
+### What it does NOT give us
+
+No cost model, no permutation circuits, no connection to the 2-adic story.
+Their results are about bent and symmetric functions (Theorem 4's bound
+|S_f(u)| ≤ (n/2)2^{n/2}, Maiorana–McFarland stability, symmetric
+classifications) — none of which our pullbacks are. Cite it for the biased-input
+dictionary and for Theorem 10; do not lean on it for anything else.
+
+## GF — THE RECURRING GF(2) PATTERN: one fact, two corollaries, one folklore gap
+
+`experiments/experiment_gf2law.py`. Prior art checked at source first; the
+derivation was done before any measurement; 7/7 checks pass with two must-fail
+controls failing as required.
+
+### The question
+
+Three results here have the same shape — affine ingredients are free, nonlinear
+ones are expensive: §L2/C30–C32 (linear structure ⟹ ½ cap; a linear wrap is
+harmless, a Toffoli destroys it), §RS/C34 (one nonlinear monomial demotes it to
+a *conditional* structure, ¾ cap), §WD/C36 (affine block control keeps C15,
+OR does not). Is that one theorem?
+
+### The answer: one FACT, two corollaries — and one of them was already textbook
+
+The fact is the defining property of the transform: **the Walsh characters of
+GF(2)ⁿ are exactly the affine functions**, so `(−1)^affine` is a *single*
+coefficient and anything nonlinear is spread. Two distinct corollaries:
+
+**(a) Affine symmetry confines the support.** This is **classical and we must
+cite it, not claim it.** Carlet, *Boolean Functions for Cryptography and Coding
+Theory*, **Proposition 29**: *"The derivative D_e f equals the null function
+(resp. function 1) if and only if supp(W_f) is included in {0ⁿ, e}^⊥ (resp. in
+its complement)."* That is C30 (linear structure ⟹ hyperplane ⟹ density ≤ ½)
+and C33 (affine structure ⟹ the opposite coset) verbatim. Functions whose Walsh
+support is an affine subspace are Carlet's **partially bent** functions.
+
+**(b) Affine gating costs one Walsh coefficient.** If a circuit's dependence on
+a register runs through a gating function φ, that register contributes a factor
+`1 + |supp(φ̂)|` to the support. φ affine ⟹ φ̂ is a single character ⟹ factor 2
+(C24's `z_I ∈ {0, 1_I}`); φ = OR of w bits ⟹ 2^w coefficients ⟹ factor 2^w per
+window. §WD measured **exactly ×4.00 at w = 2**. Same fact, different place.
+
+### C40 — the conditional law (the piece with no citation found)
+
+Derived before measuring. Let a coset partition split F₂ⁿ into cells H_u, and
+suppose f restricted to H_u has linear structure w_u. Decomposing the transform
+over the partition, `c_z = 2⁻ⁿ Σ_u (−1)^{u·z_C} A_u(z')` and Proposition 29
+kills `A_u(z')` whenever `w_u·z' = 1`. Hence
+
+> **supp(f̂) ∩ E = ∅ for E = {z : w_u·z = 1 for every u}**, so
+> **density ≤ 1 − 2^−d with d = dim span{w_u}** — when that system is
+> consistent.
+
+```
+  planted, n=14                cells   d  |E|    cap     density  violations
+    no conditioning (C30 form)     1   1  8192  0.5000   0.4919      0
+    2 cells SHARING one w          2   1  8192  0.5000   0.5000      0
+    2 cells, independent w         2   2  4096  0.7500   0.7466      0
+    4 cells, independent w         4   3  2048  0.8750   0.8649      0
+```
+
+**This corrects §RS.** The conjectured "1 − 2^−(k+1) ladder" is the wrong
+parametrisation: the cap is set by the **span dimension of the per-cell
+structures**, not by the conditioning depth. Two cells *sharing* a structure
+give d = 1 and a ½ cap (measured 0.5000), not ¾. The ladder is only the special
+case where each new level contributes one new independent vector.
+
+### C41 — consistency is a PARITY condition, and it can destroy the cap
+
+The system `{w_u·z = 1}` is solvable iff every linear dependency among the w_u
+has **even** support. An odd dependency (`w_0 ⊕ w_1 ⊕ w_2 = 0` forces
+`1⊕1⊕1 = 1 ≠ 0`) makes E empty and the cap vanishes entirely.
+
+```
+  4 cells, ODD dependency    d=2  consistent=False  |E|=0     density 0.9845
+  4 cells, EVEN dependency   d=3  consistent=True   |E|=2048  density 0.8671  (cap 0.8750)
+```
+
+Same cell count, same construction, caps 1.0 vs 0.875 **purely from the parity
+of a dependency**. This was the must-fail control and it failed as required.
+
+### P4 — the project's own numbers are instances
+
+Read off the real v4 modexp (N=5, a=2, wrap `msb_t0_anc`): the t0=0 slice has
+structure msb⊕anc, the t0=1 slice has msb. They span d = 2, so
+`E = {z : z_msb⊕z_anc = 1 and z_msb = 1} = {z_msb=1, z_anc=0}` — **exactly the
+quadrant C34 found empty** (counts 7454 / 8032 / **0** / 7978), cap ¾, measured
+density 0.7161. C30 is the m = 0, d = 1 case. So C34's mechanism is not special
+to modexp; it is this law with d = 2.
+
+### Scope, and the honest altitude
+
+- **Affine invariance tested, not asserted** (P5): under a random GF(2) change
+  of basis the cells become cosets of a generic subspace, the structures
+  transform to L⁻¹w_u, the per-cell structures still hold pointwise, E is still
+  exactly avoided, and |support| is unchanged. So the law covers arbitrary
+  subspace partitions, not just coordinate-aligned ones.
+- **This is a COROLLARY of textbook material**, not a deep theorem: Proposition
+  29 plus the standard coset decomposition of the Walsh transform. We did not
+  find the combination stated and it may be folklore. The contribution is
+  recognising that this project's density caps are all instances of it, plus
+  the parity condition.
+- **PRIOR ART — checked as far as open access allows; residual risk low but
+  not zero.** The paywalled item is Carlet–Tarannikov, *Covering sequences of
+  Boolean functions and their cryptographic significance*, DCC 25:263–279
+  (2002) = ref [326] of Carlet's book. Its **body was not read**. What was
+  checked instead, all legitimately:
+  - **Carlet's own book** — the comprehensive modern survey *by the same
+    author*, which cites [326] on pp. 205, 206, 319 and reproduces its
+    definitions and its Walsh characterisation (Def. 47, Prop. 60). §5.5 was
+    read in full. A covering sequence is a **single global** sequence λ with
+    `Σ_a λ_a D_a f(x)` constant; **partial** covering sequences (ref [231])
+    relax that to two levels on a set and its complement. Ours has a
+    **different structure vector per cell**, which is neither — no single λ
+    reproduces it. The book does not state C40.
+  - **The paper's abstract**, from Carlet's own publications page: its
+    contributions are characterisations of balancedness / correlation immunity
+    / resiliency, subclasses of resilient functions, and degree and
+    nonlinearity bounds. None is a per-cell support-confinement law.
+  - **No self-archived preprint** exists on the author's page; there is no
+    legitimate free copy of the body that was found.
+  - **Adjacent and worth citing anyway: Maiorana–McFarland** (book §5.1.1) —
+    functions whose restrictions to each coset of a subspace are **affine**,
+    whose support is confined by the image of φ. Same *flavour* (structure on
+    cells constrains the support), different hypothesis (affine restriction,
+    far stronger than a linear structure) and different conclusion.
+
+  Net: C40/C41 may still be folklore, and remain an easy corollary of
+  Proposition 29 plus the coset decomposition — that is the altitude to claim
+  them at. But "covering sequences already contains this" now looks unlikely.
+
+### Why this is worth having
+
+It converts density measurement into density *prediction*. Given a construction,
+find the per-cell structures, take the span, check the dependency parities, and
+the cap follows without simulating anything — and it says which modifications
+can possibly help: only ones that add an independent structure vector, or that
+introduce an odd dependency.
 
 ## AF — TODO 11.1: AFFINE structures, and the function-level ½ rows EXPLAINED
 
@@ -830,6 +1241,16 @@ N=7 a=6 has support exactly **23488 at n_exp = 2, 3, 4**. The ~51% penalty
 does not forfeit the free exponent register. Claim C35.
 
 ### The ladder, and corrections to C32's framing
+
+> **CORRECTED 2026-08-08 by §GF (C40/C41).** The ladder below is the wrong
+> parametrisation. The cap is **1 − 2^−d with d = dim span{per-cell
+> structures}**, plus a **parity condition** on dependencies among them — not
+> a function of the conditioning depth k. Two cells *sharing* a structure give
+> d = 1 and a ½ cap, not ¾; and an odd dependency removes the cap entirely at
+> unchanged d. The k = 0, 1 rows below are right for the reason §GF gives
+> (d = 1 and d = 2), and the "two independent monomials → no forced cap" row is
+> most likely the parity case, not a larger d. Also: the linear→hyperplane step
+> is Carlet's **Proposition 29**, classical — cite it.
 
 baseline: cap ½ (proved, L2) → one monomial: cap ¾ (this section) → two
 independent monomials: no forced cap (0.98 measured). The pattern
@@ -1791,6 +2212,19 @@ Things believed and then killed, in order. Keep adding to this.
 - F7 "Walsh sparsity is the driver, compilation sets the ceiling" — half right.
   Walsh sparsity is exactly the driver (F9), but there is no separate
   compilation ceiling; the apparent one was an ancilla-count confound.
+- C29 "V²=id is the entire condition" (§G, TODO 9) — **over-claimed, narrowed
+  by §WD.** Not wrong about anything it tested; wrong about what it had tested.
+  Every synthetic block in step 9 was controlled on exactly one fresh qubit, so
+  the experiment could not separate "V is an involution" from "the control is a
+  single qubit". `SelectModExp` has the first and not the second, and loses the
+  invariance. **The generalisation was stated at the altitude of the proof
+  sketch rather than of the evidence** — the proof genuinely uses only V²=id
+  *given* the block form, and that conditional got dropped in the write-up.
+- P5 (TODO 12) "restoring the j=0 branch makes the tail dead" — **half
+  refuted, and the half that failed was informative.** Support flatness held
+  exactly; the dead-bit half failed because the activation ancilla is itself a
+  scratch qubit the pullback ranges over. Logged rather than re-scoped; the
+  diagnosis is in §WD and is now a check in `experiment_windowed.py`.
 
 **Lessons, in order of how much they cost:**
 1. The toy sandwich (H → adder → QFT) is not a proxy for Shor. Use `modexp.py`.
@@ -1804,6 +2238,18 @@ Things believed and then killed, in order. Keep adding to this.
    `longdouble` as in `float64` ⟹ it is a bug, full stop.
 5. Matched-instance A/B needs matched *qubit counts*, not just matched logical
    function.
+6. **State a generalisation at the altitude of the evidence, not of the proof
+   sketch.** C29 said "V²=id is the entire condition" on the strength of blocks
+   that all had exactly one control. When every instance you tested shares an
+   incidental property, that property is a *hypothesis you did not vary* — list
+   it before generalising. The cheap check is to ask what the must-fail control
+   would have to look like to break the clause you are about to drop; here it
+   was "a block with V²=id and a non-affine control", which took an afternoon
+   to build and refuted the claim immediately.
+7. **The pullback sees scratch qubits in every state, not just |0⟩.** Two
+   constructions identical on the valid subspace can differ completely in Walsh
+   support — that is the whole content of §WD, and it is also what refuted half
+   of P5. Reason about the permutation on the *full* space, always.
 
 ---
 
@@ -1837,6 +2283,10 @@ perm_pps.py      permutation-native PPS: X/CNOT/Toffoli as atomic gates,
 walsh.py         classical_permutation, FWHT, pullback_coefficients,
                  walsh_sparsity, is_affine, permutation_via_statevector
 toffoli_arith.py Toffoli-compiled modexp (Cuccaro + add/sub-N reduction)
+windowed_arith.py windowed modexp (§WD): WindowedModExp = table lookup +
+                 register multiply; SelectModExp = select-multiply with the
+                 skip_zero knob; replay()/verify_modexp() gate correctness on
+                 circuits far too wide for a permutation array
 pauli.py         symplectic algebra, rotation rule
 circuits.py      Circuit (σ,θ list), gate decomps, Cuccaro adder, QFT+swaps,
                  cswap/ccphase/inverse, brickwork

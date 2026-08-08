@@ -369,14 +369,118 @@ Left open (logged in §RS): the live quadrants sit at 0.91–0.98, below the
 generic ~0.995 — a smaller, deeper deficit, presumably further conditional
 levels. The general 1 − 2^−(k+1) ladder is a conjecture, not claimed.
 
-## 12. `[ ]` Windowed / table-lookup arithmetic: apply the involution criterion
+## 12. `[x]` Windowed / table-lookup arithmetic — DONE, and it corrected C29
 
-Step 9 reduced Paper B's scope caveat to a checkable condition: the theorem
-covers any construction whose a=1 block satisfies V² = id. Gidney-style
-windowed arithmetic is what people actually propose to run on hardware, and
-whether it qualifies is the first question a referee will ask. Build a minimal
-windowed modexp block, check V² = id, and either extend the theorem's coverage
-or state the sharp boundary. Well-posed and publishable either way it lands.
+**The criterion was incomplete, and this is the item that found it.** See
+`NOTES.md` §WD; files `windowed_arith.py`, `test_windowed.py`,
+`experiments/experiment_windowed.py`. Claims C36–C39; C29 regraded to NARROWED.
+
+The literal question has a yes answer that turns out not to decide anything:
+**both** windowed designs satisfy V² = id exhaustively, and one of them loses
+the invariance completely. So V²=id does not discriminate.
+
+- **C36, the repaired criterion.** C29's *other* hypothesis — each block
+  controlled on **its own qubit** — is load-bearing. The general condition is
+  that the identity-tail block's dependence on the exponent register be
+  **affine**: identity (one fresh control) or constant (uncontrolled) qualify,
+  OR does not. Step 9 could not see this because every block it tested had
+  exactly one control, where the two hypotheses coincide.
+- **C37, lookup (Gidney-style) is covered, and more strongly than expected.**
+  The tail table is all-ones, so the QROM permutation is `s ^= 1` regardless of
+  j and the block never reads its window. The tail is **dead**, not merely
+  constant: support confined to exponent bits {0…α−1}, verified 3/3 with α =
+  1,1,2. Directly distinguishable from C24, which says the standard
+  construction's support *contains* the all-ones-tail vector — same modulus and
+  base, opposite geometry.
+- **C38, the honest caveat.** Cost is **bounded and 2-periodic** in the
+  tail-window count, not the exact constant C24 gives, because the tail applies
+  W unconditionally and W²=id. 28078/62680/28078/62680 at K=0..3; K=0 and K=2
+  support **sets identical**. Control β=3 grows.
+- **C39, the cause is not windowing.** At w=1 — no window at all — the lookup
+  form still has a dead tail. The difference is **emitting the multiply-by-1
+  branch instead of optimising it away**. Skipping it (`SelectModExp`) grows
+  **exactly ×4.00 = 2^w per window**, the derived rate (OR of w bits has Walsh
+  sparsity 2^w), with density pinned at C30's ½ cap — i.e. a β=1 instance is
+  put onto the generic β>1 curve. Mirror image of C32: there the standard
+  reduction was accidentally cheap, here standard practice would be
+  accidentally expensive.
+
+**A prediction was refuted and the refutation was informative.** P5 (restoring
+the j=0 branch restores the dead tail) was a conjunction: the flatness held
+(support ~32k at every K, no growth) but the dead-bit half failed — the live
+window's other bit stays live. Diagnosed, not waved away: the **activation
+ancilla** is itself a scratch qubit the pullback ranges over; the lookup design
+cancels it (2^w CNOT contributions into s XOR an even number of times), the
+select design does not (the ancilla gates a block). Confirmed by checking the
+block on the act=0 half-space, where the e1 dependence vanishes.
+
+**Scope limits to state in Paper B.** The construction windows the exponent and
+does the multiply bit-by-bit over x; Gidney also windows the multiplication,
+which does not affect the argument (a tail window's tables are constant in j
+however the multiply is arranged). The analysis assumes a **unitary** unlookup;
+Gidney's measurement-based uncomputation is outside it.
+
+## 12b. `[x]` Is the recurring GF(2) linear/nonlinear pattern one theorem?
+
+**Mostly yes, and it made two of our claims cheaper to state and one of them
+wrong.** See `NOTES.md` §GF; file `experiments/experiment_gf2law.py`. Claims
+C40, C41; C30/C33 downgraded from "our mechanism" to "cite Carlet Prop. 29".
+
+The unifying *fact* is the defining property of the transform — Walsh
+characters of GF(2)ⁿ **are** the affine functions — with two corollaries:
+**(a)** affine symmetry confines the support (**classical**: Carlet,
+Proposition 29; our C30/C33 are instances, and "partially bent" is the name for
+the extremal case); **(b)** affine gating costs one Walsh coefficient, which is
+why §WD measured exactly ×2^w per OR-gated window.
+
+- **C40** extends (a) to *conditional* structures: per-cell linear structures
+  w_u ⟹ support avoids E = {z : w_u·z = 1 ∀u} ⟹ **density ≤ 1 − 2^−d**,
+  d = dim span{w_u}. Verified 4/4 planted with 0 violations, and shown
+  affine-invariant (tested, not asserted).
+- **C41**: consistency is a **parity** condition — an odd dependency among the
+  w_u destroys the cap outright (0.9845 vs 0.8671 at the same cell count).
+- **It corrects §RS.** The conjectured 1 − 2^−(k+1) ladder is the wrong shape:
+  the parameter is the span dimension, not the conditioning depth.
+- **It explains C34 without modexp.** v4's two slice structures (msb⊕anc and
+  msb) span d = 2, so E is exactly the quadrant {z_msb=1, z_anc=0} that C34
+  found empty, with cap ¾.
+
+**Prior art — pursued as far as open access goes; risk now low.** The one
+unread item is Carlet–Tarannikov, DCC 25:263–279 (2002), paywalled at Springer
+with no self-archived preprint. Checked instead: **Carlet's own book** (the
+comprehensive survey by the same author, which cites that paper on pp. 205,
+206, 319 and reproduces its Def. 47 / Prop. 60 — §5.5 read in full), and **the
+paper's own abstract**. A covering sequence is a *single global* λ; a *partial*
+covering sequence allows two levels; ours has a **different structure vector
+per cell**, which is neither. The abstract's stated contributions are
+resiliency/correlation-immunity characterisations and constructions — not a
+support-confinement law. Also worth citing and distinguishing:
+**Maiorana–McFarland** (restrictions *affine* on each coset — same flavour,
+stronger hypothesis, different conclusion).
+
+Still state C40/C41 at corollary altitude (Prop. 29 + coset decomposition) and
+note they may be folklore. If someone gets institutional access, reading the
+DCC body is the last loose end — a ten-minute job.
+
+## 12c. `[ ]` Can the dead 2^−(α+1) fraction be pruned EARLY?
+
+Opened by §BI/C42. For the real Shor input state a fraction 1 − 2^−(α+1) of the
+Walsh support contributes **exactly zero** to ⟨O⟩ — 75% at α=1, 87.5% at α=2,
+verified 3/3. But PPS propagates backwards and only meets the input state at
+the end, so those terms are carried at full cost and *then* discarded: peak
+memory (C18) is unchanged. **The question is whether the dead set can be
+recognised early.** If a cheap invariant identifies "this branch will end with
+exponent support" partway through propagation, that is a real constant-factor
+win of 4× (α=1) to 8× (α=2) in peak memory, on top of everything else — and
+unlike δ-truncation it is **exact**, not approximate.
+
+First things to check: is exponent-support monotone under back-propagation
+(it is created by Toffoli controls on exp qubits — can a later gate remove it)?
+If not monotone, is it monotone on some sub-class of terms? A must-fail control
+is easy here: the β>1 case should show no such structure.
+
+Related: the same framing applies to any input state via ⟨O⟩ = Σ_z c_z ∏ δ_i,
+so a partially-biased register interpolates between "free" and "carried".
 
 ## 13. `[ ]` Third simulation method on the r = β·2^α invariant
 

@@ -56,6 +56,7 @@ uv run python test_modexp.py         # Beauregard modexp, layers A-G
 uv run python test_toffoli_arith.py  # Toffoli modexp, layers A-G + cross-check
 uv run python test_walsh.py          # logical trace, Walsh machinery
 uv run python test_perm_pps.py       # permutation-native PPS vs Walsh and vs PPS
+uv run python test_windowed.py       # windowed modexp arithmetic + tail-block structure
 uv run python test_lab.py            # lab/ engine, pinned to logged numbers
 uv run python test_claims.py         # CLAIMS.md headline rows, re-verified
 ```
@@ -75,6 +76,7 @@ peaks at y = 0, 4, 8, 12 with p = 0.25 each (r = 4).
 | `statevec.py` | O(2ⁿ)-per-gate state-vector simulation (batched) |
 | `modexp.py` | Beauregard (Fourier-arithmetic) modular exponentiation |
 | `toffoli_arith.py` | Toffoli-compiled modular exponentiation |
+| `windowed_arith.py` | windowed modexp: `WindowedModExp` (table lookup) and `SelectModExp` (select-multiply, with the `skip_zero` knob); `replay` for circuits too wide to hold a permutation array |
 | `lab/` | experiment engine: protocol harness, cached measurement, GF(2)/structure analysis, modexp variants, null models |
 | `experiments/` | the experiment scripts — lab-notebook records, filenames unchanged; run as `uv run python -m experiments.<name>`; start new ones from `TEMPLATE.py` |
 | `archive/` | fully retracted scripts, kept for the record |

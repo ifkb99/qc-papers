@@ -152,22 +152,42 @@ z_I ∈ {0, 1_I} — was derived before being tested and then confirmed with zer
 violations across seven instances, with the two halves individually constant.
 
 **Scope, now a criterion rather than a caveat.** The proof uses nothing about
-the block beyond V² = id and the fact that V does not modify the controls. We
-confirm this is the operative condition by substituting synthetic blocks
-unrelated to modular arithmetic: an involutive one leaves the support invariant
-across four widths, while an order-3 one makes it grow by roughly a factor of
-two per block, at two moduli, with a vacuity check confirming both genuinely act
-on the observed bit. The theorem therefore covers **any** construction whose a=1
-block is an involution — a property checkable of a given construction rather
-than a family one must belong to. Multiply–swap–unmultiply qualifies because
-A⁻¹SA is a conjugate of a product of disjoint transpositions; whether
-windowed/table-lookup arithmetic qualifies is a well-posed open question.
+the block beyond V² = id, the fact that V does not modify the controls, and —
+this part matters — the fact that each block is controlled on **its own qubit**.
+We confirm involutivity is operative by substituting synthetic blocks unrelated
+to modular arithmetic: an involutive one leaves the support invariant across
+four widths, while an order-3 one makes it grow by roughly a factor of two per
+block, at two moduli, with a vacuity check confirming both genuinely act on the
+observed bit. Multiply–swap–unmultiply qualifies because A⁻¹SA is a conjugate of
+a product of disjoint transpositions.
+
+> **Involutivity alone is not sufficient, and windowed arithmetic is where that
+> shows.** Applying the criterion to windowed/table-lookup modular
+> exponentiation (C36–C39) produced two constructions computing the same map
+> whose identity-tail blocks are *both* involutions, exhaustively verified, and
+> which sit on opposite sides of the result. Gidney-style **table lookup**
+> always looks up a^(j·2^{kw}) and always multiplies; in the identity tail the
+> table is all-ones, so the block never reads its window register and the tail
+> exponent qubits go **dead** — a strictly sharper confinement than z_I ∈
+> {0, 1_I}, and directly distinguishable from it, since the lookup support
+> contains no z with any tail bit set. **Select-multiply**, which skips the
+> j = 0 branch because multiplying by 1 does nothing, makes the block V gated on
+> OR(window); support then grows by exactly 2^w per window and the β = 1
+> advantage is lost entirely. The general condition is therefore that the
+> identity-tail block's dependence on the exponent register be **affine** —
+> the identity function (one fresh control) or a constant function (no control)
+> both qualify, OR does not. Two further caveats belong in any statement of
+> this: for the lookup construction the cost is **bounded and 2-periodic** in
+> the number of tail windows rather than exactly constant, since the tail
+> applies its involution unconditionally; and the analysis assumes a unitary
+> unlookup, so Gidney's measurement-based uncomputation is outside it.
 
 ## Claims ledger (Paper B)
 
 The claims ledger lives in **`CLAIMS.md`**, which is the single source of truth
 for claim statuses. The claims this paper rests on are **C15, C21, C22, C18, C7,
-C30, C31, C32, C27, C28, F12, C19, C20, C23, C24, C29**, plus **C8** (the Walsh
+C30, C31, C32, C27, C28, F12, C19, C20, C23, C24, C29 (narrowed), C36, C37,
+C38, C39**, plus **C8** (the Walsh
 identity, used as the measurement instrument) and **C17** (`perm_pps.py`, which
 supplies the peak-memory numbers), whose rows sit in Paper A's section of that
 file. The two earlier guesses disproved along the way — support confined to the

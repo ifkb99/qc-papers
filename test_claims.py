@@ -10,7 +10,8 @@ loudly.
 
 Not covered here: C25/C26 (the cryptanalytic-bound import -- kept out of the
 automated gate by request; `experiments/experiment_crypto.py` remains the
-record), C19 (a citation, not a computation), and anything needing q > 17.
+record), and C19 (a citation, not a computation). The windowed block (C36-C39)
+reaches q = 21 and adds ~15s; everything else stays at q <= 17.
 """
 from __future__ import annotations
 import os
@@ -107,6 +108,44 @@ _, st = find_structures(tile(bit_table(7, 2, 0), 12), 12)
 t("r=3 even t: all-ones LINEAR", st == [((1 << 12) - 1, 0)])
 zs, st = find_structures(tile(bit_table(11, 2, 0), 12), 12)
 t("r=10 control: no structure, density 1", st == [] and zs.size == 4096)
+
+print("[C36/C37] windowed: V^2=id in BOTH designs, but only lookup is affinely"
+      " controlled")
+from windowed_arith import WindowedModExp, SelectModExp
+
+def _tail_block(me):
+    P = walsh.classical_permutation(me.window_block(me.windows()[0], 1))
+    idn = np.arange(P.size, dtype=np.int64)
+    inv = bool((P[P] == idn).all())
+    moved = bool((P != idn).any())
+    indep = all(bool((P[idn ^ (1 << q)] == (P ^ (1 << q))).all())
+                for q in me.windows()[0])
+    return inv, moved, indep
+
+inv_l, moved_l, indep_l = _tail_block(WindowedModExp(N=5, a=4, n_exp=2, w=2))
+inv_s, moved_s, indep_s = _tail_block(SelectModExp(N=5, a=4, n_exp=2, w=2))
+t("lookup tail block: nontrivial and V^2=id", moved_l and inv_l)
+t("select tail block: nontrivial and V^2=id too (so V^2=id cannot decide)",
+  moved_s and inv_s)
+t("lookup block does NOT read its window; select block DOES",
+  indep_l and not indep_s)
+
+print("[C37/C38] lookup: tail bits dead, |S| 2-periodic not growing")
+zs = [support(WindowedModExp(N=5, a=4, n_exp=2 * (K + 1), w=2).build(),
+              WindowedModExp(N=5, a=4, n_exp=2 * (K + 1), w=2).x[0])
+      for K in (0, 1)]
+t("N=5 a=4 lookup: 28078 at K=0, 62680 at K=1",
+  [z.size for z in zs] == [28078, 62680])
+me = WindowedModExp(N=5, a=4, n_exp=4, w=2)
+tail = sum(1 << q for q in me.exp[1:])
+t("no z with any tail bit set (sharper than C24)",
+  not bool((zs[1] & tail != 0).any()))
+
+print("[C39] the multiply-by-1 branch is the whole difference")
+sk = [support(SelectModExp(N=5, a=4, n_exp=4, w=2, skip_zero=s).build(),
+              SelectModExp(N=5, a=4, n_exp=4, w=2, skip_zero=s).x[0]).size
+      for s in (True, False)]
+t("select K=1: 128981 skipping j=0 vs 32075 emitting it", sk == [128981, 32075])
 
 print("[F12-lite] function-level dichotomy")
 t("N=15 a=7 (r=4): sparsity 4 at t=12 and t=16",
