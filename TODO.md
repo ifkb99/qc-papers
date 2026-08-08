@@ -269,34 +269,34 @@ across N, a and observable is untested and would be cheap to check.
 
 ---
 
-## 9. `[ ]` Extend the C15 proof to ANY modexp construction
+## 9. `[x]` Extend the C15 proof beyond multiply–swap–unmultiply — DONE
 
-The proof of C15/C23 uses only that the controlled-multiplier block has the
-**multiply–swap–unmultiply** form: `u_a(ctrl,a) = M(a) ; SWAP ; M(a⁻¹)⁻¹`. At
-a=1 that collapses to `V = A⁻¹SA`, a conjugate of an involution, and everything
-follows. This covers both compilations studied here and any
-Vedral/Beauregard-style construction — but *not* automatically a modular
-exponentiation built some other way.
+**Confirmed: V² = id is the entire condition.** See `NOTES.md` §G; file
+`experiment_c15_general2.py`.
 
-Question: is the invariance a property of the algorithm or of this circuit
-family? Routes:
-- Survey other modexp constructions (Zalka, Takahashi–Kunihiro, Gidney's
-  windowed/lookup-based arithmetic, Häner–Roetteler–Svore) and check which have
-  a block that is an involution at a=1. Windowed arithmetic in particular does
-  *not* obviously have the multiply–swap–unmultiply shape.
-- Find the weakest sufficient condition. Conjecture: it suffices that the block
-  at a=1 be **any** involution on the full space, since (i)–(iv) never use the
-  internal structure of V beyond V²=id. If so, the theorem generalises to every
-  construction whose a=1 block is self-inverse, which is a much larger class and
-  a cleanly checkable criterion.
-- Failing that, find a construction where the invariance genuinely **fails**.
-  That would be as valuable as generalising it — it would show the effect is
-  compilation-dependent, and would need saying loudly in Paper B, whose current
-  framing implies it is a property of the arithmetic.
+Steps (i)–(iv) of the proof never use V's internals beyond V²=id — "identity on
+the valid subspace" was context, not an ingredient. Tested with synthetic blocks
+unrelated to modular arithmetic:
 
-Note the conjecture above is cheap to test: take an existing block, replace it
-with a hand-built non-involutive permutation that is still identity on the valid
-subspace, and see whether constancy breaks.
+- controlled swap `x0↔b0` (order 2): support **constant** at 15362 across
+  k=1..4 (and 15248 at N=5);
+- controlled 3-cycle `x0→b0→b1` (order 3): support **grows** 15362 → 30984 →
+  62088 → 123838;
+- vacuity check passes (k=0 gives 3116 vs k=1's 15362), so the blocks act.
+
+Generalised statement: *if a circuit contains k blocks each the same permutation
+V controlled on its own qubit, V not modifying those controls, and V²=id, then
+the Walsh support of any computational-basis pullback is independent of k.*
+
+Paper B's scope caveat is replaced by a **criterion**: the theorem covers any
+modexp construction whose a=1 block is an involution — checkable per
+construction. Open follow-up: does windowed / table-lookup arithmetic
+(Gidney-style) qualify? Now a well-posed question rather than a survey.
+
+**Protocol catch:** pass 1 was vacuous — blocks acted only on b-qubits while the
+observable was Z_x0, so both block types came out constant for a trivial reason.
+The tell was the must-fail control failing to fail. Without it, a vacuous test
+would have "confirmed" the conjecture for the wrong reason.
 
 ## Housekeeping
 

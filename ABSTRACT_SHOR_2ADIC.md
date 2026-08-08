@@ -133,11 +133,17 @@ fails for β>1 as required. Its sharpest consequence — support confined to
 z_I ∈ {0, 1_I} — was derived before being tested and then confirmed with zero
 violations across seven instances, with the two halves individually constant.
 
-**Remaining scope caveat, which must be stated.** The proof uses only that the
-controlled-multiplier block has the multiply–swap–unmultiply form, so it covers
-both compilations studied here and any Vedral/Beauregard-style construction. It
-does not automatically transfer to a modular exponentiation built differently,
-and we do not claim it does.
+**Scope, now a criterion rather than a caveat.** The proof uses nothing about
+the block beyond V² = id and the fact that V does not modify the controls. We
+confirm this is the operative condition by substituting synthetic blocks
+unrelated to modular arithmetic: an involutive one leaves the support invariant
+across four widths, while an order-3 one makes it grow by roughly a factor of
+two per block, at two moduli, with a vacuity check confirming both genuinely act
+on the observed bit. The theorem therefore covers **any** construction whose a=1
+block is an involution — a property checkable of a given construction rather
+than a family one must belong to. Multiply–swap–unmultiply qualifies because
+A⁻¹SA is a conjugate of a product of disjoint transpositions; whether
+windowed/table-lookup arithmetic qualifies is a well-posed open question.
 
 ## Claims ledger (Paper B)
 
@@ -155,6 +161,7 @@ and we do not claim it does.
 | C20 | N=15 is a degenerate benchmark **for every base**, forced by the modulus | **established, strengthened** | 100% of its bases free; smallest product of two Fermat primes |
 | **C23** | Mechanism: identity blocks apply one involution V, so the circuit depends on the identity tail only through a **parity bit** | **PROVED** | V²=id since V=A⁻¹SA with S disjoint transpositions; blocks commute; character averaging confines support to z_I ∈ {0,1_I} |
 | **C24** | Consequence: support confined to z_I ∈ {0, all-ones}, so size is independent of tail length | **PROVED + verified** | derived before testing; 0 violations in 7/7 β=1 instances, halves individually constant; controls fail with 48189 / 1556046 |
+| **C29** | The theorem needs only **V²=id**; it covers any construction with an involutive repeated block | **PROVED + verified** | synthetic involution constant across k=1..4 at two moduli; synthetic order-3 block grows ~2× per block; vacuity check passes |
 | — | *Earlier guess:* support confined to low exponent bits | **DISPROVED** | added qubits live in ~half the support terms — superseded by C23 |
 | — | *Earlier guess:* identity block is affine over GF(2) | **DISPROVED** | 14336/32768 violations |
 
