@@ -16,6 +16,7 @@ from pathlib import Path
 
 import numpy as np
 
+import accel
 import walsh
 import perm_pps
 
@@ -48,8 +49,13 @@ def support(circuit, target_qubit: int, tol: float = TOL) -> np.ndarray:
         path = CACHE_DIR / f"supp_{_key(circuit, target_qubit)}.npy"
         if path.exists():
             return np.load(path)
-    c = walsh.pullback_coefficients(circuit, target_qubit)
-    zs = np.nonzero(np.abs(c) > tol)[0].astype(np.int64)
+    if accel.enabled() and circuit.n <= accel.MAX_QUBITS and circuit.is_classical():
+        # Opt-in only (LAB_GPU=1). Gated against the CPU reference by
+        # test_accel.py; never silently substituted.
+        zs = accel.pullback_support(circuit, target_qubit, tol)
+    else:
+        c = walsh.pullback_coefficients(circuit, target_qubit)
+        zs = np.nonzero(np.abs(c) > tol)[0].astype(np.int64)
     if _cache_enabled():
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
         np.save(path, zs)

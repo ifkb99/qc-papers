@@ -45,8 +45,8 @@ Python 3.14 via `uv`. Run everything from this directory:
 uv run python test_core.py          # correctness gate -- run first, always
 ```
 
-`source .env` only when Julia / PauliPropagation.jl is needed — its `LD_PRELOAD`
-of Julia's libstdc++ segfaults numpy `longdouble` otherwise.
+Only `numpy` is required. Optional: `cupy-cuda13x` enables the CUDA backend —
+set `LAB_GPU=1` to use it (7–15× on the large sweeps; see `accel.py`).
 
 ## Test suites (all must pass)
 
@@ -57,6 +57,7 @@ uv run python test_toffoli_arith.py  # Toffoli modexp, layers A-G + cross-check
 uv run python test_walsh.py          # logical trace, Walsh machinery
 uv run python test_perm_pps.py       # permutation-native PPS vs Walsh and vs PPS
 uv run python test_windowed.py       # windowed modexp arithmetic + tail-block structure
+uv run python test_accel.py          # CUDA backend vs CPU reference (skips without a card)
 uv run python test_lab.py            # lab/ engine, pinned to logged numbers
 uv run python test_claims.py         # CLAIMS.md headline rows, re-verified
 ```
@@ -78,6 +79,7 @@ peaks at y = 0, 4, 8, 12 with p = 0.25 each (r = 4).
 | `PAPER_A.md` | **the Paper A draft** — full paper, supersedes `ABSTRACT.md` |
 | `PAPER_B.md` | **the Paper B draft** — full paper, supersedes `ABSTRACT_SHOR_2ADIC.md` |
 | `toffoli_arith.py` | Toffoli-compiled modular exponentiation |
+| `accel.py` | optional CUDA backend for permutation replay and FWHT; opt-in via `LAB_GPU=1`, gated by `test_accel.py` |
 | `windowed_arith.py` | windowed modexp: `WindowedModExp` (table lookup) and `SelectModExp` (select-multiply, with the `skip_zero` knob); `replay` for circuits too wide to hold a permutation array |
 | `lab/` | experiment engine: protocol harness, cached measurement, GF(2)/structure analysis, modexp variants, null models |
 | `experiments/` | the experiment scripts — lab-notebook records, filenames unchanged; run as `uv run python -m experiments.<name>`; start new ones from `TEMPLATE.py` |

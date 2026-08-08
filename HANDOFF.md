@@ -113,17 +113,25 @@ uv run python test_core.py          # correctness gate — run first, always
 uv run python test_claims.py        # headline results, pinned to logged numbers
 ```
 
-All eight suites must pass before trusting anything:
+All nine suites must pass before trusting anything:
 `test_core`, `test_modexp`, `test_toffoli_arith`, `test_walsh`,
 `test_perm_pps`, `test_windowed` (the windowed constructions and their
-tail-block structure), `test_lab` (engine vs historical numbers), `test_claims`
+tail-block structure), `test_accel` (CUDA backend vs the CPU reference; skips
+cleanly with no card), `test_lab` (engine vs historical numbers), `test_claims`
 (executable reproductions of the CLAIMS.md headline rows).
+
+**Slow sweeps: set `LAB_GPU=1`.** `accel.py` routes the two hot paths through
+CUDA — 7–15× measured on an RTX A4500, and the speedup *grows* with n. Opt-in
+by design; `walsh.py` remains the reference and `test_accel.py` gates the GPU
+path against it (exact equality for permutations, identical support sets).
 
 **Traps that will bite immediately:**
 
 1. **Run with `uv run python` from `research/`.** Not bare `python3`.
-2. **`source .env` ONLY for Julia work.** Its `LD_PRELOAD` of Julia's libstdc++
-   **segfaults numpy `longdouble`** (exit 139). Cost a debugging cycle.
+2. ~~`source .env` only for Julia work~~ — **TRAP RETIRED 2026-08-08.** Julia
+   was unused (no `.py` imported `juliacall`); `juliacall`, the 1.1 GB depot and
+   `.env` are all deleted, so the `LD_PRELOAD`/`longdouble` segfault cannot
+   recur. The venv went 1.6 GB → 534 MB.
 3. **CPython 3.14 crashes on long `perm_pps` runs** —
    `Fatal Python error: _TAIL_CALL_CACHE`. A 3.14 interpreter bug, not this
    code. Presents as a hang or a mysterious death with no traceback. Rerun (it

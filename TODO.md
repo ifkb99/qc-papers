@@ -547,6 +547,27 @@ If it resolves, `PAPER_A.md` §5 upgrades from "upper bound of 2, empirical" to 
 theorem, which is worth having: it is currently the only quantitative claim in
 Paper A that is measured rather than derived.
 
+## 12e. `[ ]` Re-run the reachable sweeps now that the GPU makes them cheap
+
+Not a research question, but it changes what is answerable. The 11.5× on
+permutation replay means the runs that previously took ~15 minutes take ~80
+seconds, so several things previously logged as "not reachable" are now cheap:
+
+- **C21's onset at α = 3 and α = 4.** Currently "still growing at the largest
+  width we can reach, as predicted" — i.e. the sharpest prediction of the
+  onset rule is *unconfirmed* at higher α. This is the single most valuable
+  rerun: it is a pre-registered prediction awaiting a measurement that is now
+  affordable.
+- **Circuit-level density scaling beyond 24 qubits.** C7's series stops at 24;
+  26 and 28 are now ~2 and ~8 minutes rather than ~40 minutes and 3 hours.
+  Would strengthen `PAPER_A.md` §11.1, which currently concedes the circuit
+  series is modest.
+- **The windowed sweeps (C38) at K = 4, 5**, to see whether the 2-periodicity
+  persists or eventually drifts.
+
+Watch the memory ceiling: n ≤ 30 on one 20 GiB card, and there are two cards —
+independent instances can run concurrently, one per device.
+
 ## 13. `[ ]` Third simulation method on the r = β·2^α invariant
 
 Paper B open problem 4. Two structurally unrelated methods (PPS, MPS) keying
@@ -584,9 +605,9 @@ structureless — but it is the natural next question the method itself asks.
   and PauliPropagation.jl, which it most plausibly wraps, has **zero** mentions
   of Toffoli/CCX/CCZ and no permutation gate type. No library documents or
   exploits diagonal closure. A definitive check would need Yao installed.
-- `[ ]` Decide whether `.env` should be tracked. It holds only an `LD_PRELOAD`
-  path (no secret) but hardcodes an absolute path specific to this machine;
-  currently committed.
+- `[x]` ~~Decide whether `.env` should be tracked~~ — **MOOT, deleted
+  2026-08-08** along with Julia. It existed only to `LD_PRELOAD` Julia's
+  libstdc++.
 - `[ ]` `experiment.py` §3, `experiment2.py` §§2–3 and all of `experiment3.py`
   are retracted. They carry warning headers; consider deleting once the papers
   are drafted and nothing references them.
@@ -609,4 +630,28 @@ structureless — but it is the natural next question the method itself asks.
   superseded; `CLAIMS.md` wins.
   - Still open: are there other files that should be split out as well? Perhaps
     create some sort of wiki?
-- `[ ]` Check if julia and dependencies are still needed. Remove to simplify project if not
+- `[x]` ~~Check if julia and dependencies are still needed~~ — **DONE
+  2026-08-08. Removed.** No `.py` file imported `juliacall`; the prior-art work
+  on PauliPropagation.jl was done by *reading* its source, so nothing
+  reproducible depended on it. Dropped `juliacall`, deleted the orphaned 1.1 GB
+  depot and `.env`. Venv 1.6 GB → 534 MB, all suites pass, and trap 2 in
+  `HANDOFF.md` (the `LD_PRELOAD`/`longdouble` segfault) is retired.
+
+- `[ ]` **Six more dependencies are also unused — decide.** An import scan
+  found *only* numpy is imported anywhere: `click`, `matplotlib`, `numba`,
+  `qiskit`, `quimb`, `scipy`, `stim` all have **zero** imports. Not removed
+  unilaterally because `qiskit` and `stim` were the *source-reading* tools for
+  the prior-art sweeps (TODO 1) and may be wanted again; the rest look like
+  genuine leftovers. Recommendation: drop `click`, `matplotlib`, `quimb`,
+  `scipy`; keep `numba` only if the CPU fallback is ever parallelised; keep or
+  drop `qiskit`/`stim` on how likely another source-level sweep is.
+
+- `[x]` **GPU acceleration — DONE 2026-08-08.** `accel.py` + `test_accel.py`
+  (suite 9). Both hot paths are memory-bound array passes, so a card with ~10×
+  the bandwidth wins by about that: measured **7.1× / 6.9× / 11.5×** on
+  permutation replay at q = 17/19/21 and **11.8× / 12.8× / 14.7×** on FWHT at
+  2^24/26/28 (RTX A4500). The speedup **grows with n**, which is the useful
+  direction. Opt-in via `LAB_GPU=1`; `walsh.py` stays the reference and the GPU
+  path is gated against it (exact equality on permutations, identical support
+  sets, plus must-fail controls for non-permutation input and oversized
+  registers). Capacity: n ≤ 30 on one 20 GiB card.
