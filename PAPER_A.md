@@ -341,17 +341,46 @@ excursion. The expansion is then Z-type at *every* intermediate step, and:
 - propagation runs about **10× faster** than rotation-level propagation on the
   same circuits, since no branch is created only to be cancelled.
 
-**Is the factor of two a theorem or an observation? Currently an observation,
-and we state it as one.** The mechanism is clear enough to suggest a proof: the
-gadget's Hadamard on the target qubit c exchanges the Z-sector with an X-sector,
-and a Z-type string containing Z_c is carried into a mirrored partner while a
-string without Z_c is untouched — so the doubling applies to the Z_c-containing
-subset and bounds the ratio above by 2. That accounts for the adders hitting
-2.000000 exactly and for modexp falling just short. It does **not** yet account
-for the deficit being exactly 2 in all three modexp instances, which is a clean
-regularity we have not explained. Until it is proved we claim only:
-*the ratio is at most 2, is attained for the adders tested, and is
-2 − O(1/peak) for the modular exponentiation instances tested.*
+**The ratio is exact, and the deficit is a countable set.** Let *c* be the
+target qubit of the Toffoli gadget in which the rotation-level peak falls, and
+let *S* be the permutation-native peak set. Two facts about the gadget decide
+everything.
+
+First, a Z-type string commutes with every Z-rotation, so it cannot branch until
+an H turns a Z into an X; the gadget's only H acts on *c*, so **only strings
+carrying Z_c ever leave the diagonal.** Second, once such a string is X_c-type,
+the gadget's four T gates on *c* rotate it *within* the two-dimensional space
+spanned by {X_c, Y_c},
+
+  X_c ↦ cos θ · X_c − sin θ · Y_c,   Y_c ↦ cos θ · Y_c + sin θ · X_c,
+
+which is closed — so the four T gates branch **once between them**, not
+2⁴ times. Every Z_c-carrying string therefore contributes exactly two Paulis and
+every other string exactly one, giving
+
+> **Proposition 2.** N_max^rot = 2·N_max^perm − |B|, where
+> B = { z ∈ S : z_c = 0 }.
+
+Verified exactly on 9 of 9 instances (six modular exponentiations, three
+ripple-carry adders): at the peak, every Pauli has X-support either empty or
+exactly {c}, and folding the X_c/Y_c partners back onto their parents recovers
+*S* with multiplicity 2 on z_c = 1 and 1 on z_c = 0, set for set.
+
+So the ratio is 2 for the adders because B is empty there, and the unexplained
+"deficit of exactly 2" in modular exponentiation is the statement |B| = 2. **The
+two strings are the same in every instance: Z on the measured x-register bit
+alone, and that bit together with one exponent qubit — which are precisely the
+two Walsh coefficients of magnitude ½** identified independently in §6 as the
+dominant Fourier modes of the pulled-back function (6/6 against the full
+spectrum). They are supported off the scratch register, never acquire Z_c, and
+so never double.
+
+**The constant belongs to the observable, not to the circuit family.** Holding
+the circuit fixed and moving the observable changes it: measuring the low
+accumulator bit gives a deficit of 4004, the reduction ancilla 4014, and a
+scratch-register bit 0 — the last recovering a ratio of exactly 2. Any statement
+of the form "modular exponentiation has deficit 2" is therefore a statement
+about the standard computational-basis observable, and we state it that way.
 
 This is a genuine practical recommendation regardless: for permutation circuits,
 do not decompose to Clifford+T before propagating.

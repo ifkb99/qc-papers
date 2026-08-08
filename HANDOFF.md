@@ -23,7 +23,7 @@ the 2-adic structure of the multiplicative order r = β·2^α — independent of
 exponent-register width when β = 1, Θ(2ⁿ) otherwise, with the mechanism proved.
 
 **No live research thread is blocked.** TODO items 1–12b **and 12e** are
-closed; 12c, 12d, 12f, 13 and 14 are open and each states its own rationale.
+closed; 12c, 12f, 12g, 13 and 14 are open and each states its own rationale.
 
 > **12e closed 2026-08-08 — see `NOTES.md` §OS.** Every sweep that had been
 > deferred for want of compute is now run. C21's onset is **measured** at
@@ -35,10 +35,21 @@ closed; 12c, 12d, 12f, 13 and 14 are open and each states its own rationale.
 > test of mine (the tail-confinement check has only one possible answer at
 > |I| = 1), the second time that rule specifically has earned its place.
 
-The best remaining candidates are **12d** (why the peak ratio is exactly
-`rot = 2·perm − 2`; explicitly "an afternoon or a discovery", and the only
-quantitative claim in Paper A that is measured rather than derived) and **14**
-(through the inverse QFT — highest risk, highest reach, a Paper C candidate).
+> **12d closed too, same day — see `NOTES.md` §PK.** The peak-ratio deficit is
+> **not a constant**: `N_max^rot = 2·N_max^perm − |B|` with
+> B = {z ∈ S : z_c = 0}, c the target of the gadget containing the peak. Derived
+> from the gadget (the four T gates on c rotate inside the *closed* space
+> span{X_c, Y_c}, so they branch once between them, not 2⁴ times) and verified
+> 9/9. It is 2 for modexp because B = {Z_x0, Z_x0·Z_e0} — **exactly the two
+> |c| = ½ Walsh coefficients**, the dominant Fourier modes §W3/W4 had already
+> found from the final spectrum by an unrelated route. And the constant belongs
+> to the **observable**, not to modexp: move it and you get 4004, 4014, or 0.
+> Paper A §5 is now Proposition 2 rather than "an observation"; claim **C44**.
+> Still unproved and marked so: |B| = 2 itself.
+
+The best remaining candidate is **14** (through the inverse QFT — highest risk,
+highest reach, a Paper C candidate). **12c** is mostly dead (its naive form was
+refuted by derivation); **12g** is a cheap one-sweep loose end from 12e.
 
 ---
 

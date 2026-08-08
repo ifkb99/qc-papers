@@ -165,6 +165,53 @@ sk = [support(SelectModExp(N=5, a=4, n_exp=4, w=2, skip_zero=s).build(),
       for s in (True, False)]
 t("select K=1: 128981 skipping j=0 vs 32075 emitting it", sk == [128981, 32075])
 
+print("[C44] peak ratio: rot = 2*perm - |B|, and B is the |c|=1/2 Walsh pair")
+import pps as _pps
+import perm_pps as _perm_pps
+import walsh as _w
+
+_me = build_modexp(N=5, a=2, n_exp=1)
+_qc, _tq = _me.build(), _me.x[0]
+_rot = _pps.propagate(_qc, {(0, 1 << _tq): 1.0}, delta=0.0)
+_perm = _perm_pps.propagate_perm(_qc, 1 << _tq)
+t("logged peaks: rot 13666, perm 6834",
+  (_rot.n_max, _perm.n_max) == (13666, 6834))
+
+
+class _Suffix:                       # the last m gates == the state after m steps
+    def __init__(self, c, m, logical=False):
+        self.n = c.n
+        self.gates = [] if logical else c.gates[len(c.gates) - m:]
+        self.logical = c.logical[len(c.logical) - m:] if logical else []
+
+    def is_classical(self):
+        return True
+
+
+_m = int(np.argmax(_rot.n_terms)) + 1
+_peak = _pps.propagate(_Suffix(_qc, _m), {(0, 1 << _tq): 1.0},
+                       delta=0.0).final_terms
+_nz = sorted({x for (x, _) in _peak if x})
+t("peak lives in {I, X_c} for a single c", len(_nz) == 1
+  and _nz[0].bit_count() == 1)
+_c = _nz[0].bit_length() - 1
+_S = set(_perm_pps.propagate_perm(
+    _Suffix(_qc, int(np.argmax(_perm.n_terms)) + 1, logical=True),
+    1 << _tq).final_terms)
+_fold = {}
+for (_x, _z) in _peak:
+    _k = (_z | (1 << _c)) if _x else _z
+    _fold[_k] = _fold.get(_k, 0) + 1
+t("fold recovers the perm peak set, doubled on z_c=1",
+  _fold == {z: (2 if (z >> _c) & 1 else 1) for z in _S})
+_B = sorted(z for z in _S if not ((z >> _c) & 1))
+t("B = {Z_x0, Z_x0 Z_e0}, so the deficit is 2",
+  _B == sorted([1 << _me.x[0], (1 << _me.x[0]) | (1 << _me.exp[0])])
+  and _rot.n_max == 2 * _perm.n_max - len(_B))
+_co = _w.pullback_coefficients(_qc, _tq)
+t("B is exactly the |coefficient| = 1/2 Walsh pair",
+  set(np.nonzero(np.abs(np.abs(_co) - 0.5) < 1e-12)[0].tolist()) == set(_B))
+
 print("[F12-lite] function-level dichotomy")
 t("N=15 a=7 (r=4): sparsity 4 at t=12 and t=16",
   fn_support(tile(bit_table(15, 7, 0), 12)).size == 4
