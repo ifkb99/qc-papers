@@ -300,6 +300,88 @@ killing C3. Not a valid compilation comparison.
 
 ---
 
+## C15 REFINED (TODO step 4) — it locks at n_exp = v2(r)+1, not "always"
+
+Sweeping a third modulus caught an over-claim. N=5 with a=2 has r=4 (α=2), where
+every previous sweep used r=2 (α=1). It is **not** constant from n_exp=2:
+
+```
+   N   a   r  alpha  n_exp    q  |support|  locked?
+   5   4   2      1      1   14       2708        -
+   5   4   2      1      2   15      15509     grew
+   5   4   2      1      3   16      15509   LOCKED
+   5   4   2      1      5   18      15509   LOCKED
+
+   5   2   4      2      1   14       3086        -
+   5   2   4      2      2   15      15493     grew
+   5   2   4      2      3   16      32143     grew
+   5   2   4      2      4   17      32143   LOCKED
+   5   2   4      2      5   18      32143   LOCKED
+
+  17   2   8      3      2   21    1037405     grew
+  17   2   8      3      3   22    2093137     grew     (lock predicted at 4)
+  17   3  16      4      3   22    2093202     grew     (lock predicted at 5)
+```
+
+**Rule: the support locks at n_exp = α + 1, where α = v2(r).** Verified exactly
+for α=1 and α=2; α=3 and α=4 are still growing at the largest width reachable
+(q ≤ 22), consistent with locking at 4 and 5.
+
+**Mechanism (this one *is* clean).** The u_a block for exponent bit i multiplies
+by `a^(2^i) mod N`, which equals 1 exactly when r | 2^i, i.e. when i ≥ α. So
+blocks i ≥ α are identity on the valid subspace. With n_exp qubits the blocks
+are i = 0..n_exp−1, so at least one identity block exists iff n_exp ≥ α + 1.
+The support locks the moment the first identity block appears.
+
+**Why this was missed:** every earlier sweep used r=2, i.e. α=1, and started at
+n_exp=2 = α+1 — exactly on the threshold. Pure luck. Had the original controlled
+design used r=4, the first two data points would have disagreed and the claim
+would have looked false.
+
+**Corrected statement for Paper B:**
+
+> support is constant in n_exp **for n_exp ≥ v2(r) + 1** when r is a power of
+> two, and Θ(2^q) as soon as r has an odd factor.
+
+Secondary observation: the locked value is close to **half** the Hilbert space
+at the lock point (density 0.473 at α=1, 0.490 at α=2, and 0.499 already at
+n_exp=3 for α=3). So the support grows to half-density, then freezes in absolute
+terms while density falls by 4× per two added qubits.
+
+## C20 STRENGTHENED — N=15 is degenerate for EVERY base, and necessarily so
+
+Every order divides the Carmichael function λ(N), so if λ(N) is a power of two
+then **every** base has β=1 and the whole modulus is in the free branch.
+
+```
+    N   factors  lambda(N)  pow2?          orders present
+    5         5          4    YES               [1, 2, 4]
+   15       3x5          4    YES               [1, 2, 4]
+   21       3x7          6     no            [1, 2, 3, 6]
+   33      3x11         10     no           [1, 2, 5, 10]
+   51      3x17         16    YES        [1, 2, 4, 8, 16]
+   85      5x17         16    YES        [1, 2, 4, 8, 16]
+  143     11x13         60     no   [1,2,3,4,5,6,10,12,15,20,30,60]
+```
+
+```
+  N=15: 7 usable bases, 7 with beta=1  -> 100%
+  N=21: 11 usable bases, 3 with beta=1 ->  27%
+```
+
+λ(N) is a power of two exactly when **N = 2^a × (product of distinct Fermat
+primes)** — since p−1 must be a power of two for each odd prime p, and p^k needs
+k=1. Known Fermat primes: 3, 5, 17, 257, 65537.
+
+**So the odd semiprimes in the free branch are exactly p·q with both p and q
+Fermat primes: 15 = 3×5, 51 = 3×17, 85 = 5×17, … and 15 is the smallest.**
+
+That is a sharper version of C20 than "N=15, a=7 happens to have r=4". The
+canonical demonstration instance is degenerate **for every base**, and it is
+degenerate *because* it is the smallest product of two Fermat primes — the same
+property that makes it the natural smallest demo. The degeneracy is forced by
+the choice of N, not by the choice of a.
+
 ## W — WEIGHT TRUNCATION (TODO step 2). Naive identity fails; knob is unusable.
 
 PPS has two truncation knobs: coefficient threshold δ (all prior work here) and

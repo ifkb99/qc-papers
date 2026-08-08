@@ -16,9 +16,10 @@ Baker, I.
 >
 > Post-bugfix (θ=π propagator bug, see `NOTES.md` STATUS 2) and post external
 > review. Confirmed for both final support and peak memory. The core dichotomy
-> is verified in a controlled design at two moduli; the *mechanism* at circuit
-> level is empirical rather than proved — see the honesty note below, which must
-> survive into any submitted version.
+> is verified in a controlled design at **three** moduli (N = 5, 7, 21); the
+> onset rule n_exp = v₂(r)+1 is exact for α = 1, 2 and consistent for α = 3, 4.
+> The *mechanism* at circuit level is still empirical rather than proved — see
+> the honesty note below, which must survive into any submitted version.
 
 ---
 
@@ -52,10 +53,20 @@ alone changes. For N = 7 with a = 6 (r = 2) the Pauli support is *exactly
 invariant* at 15549 terms, and peak memory *exactly invariant* at 24369 terms,
 across a 64- to 256-fold growth in Hilbert-space dimension; for a = 3 (r = 6) the
 same quantities grow by a clean factor of 4.00 per two added qubits. The result
-reproduces at N = 21. Consequently the exponent register — which sets the
-precision of the continued-fractions post-processing, and which one would expect
-to be the expensive resource — is free for Pauli-path simulation when r is a
-power of two and quadruples cost per two qubits otherwise.
+reproduces at N = 21 and N = 5. Consequently the exponent register — which sets
+the precision of the continued-fractions post-processing, and which one would
+expect to be the expensive resource — is free for Pauli-path simulation when r
+is a power of two and quadruples cost per two qubits otherwise.
+
+The invariance has a precise onset. Writing α = v₂(r), the controlled-multiplier
+block attached to exponent bit i multiplies by a^(2^i) mod N, which is the
+identity on the valid subspace exactly when i ≥ α; the support therefore locks as
+soon as the first such block appears, at **n_exp = α + 1**, and not before. We
+confirm this for α = 1 and α = 2 (where the support grows once, 15493 → 32143,
+before freezing) and find α = 3 and α = 4 still growing at the largest width we
+can reach, as predicted. The locked value is close to half the Hilbert-space
+dimension at the lock point, so the support saturates to half density and then
+freezes in absolute terms while density falls fourfold per two added qubits.
 
 For instances with an odd factor, which is the generic and cryptographically
 relevant case, we find the Walsh density converges monotonically to one half
@@ -69,9 +80,19 @@ matrix-product-state simulation of Shor's algorithm, where α is the number of
 trailing zeros of r and the memory reduction is by a factor β² carried by the
 odd part. Two structurally unrelated classical methods keying on the same
 arithmetic invariant suggests a property of the algorithm rather than of either
-simulator. A practical corollary is that the standard N = 15, a = 7
-demonstration instance (r = 4) lies in the degenerate branch of both methods,
-and is therefore a poor benchmark for classical-simulation difficulty.
+simulator.
+
+The practical corollary is stronger than a remark about one instance. Since every
+order divides the Carmichael function λ(N), a modulus with λ(N) a power of two
+lies in the free branch for *every* base — and λ(N) is a power of two exactly
+when N is a power of two times a product of distinct Fermat primes. The odd
+semiprimes with this property are precisely p·q with p and q both Fermat primes:
+15 = 3×5, 51 = 3×17, 85 = 5×17, and so on. **N = 15 is the smallest, and all
+seven of its usable bases lie in the free branch**, against 3 of 11 for N = 21.
+The canonical demonstration instance is therefore degenerate for classical
+simulation not because of an unlucky choice of base but because of the choice of
+modulus, and the property that makes it the natural smallest example is the same
+one that makes it uninformative as a benchmark.
 
 ---
 
@@ -89,8 +110,14 @@ cardinality is preserved. The cause is that `u_a(ctrl, a^{2^i})` with
 a^{2^i} = 1 is the identity only on the *valid* subspace; as a full-space unitary
 it acts nontrivially on invalid inputs, and the constancy arises through
 cancellation there. **Report the circuit-level result as an empirical regularity
-across five widths and two moduli, not as a corollary of the subspace argument.**
-Proving it is the main open problem for this paper.
+across five widths and three moduli, not as a corollary of the subspace
+argument.** Proving it is the main open problem for this paper.
+
+Note the onset rule (C21) is a partial exception: *that* part has a clean
+mechanism — blocks with i ≥ α multiply by 1 on the valid subspace, so the first
+identity block appears at n_exp = α+1 — and it predicts the observed lock point
+correctly. What remains unproved is why the locked value is then preserved
+exactly on the full space, invalid inputs included.
 
 ---
 
@@ -98,12 +125,14 @@ Proving it is the main open problem for this paper.
 
 | # | Claim | Status | Evidence |
 |---|---|---|---|
-| **C15** | Cost is set by the 2-adic structure of r, at circuit level | **CONFIRMED, controlled** | fix N vary a: r=2 ⟹ support *exactly* 15549 over 256× dim growth; r=6 ⟹ 4.00×/step; reproduced at N=21 |
+| **C15** | Cost is set by the 2-adic structure of r, at circuit level | **CONFIRMED, controlled** | fix N vary a: r=2 ⟹ support *exactly* 15549 over 256× dim growth; r=6 ⟹ 4.00×/step; reproduced at N=21 and N=5 |
+| **C21** | Invariance has a precise onset: support locks at **n_exp = v₂(r)+1** | **established** | α=1,2 exact (α=2 grows 15493→32143 then freezes); α=3,4 still growing at max reachable width, as predicted |
+| C22 | λ(N) a power of two ⟹ **every** base free; ⟺ N = 2^a × distinct Fermat primes | **established** | N=15: 7/7 bases free; N=21: 3/11. Odd semiprimes = p·q both Fermat, smallest 15 |
 | **C18** | Holds for **peak memory**, not just final support | **established** | N_max exactly 24369 at n_exp = 2,4,6,8 (64× dim growth); control r=6 grows 4.02×/step |
 | C7 | Generic r ⟹ Θ(2ⁿ); results are not pre-asymptotic | **established** | 24 qubits via Walsh; density 0.473→0.498→½, slope 1.008 bits/qubit |
 | F12 | Function-level dichotomy is absolute | **established** | r=4: sparsity 4 constant to t=24; odd factor: density 1.000000 |
 | C19 | Same r = β·2^α invariant governs MPS simulation | **established, cited** | Dang et al. §4: α = trailing zeros, β = odd part "cannot be localised"; §5.2: memory ∝ β² |
-| C20 | N=15 a=7 (r=4) is a degenerate benchmark | **established** | lies in the free branch of both PPS and MPS |
+| C20 | N=15 is a degenerate benchmark **for every base**, forced by the modulus | **established, strengthened** | 100% of its bases free; smallest product of two Fermat primes |
 | — | *Circuit-level mechanism* (support confined to low exponent bits) | **DISPROVED as stated** | added qubits are live in ~half the support terms; see honesty note |
 
 ## Dependencies on Paper A
