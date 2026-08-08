@@ -333,6 +333,65 @@ designed".
 1.000), so residual *non-linear* structure remains after the linear structure is
 destroyed. Unidentified — a natural next thread.
 
+## 11. `[ ]` Identify the residual non-linear structure — THE LIVE THREAD
+
+**Why first:** the only open scientific question in Paper B (its open problem
+5), and closing it completes the density story: ½ = linear structure (C30),
+1.000 = structureless, 0.716 = unexplained. A cheap entry point appeared on
+2026-08-08.
+
+**Start at function level, not circuit level.** §I's unpursued observation is
+the lead: the real r=6 table gives density exactly 0.500 on even t (re-verified
+at t=24), a clean factor-of-two deficit with no circuit, no ancillas, no
+reduction discipline involved. So structure of this kind lives partly in the
+arithmetic itself, and WHTs of period-r tables cost milliseconds against
+15-qubit pullbacks.
+
+Sequence, cheapest-decisive first:
+
+1. **Affine structures.** Extend `gf2_rank_and_kernel` to catch w with
+   `g(y⊕w) = g(y) ⊕ 1` — these constrain the support but are invisible to the
+   current rank test. Run on the broken circuit variants *and* the
+   function-level tables.
+2. **Support complement.** If the missing ~28% forms a recognisable set
+   (a coset, a weight band, a subspace union), that names the constraint.
+3. **Weight profile** vs the binomial baseline (`experiment_weight.py`
+   machinery exists).
+4. **Stack independent Toffoli conjugations.** If density saturates below 1,
+   the residue is intrinsic to the arithmetic rather than the reduction.
+5. The "is 0.716 a recognisable constant" question is half-answered
+   (23464/32768 at N=5 vs 23488/32768 at N=7 — not an exact rational); close
+   it formally.
+
+## 12. `[ ]` Windowed / table-lookup arithmetic: apply the involution criterion
+
+Step 9 reduced Paper B's scope caveat to a checkable condition: the theorem
+covers any construction whose a=1 block satisfies V² = id. Gidney-style
+windowed arithmetic is what people actually propose to run on hardware, and
+whether it qualifies is the first question a referee will ask. Build a minimal
+windowed modexp block, check V² = id, and either extend the theorem's coverage
+or state the sharp boundary. Well-posed and publishable either way it lands.
+
+## 13. `[ ]` Third simulation method on the r = β·2^α invariant
+
+Paper B open problem 4. Two structurally unrelated methods (PPS, MPS) keying
+on the same arithmetic invariant is suggestive; a third would make "property
+of the algorithm, not the simulator" hard to argue with. Decision diagrams are
+the natural candidate (MQT DDSIM): rerun the controlled design (fix N, vary a
+so only r changes) and see whether memory keys on β. Mostly integration work,
+no new theory.
+
+## 14. `[ ]` Through the inverse QFT — the frontier of the exact model
+
+Highest risk, highest reach; a Paper C candidate. Everything so far stops
+where the identity stops (F10: X/Y pullbacks leave the diagonal and blow up),
+but real Shor measures the exponent register *after* the inverse QFT. The
+structure is suggestive: the Walsh basis is the character group of (Z/2)^t,
+the QFT diagonalises translation on Z/2^t, and the whole cost story is already
+2-adic. Is there an exact characterisation of the pulled-back observable in a
+mixed character basis (GF(2)^t Walsh × Z/2^t Fourier)? May simply be dense and
+structureless — but it is the natural next question the method itself asks.
+
 ## Housekeeping
 
 - `[x]` Yao.jl backend — closed as far as possible without installing it. Its
