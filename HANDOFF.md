@@ -100,18 +100,41 @@ All five suites must pass before trusting anything:
 
 ---
 
+## The `computational-research` skill
+
+There is a skill at `~/.claude/skills/computational-research/SKILL.md`
+generalising the working protocol used here. It was **created mid-session, so it
+was not loadable at the time** — a fresh session should be able to invoke it
+with `Skill(computational-research)`. Worth loading before doing experimental
+work on this project.
+
+It encodes the one thing that most distinguishes this domain: **in empirical
+science a surprising result may be a discovery, but in research on your own code
+it is almost always your own bug** — and the corollary that a result *agreeing*
+with your hypothesis is more dangerous than one contradicting it, because you
+won't look. Also: a bug-check procedure ordered by cost, derive-then-test,
+always including a control that must fail, promoting regularities to proofs by
+reading the construction rather than measuring more, and explicit claim grading.
+
+It is not decoration. In this session its rules caught three of my own errors
+that had already produced confident-looking numbers: a vacuous test whose
+must-fail control failed to fail, a sweep that varied two parameters at once,
+and degenerate random inputs at small sizes.
+
 ## Reading order
 
 1. **This file.**
-2. `METHOD.md` — how the work is conducted, the failure modes hit, and the
+2. The `computational-research` skill (above), if doing experimental work.
+3. `METHOD.md` — how the work is conducted, the failure modes hit, and the
    techniques that earned their keep. Short. Read before extending anything;
-   several lessons cost real time.
-3. `NOTES.md` — the working record. **Read the STATUS blocks and the honesty log
+   several lessons cost real time. The skill is its generalisation; this file is
+   the project-specific version with the concrete instances.
+4. `NOTES.md` — the working record. **Read the STATUS blocks and the honesty log
    before trusting any number.** Roughly half of what was believed at various
    points is now marked dead, with the reason.
-4. `TODO.md` — ranked, with rationale, so it can be re-ranked rather than
+5. `TODO.md` — ranked, with rationale, so it can be re-ranked rather than
    followed blindly.
-5. The two abstracts, when writing.
+6. The two abstracts, when writing.
 
 ---
 
