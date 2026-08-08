@@ -68,6 +68,17 @@ can reach, as predicted. The locked value is close to half the Hilbert-space
 dimension at the lock point, so the support saturates to half density and then
 freezes in absolute terms while density falls fourfold per two added qubits.
 
+The invariance is not an artifact of exact arithmetic. Applying a coefficient
+threshold to the finished spectrum preserves it at *every* threshold, since the
+surviving magnitudes are identical across widths; and under the incremental
+truncation that Pauli-path simulators actually perform, the peak term count —
+the quantity that bounds memory — is likewise unchanged at every threshold we
+test. Accuracy is independent of width up to moderate thresholds but degrades
+first for the wider circuit at aggressive ones, not because its exact spectrum
+differs (it is identical) but because incremental truncation has more gates to
+act upon. We therefore state the practical claim as: peak cost is free in the
+exponent register, and accuracy is free up to moderate truncation.
+
 For instances with an odd factor, which is the generic and cryptographically
 relevant case, we find the Walsh density converges monotonically to one half
 (0.473 → 0.498 over 15 to 24 qubits, growth 1.008 bits per qubit), so
@@ -137,6 +148,8 @@ and we do not claim it does.
 | C22 | λ(N) a power of two ⟹ **every** base free; ⟺ N = 2^a × distinct Fermat primes | **established** | N=15: 7/7 bases free; N=21: 3/11. Odd semiprimes = p·q both Fermat, smallest 15 |
 | **C18** | Holds for **peak memory**, not just final support | **established** | N_max exactly 24369 at n_exp = 2,4,6,8 (64× dim growth); control r=6 grows 4.02×/step |
 | C7 | Generic r ⟹ Θ(2ⁿ); results are not pre-asymptotic | **established** | 24 qubits via Walsh; density 0.473→0.498→½, slope 1.008 bits/qubit |
+| **C27** | Invariance survives truncation: exact for terminal thresholding at every δ; peak cost unchanged under incremental | **established** | counts identical across n_exp at all 7 δ values; N_max SAME at every δ; control diverges |
+| C28 | Accuracy degrades first for the *wider* circuit at aggressive δ | **established, must be stated** | ⟨O⟩ → 0 at δ=1e-1 for n_exp=4,5 while n_exp=3 stays exact; more gates ⟹ more incremental truncation |
 | F12 | Function-level dichotomy is absolute | **established** | r=4: sparsity 4 constant to t=24; odd factor: density 1.000000 |
 | C19 | Same r = β·2^α invariant governs MPS simulation | **established, cited** | Dang et al. §4: α = trailing zeros, β = odd part "cannot be localised"; §5.2: memory ∝ β² |
 | C20 | N=15 is a degenerate benchmark **for every base**, forced by the modulus | **established, strengthened** | 100% of its bases free; smallest product of two Fermat primes |
