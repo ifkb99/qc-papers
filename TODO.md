@@ -333,35 +333,41 @@ designed".
 1.000), so residual *non-linear* structure remains after the linear structure is
 destroyed. Unidentified — a natural next thread.
 
-## 11. `[ ]` Identify the residual non-linear structure — THE LIVE THREAD
+## 11. `[x]` Identify the residual non-linear structure — SOLVED (C33, C34, C35)
 
-**Why first:** the only open scientific question in Paper B (its open problem
-5), and closing it completes the density story: ½ = linear structure (C30),
-1.000 = structureless, 0.716 = unexplained. A cheap entry point appeared on
-2026-08-08.
+**The residue is a conditional linear structure with an exact ¾ density cap.**
+See `NOTES.md` §AF and §RS; files `experiment_affstruct.py`,
+`experiment_resid1.py`, `experiment_resid2.py`. Density story now complete:
+½ = linear structure (C30), ¾ = conditional structure (C34), no forced cap =
+two independent nonlinear monomials, 1.000 = structureless.
 
-**Start at function level, not circuit level.** §I's unpursued observation is
-the lead: the real r=6 table gives density exactly 0.500 on even t (re-verified
-at t=24), a clean factor-of-two deficit with no circuit, no ancillas, no
-reduction discipline involved. So structure of this kind lives partly in the
-arithmetic itself, and WHTs of period-r tables cost milliseconds against
-15-qubit pullbacks.
+How the planned sequence resolved:
 
-Sequence, cheapest-decisive first:
+1. **Affine structures** — counting lemma: density > ½ forbids linear AND
+   affine structures, so the circuit half was settled without measurement.
+   At function level the finder explained §I's exact-0.500 rows outright:
+   all-ones structures (r=6 AFFINE, r=3 LINEAR, r=10 negative control clean),
+   PROVED with a three-ingredient criterion (C33).
+2. **Support complement** — it IS a recognisable set: the quadrant
+   {z_msb=1, z_anc=0} is exactly empty, 0 violations in 3/3 instances (C34).
+   Mechanism: t is restored between reductions, so the wraps are inert on the
+   t0=0 half-space (baseline structure survives conditionally, proved) and
+   degenerate to CNOTs on the t0=1 half (the structure rotates, verified,
+   rather than breaks).
+3. **Weight profile** — mooted; the structure was identified without it.
+4. **Stacking** — decisive and surprising: v4/v5/v45 inject the same monomial
+   msb∧t0 and all sit at the same ¾ cap; a second independent monomial (v3x)
+   removes the cap (density 0.98). The residue tracks independent nonlinear
+   monomials, not wrap count. Bonus, derived from C29 then verified: the
+   broken variant keeps C15 constancy exactly (C35) — the ~51% penalty does
+   not forfeit the free exponent register.
+5. **0.716 the constant** — closed: instance-dependent and width-dependent;
+   it is a finite-size snapshot of the approach to ¾ (98.9% of cap at
+   n_exp=6, beside the baseline at 98.7% of ½).
 
-1. **Affine structures.** Extend `gf2_rank_and_kernel` to catch w with
-   `g(y⊕w) = g(y) ⊕ 1` — these constrain the support but are invisible to the
-   current rank test. Run on the broken circuit variants *and* the
-   function-level tables.
-2. **Support complement.** If the missing ~28% forms a recognisable set
-   (a coset, a weight band, a subspace union), that names the constraint.
-3. **Weight profile** vs the binomial baseline (`experiment_weight.py`
-   machinery exists).
-4. **Stack independent Toffoli conjugations.** If density saturates below 1,
-   the residue is intrinsic to the arithmetic rather than the reduction.
-5. The "is 0.716 a recognisable constant" question is half-answered
-   (23464/32768 at N=5 vs 23488/32768 at N=7 — not an exact rational); close
-   it formally.
+Left open (logged in §RS): the live quadrants sit at 0.91–0.98, below the
+generic ~0.995 — a smaller, deeper deficit, presumably further conditional
+levels. The general 1 − 2^−(k+1) ladder is a conjecture, not claimed.
 
 ## 12. `[ ]` Windowed / table-lookup arithmetic: apply the involution criterion
 

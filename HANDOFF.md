@@ -22,6 +22,12 @@ otherwise. Twelve of fifteen TODO items are closed. **One live thread**, below.
 
 ## THE LIVE THREAD — residual non-linear structure
 
+> **RESOLVED 2026-08-08 (post-handoff).** The residue is a **conditional
+> linear structure**: the support exactly avoids the quadrant
+> {z_msb=1, z_anc=0}, capping density at ¾. See `NOTES.md` §AF/§RS, claims
+> C33–C35 in `CLAIMS.md`, and TODO item 11. The section below is kept as the
+> state of knowledge at handoff time.
+
 ### What is known
 
 Modexp pullbacks carry a **linear structure** w = b_msb ⊕ anc: the GF(2) rank of
