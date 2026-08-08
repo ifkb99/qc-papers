@@ -85,31 +85,55 @@ Cite all three; do not let a referee find them first.**
 
 ---
 
-## 2. `[ ]` Weight-truncation as Fourier tail mass
+## 2. `[x]` Weight-truncation as Fourier tail mass — DONE, negative result
 
-**The biggest unexplored idea.** The Pauli weight of `Z^z` is `popcount(z)`,
-which *is* the Fourier degree of that coefficient. So for permutation circuits,
-**weight-truncation error is literally the Fourier tail mass** of the pulled-back
-bit function.
+**Outcome: the exact model does NOT extend to weight truncation, and weight
+truncation should not be used on reversible arithmetic.** See `NOTES.md` §W.
 
-Current work covers only coefficient-truncation (δ). Weight-truncation is the
-other standard PPS knob and is completely untouched — this roughly doubles the
-model's reach.
+- **W1** The naive identity is false. PPS truncates *incrementally*, so a
+  discarded term never branches and the result is not the truncated final
+  operator. The Fourier tail describes **terminal** truncation only. Both are
+  non-monotonic in k; incremental can be 400× better (k=3) or far worse (k=8).
+  This also retroactively sharpens the δ story (C14): non-monotonicity is not
+  only cancellation, it is truncation changing what subsequently branches.
+- **W2** Signed sums per weight level are large and alternating
+  (−0.500, −0.516, +0.117, …, −0.516, +0.297), cancelling only over all levels.
+  Any cutoff slices the cancellation. No usable k exists.
+- **W3** By contrast δ is exactly right: the `|c|>0.1` set (4 of 3086 terms)
+  sums to **exactly** ⟨O⟩ = −1.00000000 and the remaining 3082 sum to
+  **exactly** 0. Clean split.
+- **W4** The four dominant coefficients sit at weights **1, 2, 8, 9** — not all
+  low-degree, which is precisely why weight truncation cannot substitute for δ.
+  (Also corrects a misreading: the "292× low-weight enrichment" is just those two
+  0.5-magnitude coefficients; `k(99% mass)=11`, so the bulk is high-weight.)
 
-Concrete: measure mass-by-weight profiles for adder vs modexp vs the binomial
-profile of a random function; check whether the exact identity extends to
-weight-truncated PPS. Effort: days. Logged as R3 in `experiment_review.py`.
+Files: `experiment_weight.py`, `experiment_weight2.py`; `perm_pps.py` gained a
+`max_weight` argument.
 
-## 3. `[ ]` Prove the circuit-level C15 invariance
+**Subsumes step 8** (decode the dominant coefficients) — done as part of W4.
+
+## 3. `[~]` Prove the circuit-level C15 invariance — one lead tried and killed
 
 Paper B's soft centre. The valid-subspace argument **demonstrably does not
 cover it** — the added exponent qubits are live (each set in ≈7779/15549 support
 terms), so the support is relabelled, not confined.
 
-Most promising route: is the support confined to an *affine subspace*? That
-would also explain density → ½ exactly. Until this lands, Paper B reports an
-empirical regularity over five widths and two moduli — publishable but weaker
-than it reads.
+**Lead tried: the (z, z⊕e) pairing. REFUTED** (`experiment_pairing.py`,
+`NOTES.md` §W5). The support looked closed under XOR with each exponent qubit,
+which would have been a hard group-theoretic constraint. It holds exactly at
+n_exp=1 for **both** r=2 and r=6 and breaks at n_exp≥2 for both — an n_exp=1
+artifact, not r-dependent, not the mechanism.
+
+Remaining routes, untried:
+- Affine-subspace structure of the support (would also explain density → ½).
+- Track *which* terms are created and destroyed by the identity `u_a(ctrl, 1)`
+  blocks, rather than only the support size — the invariance must be a
+  bijection, so exhibit it.
+- Work in the valid/invalid subspace decomposition explicitly rather than on the
+  full space.
+
+Until this lands, Paper B reports an empirical regularity over five widths and
+two moduli — publishable but weaker than it reads.
 
 ## 4. `[ ]` Third modulus for C15
 
@@ -139,11 +163,15 @@ than the current binary power-of-two / not split?
 Every C15 figure is δ=0. Given C14's non-monotonicity, the practical claim needs
 checking at realistic δ before it can be offered as guidance.
 
-## 8. `[ ]` Decode the dominant coefficients
+## 8. `[x]` Decode the dominant coefficients — DONE inside step 2
 
-Which qubits/registers carry the 4 of 15493 Walsh coefficients that reproduce
-⟨O⟩ exactly (F13)? Would turn the aggressive-truncation rule from empirical to
-structural. Logged as R4 in `experiment_review.py`.
+For modexp N=5 the four dominant coefficients are `{x8,e13}` and `{x8}` at
+|c| = 0.5 (weights 2 and 1), plus a pair at |c| = 0.1465 (weights 8 and 9). They
+sum to exactly ⟨O⟩; the other 3082 sum to exactly 0. See `NOTES.md` §W3–W4.
+
+Still open: the two large coefficients are supported almost entirely on the
+x-register bit being measured plus one exponent qubit. Whether that generalises
+across N, a and observable is untested and would be cheap to check.
 
 ---
 

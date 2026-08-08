@@ -39,9 +39,19 @@ class PermPPSResult:
 
 
 def propagate_perm(circuit, zmask: int, delta: float = 0.0,
-                   max_terms: int = 4_000_000) -> PermPPSResult:
+                   max_terms: int = 4_000_000,
+                   max_weight: int | None = None) -> PermPPSResult:
     """Back-propagate the Z-type observable Z^zmask through a classical
-    reversible circuit, keeping only Z-strings (keys are z bitmasks)."""
+    reversible circuit, keeping only Z-strings (keys are z bitmasks).
+
+    `delta`      : coefficient truncation (drop |c| < delta)
+    `max_weight` : weight truncation (drop Pauli weight popcount(z) > k), the
+                   other standard PPS knob. For permutation circuits the Pauli
+                   weight of Z^z is popcount(z), which is exactly the Fourier
+                   DEGREE of that Walsh coefficient -- so weight truncation here
+                   is literally low-degree Fourier truncation of the pulled-back
+                   Boolean function.
+    """
     if not circuit.is_classical():
         bad = next(op[0] for op in circuit.logical
                    if op[0] not in ("x", "cnot", "toffoli"))
@@ -76,9 +86,12 @@ def propagate_perm(circuit, zmask: int, delta: float = 0.0,
                     new[zz] = new.get(zz, 0.0) + s
 
         if delta > 0:
-            terms = {z: v for z, v in new.items() if abs(v) >= delta}
+            new = {z: v for z, v in new.items() if abs(v) >= delta}
         else:
-            terms = {z: v for z, v in new.items() if abs(v) > 1e-13}
+            new = {z: v for z, v in new.items() if abs(v) > 1e-13}
+        if max_weight is not None:
+            new = {z: v for z, v in new.items() if z.bit_count() <= max_weight}
+        terms = new
 
         res.n_terms.append(len(terms))
         if len(terms) > max_terms:
