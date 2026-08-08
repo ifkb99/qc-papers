@@ -1,7 +1,7 @@
 # Handoff — pick up here
 
 Written for a session with **no prior context**. Read this first, then
-`NOTES.md`. Everything is committed; working tree clean at 14 commits.
+`NOTES.md`. Everything is committed; working tree clean at 16 commits.
 
 ---
 
