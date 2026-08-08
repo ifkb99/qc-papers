@@ -474,10 +474,24 @@ exponent support" partway through propagation, that is a real constant-factor
 win of 4× (α=1) to 8× (α=2) in peak memory, on top of everything else — and
 unlike δ-truncation it is **exact**, not approximate.
 
-First things to check: is exponent-support monotone under back-propagation
-(it is created by Toffoli controls on exp qubits — can a later gate remove it)?
-If not monotone, is it monotone on some sub-class of terms? A must-fail control
-is easy here: the β>1 case should show no such structure.
+> **The naive version is DEAD — answered the same day it was written, by
+> derivation, before any effort went into it.** Exponent support is **not
+> monotone** under back-propagation, so a term cannot be pruned when it
+> acquires it. Through `CCX(a,b,c)` the pullback of `Z_c` is
+> `½(Z_c + Z_aZ_c + Z_bZ_c − Z_aZ_bZ_c)`, and the pullback of `Z_aZ_c` is
+> `½(Z_aZ_c + Z_c + Z_aZ_bZ_c − Z_bZ_c)` — because `Z_a·Z_a = I`. Verified
+> exactly: `Z_aZ_c` produces the term `Z_c` with coefficient +0.50, carrying
+> **no** support on the control qubit a. A term with exponent support can
+> therefore lose it and go on to contribute, so zeroing it early is simply
+> wrong, not merely suboptimal.
+
+What survives the above: is there a *certificate* weaker than "has exponent
+support now" that predicts the final exponent support of a whole branch? The
+C23/C24 mechanism is known analytically (the tail is entered through a single
+parity bit), so the dead set is characterised at the END — the question is
+whether that characterisation can be pushed backwards through the propagation.
+Unclear, and much less likely to be cheap than it looked. A must-fail control
+is easy: the β>1 case should show no such structure.
 
 Related: the same framing applies to any input state via ⟨O⟩ = Σ_z c_z ∏ δ_i,
 so a partially-biased register interpolates between "free" and "carried".
