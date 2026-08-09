@@ -187,11 +187,32 @@ def build_claims_aggregate() -> str:
     return "\n".join(L) + "\n"
 
 
+def build_notes_aggregate() -> str:
+    """NOTES.md, kept as a generated aggregate. Around a hundred references to
+    it survive in claim files, historical experiment scripts and METHOD.md;
+    regenerating is cheaper and safer than rewriting those, and the experiment
+    scripts are records that should not be edited at all. The hot path is
+    notes/INDEX.md -- nobody needs to read this."""
+    rows = sorted(load(ROOT / "notes"), key=lambda r: str(r[0].get("code", "")))
+    pre = ROOT / "notes" / "_preamble.md"
+    L = [BANNER, "", "# PPS / Shor working notes — generated aggregate", "",
+         "**GENERATED from `notes/*.md` by `tools/reindex.py`.** Edit the",
+         "individual note, not this. It exists so that existing `NOTES.md §CODE`",
+         "references keep resolving.", ""]
+    if pre.exists():
+        L += [parse(pre)[1].strip(), ""]
+    for m, p in rows:
+        _, body = parse(p)
+        L += ["---", "", body.strip(), ""]
+    return "\n".join(L) + "\n"
+
+
 TARGETS = [
     (ROOT / "todo" / "INDEX.md", build_todo_index, ROOT / "todo"),
     (ROOT / "claims" / "INDEX.md", build_claims_index, ROOT / "claims"),
     (ROOT / "notes" / "INDEX.md", build_notes_index, ROOT / "notes"),
     (ROOT / "CLAIMS.md", build_claims_aggregate, ROOT / "claims"),
+    (ROOT / "NOTES.md", build_notes_aggregate, ROOT / "notes"),
 ]
 
 
