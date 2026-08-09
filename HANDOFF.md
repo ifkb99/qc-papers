@@ -10,20 +10,37 @@ be fast-forwarded into `main` whenever wanted.
 
 ---
 
-## → START HERE: the agreed next task is REFINING PAPER A AND PAPER B
+## → START HERE: REFINING PAPER A AND PAPER B (in progress)
 
-The experimental backlog is done. **The next session's job is editorial, not
-experimental**, and it was left at exactly this point deliberately.
+The experimental backlog is done. **The current job is editorial, not
+experimental.**
 
-Two questions were put to the user and are **still unanswered** — ask them
-before doing bulk work, because they change what "refine" means:
+**The two open questions were answered on 2026-08-08 and no longer need asking:**
 
-1. **Target venue / format?** arXiv preprint as-is, a journal with a length
-   limit, or a workshop. Current lengths: Paper A ~6,700 words / 12 sections,
-   Paper B ~5,000 / 12.
-2. **Order?** Paper A end to end, Paper B first, or one consistency pass across
-   both. The recommendation given was **Paper A first** — its structure changed
-   most on 2026-08-08.
+1. **Target venue / format.** Shape both papers **as if submitting to a
+   journal** — focused, every paragraph earning its place — but the likely
+   first destination is **arXiv**. The user has not published before.
+2. **Order.** **A consistency pass across both first, then Paper A end to end**,
+   then Paper B. Paper B uses Paper A's identity as Lemma 1, so changes to A
+   propagate into B.
+3. **The third paper** (compilation-dependence, C30–C41) stays **scattered as
+   caveats inside A and B** for now; revisit after the first two are submitted.
+
+**The consistency pass is DONE** (commits `184f49c` and its successor). It found
+**sixteen** defects, mostly 2026-08-08 edits applied in one place but not their
+mirror — see those commit messages for the itemised list. Table 1's arithmetic,
+all section cross-references, every claim ID against the ledger, and every
+reproducibility command were verified mechanically rather than by eye.
+
+**Remaining: Paper A end to end.** The three things flagged as worth attention:
+
+- **§9 "Demonstration of reach"** is eight lines that say "there is a companion
+  paper". At journal length that is a sentence in §1 or §12, not a section.
+- **§11.1 / §11.2** are strong and load-bearing, but are where a length-conscious
+  editor points first. Decide deliberately whether they stay in-body.
+- **§4.4 Table 1** carries the paper, but its rot-PPS column stops at 17 qubits
+  while the text claims 30. That asymmetry is disclosed honestly in §11.1 —
+  check it is also disclosed *at the table*, not only 300 lines later.
 
 **What changed in the papers that day, so a fresh session does not re-derive it:**
 
@@ -49,8 +66,15 @@ things a referee would poke):
 - Paper B §6's table is six instances; α ≥ 5 is genuinely out of reach (needs
   r = 32, whose smallest instance is q = 32) and the text says so.
 - The **third paper** flagged below (compilation-dependence, C30–C41) is still
-  only a possibility, and its material is still scattered as caveats inside A
-  and B. Decide explicitly whether to extract it or leave it.
+  only a possibility, and its material is deliberately left scattered as caveats
+  inside A and B (decided 2026-08-08). A consequence worth tracking: **C33, C34
+  and C35 are now cited in neither paper** — three established claims with no
+  home. That is the Paper C material, and it is where to start if it is ever
+  extracted.
+- **Both papers now keep claim IDs out of the prose**, resolving them through an
+  Appendix A claim map. Paper B was converted to match Paper A on 2026-08-08; it
+  previously carried IDs in its section headings. Keep new text to that
+  convention.
 - `ABSTRACT.md` / `ABSTRACT_SHOR_2ADIC.md` are abstract workshops and prior-art
   dossiers, **not** superseded copies to edit in parallel. Prior-art text lives
   there; do not duplicate it into the papers.

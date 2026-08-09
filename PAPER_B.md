@@ -147,7 +147,7 @@ to over-claim. It oscillates with period ord₂(β): N = 7, a = 3 (r = 6) sits a
 exactly 0.500000 on even t including t = 24, while N = 21, a = 2 reaches
 1.000000 at t = 24.
 
-**There is no intermediate law (§I, negative result).** We looked for a
+**There is no intermediate law — a negative result.** We looked for a
 quantitative law in α interpolating the two branches and there is none. An
 apparent one at N = 323 (density 0.981 at t = 16 washing to 1.000 by t = 24) was
 **sampling aliasing**: t = 16, 20, 24 hit residues 4, 2, 0 mod ord₂(9) = 6 — three
@@ -519,11 +519,13 @@ uv run python -m experiments.experiment_windowed   # the windowed criterion (TOD
 uv run python test_claims.py                   # headline rows, pinned, ~15 s
 ```
 
-Every claim resolves to a row in `CLAIMS.md`. Headline rows are re-verified by an
-executable regression suite inside a nine-suite correctness gate. Experiments
-declare predictions *before* measurement and carry must-fail controls; the
-harness reports when a control fails to fail, which has caught at least one
-vacuous result.
+Every claim resolves, via the claim map of Appendix A, to a row in `CLAIMS.md`.
+Headline rows are re-verified by an executable regression suite
+(`test_claims.py`) inside a nine-suite correctness gate. Experiments declare
+predictions *before* measurement and carry must-fail controls; the harness
+reports when a control fails to fail, which has caught two vacuous results that
+had already produced confident-looking numbers — one of them a confinement test
+in this paper, discussed in §7.1.
 
 ---
 

@@ -21,16 +21,17 @@ support and peak memory, and **proved** via a parity-reduction argument.
 ## Start here
 
 **`HANDOFF.md`** — if you are picking this up fresh, read that first. It states
-where things stand, the single open thread, how to get running, and what not to
-redo.
+where things stand, the open threads and their ranking, how to get running, and
+what not to redo.
 
 `METHOD.md` records how this work was actually conducted — the research loop,
 the failure modes hit, and the techniques that earned their keep. Worth reading
 before extending anything, since several of the lessons cost real time.
 
 `CLAIMS.md` is the single source of truth for claim statuses (C-numbers,
-F-numbers, and the retracted/dead ones). Both abstracts point at it rather than
-carrying ledgers of their own.
+F-numbers, and the retracted/dead ones). Both papers point at it rather than
+carrying ledgers of their own; each keeps identifiers out of its prose and
+resolves them through its Appendix A claim map.
 
 `NOTES.md` is the working record — conventions, verified results, retracted
 claims, traps, and an honesty log of everything believed and then killed. Read
@@ -44,6 +45,10 @@ Python 3.14 via `uv`. Run everything from this directory:
 ```bash
 uv run python test_core.py          # correctness gate -- run first, always
 ```
+
+**Use 3.12 or 3.13 for long `perm_pps` jobs.** CPython 3.14 dies intermittently
+on them with `Fatal Python error: _TAIL_CALL_CACHE` — an interpreter bug, not a
+bug in this code. It presents as a hang or a death with no traceback.
 
 Only `numpy` is required. Optional: `cupy-cuda13x` enables the CUDA backend —
 set `LAB_GPU=1` to use it (7–15× on the large sweeps; see `accel.py`).
@@ -72,7 +77,7 @@ peaks at y = 0, 4, 8, 12 with p = 0.25 each (r = 4).
 | `pauli.py` | symplectic Pauli algebra, the single rotation/conjugation rule |
 | `circuits.py` | `Circuit` as (σ,θ) list + logical trace; gate decompositions; Cuccaro adder; QFT |
 | `pps.py` | rotation-level Pauli propagation with δ-truncation |
-| `perm_pps.py` | permutation-native PPS — stays Z-type throughout, 2× lower peak, ~10× faster |
+| `perm_pps.py` | permutation-native PPS — stays Z-type throughout, ~2× lower peak (exactly `2·perm − \|B\|`, Paper A §5), ~10× faster |
 | `walsh.py` | permutation extraction, FWHT, pullback coefficients, sparsity, affineness |
 | `statevec.py` | O(2ⁿ)-per-gate state-vector simulation (batched) |
 | `modexp.py` | Beauregard (Fourier-arithmetic) modular exponentiation |

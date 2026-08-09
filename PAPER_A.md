@@ -121,8 +121,8 @@ stated: for permutation circuits with computational-basis observables, the
 Pauli-spectrum/Boolean-Fourier analogy becomes an *exact identity*, and that
 identity is a cost model. What we claim is that composition and what follows
 from it — compilation invariance, the affine explanation of adder collapse,
-permutation-native propagation and its near-exact factor of two, the cryptanalytic
-transfer, and the structural caps of §6. We are explicit in §10 about which
+permutation-native propagation and the exact peak relation it yields, the
+cryptanalytic transfer, and the structural caps of §6. We are explicit in §10 about which
 ingredients are prior art.
 
 ---
@@ -661,7 +661,7 @@ the analogy becomes an identity, and its use as a cost model.
   Clifford-only and cannot express one. (Checked at source; documentation was
   misleading in two cases.) See also the framework paper arXiv:2505.21606.
 
-**On C1/C6.** That permutation circuits preserve the diagonal Pauli subalgebra
+**On Z-closure.** That permutation circuits preserve the diagonal Pauli subalgebra
 is elementary, and its ingredients are folklore in the stabilizer literature. A
 targeted search found no prior statement of it *as a simulation cost mechanism*.
 We present it as elementary-but-unstated rather than as a discovery.
@@ -727,12 +727,24 @@ wrong mechanism is a failure, and is logged as one.
 
 ### 11.3 Reproducibility
 
-Every quantitative claim in this paper carries an ID resolving to a row in
-`CLAIMS.md`, which records status, evidence and location. The headline rows are
-re-verified by an executable regression suite (`test_claims.py`) that runs as
-part of a nine-suite correctness gate. Experiments declare their predictions
-*before* measurement and carry must-fail controls; the harness reports a test in
-which the control failed to fail, which has caught at least one vacuous result.
+```
+uv run python -m experiments.experiment_c8            # the identity, 6/6 instances
+uv run python -m experiments.experiment_scope         # scope: Z-type yes, X/Y no; truncation
+uv run python -m experiments.experiment_c17_deficit   # the peak relation of §5, 9/9
+uv run python -m experiments.experiment_crypto        # the nonlinearity bound of §8
+uv run python -m experiments.experiment_gf2law        # the conditional-structure law of §6.2
+uv run python -m experiments.experiment_reduction2    # the compilation cost of §6.3
+uv run python test_claims.py                          # headline rows, pinned, ~15 s
+```
+
+Every quantitative claim in this paper resolves, via the claim map of Appendix
+A, to a row in `CLAIMS.md`, which records status, evidence and location. The
+headline rows are re-verified by an executable regression suite
+(`test_claims.py`) that runs as part of a nine-suite correctness gate.
+Experiments declare their predictions *before* measurement and carry must-fail
+controls; the harness reports a test in which the control failed to fail, which
+has caught two vacuous results that had already produced confident-looking
+numbers.
 
 ---
 
@@ -761,11 +773,14 @@ diagonal and the exact model stops.
 
 The working ledger `CLAIMS.md` records every claim's status, evidence and
 location, and is supplied as supplementary material. Inline identifiers are
-kept out of the prose; this table is the mapping.
+kept out of the prose; this table is the mapping. Identifiers prefixed
+*Paper B* have their rows in the companion paper's section of the ledger; those
+listed against §11.2 are **retracted** rows, cited there as the record of what
+was withdrawn and not as support for anything.
 
 | section | claims |
 |---|---|
-| 1.1 What is being predicted, and for which task | C42 |
+| 1.1 What is being predicted, and for which task | Paper B: C42 |
 | 3.1 Statement and proof | C8 |
 | 3.2 Which Boolean function — a definition that must be stated precisely | C8 |
 | 3.3 Scope: exactly where this holds and where it stops | C6, C13 |
@@ -773,13 +788,13 @@ kept out of the prose; this table is the mapping.
 | 4.2 Affine collapse is exactly sparsity one | C10 |
 | 4.3 A cost model at O(2ⁿ n) | C11 |
 | 4.4 The instances (Table 1) | C8, C10, C17, C44 |
-| 5. Peak versus final cost, and permutation-native propagation | C17, C18, C44 |
-| 6.1 Linear structures cap the density | C7, C30, C31 |
-| 6.2 A conditional generalisation | C40, C41 |
-| 6.3 A compilation choice with a real cost | C32 |
+| 5. Peak versus final cost, and permutation-native propagation | C17, C44; Paper B: C18 |
+| 6.1 Linear structures cap the density | Paper B: C7, C30, C31 |
+| 6.2 A conditional generalisation | Paper B: C40, C41 |
+| 6.3 A compilation choice with a real cost | Paper B: C32 |
 | 7. Truncation: what the model does and does not say | C5, C14, C16 |
 | 8. The cryptanalytic bridge | C12, C25, C26 |
-| 9. Demonstration of reach | C15 (developed in the companion paper) |
+| 9. Demonstration of reach | Paper B: C15 |
 | 10. Related work, and what is prior art | C1, C6 |
-| 11.1 What this does not do | C7, C40 |
+| 11.1 What this does not do | Paper B: C7, C40 |
 | 11.2 Retractions | C3, C4, C9, and the F- and H-rows of the ledger's retracted section |

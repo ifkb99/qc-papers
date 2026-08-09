@@ -53,7 +53,11 @@ re-verified by `test_claims.py`, which runs as part of the correctness gate.
 generic r — the original "results are pre-asymptotic" framing is retracted, see
 the Retracted section), C15 and C18 (both moved wholesale to Paper B), C30, C31
 and C32 (the density-½ linear structure and the one compilation-dependent cost
-effect).
+effect), **C40 and C41** (the conditional-structure law and its parity
+condition, presented in `PAPER_A.md` §6.2 — filed below only because they were
+found during the Paper B residue work, and a candidate to move if the two
+ledgers are ever split), and **C42** (the inert-support fraction, cited in
+`PAPER_A.md` §1.1 to state what the cost model does *not* claim).
 
 Paper A's ledger stated C30 and C32 in their general, cost-model form; those
 statements are preserved verbatim in the trailing notes of the corresponding
