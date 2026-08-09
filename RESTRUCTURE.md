@@ -1,8 +1,31 @@
 # Restructure plan — context, drift, and the shape of the repo
 
 *Written 2026-08-08, after a session that fixed sixteen consistency defects
-across the two paper drafts and the ledger. This document is the plan; nothing
-in it has been executed yet.*
+across the two paper drafts and the ledger.*
+
+> **STATUS: EXECUTED 2026-08-08.** All four phases are done; this document is
+> kept as the rationale, not as a to-do. Outcomes against §10's criteria:
+>
+> | criterion | target | measured |
+> |---|---|---|
+> | cold-start orientation | < 5,000 tok | **4,912** (was 16,769) |
+> | working one item | ≈ 9,000 tok | **≈ 9,000** |
+> | `check.py` fails on a reintroduced defect | must | **verified on three** |
+>
+> Counts landed as predicted for claims (44 live + 19 retracted) but not for
+> the other two: TODO had **29** items, not 20, because nine were loose
+> Housekeeping bullets; NOTES had **42** sections, not 43, because one heading
+> is wrapped across two lines. Both are recorded in the migration commits.
+>
+> **Two decisions taken during execution that this plan did not anticipate.**
+> `CLAIMS.md` and `NOTES.md` were kept as *generated aggregates* rather than
+> deleted — the papers cite `CLAIMS.md` as supplementary material, and roughly
+> a hundred references to `NOTES.md` live in claim files and in historical
+> experiment scripts that are records and should not be edited. Regenerating
+> costs nothing and every existing pointer keeps working. And `check.py` is
+> deliberately **not** one of the nine `test_*.py` suites: it gates
+> documentation, not science, and folding it in would change what "nine-suite
+> correctness gate" means in the papers.
 
 **Operating assumption, decided 2026-08-08: sessions are SEQUENTIAL, one at a
 time.** No two agents work on this repo simultaneously. That decision removes

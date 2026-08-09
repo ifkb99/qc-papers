@@ -7,7 +7,7 @@ they say what was believed at the time, so a note may contain a status
 later superseded. Where a note disagrees with a claim file, the claim
 file wins.
 
-**42 investigations**
+**44 investigations**
 
 | code | date | outcome | subject | claims |
 |---|---|---|---|---|
@@ -24,6 +24,8 @@ file wins.
 | [F9](notes/F9-the-result-pps-term-count-walsh-sparsity.md) | - | solved | THE RESULT: PPS term count = Walsh sparsity, exactly | - |
 | [G](notes/G-the-theorem-generalises-todo-step-the-whole.md) | 2026-08-08 | superseded | THE THEOREM GENERALISES (TODO step 9). V²=id is the whole condition. | C15, C29 |
 | [GF](notes/GF-the-recurring-pattern-one-fact-two-corollaries.md) | - | record | THE RECURRING GF(2) PATTERN: one fact, two corollaries, one folklore gap | C15, C24, C30, C32, C33, C34, C36, C40, C41 |
+| [GPU](notes/GPU-cuda-backend-capacity-and-measurements.md) | 2026-08-08 | record | CUDA backend: what it buys, where it caps, and why the replay binds | - |
+| [HIST](notes/HIST-the-0716-residue-thread-as-it-stood.md) | - | solved | The 0.716-residue thread, as it stood at handoff (RESOLVED) | C30, C33, C34, C35 |
 | [I](notes/I-there-intermediate-adic-law-todo-step-answer.md) | - | negative | IS THERE AN INTERMEDIATE 2-ADIC LAW? (TODO step 6). No. Answer is negative. | C15 |
 | [L](notes/L-the-density-ceiling-explained-linear-structure.md) | - | solved | THE DENSITY-½ CEILING EXPLAINED: a linear structure from the reduction ancilla | C7, C12 |
 | [L2](notes/L2-step-resolved-the-standard-reduction.md) | - | solved | STEP 10 RESOLVED: the standard reduction is *accidentally* PPS-friendly | C7, C15 |

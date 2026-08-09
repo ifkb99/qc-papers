@@ -696,6 +696,170 @@ introduce an odd dependency.
 
 ---
 
+# GPU — read this before running anything slow
+
+The two hot paths (permutation replay, FWHT) are memory-bound array passes, and
+a CUDA backend gives **7–15×, growing with n**. This is already built, gated and
+wired in. It will save hours.
+
+```bash
+LAB_GPU=1 uv run python -m experiments.<name>     # that is the whole interface
+```
+
+- **`accel.py`** is the backend; **`test_accel.py`** (suite 9) gates it against
+  the CPU reference and skips cleanly with no card.
+- **Opt-in by design.** `walsh.py` stays the reference and is never silently
+  substituted. `LAB_GPU=1` routes `lab.measure.support` through the GPU; nothing
+  else changes behaviour.
+- **Measured** (RTX A4500): permutation replay 7.1× / 6.9× / **11.5×** at
+  q = 17 / 19 / 21 (29.3 s → 2.6 s at q = 21); FWHT 11.8× / 12.8× / **14.7×** at
+  2²⁴ / 2²⁶ / 2²⁸ (18.1 s → 1.2 s at 2²⁸).
+- **Capacity: n ≤ 30** on one 20 GiB card (`accel.MAX_QUBITS`); it raises rather
+  than thrashing past that. Measured: float64 FWHT at n = 30 needs 12 GiB and
+  fits; n = 31 needs 24 GiB and does not.
+- **The binding constraint is the REPLAY, not the transform** (found 2026-08-08
+  while doing TODO 12e). `idx ^= ((idx >> c) & 1) << t` keeps the array plus two
+  temporaries live, so an int64 index array needs ~24 GiB at n = 30 and fails.
+  Images are < 2ⁿ, so `accel._replay` builds it in **int32** for n ≤ 30 (~12
+  GiB), which is what makes a q = 30 circuit-level run possible at all. Gated
+  against the CPU int64 reference in `test_accel.py` [A]. A real q = 30 modexp
+  now takes ~14 min end to end.
+- **Does the second card scale it further? Only by +1 qubit, and there is a
+  cheaper way.** Memory doubles per qubit, so 40 GiB buys exactly one more than
+  20 GiB. A split would be genuinely easy — with the array halved by its top
+  bit, every FWHT level except the last is local to a half, and only the final
+  butterfly crosses cards — but +1 qubit is a poor return, so it is **not
+  implemented** (logged as TODO 12f).
+  **Use `wht_exact` / `pullback_support_exact` instead:** the FWHT of ±1 data is
+  *exactly integer-valued* (verified bit-for-bit), so int32 gives the same
+  answer in half the memory — the same +1 qubit, no complexity — **and it makes
+  the support test exact (≠ 0) rather than a magnitude threshold.** That second
+  property matters: it removes the thresholding artifact that otherwise makes
+  measured densities drift below their true value as n grows (see `NOTES.md`
+  §GF and `experiment_gf2law_scale.py`). Safe to n = 30, since intermediate
+  magnitudes are bounded by 2ⁿ and 2³⁰ < 2³¹.
+- The best use of the second card is **throughput**: two independent sweeps at
+  once, one per device, via `CUDA_VISIBLE_DEVICES=0` / `=1`. Zero new code —
+  and it is how 12e was actually run, two sweeps in parallel throughout. The
+  measurement cache is content-addressed, so concurrent writers cannot collide
+  and a later single-process run of the experiment replays everything for free.
+  That is the pattern to reuse: **warm the cache in parallel, then run the
+  experiment file once for the record.**
+- **Install is machine-specific.** `pyproject.toml` pins `cupy-cuda13x` to match
+  this machine's CUDA 13.3. On a CUDA 12 host swap to `cupy-cuda12x`; both were
+  tested and perform identically. Without cupy everything still works on CPU.
+- `accel.device_info()` prints what was detected; `accel.enabled()` tells you
+  whether `LAB_GPU` actually took effect.
+
+---
+
+---
+
+# HISTORICAL — the former live thread (RESOLVED; kept for context)
+
+> **RESOLVED 2026-08-08 (post-handoff).** The residue is a **conditional
+> linear structure**: the support exactly avoids the quadrant
+> {z_msb=1, z_anc=0}, capping density at ¾. See `NOTES.md` §AF/§RS, claims
+> C33–C35 in `CLAIMS.md`, and TODO item 11. The section below is kept as the
+> state of knowledge at handoff time.
+
+### What is known
+
+Modexp pullbacks carry a **linear structure** w = b_msb ⊕ anc: the GF(2) rank of
+the Walsh support is n−1, so the support lies in a hyperplane and density is
+capped at exactly ½. This explains why C7 saw density converge to 0.498 *from
+below* and never cross. Verified pointwise: `g(y ⊕ w) = g(y)`.
+
+It is forced by three things acting together (§L, §L2 of `NOTES.md`):
+(a) flipping the msb *is* adding 2^(m−1), which commutes with mod-2^m addition;
+(b) anc is coupled to msb only by XOR; (c) the msb is `b[n]` while the cswaps use
+`b[:n]`, so it never reaches the observed register.
+
+Breaking it needs **nonlinearity in the msb**. Conjugating the reduction with
+`toffoli(msb, t0, anc)` destroys it — full rank, density 0.473 → 0.716 — while
+still computing `a^e mod N` correctly.
+
+### The open question
+
+**The broken variants sit at 0.716–0.721, not 1.000. Random Boolean functions
+reach 1.000. So something non-linear survives after the linear structure is
+destroyed, and it is unidentified.**
+
+### Concrete things to try — **ALL FIVE ARE DONE. This is not a to-do list.**
+
+Resolved as TODO item 11 (C33–C35, `NOTES.md` §AF/§RS): affine structures found
+the mechanism, the support complement *is* a recognisable set (the empty
+quadrant), the weight profile was mooted, 0.716 turned out instance- and
+width-dependent rather than a constant, and stacking showed the residue tracks
+independent nonlinear monomials rather than wrap count.
+
+<details><summary>The original five, kept for the record</summary>
+
+1. **Is it another linear structure at higher order?** Check for *affine*
+   structures (w with `g(y⊕w) = g(y) ⊕ const`, not just `= g(y)`) — these also
+   constrain the support but are not caught by the rank test currently used.
+2. **Is the missing ~28% structured?** Look at the *complement* of the support.
+   If the absent z form a recognisable set (a coset, a weight band, a subspace
+   union), that names the constraint.
+3. **Weight profile.** Compare mass-by-weight of the broken variant against the
+   binomial baseline (machinery exists in `experiment_weight.py`). Deviation
+   would localise the structure by Fourier degree.
+4. **Is 0.716 a recognisable constant?** It was 23464/32768 at N=5 and
+   23488/32768 at N=7 — close but not equal, so probably not an exact rational.
+   Worth ruling in or out early.
+5. **Does more nonlinearity push it to 1.000?** Stack several independent
+   Toffoli conjugations. If density saturates below 1, the residue is intrinsic
+   to the arithmetic rather than to the reduction.
+
+</details>
+
+### Where the tools are
+
+> **Restructured 2026-08-08.** The patterns below now live in the `lab/`
+> package — `lab.gf2` (rank/kernel plus the affine-aware structure finder),
+> `lab.variants` (the wrap registry that replaced the copy-pasted `Variant`
+> subclasses, with `verify_correctness`), `lab.measure` (cached
+> support/density/peak), `lab.modarith`, `lab.nulls`, and `lab.harness`
+> (`Experiment`: predictions-before-measurement and must-fail controls,
+> enforced). Start new experiments from `experiments/TEMPLATE.py`. Finished
+> scripts moved to `experiments/` unchanged; run them as
+> `uv run python -m experiments.<name>`.
+
+- `walsh.py` — `pullback_coefficients`, `classical_permutation`, FWHT,
+  `walsh_sparsity`, `is_affine`.
+- `experiments/experiment_linstruct.py` — GF(2) rank + kernel extraction
+  (now `lab.gf2.rank_kernel`).
+- `experiments/experiment_reduction2.py` — the `Variant` subclass that injects
+  modified reductions while preserving correctness (now `lab.variants`).
+- `perm_pps.py` — permutation-native propagation, ~10× faster than
+  rotation-level, with `delta` and `max_weight` truncation.
+- `windowed_arith.py` — the two windowed modexp constructions (`WindowedModExp`
+  table-lookup, `SelectModExp` select-multiply with the `skip_zero` knob), plus
+  `replay` (single-basis-state image, for circuits too wide to hold a
+  permutation array) and `verify_modexp`. Gated by `test_windowed.py`.
+
+**Added 2026-08-08 — reach for these before writing new machinery:**
+
+- `lab.measure.support(qc, q, exact=True)` — the exact integer path (support
+  test is `!= 0`, no tolerance). Cached under its own key so exact and
+  thresholded results can be compared rather than silently swapped.
+- `lab.measure.stats(qc, q, masks=(w,))` — `count`, `density`, and per-mask
+  GF(2) parity counts **without moving the support to the host**. At q = 30 a
+  support is 4 GiB; a density sweep wants three scalars. `odd[w] == 0` is
+  exactly "w is a linear structure" (C30). Cached as JSON.
+- `accel.pullback_stats` / `accel._replay` — the backend for both. See the GPU
+  section for why the replay is int32.
+- **Peak-state extraction without a new propagator** (`experiment_c17_deficit`):
+  Heisenberg propagation of the *last m gates* IS the state after m steps, so
+  a peak Pauli set is obtained by running the existing verified `pps.propagate`
+  on a gate suffix, and a perm-level state by running `propagate_perm` on a
+  logical suffix. Writing a second propagator to inspect the first is exactly
+  how this project has been bitten before; do not.
+
+---
+
+---
+
 # I — IS THERE AN INTERMEDIATE 2-ADIC LAW? (TODO step 6). No. Answer is negative.
 
 N=323 (r = 144 = 16·9) had shown density 0.981 at t=16 rising to 1.000 at t=24,

@@ -38,24 +38,24 @@ cited as support**.
 | [C26](claims/C26.md) | A | established | The bound is weak away from the extremes |
 | [C27](claims/C27.md) | B | established | Invariance survives truncation: exact for terminal thresholding at every δ; peak cost unchanged under incremental |
 | [C28](claims/C28.md) | B | established | Accuracy degrades first for the wider circuit at aggressive δ |
-| [C29](claims/C29.md) | B | narrowed | ~~The theorem needs only V²=id~~ → The theorem needs V²=id plus each block being controlled on its own qubit; it covers any construction with an involutive repeated block so controlled |
+| [C29](claims/C29.md) | B | narrowed | ~~The theorem needs only V²=id~~ → The theorem needs V²=id plus each block being controlled on its own qubit; it covers any construction with an … |
 | [C30](claims/C30.md) | B | established | The ½ ceiling is a linear structure w = b_msb ⊕ anc, not an algorithmic constant |
 | [C31](claims/C31.md) | B | established | The structure is forced by (a) msb-flip commuting with mod-2^m addition, (b) XOR-only coupling to anc, (c) msb excluded from the cswaps |
 | [C32](claims/C32.md) | B | established | Breaking it needs nonlinearity in the msb, and costs ~51%: density 0.473 → 0.716 |
-| [C33](claims/C33.md) | B | proven | The exact-½ function-level densities (§I's "non-generic" rows) are exact all-ones structures: complementing every exponent bit acts as c ↦ (ρ−1−c) mod r with ρ = 2^t mod r, exact when the bit table is antipodal (prime N, even r ⟹ a^(r/2)≡−1) and/or inversion-symmetric (bit_j(x)=bit_j(x⁻¹)) |
-| [C34](claims/C34.md) | B | proven | A single nonlinear monomial msb∧t0 does not destroy the linear structure — it demotes it to a conditional one: support exactly avoids the quadrant {z_msb=1, z_anc=0}, capping density at ¾; the 0.716→0.742 trajectory is the approach to that cap. Two independent monomials remove the cap (density 0.98) |
+| [C33](claims/C33.md) | B | proven | The exact-½ function-level densities (§I's "non-generic" rows) are exact all-ones structures: complementing every exponent bit acts as c ↦ (ρ−1−c) … |
+| [C34](claims/C34.md) | B | proven | A single nonlinear monomial msb∧t0 does not destroy the linear structure — it demotes it to a conditional one: support exactly avoids the quadrant … |
 | [C35](claims/C35.md) | B | proven | Breaking the linear structure and C15 constancy are independent: the broken variant keeps support exactly constant in n_exp |
-| [C36](claims/C36.md) | B | established | The general criterion is affine control: V²=id is necessary but not sufficient; the identity-tail block's dependence on the exponent register must be affine — identity (one fresh control qubit) or constant (uncontrolled) qualify, OR does not |
-| [C37](claims/C37.md) | B | derived | In table-lookup (Gidney-style) modexp the identity tail is dead, not merely constant: support confined to z_exp on bits {0…α−1}, containing no z with any tail bit set — strictly sharper than C24 |
-| [C38](claims/C38.md) | B | derived | For that construction the invariance is bounded and 2-periodic in the tail-window count, not exactly constant, because the tail applies W unconditionally and W²=id |
-| [C39](claims/C39.md) | B | derived | The cause is emitting the multiply-by-1 branch, not windowing: at w = 1 (no window at all) the lookup form still has a dead tail, and skipping j = 0 (`SelectModExp`) removes the β=1 advantage entirely — density pinned at C30's ½ cap, i.e. generic β>1 behaviour |
-| [C40](claims/C40.md) | B | derived | Conditional-structure law. If f restricted to each cell of a coset partition has linear structure w_u, then supp(f̂) avoids E = {z : w_u·z = 1 ∀u}, so density ≤ 1 − 2^−d with d = dim span{w_u} |
+| [C36](claims/C36.md) | B | established | The general criterion is affine control: V²=id is necessary but not sufficient; the identity-tail block's dependence on the exponent register must be … |
+| [C37](claims/C37.md) | B | derived | In table-lookup (Gidney-style) modexp the identity tail is dead, not merely constant: support confined to z_exp on bits {0…α−1}, containing no z with … |
+| [C38](claims/C38.md) | B | derived | For that construction the invariance is bounded and 2-periodic in the tail-window count, not exactly constant, because the tail applies W … |
+| [C39](claims/C39.md) | B | derived | The cause is emitting the multiply-by-1 branch, not windowing: at w = 1 (no window at all) the lookup form still has a dead tail, and skipping j = 0 … |
+| [C40](claims/C40.md) | B | derived | Conditional-structure law. If f restricted to each cell of a coset partition has linear structure w_u, then supp(f̂) avoids E = {z : w_u·z = 1 ∀u}, … |
 | [C41](claims/C41.md) | B | derived | Consistency of that system is a parity condition: any dependency among the w_u with odd support makes E empty and destroys the cap entirely |
-| [C42](claims/C42.md) | B | derived | For the real Shor input state (exponent register in |+⟩, so δ=0 there) every z with exponent support contributes exactly 0, giving a useful fraction of exactly 2^−(α+1) — cost and useful work are both constant in n_exp |
-| [C43](claims/C43.md) | B | derived | C24 holds at set level, not merely in cardinality: encode each support element as (z_rest, tailflag) with tailflag saying whether z_I = 0 or 1_I; the set of pairs is identical at consecutive widths |
-| [C44](claims/C44.md) | A | derived | The peak ratio is exact, not empirical: N_max^rot = 2·N_max^perm − |B| with B = {z ∈ S : z_c = 0}, S the permutation-native peak set and c the target of the Toffoli gadget containing the rotation-level peak. The deficit is a countable set, not a constant |
+| [C42](claims/C42.md) | B | derived | For the real Shor input state (exponent register in |+⟩, so δ=0 there) every z with exponent support contributes exactly 0, giving a useful fraction … |
+| [C43](claims/C43.md) | B | derived | C24 holds at set level, not merely in cardinality: encode each support element as (z_rest, tailflag) with tailflag saying whether z_I = 0 or 1_I; the … |
+| [C44](claims/C44.md) | A | derived | The peak ratio is exact, not empirical: N_max^rot = 2·N_max^perm − |B| with B = {z ∈ S : z_c = 0}, S the permutation-native peak set and c the target … |
 | [F12](claims/F12.md) | B | established | Function-level dichotomy is absolute |
-| [dictionary-biased-product-input-state-ma](claims/dictionary-biased-product-input-state-ma.md) | B | established | Dictionary: a biased product input state makes ⟨O⟩ = Σ_z c_z ∏_{i∈z} δ_i, i.e. exactly the p-biased WHT of Gangopadhyay et al. (JAMC 2023) with δ_i = ⟨Z⟩_i |
+| [dictionary-biased-product-input-state-ma](claims/dictionary-biased-product-input-state-ma.md) | B | established | Dictionary: a biased product input state makes ⟨O⟩ = Σ_z c_z ∏_{i∈z} δ_i, i.e. exactly the p-biased WHT of Gangopadhyay et al. (JAMC 2023) with δ_i = … |
 | [superseded-the-residual-ladder-the](claims/superseded-the-residual-ladder-the.md) | B | established | Superseded (§RS): the residual ladder is 1 − 2^−(k+1) in the conditioning depth k |
 
 ## Retracted / dead — do not cite as support

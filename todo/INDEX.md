@@ -5,7 +5,7 @@
 One item per file. State is the directory it lives in: moving a file
 between `open/` and `done/` is how state changes.
 
-**7 open · 22 done**
+**6 open · 23 done**
 
 ## Open
 
@@ -17,7 +17,6 @@ between `open/` and `done/` is how state changes.
 | [14](todo/open/14-through-the-inverse-qft-the-frontier.md) | Through the inverse QFT |
 | [hk3](todo/open/hk3-experiment-experiment2-and-all-experiment3.md) | experiment.py §3, experiment2.py §§2–3 and all of experiment3.py |
 | [hk7](todo/open/hk7-six-more-dependencies-are-also-unused.md) | Six more dependencies are also unused |
-| [hk9](todo/open/hk9-structure-files-decreace-their-context.md) | Structure files to decreace their context |
 
 ## Done
 
@@ -45,3 +44,4 @@ between `open/` and `done/` is how state changes.
 | [hk5](todo/done/hk5-split-claims-into-separate-file-keep.md) | Split claims into a separate file to keep a single source of truth | - |
 | [hk6](todo/done/hk6-check-julia-and-dependencies-are-still.md) | Check if julia and dependencies are still needed | - |
 | [hk8](todo/done/hk8-gpu-acceleration-done-2026.md) | GPU acceleration | DONE 2026-08-08 |
+| [hk9](todo/done/hk9-structure-files-reduce-their-context.md) | Structure files to reduce their context | DONE 2026-08-08 — one fact one home, generated indexes, executable checks |
