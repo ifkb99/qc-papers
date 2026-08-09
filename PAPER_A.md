@@ -44,10 +44,10 @@ N_max^rot = 2·N_max^perm − |B|, where B is the set of peak-time Pauli strings
 missing the target qubit of the Toffoli gadget in which the peak falls. B is
 empty for ripple-carry adders, giving exactly 2; for modular exponentiation with
 the standard observable it has two elements, and those two are precisely the
-dominant Walsh coefficients of the pulled-back function. **(iv)** Walsh sparsity and nonlinearity are
-the same object linear cryptanalysis studies, giving a transfer: any published
-nonlinearity lower-bounds PPS cost for *every* circuit computing that function,
-with no simulation.
+dominant Walsh coefficients of the pulled-back function. **(iv)** Walsh sparsity
+and nonlinearity are the same object linear cryptanalysis studies, giving a
+transfer: any published nonlinearity lower-bounds PPS cost for *every* circuit
+computing that function, with no simulation.
 
 The quantity the model computes is the size of the **Heisenberg representation
 PPS maintains** — its memory footprint — not the difficulty of the expectation
@@ -699,7 +699,7 @@ arithmetic constructions used.
 
 ### 11.2 Retractions
 
-Two substantial claims were made and withdrawn during this work; both are
+Three substantial claims were made and withdrawn during this work; all are
 recorded because the reasons are instructive.
 
 1. **"Compilation, not algorithm, determines Pauli-path simulability."** The
@@ -713,9 +713,12 @@ recorded because the reasons are instructive.
 
 3. **"Permutation-native propagation halves peak memory exactly."** The factor
    is 2.000000 for adders but 1.9997 for modular exponentiation; the phrase was
-   written from a table rounded to one decimal place. Corrected in §5, where the
-   claim is now an upper bound of 2 with the measured values given. The
-   `rot = 2·perm − 2` regularity in 3/3 modexp instances remains unexplained.
+   written from a table rounded to one decimal place. Corrected in §5. The
+   `rot = 2·perm − 2` regularity in 3/3 modexp instances was recorded here as
+   unexplained through several revisions of this paper; it is now derived from
+   the Toffoli gadget as Proposition 2, and the deficit is a set rather than a
+   constant. What remains unproved is only that that set has exactly two
+   elements for the standard observable, which §5 states as a measurement.
 
 A further correction is methodological and worth stating: the collapse of adders
 was originally explained by permutation-ness. That conclusion was right and the
@@ -727,7 +730,7 @@ wrong mechanism is a failure, and is logged as one.
 Every quantitative claim in this paper carries an ID resolving to a row in
 `CLAIMS.md`, which records status, evidence and location. The headline rows are
 re-verified by an executable regression suite (`test_claims.py`) that runs as
-part of an eight-suite correctness gate. Experiments declare their predictions
+part of a nine-suite correctness gate. Experiments declare their predictions
 *before* measurement and carry must-fail controls; the harness reports a test in
 which the control failed to fail, which has caught at least one vacuous result.
 
@@ -762,15 +765,21 @@ kept out of the prose; this table is the mapping.
 
 | section | claims |
 |---|---|
+| 1.1 What is being predicted, and for which task | C42 |
 | 3.1 Statement and proof | C8 |
 | 3.2 Which Boolean function — a definition that must be stated precisely | C8 |
 | 3.3 Scope: exactly where this holds and where it stops | C6, C13 |
 | 4.1 Compilation invariance | C1, C2, C6 |
 | 4.2 Affine collapse is exactly sparsity one | C10 |
-| 5. Peak versus final cost, and permutation-native propagation | C17, C18 |
+| 4.3 A cost model at O(2ⁿ n) | C11 |
+| 4.4 The instances (Table 1) | C8, C10, C17, C44 |
+| 5. Peak versus final cost, and permutation-native propagation | C17, C18, C44 |
 | 6.1 Linear structures cap the density | C7, C30, C31 |
 | 6.2 A conditional generalisation | C40, C41 |
 | 6.3 A compilation choice with a real cost | C32 |
 | 7. Truncation: what the model does and does not say | C5, C14, C16 |
 | 8. The cryptanalytic bridge | C12, C25, C26 |
+| 9. Demonstration of reach | C15 (developed in the companion paper) |
 | 10. Related work, and what is prior art | C1, C6 |
+| 11.1 What this does not do | C7, C40 |
+| 11.2 Retractions | C3, C4, C9, and the F- and H-rows of the ledger's retracted section |

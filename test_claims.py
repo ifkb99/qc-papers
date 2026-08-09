@@ -1,5 +1,5 @@
 """Claims regression -- cheap executable reproductions of the headline
-results in CLAIMS.md, pinned to the exact logged numbers. Suite 7 of the
+results in CLAIMS.md, pinned to the exact logged numbers. Suite 7 of 9 in the
 correctness gate.
 
 Until this file existed, only the *infrastructure* had regression protection;

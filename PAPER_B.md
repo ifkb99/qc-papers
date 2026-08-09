@@ -3,9 +3,9 @@
 **Ian Baker**
 
 *Draft v1, 2026-08-08. Companion to `PAPER_A.md`, whose identity is used here as
-an instrument (§3). Every quantitative claim carries its ledger ID from
-`CLAIMS.md`, the single source of truth for claim status. Numbers are
-post-bugfix; see §12.2.*
+an instrument (§3). Claim identifiers are kept out of the prose and collected in
+Appendix A; the working ledger `CLAIMS.md` is supplementary material and is the
+single source of truth for claim status. Numbers are post-bugfix; see §12.2.*
 
 ---
 
@@ -23,10 +23,10 @@ of the exponent-register width when β = 1**, and measure it to be Θ(2ⁿ) with
 density bounded away from zero otherwise. The invariance has an exact onset at
 n_exp = α + 1. In a controlled design that fixes the modulus, ancilla layout,
 gate structure and observable and varies only the base — so that r alone changes
-— the support for N = 7, a = 6 (r = 2) is *exactly* 15549 terms and peak memory
-*exactly* 24369 terms across a 64-fold growth in Hilbert-space dimension, while
-a = 3 (r = 6) grows by a clean factor of 4.00 per two added qubits. It reproduces
-at N = 21 and N = 5.
+— the support for N = 7, a = 6 (r = 2) is *exactly* 15549 terms across a 64- to
+256-fold growth in Hilbert-space dimension, and peak memory *exactly* 24369
+terms across a 64-fold growth, while a = 3 (r = 6) grows by a clean factor of
+4.00 per two added qubits. It reproduces at N = 21 and N = 5.
 
 The circuit-level mechanism is **proved**, not observed: every identity-tail
 block applies the same permutation V = u_a(·,1), which is an involution because
@@ -76,7 +76,7 @@ to a resource model that extrapolates from circuit size.
 idealised bit function is elementary (§4). The circuit-level statement is the
 substantive one, and its mechanism is proved (§7) rather than inferred from the
 measurements (§5, §6). We are explicit throughout about which is which, and §12
-records two claims withdrawn along the way.
+records five claims withdrawn or narrowed along the way.
 
 ---
 
@@ -107,8 +107,9 @@ vary width and instance simultaneously are not admissible here.
 
 We use as a lemma the identity established in the companion paper.
 
-**Lemma 1 (Paper A, C8).** *For a circuit implementing a basis permutation π and
-a computational-basis observable Z_j, the pullback π†Z_jπ is the diagonal
+**Lemma 1 (Paper A, Theorem 1).** *For a circuit implementing a basis
+permutation π and a computational-basis observable Z_j, the pullback π†Z_jπ is
+the diagonal
 operator (−1)^{g(y)} with g(y) = bit j of π(y), its Pauli expansion is purely
 Z-type, and its coefficient vector is exactly the Walsh–Hadamard transform of
 (−1)^g. The number of Pauli terms PPS must carry is the Walsh sparsity of g.*
@@ -118,7 +119,7 @@ Two consequences make this paper possible.
 1. **Cost is computable without simulating.** We reach 30 qubits by computing
    spectra directly, where rotation-level propagation stalls near 17.
 2. **Peak memory is measurable at scale.** Propagating X, CNOT and Toffoli as
-   atomic permutations (Paper A, C17) keeps the expansion Z-type throughout and
+   atomic permutations (Paper A, §5) keeps the expansion Z-type throughout and
    makes the n_exp = 8 peak measurement tractable — 7.4 s at 21 qubits, against
    rotation-level propagation failing to finish 17 qubits in 20 minutes.
 
@@ -129,7 +130,7 @@ establishing it where it actually matters, at circuit level.
 
 ---
 
-## 4. The dichotomy at function level (F12)
+## 4. The dichotomy at function level
 
 Consider the idealised bit function g(e) = bit_j(a^e mod N) on t exponent bits.
 
@@ -164,7 +165,7 @@ not be used as a proxy for real ones.
 
 ---
 
-## 5. The dichotomy at circuit level (C15, C18)
+## 5. The dichotomy at circuit level
 
 Function-level behaviour need not survive compilation into a circuit with
 ancillas and scratch registers, and in this case the naive reason it might is
@@ -177,7 +178,7 @@ ancillas and scratch registers, and in this case the naive reason it might is
 | 6 | 2 (β=1) | **exactly 15549**, invariant over a 64–256× growth in dimension |
 | 3 | 6 (β=3) | grows by a factor **4.00 per two added qubits** |
 
-**Peak memory** (C18), the quantity that actually bounds a run:
+**Peak memory**, the quantity that actually bounds a run:
 
 | a | r | peak vs n_exp = 2, 4, 6, 8 |
 |---|---|---|
@@ -193,7 +194,7 @@ otherwise.
 
 ---
 
-## 6. The onset is exact (C21)
+## 6. The onset is exact
 
 The invariance does not hold from the smallest width; it switches on.
 
@@ -240,7 +241,7 @@ terms while density falls fourfold per two added qubits.
 
 ---
 
-## 7. The mechanism, proved (C23, C24)
+## 7. The mechanism, proved
 
 ### 7.1 The parity reduction
 
@@ -251,7 +252,7 @@ added qubits remain live. Constancy and liveness looked to be in tension.
 
 They are not. The resolution:
 
-**Theorem 2 (C23).** *Write the identity-tail block as V := u_a(·, 1). Then
+**Theorem 2.** *Write the identity-tail block as V := u_a(·, 1). Then
 V = A⁻¹SA, where A is the multiply-accumulate and S the controlled swap layer.
 S is a product of **disjoint transpositions**, so S² = id, and therefore
 V² = id: V is an involution.*
@@ -264,7 +265,7 @@ does not modify. The blocks therefore commute and compose to V^p with*
 *a single parity bit. The circuit depends on the entire identity tail through one
 effective variable, however many qubits that tail spans.*
 
-**Corollary 3 (C24).** *Averaging the Walsh character over the tail confines the
+**Corollary 3.** *Averaging the Walsh character over the tail confines the
 support to z_I ∈ {0, 1_I} — two values regardless of tail length — so the support
 size carries no dependence on the number of exponent qubits.*
 
@@ -286,7 +287,7 @@ and 1556046 violations for the β > 1 controls.
 > carry no evidence, and a β > 1 control evaluated there *passes*. Only widths
 > with |I| ≥ 2 test anything. All counts quoted here are from such widths.
 
-**Corollary 3 is in fact stronger than a statement about size (C43).** Step
+**Corollary 3 is in fact stronger than a statement about size.** Step
 (iv) computes the surviving coefficient explicitly and the expression contains
 no |I|, so the supports at consecutive widths must coincide as *sets*, not
 merely in cardinality. Writing each element as (z_rest, tailflag) with the flag
@@ -311,7 +312,7 @@ moduli, while an order-3 block grows by roughly 2× per block, with a vacuity
 check confirming both genuinely act on the observed bit.
 
 > **We first stated this criterion as "V² = id is the entire condition". That is
-> too strong, and we correct it here (C29 → C36).** Every synthetic block we
+> too strong, and we correct it here.** Every synthetic block we
 > tested was controlled on exactly one fresh qubit, so the experiment could not
 > separate *"V is an involution"* from *"the control is a single qubit"*. The
 > second hypothesis is load-bearing. The correct statement is that the
@@ -319,7 +320,7 @@ check confirming both genuinely act on the observed bit.
 > the identity function (one fresh control qubit) and the constant function (no
 > control at all) both qualify; a nonlinear control such as OR does not.
 
-### 7.3 Windowed arithmetic (C36–C39)
+### 7.3 Windowed arithmetic
 
 The natural test of the criterion is windowed / table-lookup arithmetic, which is
 what is actually proposed for hardware. It is also where the correction above
@@ -359,7 +360,7 @@ one real remaining gap.
 
 ---
 
-## 8. Robustness to truncation (C27, C28)
+## 8. Robustness to truncation
 
 An exact-arithmetic invariance is of limited interest if it evaporates under the
 approximations a real run makes. It largely does not.
@@ -371,7 +372,7 @@ approximations a real run makes. It largely does not.
 - **Peak cost survives incremental truncation** — the truncation PPS actually
   performs. N_max is the *same* at every δ tested (24369 / 24369 / 1028 / 34).
   That is the quantity bounding memory.
-- **Accuracy has a limit (C28), and it must be stated.** The final term count
+- **Accuracy has a limit, and it must be stated.** The final term count
   drifts at aggressive δ (8 → 16 → 32) and ⟨O⟩ collapses to 0 at δ = 10⁻¹ for the
   wider circuits while n_exp = 3 stays exact. The wider circuit is *more fragile
   at the same δ* despite an identical exact spectrum, because it has more gates
@@ -386,11 +387,11 @@ The honest practical claim: **peak cost is free in the exponent register at ever
 
 For instances with an odd factor — the generic and cryptographically relevant
 case — Walsh density converges monotonically to one half: 0.473 → 0.4994 over 15
-to **30** qubits, growth **1.006 bits per qubit** (C7, two series varying the
+to **30** qubits, growth **1.006 bits per qubit** (two series varying the
 modulus at fixed exponent width). PPS cost is therefore Θ(2ⁿ), asymptotically no
 better than state-vector simulation.
 
-**The limiting constant of ½ is neither accidental nor algorithmic (C30, C31).**
+**The limiting constant of ½ is neither accidental nor algorithmic.**
 The support carries a linear structure w = b_msb ⊕ anc, pairing the accumulator's
 sign bit with the modular-reduction comparison ancilla, which confines it to a
 hyperplane. That a linear structure confines the Walsh support to a coset is
@@ -407,7 +408,7 @@ exhaustively, 0/256 violations); the comparison ancilla is coupled to that bit
 only by XOR; and the swap network excludes the msb entirely, so it never reaches
 the measured register.
 
-**Confirmed by substitution (C32).** Replacing the reduction with one that
+**Confirmed by substitution.** Replacing the reduction with one that
 couples the sign bit *nonlinearly* leaves the computed function unchanged but
 destroys the linear structure and raises density from 0.473 to 0.716 — a cost
 increase of roughly one half from a pure compilation choice, and the only such
@@ -419,7 +420,7 @@ it needs to be, for a reason nobody designed.
 
 ## 10. Two corollaries about instances
 
-### 10.1 N = 15 is degenerate by construction (C20, C22)
+### 10.1 N = 15 is degenerate by construction
 
 Every order divides the Carmichael function λ(N). So if λ(N) is a power of two,
 *every* base lies in the free branch — and λ(N) is a power of two exactly when N
@@ -435,7 +436,7 @@ property that makes 15 the natural smallest example is the same one that makes i
 uninformative as a benchmark. Simulation results on N = 15 should not be
 extrapolated.
 
-### 10.2 Most of the support is inert for the real input state (C42)
+### 10.2 Most of the support is inert for the real input state
 
 Shor's actual initial state puts the exponent register in |+⟩. Since ⟨Z⟩ = 0
 there, *every* Pauli term with support on the exponent register contributes
@@ -453,7 +454,7 @@ irrelevant to the answer.
 
 ---
 
-## 11. Cross-method corroboration (C19)
+## 11. Cross-method corroboration
 
 The same decomposition r = β·2^α governs matrix-product-state simulation of
 Shor's algorithm. Dang, Hill & Hollenberg (arXiv:1712.07311) give α as the number
@@ -495,7 +496,7 @@ would make it hard to argue with, and remains open (§13).
 2. **"Support is confined to the low exponent bits."** Disproved: the added
    qubits are live in about half the support terms. Superseded by Corollary 3.
 3. **"The (z, z⊕e) pairing is the mechanism."** Disproved: an n_exp = 1 artifact.
-4. **"V² = id is the entire condition" (C29).** Narrowed, §7.2. Not wrong about
+4. **"V² = id is the entire condition".** Narrowed, §7.2. Not wrong about
    anything it tested; wrong about what it had tested — every block tested had
    exactly one control, so the experiment could not separate the two hypotheses.
 5. **An intermediate 2-adic law in α.** There is none; the apparent case was
@@ -519,7 +520,7 @@ uv run python test_claims.py                   # headline rows, pinned, ~15 s
 ```
 
 Every claim resolves to a row in `CLAIMS.md`. Headline rows are re-verified by an
-executable regression suite inside an eight-suite correctness gate. Experiments
+executable regression suite inside a nine-suite correctness gate. Experiments
 declare predictions *before* measurement and carry must-fail controls; the
 harness reports when a control fails to fail, which has caught at least one
 vacuous result.
@@ -538,7 +539,7 @@ vacuous result.
    and the cost story is already 2-adic. Whether there is an exact
    characterisation in a mixed character basis is the natural next question, and
    it may simply be dense and structureless.
-3. **Measurement-based uncomputation.** Gidney's unlookup is not unitary, so C8
+3. **Measurement-based uncomputation.** Gidney's unlookup is not unitary, so Lemma 1
    does not apply to it as written (§7.3). This is the one real gap in the
    windowed analysis.
 4. **Whether the MPS correspondence extends** to other contraction orders and
@@ -559,3 +560,28 @@ The criterion we extract is checkable rather than a family restriction, and
 applying it to the arithmetic people actually propose to run reveals both that
 the invariance survives — in a sharper form than we proved — and that a single
 obvious optimisation would destroy it.
+
+---
+
+## Appendix A — claim map
+
+The working ledger `CLAIMS.md` records every claim's status, evidence and
+location, and is supplied as supplementary material. Inline identifiers are
+kept out of the prose; this table is the mapping. Identifiers prefixed
+*Paper A* have their rows in the companion paper's section of the ledger.
+
+| section | claims |
+|---|---|
+| 3. The instrument | Paper A: C8, C17 |
+| 4. The dichotomy at function level | F12, C33 |
+| 5. The dichotomy at circuit level | C15, C18 |
+| 6. The onset is exact | C21 |
+| 7.1 The parity reduction | C23, C24, C43 |
+| 7.2 The criterion, and a correction to it | C29 (narrowed) → C36 |
+| 7.3 Windowed arithmetic | C36, C37, C38, C39 |
+| 8. Robustness to truncation | C27, C28 |
+| 9. The generic case, and what sets its constant | C7, C30, C31, C32 |
+| 10.1 N = 15 is degenerate by construction | C20, C22 |
+| 10.2 Most of the support is inert for the real input state | C42 |
+| 11. Cross-method corroboration | C19 |
+| 12.2 Retractions and corrections | C29, and the retracted rows of the ledger |

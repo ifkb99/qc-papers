@@ -1,7 +1,7 @@
 """Engine tests for lab/ -- every extracted helper is pinned to a number
 already logged in NOTES.md/CLAIMS.md before the extraction, so a refactor
 that changes behaviour fails against the historical record, not against
-itself. Part of the correctness gate (suite 6 of 7).
+itself. Part of the correctness gate (suite 6 of 9).
 """
 from __future__ import annotations
 import os

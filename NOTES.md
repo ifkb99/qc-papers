@@ -1172,11 +1172,19 @@ predicted first:
   cached under their own keys so exact and thresholded results can be
   compared rather than silently substituted.
 
-## DF — TODO 12g CLOSED NEGATIVELY: there is no cliff, and §OS4 is RETRACTED
+## DF — TODO 12g CLOSED NEGATIVELY: there is no cliff, and §OS4's CLIFF OBSERVATION is RETRACTED
 
 `experiments/experiment_c7_deficit.py`. **Three of its four predictions fail
 and the file exits nonzero; that is the result.** No new claim; §OS4's
-observation is withdrawn and TODO 12g closes.
+*hyperplane-deficit cliff* observation is withdrawn and TODO 12g closes.
+
+> **Scope of this retraction — read before following a pointer to §OS4.** What
+> dies here is one observation *inside* §OS4: the claimed cliff in
+> `D = 1 − 2·density` between n_exp = 2 and 3. **§OS4's C7 result is
+> untouched** — the 30-qubit circuit series, density 0.4728 → 0.49944, pooled
+> slope 1.0062 bits/qubit, and the bit-for-bit exact-integer reproduction all
+> stand, and `CLAIMS.md`'s C7 row correctly cites §OS4 for them. Do not read
+> the header as retracting the section.
 
 **What was asked.** §OS4 noticed that the missing fraction of the C30
 hyperplane, `D = 1 − 2·density`, dropped 8–11× between n_exp = 2 and 3 for
