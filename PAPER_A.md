@@ -2,10 +2,10 @@
 
 **Ian Baker**
 
-*Draft v2, 2026-08-08. The limitations and retraction material in §11 is
+*Draft v2, 2026-08-08. The limitations and retraction material in §10 is
 load-bearing and should survive to submission. Claim identifiers have been moved
 out of the prose into Appendix A; the working ledger `CLAIMS.md` is supplementary
-material. Numbers here are post-bugfix (see §11.2).*
+material. Numbers here are post-bugfix (see §10.2).*
 
 ---
 
@@ -122,7 +122,7 @@ Pauli-spectrum/Boolean-Fourier analogy becomes an *exact identity*, and that
 identity is a cost model. What we claim is that composition and what follows
 from it — compilation invariance, the affine explanation of adder collapse,
 permutation-native propagation and the exact peak relation it yields, the
-cryptanalytic transfer, and the structural caps of §6. We are explicit in §10 about which
+cryptanalytic transfer, and the structural caps of §6. We are explicit in §9 about which
 ingredients are prior art.
 
 ---
@@ -255,7 +255,7 @@ Z-type Pauli subalgebra (0 non-Z terms in each), because both implement the same
 basis permutation.
 
 > An earlier version of this work claimed the opposite — that compilation
-> determines simulability. It is retracted in full; see §11.2 for what killed it.
+> determines simulability. It is retracted in full; see §10.2 for what killed it.
 
 ### 4.2 Affine collapse is exactly sparsity one
 
@@ -306,7 +306,7 @@ satisfy `rot = 2·perm − 2` exactly**, while all four adder rows satisfy
 
 Four things to read off it. **(a)** Final *S* matches the propagated term count
 on every row — this is Theorem 1, and it is the support *set* that matches, not
-merely its size. **(b)** The two adder rows with *S* = 1 are the affine collapse
+merely its size. **(b)** The three adder rows with *S* = 1 are the affine collapse
 of §4.2, with Z(b₂) = 10 as the control that must not collapse. **(c)** The
 Walsh route is 143–219× faster than rotation-level propagation on the modexp
 rows, and the gap widens with size. **(d)** Density stays well below ½ — the
@@ -316,7 +316,7 @@ function.
 The largest instance reached by the Walsh route elsewhere in this work is **30
 qubits** (|S| = 536,271,623 for N = 143, exactly counted); propagation stalls
 near 17, which is why the table's rot-PPS column stops there. The asymmetry is
-noted in §11.1 rather than dressed up: the structural results are proved and do
+noted in §10.1 rather than dressed up: the structural results are proved and do
 not depend on instance size, and the circuit series now spans a 32768-fold
 range of Hilbert-space dimension.
 
@@ -427,7 +427,7 @@ The above has a natural extension we did not find stated, and which we present
 at corollary altitude: it follows from Proposition 29 plus the standard
 decomposition of the Walsh transform over a coset partition.
 
-**Proposition 2.** *Let a coset partition split F₂ⁿ into cells H_u, and
+**Proposition 3.** *Let a coset partition split F₂ⁿ into cells H_u, and
 suppose g restricted to H_u has linear structure w_u. Then the Walsh support
 avoids E = {z : w_u·z = 1 for every u}, and hence*
 
@@ -440,7 +440,7 @@ c_z = 2^{−n} Σ_u (−1)^{u·z_C} A_u(z′) with A_u the transform of the rest
 Proposition 29 kills A_u(z′) whenever w_u·z′ = 1. If every A_u vanishes, so does
 c_z. ∎
 
-**Proposition 3.** *That system is consistent iff every linear dependency
+**Proposition 4.** *That system is consistent iff every linear dependency
 among the w_u has even support. An odd dependency makes E empty and removes the
 cap entirely.*
 
@@ -562,7 +562,7 @@ rather than trusted.
 Walsh sparsity and nonlinearity are the central quantities of linear
 cryptanalysis. The identity turns that coincidence into a transfer.
 
-**Proposition 4.** *For any Boolean function g with nonlinearity NL,*
+**Proposition 5.** *For any Boolean function g with nonlinearity NL,*
 
 > S ≥ (1 − NL/2^{n−1})^{−2}.
 
@@ -592,18 +592,7 @@ and independent of compilation.
 
 ---
 
-## 9. Demonstration of reach
-
-Applied to modular exponentiation, the exact model yields a sharp arithmetic
-criterion — cost is controlled by the 2-adic structure of the multiplicative
-order, being independent of exponent-register width for one branch and Θ(2ⁿ) for
-the other. That analysis is developed separately and is not claimed here; we note
-it only as evidence that an exact cost model buys structural results a fitted
-power law cannot see.
-
----
-
-## 10. Related work, and what is prior art
+## 9. Related work, and what is prior art
 
 **The ingredient is standard and we do not claim it.** That a diagonal
 operator's Pauli-Z expansion is the Walsh–Hadamard transform of its diagonal is
@@ -653,8 +642,11 @@ the analogy becomes an identity, and its use as a cost model.
   equally does not state the identity.
 - **Boolean-function side.** Work computing complete Walsh spectra for
   structured families (e.g. permutation-inverse families) is the right
-  neighbourhood for §6 and should be surveyed before submission; our §6.2 is an
-  easy corollary of Carlet's Proposition 29 and may be folklore there.
+  neighbourhood for §6. We state Propositions 3 and 4 at corollary altitude for
+  that reason: they follow from Carlet's Proposition 29 together with the
+  standard coset decomposition of the Walsh transform, and we would not be
+  surprised to find them folklore in that literature. We claim their application
+  as a PPS cost cap, not the underlying combinatorics.
 - **Implementations.** No available implementation propagates permutation gates
   natively. Qiskit `pauli-prop` accepts only Pauli rotation gates and rejects
   Toffoli; PauliPropagation.jl's Clifford map contains no Toffoli; stim is
@@ -675,9 +667,9 @@ arithmetic constructions used.
 
 ---
 
-## 11. Limitations, and the honesty record
+## 10. Limitations, and the honesty record
 
-### 11.1 What this does not do
+### 10.1 What this does not do
 
 - **No simulation speedup.** The Walsh transform is O(2ⁿ n). This is a
   diagnostic, not an algorithm.
@@ -697,7 +689,7 @@ arithmetic constructions used.
   **n = 30 (10⁹ points)**. The remaining asymmetry is between the Walsh route
   and rotation-level propagation, not between circuit and function level.
 
-### 11.2 Retractions
+### 10.2 Retractions
 
 Three substantial claims were made and withdrawn during this work; all are
 recorded because the reasons are instructive.
@@ -725,7 +717,7 @@ was originally explained by permutation-ness. That conclusion was right and the
 mechanism wrong; the real reason is affineness (§4.2). A right conclusion via a
 wrong mechanism is a failure, and is logged as one.
 
-### 11.3 Reproducibility
+### 10.3 Reproducibility
 
 ```
 uv run python -m experiments.experiment_c8            # the identity, 6/6 instances
@@ -748,7 +740,7 @@ numbers.
 
 ---
 
-## 12. Conclusion
+## 11. Conclusion
 
 For circuits that implement a permutation of the computational basis, the number
 of Pauli terms Pauli-path simulation must carry is not an empirical quantity to
@@ -756,7 +748,7 @@ be extrapolated. It is the Walsh sparsity of the Boolean function the circuit
 computes — exactly, compilation-independently, and computable before the run.
 
 The identity is elementary. What it buys is not: an exact account of why adders
-collapse and general arithmetic does not, an exact factor of two from
+collapse and general arithmetic does not, an exact peak-memory relation from
 propagating permutations natively, structural caps on achievable density with a
 parity condition governing when they apply, a transfer from published
 cryptanalytic constants to simulation cost with no simulation, and — developed
@@ -775,7 +767,7 @@ The working ledger `CLAIMS.md` records every claim's status, evidence and
 location, and is supplied as supplementary material. Inline identifiers are
 kept out of the prose; this table is the mapping. Identifiers prefixed
 *Paper B* have their rows in the companion paper's section of the ledger; those
-listed against §11.2 are **retracted** rows, cited there as the record of what
+listed against §10.2 are **retracted** rows, cited there as the record of what
 was withdrawn and not as support for anything.
 
 | section | claims |
@@ -794,7 +786,6 @@ was withdrawn and not as support for anything.
 | 6.3 A compilation choice with a real cost | Paper B: C32 |
 | 7. Truncation: what the model does and does not say | C5, C14, C16 |
 | 8. The cryptanalytic bridge | C12, C25, C26 |
-| 9. Demonstration of reach | Paper B: C15 |
-| 10. Related work, and what is prior art | C1, C6 |
-| 11.1 What this does not do | Paper B: C7, C40 |
-| 11.2 Retractions | C3, C4, C9, and the F- and H-rows of the ledger's retracted section |
+| 9. Related work, and what is prior art | C1, C6 |
+| 10.1 What this does not do | Paper B: C7, C40 |
+| 10.2 Retractions | C3, C4, C9, and the F- and H-rows of the ledger's retracted section |
