@@ -42,6 +42,8 @@ def parse(path: pathlib.Path) -> tuple[dict, str]:
         elif val in (">", "|"):
             meta[key] = ""
         else:
+            if len(val) > 1 and val[0] == val[-1] == '"':
+                val = val[1:-1].replace('\\"', '"').replace("\\\\", "\\")
             meta[key] = val
     return meta, body
 
@@ -49,8 +51,8 @@ def parse(path: pathlib.Path) -> tuple[dict, str]:
 def load(d: pathlib.Path) -> list[tuple[dict, pathlib.Path]]:
     out = []
     for p in sorted(d.rglob("*.md")):
-        if p.name == "INDEX.md":
-            continue
+        if p.name == "INDEX.md" or p.name.startswith("_"):
+            continue  # _-prefixed files are prose, not records
         meta, _ = parse(p)
         if meta:
             out.append((meta, p))

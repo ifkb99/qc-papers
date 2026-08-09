@@ -67,7 +67,7 @@ def claim_ids() -> tuple[set[str], set[str]]:
     if cdir.exists():
         live, dead = set(), set()
         for p in cdir.rglob("*.md"):
-            if p.name == "INDEX.md":
+            if p.name == "INDEX.md" or p.name.startswith("_"):
                 continue
             m = re.search(r"^id:\s*(\S+)", p.read_text(), re.M)
             if not m:
