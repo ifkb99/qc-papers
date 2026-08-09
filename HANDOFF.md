@@ -4,6 +4,57 @@ Written for a session with **no prior context**. Read this file, then
 `PAPER_A.md` / `PAPER_B.md` if writing, or `TODO.md` if experimenting.
 Everything is committed; working tree clean.
 
+**Branch: `todo-12e-gpu-sweeps`**, three commits ahead of `main` (`10a9288`) and
+not pushed. Nothing on it is speculative — all nine test suites pass — so it can
+be fast-forwarded into `main` whenever wanted.
+
+---
+
+## → START HERE: the agreed next task is REFINING PAPER A AND PAPER B
+
+The experimental backlog is done. **The next session's job is editorial, not
+experimental**, and it was left at exactly this point deliberately.
+
+Two questions were put to the user and are **still unanswered** — ask them
+before doing bulk work, because they change what "refine" means:
+
+1. **Target venue / format?** arXiv preprint as-is, a journal with a length
+   limit, or a workshop. Current lengths: Paper A ~6,700 words / 12 sections,
+   Paper B ~5,000 / 12.
+2. **Order?** Paper A end to end, Paper B first, or one consistency pass across
+   both. The recommendation given was **Paper A first** — its structure changed
+   most on 2026-08-08.
+
+**What changed in the papers that day, so a fresh session does not re-derive it:**
+
+- `PAPER_A.md` §5 was rewritten from "the factor of two is an observation, and
+  we state it as one" to **Proposition 2** (`rot = 2·perm − |B|`), plus the
+  identification of B and the observable-dependence paragraph. The **abstract**
+  was updated to match — it had still been claiming "a measured factor of 2.000
+  to 1.9997".
+- `PAPER_A.md` §11.1's instance sizes went 24 → **30 qubits**, and §4.4's
+  closing paragraph with it.
+- `PAPER_B.md` §6 gained the measured onset table for α = 3, 4 and the
+  "invisible at a single width" caution; §7.1 gained C43 and the |I| = 1
+  vacuity caveat; §9's density series went to 30 qubits / slope 1.006; §12.1's
+  scope caveat "the α = 3 and α = 4 onsets are consistent-with but not
+  confirmed" was **removed because they are now confirmed**; §12.3 gained the
+  two new reproducibility lines.
+
+**Known rough edges to look at while refining** (none are errors, all are
+things a referee would poke):
+
+- Paper A §5's Proposition 2 is derived, but **|B| = 2 itself is measured, not
+  proved** — the paper says so; keep it that way unless someone proves it.
+- Paper B §6's table is six instances; α ≥ 5 is genuinely out of reach (needs
+  r = 32, whose smallest instance is q = 32) and the text says so.
+- The **third paper** flagged below (compilation-dependence, C30–C41) is still
+  only a possibility, and its material is still scattered as caveats inside A
+  and B. Decide explicitly whether to extract it or leave it.
+- `ABSTRACT.md` / `ABSTRACT_SHOR_2ADIC.md` are abstract workshops and prior-art
+  dossiers, **not** superseded copies to edit in parallel. Prior-art text lives
+  there; do not duplicate it into the papers.
+
 ---
 
 ## Where things stand
@@ -143,6 +194,13 @@ uv run python test_claims.py        # headline results, pinned to logged numbers
    write. Two scripts vanished this way.
 5. **A GPU run needs `LAB_GPU=1`** — `accel.enabled()` returns False without
    it and everything silently runs on CPU at 1/10th the speed.
+6. **Do not pipe a long experiment through `tail`** — the pipe buffers the whole
+   run, so a job that streams progress for 40 minutes shows nothing until it
+   exits, and looks hung. Redirect to a file and read that.
+7. **Do not build large `frozenset`s of Python tuples over a support.** At 33.5M
+   elements that is a multi-GB structure and an OOM; encode the pair as one
+   int64 and compare sorted numpy arrays instead (see `experiment_c21_onset`'s
+   signature construction). Same answer, ~40× less memory.
 
 ---
 
@@ -176,7 +234,15 @@ still computing `a^e mod N` correctly.
 reach 1.000. So something non-linear survives after the linear structure is
 destroyed, and it is unidentified.**
 
-### Concrete things to try
+### Concrete things to try — **ALL FIVE ARE DONE. This is not a to-do list.**
+
+Resolved as TODO item 11 (C33–C35, `NOTES.md` §AF/§RS): affine structures found
+the mechanism, the support complement *is* a recognisable set (the empty
+quadrant), the weight profile was mooted, 0.716 turned out instance- and
+width-dependent rather than a constant, and stacking showed the residue tracks
+independent nonlinear monomials rather than wrap count.
+
+<details><summary>The original five, kept for the record</summary>
 
 1. **Is it another linear structure at higher order?** Check for *affine*
    structures (w with `g(y⊕w) = g(y) ⊕ const`, not just `= g(y)`) — these also
@@ -193,6 +259,8 @@ destroyed, and it is unidentified.**
 5. **Does more nonlinearity push it to 1.000?** Stack several independent
    Toffoli conjugations. If density saturates below 1, the residue is intrinsic
    to the arithmetic rather than to the reduction.
+
+</details>
 
 ### Where the tools are
 
@@ -219,6 +287,24 @@ destroyed, and it is unidentified.**
   `replay` (single-basis-state image, for circuits too wide to hold a
   permutation array) and `verify_modexp`. Gated by `test_windowed.py`.
 
+**Added 2026-08-08 — reach for these before writing new machinery:**
+
+- `lab.measure.support(qc, q, exact=True)` — the exact integer path (support
+  test is `!= 0`, no tolerance). Cached under its own key so exact and
+  thresholded results can be compared rather than silently swapped.
+- `lab.measure.stats(qc, q, masks=(w,))` — `count`, `density`, and per-mask
+  GF(2) parity counts **without moving the support to the host**. At q = 30 a
+  support is 4 GiB; a density sweep wants three scalars. `odd[w] == 0` is
+  exactly "w is a linear structure" (C30). Cached as JSON.
+- `accel.pullback_stats` / `accel._replay` — the backend for both. See the GPU
+  section for why the replay is int32.
+- **Peak-state extraction without a new propagator** (`experiment_c17_deficit`):
+  Heisenberg propagation of the *last m gates* IS the state after m steps, so
+  a peak Pauli set is obtained by running the existing verified `pps.propagate`
+  on a gate suffix, and a perm-level state by running `propagate_perm` on a
+  logical suffix. Writing a second propagator to inspect the first is exactly
+  how this project has been bitten before; do not.
+
 ---
 
 ## The `computational-research` skill
@@ -237,11 +323,24 @@ won't look. Also: a bug-check procedure ordered by cost, derive-then-test,
 always including a control that must fail, promoting regularities to proofs by
 reading the construction rather than measuring more, and explicit claim grading.
 
-It is not decoration. Its rules have now caught four of my own errors that had
-already produced confident-looking numbers: **two** vacuous tests whose
-must-fail control failed to fail (step 9, and TODO 12e's |I| = 1 tail check),
-a sweep that varied two parameters at once, and degenerate random inputs at
-small sizes.
+It is not decoration. Its rules have now caught **six** of my own errors that
+had already produced confident-looking numbers:
+
+- three **vacuous tests** — step 9's blocks acting only on unobserved qubits;
+  TODO 12e's `z_I ∈ {0, 1_I}` check at |I| = 1; TODO 12g's sign test on
+  monotone data. Two were caught by a must-fail control failing to fail; the
+  third by noticing the pass was unanimous and unearned. **A unanimous pass is
+  a tell, not a triumph.**
+- one **control whose predicate was wrong** (12g's β = 1 control demanded
+  monotone growth including a pre-lock step) — the control was right, the code
+  asking it was not, and fixing it produced a sharper control;
+- a sweep that varied two parameters at once;
+- degenerate random inputs at small sizes.
+
+The two rules that pay most, by count: **every experiment carries a must-fail
+control**, and **derive before measuring** (which also means the prediction
+must be written where it can be seen to have come first — `lab.harness`
+enforces both).
 
 ## Reading order
 
@@ -264,6 +363,23 @@ small sizes.
    dossiers. None carries a ledger; all point at `CLAIMS.md`.
 8. `accel.py` — before running anything large. See the GPU section above.
 
+The four experiments written on 2026-08-08, all runnable and all carrying their
+own OUTCOME block in the header — read the header, not just the code:
+
+```
+LAB_GPU=1 uv run python -m experiments.experiment_c21_onset      # 7/7, §OS
+LAB_GPU=1 uv run python -m experiments.experiment_c7_scale       # 6/6, §OS4
+LAB_GPU=1 uv run python -m experiments.experiment_windowed_scale # 4/4, §OS6
+         uv run python -m experiments.experiment_c17_deficit     # 6/6, §PK
+LAB_GPU=1 uv run python -m experiments.experiment_c7_deficit     # 2/5, §DF
+```
+
+**`experiment_c7_deficit` exits NONZERO ON PURPOSE** — three of its predictions
+are refuted and it is left failing rather than re-scoped, the same treatment
+`experiment_windowed.py`'s P5 got. A red line in a log is not always a bug
+here; check the header first. Everything is cached in `out/cache/` (gitignored,
+~2 GB), so a re-run replays in seconds rather than hours.
+
 ---
 
 ## Do NOT redo these
@@ -284,10 +400,43 @@ Logged in full in `NOTES.md`; listed here so a fresh session does not burn time.
   real structure and the apparent intermediate case was sampling aliasing.
 - **The msb↔anc CNOT pairing as the cause of the linear structure.** Refuted;
   see §L2 for the actual three-part mechanism.
+- **A "cliff" in the hyperplane deficit between n_exp = 2 and 3.** Refuted the
+  same day it was conjectured (§DF). D = 1 − 2·density is **monotone
+  decreasing** in n_exp in every β > 1 instance over 10–12 widths; the apparent
+  cliff was a two-point comparison landing on the one step where N = 21
+  disagrees with every other instance.
+- **The §I period-ord₂(β) oscillation at CIRCUIT level.** It is a
+  **function-level** phenomenon only and does not transfer. Do not import it
+  again — that import is what made 12g look worth a sweep.
+- **The identity string Z⁰, or a parity constraint, as the peak deficit.** Both
+  were the named candidates in TODO 12d and both are wrong; the answer is the
+  two |c| = ½ Walsh modes (§PK).
 
 ---
 
 ## Remaining TODO items (see `TODO.md` for the ranked list)
+
+**Open, in the order they are worth doing:**
+
+- **14 — through the inverse QFT.** The only genuinely open frontier, and a
+  Paper C candidate. Highest risk, highest reach. Note the standing warning in
+  `TODO.md`: **Cîrstoiu was pulled for this and does not help** — their group
+  indexes *circuit parameters* and their results are about *ensembles*, while
+  Shor's circuit is fixed. Do not re-pull it for this.
+- **12c — early pruning of the dead 2^−(α+1) fraction.** Its naive form is
+  already dead by derivation (exponent support is not monotone under
+  back-propagation, proved with an explicit `CCX` counterexample). What
+  survives is a much harder question about certificates.
+- **13 — a third simulation method (DDSIM) on the r = β·2^α invariant.** Mostly
+  integration work, no new theory; strengthens "property of the algorithm, not
+  the simulator".
+- **12f — two-GPU split FWHT.** Deliberately **not** done: the second card buys
+  exactly one qubit and `wht_exact` already buys the same one for free.
+- **Housekeeping:** six unused dependencies (`click`, `matplotlib`, `numba`,
+  `quimb`, `scipy`, plus `qiskit`/`stim` which were the source-reading tools for
+  the prior-art sweeps). Only `numpy` and `cupy` are imported anywhere. Decide.
+
+**Longer-standing, still open:**
 
 - **Exact-spectrum crypto import.** The bound S ≥ (1 − NL/2ⁿ⁻¹)⁻² is tight only
   at the extremes (AES: bound 64, actual 239). For crypto families whose *full*
@@ -307,12 +456,21 @@ Logged in full in `NOTES.md`; listed here so a fresh session does not burn time.
 
 ## Publication state
 
-**Paper A is drafted in full: `PAPER_A.md` (v1, 2026-08-08).** It supersedes
-`ABSTRACT.md` as the live document; `ABSTRACT.md` is retained as the abstract
-workshop and prior-art dossier. **Paper B is drafted in full too: `PAPER_B.md` (v1)**, superseding
-`ABSTRACT_SHOR_2ADIC.md`, which is retained as the abstract workshop. A third paper is now viable and was not before —
-the compilation-dependence results (C30–C32, C33–C35, C36–C39) acquired a
-spine in C40/C41 and are currently scattered as caveats inside A and B.
+**Paper A is drafted in full: `PAPER_A.md` (v2, revised 2026-08-08).** It
+supersedes `ABSTRACT.md` as the live document; `ABSTRACT.md` is retained as the
+abstract workshop and prior-art dossier. **Paper B is drafted in full too:
+`PAPER_B.md` (v1, revised 2026-08-08)**, superseding `ABSTRACT_SHOR_2ADIC.md`,
+which is retained as the abstract workshop. **Refining both is the agreed next
+task — see the START HERE section at the top for what changed and what is still
+open.** A third paper is now viable and was not before — the
+compilation-dependence results (C30–C32, C33–C35, C36–C39) acquired a spine in
+C40/C41 and are currently scattered as caveats inside A and B.
+
+**Claims added 2026-08-08: C43** (C24 holds at set level, not merely in
+cardinality) and **C44** (the peak ratio is exact: `rot = 2·perm − |B|`).
+**Regraded:** C21 to α = 1..4, C7 to 30 qubits, C17 from "the factor is
+empirical" to derived, C30 re-verified at q = 30, C37/C38 extended to K = 5.
+**Removed:** §OS4's hyperplane-deficit "cliff". `CLAIMS.md` is canonical.
 
 Both abstracts carry honest status markers and scope caveats; the claims ledger
 they all point at is `CLAIMS.md`. Before submitting anything:
