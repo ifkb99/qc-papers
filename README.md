@@ -20,9 +20,17 @@ support and peak memory, and **proved** via a parity-reduction argument.
 
 ## Start here
 
-**`HANDOFF.md`** — if you are picking this up fresh, read that first. It states
+**`CLAUDE.md`** — conventions, traps and the discipline this project runs on.
+Auto-loaded for agents; read it first if you are a person.
+
+**`HANDOFF.md`** — if you are picking this up fresh, read that second. It states
 where things stand, the open threads and their ranking, how to get running, and
 what not to redo.
+
+`claims/INDEX.md` is what is known · `todo/INDEX.md` is what is next ·
+`notes/INDEX.md` is how things were found. **All three, and `CLAIMS.md`, are
+generated** — edit the individual files and run `tools/reindex.py`.
+`RESTRUCTURE.md` explains why the repo is laid out this way.
 
 `METHOD.md` records how this work was actually conducted — the research loop,
 the failure modes hit, and the techniques that earned their keep. Worth reading
@@ -67,6 +75,13 @@ uv run python test_lab.py            # lab/ engine, pinned to logged numbers
 uv run python test_claims.py         # CLAIMS.md headline rows, re-verified
 ```
 
+Documentation has its own gate, run before committing doc changes:
+
+```bash
+uv run python tools/reindex.py       # regenerate the generated files
+uv run python tools/check.py         # 10 consistency checks; must pass
+```
+
 Sanity anchor: `ModExp(15, 7, n_exp=4).build_shor()` must give exponent-register
 peaks at y = 0, 4, 8, 12 with p = 0.25 each (r = 4).
 
@@ -86,6 +101,11 @@ peaks at y = 0, 4, 8, 12 with p = 0.25 each (r = 4).
 | `toffoli_arith.py` | Toffoli-compiled modular exponentiation |
 | `accel.py` | optional CUDA backend for permutation replay and FWHT; opt-in via `LAB_GPU=1`, gated by `test_accel.py` |
 | `windowed_arith.py` | windowed modexp: `WindowedModExp` (table lookup) and `SelectModExp` (select-multiply, with the `skip_zero` knob); `replay` for circuits too wide to hold a permutation array |
+| `CLAUDE.md` | conventions, traps, research discipline — auto-loaded |
+| `todo/` | one item per file; `open/` vs `done/` is the state. `INDEX.md` generated |
+| `claims/` | one claim per file; `retracted/` may not be cited. `INDEX.md` and `CLAIMS.md` generated |
+| `notes/` | one investigation per file, keyed by its §code. `INDEX.md` generated |
+| `tools/` | `reindex.py` regenerates the generated files; `check.py` is the doc gate |
 | `lab/` | experiment engine: protocol harness, cached measurement, GF(2)/structure analysis, modexp variants, null models |
 | `experiments/` | the experiment scripts — lab-notebook records, filenames unchanged; run as `uv run python -m experiments.<name>`; start new ones from `TEMPLATE.py` |
 | `archive/` | fully retracted scripts, kept for the record |

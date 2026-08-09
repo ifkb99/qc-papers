@@ -18,7 +18,7 @@ what caused the ledgers to drift once already (a stale C7 row, removed in
 `3606e9e`).
 
 The "Where established" column cites only pointers stated in the source
-material (`ABSTRACT.md`, `ABSTRACT_SHOR_2ADIC.md`, `TODO.md`, `HANDOFF.md`,
+material (`ABSTRACT.md`, `ABSTRACT_SHOR_2ADIC.md`, `todo/INDEX.md`, `HANDOFF.md`,
 `README.md`, `NOTES.md` section headers). A blank cell means no pointer was
 recorded, not that none exists.
 

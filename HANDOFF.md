@@ -1,7 +1,7 @@
 # Handoff — pick up here
 
 Written for a session with **no prior context**. Read this file, then
-`PAPER_A.md` / `PAPER_B.md` if writing, or `TODO.md` if experimenting.
+`PAPER_A.md` / `PAPER_B.md` if writing, or `todo/INDEX.md` if experimenting.
 Everything is committed; working tree clean.
 
 **Branch: `todo-12e-gpu-sweeps`**, three commits ahead of `main` (`10a9288`) and
@@ -377,7 +377,7 @@ enforces both).
 4. `NOTES.md` — the working record. **Read the STATUS blocks and the honesty log
    before trusting any number.** Roughly half of what was believed at various
    points is now marked dead, with the reason.
-5. `TODO.md` — ranked, with rationale, so it can be re-ranked rather than
+5. `todo/INDEX.md` — ranked, with rationale, so it can be re-ranked rather than
    followed blindly.
 6. `CLAIMS.md` — the canonical ledger of every claim ID and its status, split
    into Paper A, Paper B and retracted/dead. Read it before citing any claim:
@@ -438,13 +438,13 @@ Logged in full in `NOTES.md`; listed here so a fresh session does not burn time.
 
 ---
 
-## Remaining TODO items (see `TODO.md` for the ranked list)
+## Remaining TODO items (see `todo/INDEX.md` for the ranked list)
 
 **Open, in the order they are worth doing:**
 
 - **14 — through the inverse QFT.** The only genuinely open frontier, and a
   Paper C candidate. Highest risk, highest reach. Note the standing warning in
-  `TODO.md`: **Cîrstoiu was pulled for this and does not help** — their group
+  `todo/INDEX.md`: **Cîrstoiu was pulled for this and does not help** — their group
   indexes *circuit parameters* and their results are about *ensembles*, while
   Shor's circuit is fixed. Do not re-pull it for this.
 - **12c — early pruning of the dead 2^−(α+1) fraction.** Its naive form is

@@ -228,7 +228,7 @@ with exact support counts.
 This list is stale: the C12 crypto import was completed (TODO step 5, see the
 X section of `NOTES.md` and C25/C26 in `CLAIMS.md`); the C3 redo was mooted by C8 and
 never done; and C7's bit-packed core became unnecessary once the Walsh route
-reached 24 qubits. `TODO.md` is the live ranking of remaining work.
+reached 24 qubits. `todo/INDEX.md` is the live ranking of remaining work.
 
 ## Related work to position against
 
