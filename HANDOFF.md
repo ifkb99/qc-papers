@@ -3,9 +3,11 @@
 Written for a session with no prior context. **Read `CLAUDE.md` first** for the
 conventions and traps; this file is only *where things stand*.
 
-**Branch: `todo-12e-gpu-sweeps`**, ahead of `main` (`10a9288`), not pushed. All
-nine science suites and the documentation gate pass, so it can be
-fast-forwarded whenever wanted.
+**On `main`** as of 2026-08-08 — `todo-12e-gpu-sweeps` was fast-forwarded in
+and both now point at the same commit, so the branch can be deleted whenever
+wanted. **Nothing is pushed**; `origin` is
+[`ifkb99/qc-papers`](https://github.com/ifkb99/qc-papers.git) and is behind.
+All nine science suites and the documentation gate pass.
 
 ---
 
