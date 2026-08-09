@@ -796,3 +796,4 @@ structureless — but it is the natural next question the method itself asks.
   path is gated against it (exact equality on permutations, identical support
   sets, plus must-fail controls for non-permutation input and oversized
   registers). Capacity: n ≤ 30 on one 20 GiB card.
+- `[ ]` **Structure files to decreace their context.** TODO, claims, and even handoff files are becoming quite large. We need to create a system to store information in a format that will allow [multiptle] agents to have only what they need in their context window, and ideally allow for parallel work. Perhaps a wiki would help.
