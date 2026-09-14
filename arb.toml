@@ -1,0 +1,43 @@
+# Copy to research/arb.toml before initializing. Paths are relative to that root.
+schema_version = 1
+
+[project]
+name = "qsim-research"
+root = "."
+instructions = ["AGENTS.md", "CLAUDE.md", "METHOD.md", "SWARM.md"]
+skills = ["qsim-research"]
+handoff = "HANDOFF.md"
+
+[records]
+questions = "todo/open/*.md"
+done = "todo/done/*.md"
+claims = "claims/*.md"
+discovery = "notes/*.md"
+papers = "PAPER_*.md"
+method = "METHOD.md"
+protocol = "SWARM.md"
+review = "SWARM_REVIEW_*.md"
+
+[closure]
+# Every closure names the ledger records it changed or explains why none did.
+require_records = true
+
+[board]
+attention_after_hours = 24
+
+[storage]
+state_dir = "out/agent-board/state"
+artifact_dir = "out/agent-board/artifacts"
+worker_dir = "out/agent-board/workers"
+
+[validation]
+# Guidance returned to agents; the board does not execute these commands.
+# CLAUDE.md and the task scope determine which checks apply.
+working_directory = "."
+science_first = ["uv", "run", "python", "test_core.py"]
+reindex = ["uv", "run", "python", "tools/reindex.py"]
+documentation = ["uv", "run", "python", "tools/check.py"]
+
+[[resources]]
+name = "gpu"
+capacity = 1

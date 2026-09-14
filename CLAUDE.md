@@ -3,21 +3,37 @@
 Research repo: Pauli-path simulation (PPS) of reversible quantum arithmetic.
 Two papers are drafted; the experimental backlog is largely closed.
 
-**Sessions here are sequential — one at a time.** No locking or ownership
-protocol exists because none is needed.
+**One coordinating session and one canonical source writer at a time.**
+Authorized delegated workers coordinate through the local `arb` board configured
+by `arb.toml`. The coordinator edits shared source files; workers put drafts and
+evidence in their assigned `out/agent-board/workers/` directory. Board ownership
+is advisory: this host does not enforce filesystem isolation.
+
+On research resumption, run `arb --actor coordinator resume` from this directory;
+workers use their assigned actor ID. Read the inbox and acknowledge its receipt
+after consuming it. `arb schema OPERATION` gives the agent interface; `arb board`
+and `arb thread topic:general` provide a human-readable entry. The installed
+research skill supplies the coordination workflow. Model choice remains with
+the existing session, and board use does not imply permission for new delegation.
 
 ---
 
 ## Running things
 
 ```bash
-uv run python test_core.py        # science gate — run first, always
+uv run python test_core.py        # science gate — run first for science work
 uv run python tools/check.py      # documentation gate — before any doc commit
 ```
 
 The nine `test_*.py` suites gate the science. `tools/check.py` is separate and
 gates the documentation; it is deliberately **not** one of the nine, so that
 "nine-suite correctness gate" in the papers keeps meaning nine science suites.
+
+Run the core gate before changing or executing scientific code/experiments,
+then select affected suites in proportion to the change. Read-only discussion
+and document/skill-only edits do not require science execution. Documentation
+changes use the documentation gate below; skill changes also need their own
+validation. Do not interpret a passing science suite as a skill-behavior test.
 
 1. **`uv run python` from `research/`.** Not bare `python3`.
 2. **`LAB_GPU=1` or it silently runs on CPU at a tenth the speed.**
@@ -52,6 +68,11 @@ concluding something is broken.
 | current state, pointers | `HANDOFF.md` | facts that belong in a claim |
 | how the work is conducted | `METHOD.md` | — |
 
+Board assignments link to the existing research questions and record temporary
+execution, ownership, discussion, submissions, and review. They do not duplicate
+the scientific ledger or replace the research backlog. A submission accepted on
+the board does not itself promote a scientific claim.
+
 **`INDEX.md` files and `CLAIMS.md` are GENERATED. Never hand-edit them.**
 Run `uv run python tools/reindex.py` after changing any claim, note or todo.
 
@@ -85,7 +106,9 @@ Start new experiments from `experiments/TEMPLATE.py`. Reach for
 machinery. Never write a second propagator to inspect the first — that has
 bitten this project before.
 
-The `computational-research` skill generalises all of this.
+The installed `qsim-research` skill guides Codex through these existing
+instructions and the current ledger; `AGENTS.md` is its repository entrypoint.
+It does not depend on a separate `computational-research` skill.
 
 ---
 
