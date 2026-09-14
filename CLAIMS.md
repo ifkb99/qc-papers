@@ -6,7 +6,7 @@
 Edit the individual claim file, not this. It exists so the papers can
 ship one self-contained supplementary document.
 
-44 live claims, 19 retracted.
+98 live claims, 19 retracted.
 
 ---
 
@@ -110,7 +110,11 @@ originally 24 qubits, density 0.473→0.498→½, slope 1.008. **Now q = 15..30 
 
 ## Evidence
 
-6/6 instances, supports identical, maxerr ≤ 6.7e-16
+6/6 instances, supports identical, maxerr ≤ 6.7e-16. These six rows comprise
+four Toffoli-modexp observables and two ripple-adder observables, not a Fourier
+versus Toffoli comparison. The identity is the circuit-function application of
+the established diagonal Pauli/Boolean-Fourier correspondence; Paper A §9
+credits Montanaro and Osborne, Proposition 9.
 
 ## Where established
 
@@ -208,13 +212,18 @@ mechanism: small coefficients cancel as a set
 
 ---
 
-## C15 — Cost is set by the 2-adic structure of r, at circuit level
+## C15 — Full-operator support is width-invariant for the studied β=1 construction; β>1 growth is measured, not a bound on state-aware reduced propagation
 
 *status: established · paper: B*
 
 # C15 — Cost is set by the 2-adic structure of r, at circuit level
 
 **Status.** CONFIRMED, controlled
+
+Scope clarified 2026-09-09: this is the full uncontracted operator. C23/C24
+prove the β=1 mechanism; the β>1 branch is measured in the specified families,
+not a universal scalar-bit density theorem. C45 changes the width dependence
+for the reduced observable after input-state contraction in both branches.
 
 ## Evidence
 
@@ -244,17 +253,23 @@ fix N vary a: r=2 ⟹ support *exactly* 15549 over 256× dim growth; r=6 ⟹ 4.0
 
 ---
 
-## C17 — Peak ≠ final; permutation-native PPS reduces peak by a factor ≤ 2 and makes it a Walsh quantity
+## C17 — Atomic permutation PPS peak equals maximum suffix Walsh sparsity; near-two peak reductions are measured arithmetic regularities, not a universal bound
 
 *status: established · paper: A*
 
-# C17 — Peak ≠ final; permutation-native PPS reduces peak by a factor ≤ 2 and makes it a Walsh quantity
+# C17 — Atomic peak is a suffix-Walsh quantity; no universal factor-two bound
 
-**Status.** established; the factor is now DERIVED, not empirical (2026-08-08) — see C44. Earlier "halves exactly" was a rounding artifact, corrected 2026-08-08
+**Status.** established for the exact atomic-peak/Walsh-suffix characterization;
+the near-two arithmetic ratios are measured regularities (2026-09-09), not a
+universal consequence of the local Toffoli gadget. Earlier "halves exactly" was
+a rounding artifact.
 
 ## Evidence
 
-exactly **2.000000** for adders (128→64, 512→256, 2048→1024); **1.9997** for modexp (13666→6834, 16386→8194, 128138→64070), satisfying `rot = 2·perm − 2` in 3/3 — **the once-unexplained part is C44**
+exactly **2.000000** for adders (128→64, 512→256, 2048→1024); **1.9997** for
+modexp (13666→6834, 16386→8194, 128138→64070), satisfying
+`rot = 2·perm − 2` in 3/3 tested modexp rows. The universal derivation is
+withdrawn by the C44 counterexample.
 
 ## Where established
 
@@ -262,13 +277,18 @@ exactly **2.000000** for adders (128→64, 512→256, 2048→1024); **1.9997** f
 
 ---
 
-## C18 — Holds for peak memory, not just final support
+## C18 — The measured width dichotomy also holds for peak retained support in uncontracted atomic PPS, not just final support
 
 *status: established · paper: B*
 
 # C18 — Holds for peak memory, not just final support
 
 **Status.** established
+
+Scope clarified 2026-09-09: peak counts retained terms, not allocated bytes,
+for the uncontracted implementation. C45 gives a different, state-aware
+contraction schedule whose reduced-observable support is bounded in both
+order branches; this claim is not a lower bound on that task.
 
 ## Evidence
 
@@ -280,17 +300,20 @@ N_max exactly 24369 at n_exp = 2,4,6,8 (64× dim growth); control r=6 grows 4.02
 
 ---
 
-## C19 — Same r = β·2^α invariant governs MPS simulation
+## C19 — MPS work uses the same r = β·2^α decomposition; its β² tensor-memory factor is a distinct resource statement
 
 *status: established · paper: B*
 
-# C19 — Same r = β·2^α invariant governs MPS simulation
+# C19 — MPS uses the same 2-adic decomposition, with a distinct resource claim
 
 **Status.** established, cited
 
 ## Evidence
 
-Dang et al. §4: α = trailing zeros, β = odd part "cannot be localised"; §5.2: memory ∝ β²
+Dang et al. §4: α = trailing zeros, β = odd part "cannot be localised"; §5.2:
+their tensor-partition memory factor scales as β². This corroborates a shared
+arithmetic decomposition but is not the same assertion as PPS growth with
+exponent-register width.
 
 ## Where established
 
@@ -316,17 +339,20 @@ Dang, Hill & Hollenberg, [arXiv:1712.07311](https://arxiv.org/abs/1712.07311), �
 
 ---
 
-## C21 — Invariance has a precise onset: support locks at n_exp = v₂(r)+1
+## C21 — The parity theorem guarantees invariance for n_exp ≥ v₂(r)+1; first locking at that width is measured in the reported rows
 
-*status: established · paper: B*
+*status: narrowed · paper: B*
 
-# C21 — Invariance has a precise onset: support locks at n_exp = v₂(r)+1
+# C21 — Sufficient threshold and measured first-lock rows
 
-**Status.** established at α = 1, 2, 3, 4 (was: α=3,4 unmeasured)
+**Status.** narrowed 2026-09-09: invariance is guaranteed once the identity
+tail begins, n_exp ≥ α+1. First locking at α+1 is measured for the reported
+observables and instances (α=1,2,3,4), but the measurements do not prove a
+universal lower bound excluding earlier stabilization.
 
 ## Evidence
 
-α=1,2 exact (α=2 grows 15493→32143 then freezes). **α=3 and α=4 measured 2026-08-08**: N=17 a=2 (r=8) locks at n_exp=4, N=41 a=3 (r=8) locks at n_exp=4 — two different moduli — and N=17 a=3 (r=16) locks at n_exp=5, with strict growth at all 7 steps below the onset. **Matched control**: N=41 a=6 (r=40=5·2³) — same modulus, same α, same width, only β differs — grows at every step and never locks. At n_exp=4 the β=1 and β=5 rows differ by 66 in 3.4e7, so a cost measurement at *one* width cannot see the invariant; only the growth separates them
+α=1,2 exact (α=2 grows 15493→32143 then freezes). **α=3 and α=4 measured 2026-08-08**: N=17 a=2 (r=8) locks at n_exp=4, N=41 a=3 (r=8) locks at n_exp=4 — two different moduli — and N=17 a=3 (r=16) locks at n_exp=5, with strict growth at all 7 steps below the onset. **Matched control**: N=41 a=6 (r=40=5·2³) — same modulus, same α and same width, with base-dependent constants and gates — grows at every measured step and never locks. At n_exp=4 the β=1 and β=5 rows differ by 66 in 3.4e7, so a cost measurement at *one* width cannot see the invariant; only the growth separates them
 
 ## Where established
 
@@ -344,7 +370,8 @@ Dang, Hill & Hollenberg, [arXiv:1712.07311](https://arxiv.org/abs/1712.07311), �
 
 ## Evidence
 
-N=15: 7/7 bases free; N=21: 3/11. Odd semiprimes = p·q both Fermat, smallest 15
+N=15: 7/7 bases free; N=21: 3/11. Odd semiprimes = p·q both Fermat;
+smallest relevant odd semiprime is 15
 
 ## Where established
 
@@ -424,17 +451,22 @@ AES 64 vs 239 actual; modexp 4 vs 3086. Uses only max|c|, discarding the rest of
 
 ---
 
-## C27 — Invariance survives truncation: exact for terminal thresholding at every δ; peak cost unchanged under incremental
+## C27 — The β=1 coefficient invariant preserves terminal thresholded support at every δ; incremental peak equality is only measured at tested thresholds
 
 *status: established · paper: B*
 
-# C27 — Invariance survives truncation: exact for terminal thresholding at every δ; peak cost unchanged under incremental
+# C27 — Truncation: terminal invariance and measured incremental peak equality
 
-**Status.** established
+**Status.** terminal invariance follows for every threshold from the proved
+coefficient invariant. Incremental equality is established only for the tested
+thresholds, not as a theorem for every δ or circuit.
 
 ## Evidence
 
-counts identical across n_exp at all 7 δ values; N_max SAME at every δ; control diverges
+Counts are identical across n_exp at all 7 tested δ values; N_max is the same
+at every tested δ in the measured rows; the control diverges. Terminal equality
+follows from the identical magnitude multisets, while incremental equality is
+empirical.
 
 ## Where established
 
@@ -484,7 +516,13 @@ the step-9 evidence stands (synthetic involution constant across k=1..4 at two m
 
 # C30 — The ½ ceiling is a linear structure w = b_msb ⊕ anc, not an algorithmic constant
 
-**Status.** established; the mechanism is CLASSICAL — cite, do not claim (Carlet, Boolean Functions for Cryptography and Coding Theory, Proposition 29: D_e f null ⟺ supp(W_f) ⊆ {0,e}^⊥; such functions are Carlet's partially bent). Our contribution is finding it in modexp pullbacks and using it as a PPS cost cap — see §GF
+**Status.** established; the mechanism is CLASSICAL — cite, do not claim
+(Carlet, *Boolean Functions for Cryptography and Coding Theory*, Proposition
+29: D_e f null ⟺ supp(W_f) ⊆ {0,e}^⊥). A linear structure can cap support
+density; support lying in an affine subspace alone is not a definition of
+partial bentness, which also requires spectral flatness. Our contribution is
+finding the structure in modexp pullbacks and using it as a PPS cost cap — see
+§GF.
 
 ## Evidence
 
@@ -694,17 +732,25 @@ same 4 cells: odd dependency → E empty, density 0.9845; even dependency → d=
 
 ---
 
-## C42 — For the real Shor input state (exponent register in |+⟩, so δ=0 there) every z with exponent support contributes exactly 0, giving a useful fraction of exactly 2^−(α+1) — cost and useful work are both constant in n_exp
+## C42 — For the real Shor input state, every z with exponent support contributes exactly 0; useful-sector membership is exact, while the measured useful fraction is only approximately 2^−(α+1)
 
-*status: derived · paper: B*
+*status: narrowed · paper: B*
 
-# C42 — For the real Shor input state (exponent register in |+⟩, so δ=0 there) every z with exponent support contributes exactly 0, giving a useful fraction of exactly 2^−(α+1) — cost and useful work are both constant in n_exp
+# C42 — Real Shor input: exact dead-term criterion, approximate measured fraction
 
-**Status.** derived from C24, then verified 3/3 across widths
+**Status.** narrowed 2026-09-09: the dead-term criterion follows exactly from
+⟨+|Z|+⟩=0 and the product input, but equal sector cardinalities do not; the fraction is measured, not the
+exact value 2^−(α+1).
 
 ## Evidence
 
-75.03% / 74.99% dead at α=1 and 87.51% at α=2; useful counts 3883 / 3879 / 4014 constant in n_exp; the α=2 row jumps exactly at n_exp = α+1, reproducing C21's onset independently. **Not a speedup**: PPS meets the input state only at the end, so peak memory (C18) is unchanged
+Useful counts include 3883/15549 ≈ 0.24973 at α=1 and 4014/32143 ≈
+0.12488 at α=2, with width-invariant rows in the reported sweeps. These are
+close to, but not exactly, 1/4 and 1/8. **Not a speedup**: in the uncontracted
+implementation the input state is applied only at the end, so naive
+within-block pruning is unsafe and peak memory (C18) is unchanged.
+This is not an impossibility result: C45 gives a safe contraction schedule
+after each control's last reverse use and reduces the peak in both branches.
 
 ## Where established
 
@@ -730,17 +776,28 @@ C24 (iv) computes the surviving coefficient explicitly and the expression does n
 
 ---
 
-## C44 — The peak ratio is exact, not empirical: N_max^rot = 2·N_max^perm − |B| with B = {z ∈ S : z_c = 0}, S the permutation-native peak set and c the target of the Toffoli gadget containing the rotation-level peak. The deficit is a countable set, not a constant
+## C44 — In the tested arithmetic rows, N_max^rot = 2·N_max^perm − |B| with B = {z ∈ S : z_c = 0}; the local gadget argument does not establish this as a universal peak formula
 
-*status: derived · paper: A*
+*status: narrowed · paper: A*
 
-# C44 — The peak ratio is exact, not empirical: N_max^rot = 2·N_max^perm − |B| with B = {z ∈ S : z_c = 0}, S the permutation-native peak set and c the target of the Toffoli gadget containing the rotation-level peak. The deficit is a countable set, not a constant
+# C44 — Tested arithmetic peak relation; universal formula withdrawn
 
-**Status.** derived from the gadget, verified 9/9; the identity of B verified 6/6; |B|=2 not itself proved
+**Status.** narrowed 2026-09-09: the relation is verified 9/9 in the tested
+arithmetic rows, but the local gadget derivation is not a universal theorem;
+the four-qubit counterexample has atomic peak 4 and rotation peak 10. The
+identity of B is verified 6/6 in the standard modexp rows; |B|=2 is not proved.
 
 ## Evidence
 
-Mechanism: only Z_c-carrying strings meet an H and leave the diagonal, and the four T gates on c rotate *within* span{X_c, Y_c}, which is closed — so they branch once between them, not 2⁴ times. Measured: at the peak every Pauli has X-support ∅ or exactly {c} (9/9); folding X_c/Y_c partners onto their parents recovers S set-for-set with multiplicity 2 on z_c=1 and 1 on z_c=0 (9/9). **B = {Z_x0, Z_x0·Z_e0} in 6/6 modexp instances, and these are exactly the |coefficient| = ½ Walsh terms** — the dominant Fourier modes of §W3/W4, found there by an unrelated route. Adders have B = ∅, hence ratio exactly 2. **The deficit belongs to the OBSERVABLE, not the circuit family**: same circuit, observable moved to b0 → 4004, anc → 4014, t0 → 0
+The local mechanism explains why a Z_c-carrying string can branch within the
+{X_c,Y_c} plane, but intervening CNOTs and interference can change the global
+peak. In the measured rows, folding X_c/Y_c partners onto their parents
+recovers S set-for-set with multiplicity 2 on z_c=1 and 1 on z_c=0 (9/9).
+**B = {Z_x0, Z_x0·Z_e0} in 6/6 modexp instances, and these are exactly the
+|coefficient| = ½ Walsh terms** — the dominant Fourier modes of §W3/W4, found
+there by an unrelated route. Adders have B = ∅, hence ratio exactly 2. **The
+deficit belongs to the OBSERVABLE, not the circuit family**: same circuit,
+observable moved to b0 → 4004, anc → 4014, t0 → 0
 
 ## Where established
 
@@ -748,17 +805,7828 @@ Mechanism: only Z_c-carrying strings meet an H and leave the diagonal, and the f
 
 ---
 
-## F12 — Function-level dichotomy is absolute
+## C45 — Exact last-use contraction of independent |+> inputs bounds diagonal PPS support by 2^(m+1) for m work qubits and one fresh control per block, in either order branch
+
+*status: proven · paper: B*
+
+# C45 — Finished-control contraction changes the reduced-observable width scaling
+
+**Status.** proved in exact arithmetic; implemented and checked 2026-09-09.
+
+Let a permutation circuit be back-propagated from a diagonal observable, and
+let q have an independent |+⟩ input. Once the first forward gate touching q
+has been propagated in reverse, every remaining gate acts trivially on q.
+Consequently contraction E_q(O)=⟨+|O|+⟩ commutes with all remaining
+conjugations. In the Z basis it simply removes terms whose mask contains q.
+This produces exactly the same reduced operator as contracting q at the end.
+The statement allows q to be reused, but only contracts after its last reverse
+use; support on q at an earlier step is not a valid certificate.
+
+For a work-only observable and a sequence of contiguous blocks, each acting
+on m shared work qubits and one distinct exponent control, finished controls
+can be eliminated before the next is introduced. At most m+1 qubits occur in
+the expansion, so retained support is at most 2^(m+1), including intermediate
+gate-level peaks before contraction; at completed block boundaries it is at
+most 2^m. This bound is independent of exponent width and does not require
+β=1. Gate count still grows with width. Dictionary overhead, simultaneously
+allocated buffers, mask bit lengths and coefficient precision are not bounded
+by a count of retained terms alone.
+
+## Evidence and implementation
+
+`propagate_perm(..., trace_plus=...)` in `perm_pps.py` schedules contractions
+from the logical trace; the existing propagation kernel is reused. Default
+calls are unchanged. At δ=0 it retains the existing numerical floor 10^−13;
+the mathematical exactness claim does not remove floating-point limitations.
+Coefficient or weight truncation need not commute with contraction.
+
+The experiment checks every projected coefficient against uncontracted PPS
+in 15 small arithmetic cases and against independent Walsh transforms in
+nine of those; random-circuit and state-vector checks live in
+`test_perm_pps.py`. Reused-control premature pruning is a negative control.
+Measurements and reproducibility commands are in §CT.
+
+This is a reduced pre-inverse-QFT observable, not the full Heisenberg operator,
+Shor output sampling, or a speedup over direct classical sampling of this
+diagonal expectation. C15/C18 remain full-operator statements, not lower bounds
+on all state-aware representations. The method is a form of ordinary variable
+elimination; novelty beyond this implementation/application is not established.
+
+---
+
+## C46 — After contracting independent |+> controls, repeated identical involution blocks induce an idempotent map, so a nonempty identity tail can be replaced by one block
+
+*status: proven · paper: B*
+
+# C46 — The reduced identity tail is idempotent
+
+**Status.** proved in exact arithmetic; implemented as an experiment-level
+circuit simplification and checked 2026-09-09.
+
+A controlled work permutation V with a fresh independent |+⟩ control acts on
+a work-only observable, after control contraction, by
+
+    E_V(O) = (O + V† O V)/2.
+
+If V²=I then Ad_V²=Id and E_V²=E_V. Thus any positive number of consecutive
+identical controlled-involution blocks has the same reduced action as one.
+This is an operator identity, not merely agreement of one expectation value.
+
+In the β=1 construction, C23 supplies the repeated identity-tail involution.
+Retaining the first α+1 exponent blocks therefore suffices at all widths
+t≥α+1 for this reduced work observable; low nonidentity blocks remain. This
+does not replace the full-operator parity-tail theorem and does not apply to
+arbitrary β>1 tails. The negative control in §CT compares full reduced
+coefficient vectors, since one scalar expectation can agree accidentally.
+
+The propagation body of an explicitly compressed circuit is independent of
+tail length. Constructing the original circuit first, scanning it to find
+contraction points, and maintaining width-dependent integer masks still incur
+width-dependent costs; constant end-to-end runtime is not claimed.
+
+## Where established
+
+§CT; `experiments/experiment_control_trace.py`, using `perm_pps.py` with
+`trace_plus`. This is not a production rewrite of `ToffoliModExp.build()`.
+
+---
+
+## C47 — For independent windows controlling one involution, reduced action depends on control bias, not Walsh sparsity: E^K(O)=O+ +(1-2p)^K O-
+
+*status: proven · paper: B*
+
+# C47 — Balance replaces Boolean complexity after control contraction
+
+Let the unitary involution V²=I act on work qubits, with fresh independent
+identically distributed control windows, and let phi activate V with
+probability p. Define
+O±=(O±V†OV)/2. The reduced map is E=(1-p)Id+p Ad_V, hence
+
+    E^K(O) = O+ + (1-2p)^K O-.
+
+This holds for arbitrary work observables. For a diagonal observable and
+permutation V the implementation uses real sign tables. The bound on replacing
+the reduced tail by O+ is exactly |1-2p|^K ||O-|| in any homogeneous norm.
+Balanced controls (p=1/2), nonlinear or otherwise, all give the same idempotent
+map. Constant controls need not converge. Correlated or reused windows do not
+in general have the product formula; gates coupling finished controls back to
+the work also invalidate the assumed schedule.
+
+For independent uniform Boolean windows write psi=(-1)^phi. The full function
+is O+ + O- product psi, so nonzero window-frequency sectors have support
+|supp(W(O-))| times (|supp(W(psi))|^K - 1_{E psi != 0}); the zero-frequency
+sector is the reduced operator. Thus large full spectra and identical reduced
+operators coexist. This is a direct two-eigenspace calculation, not a claim
+to a new general theory of quantum channels.
+
+The experiment checks the toy and the actual arithmetic identity-tail work
+permutation, on arbitrary work inputs. It is a block/function-level test, not
+an implementation of all three Boolean controls in the arithmetic compiler.
+Gate-level PPS independently verifies the one-control arithmetic projection.
+See §BC for evidence and reproduction. C36 is a full-operator statement and
+does not imply that nonlinear controls obstruct this reduced computation.
+
+---
+
+## C48 — Normalized Walsh transforms preserve every fixed cut spectrum; a scalar period-r truth tensor has cut rank at most r, unlike the unrestricted scratch-space function
+
+*status: proven · paper: A*
+
+# C48 — Dense Walsh support does not imply large tensor rank
+
+For a partition L|R of Boolean input bits, matricize the sign tensor F and
+its orthonormal Walsh transform C. Then C=H_L F H_R^T with orthogonal H_L,H_R.
+Ranks and singular values are identical. With the repository's probability-
+normalized Fourier convention, compare F/sqrt(2^n) with the coefficient tensor.
+This is a standard consequence of local basis changes, not a new tensor theorem.
+
+For a scalar function f(e) with period r, a cut factors through the residue of
+the partial binary sum modulo r. Thus rank<=r. The running-residue update
+q -> (2q+b) mod r gives a finite-state realization when reading bits MSB first.
+It need not be minimal; the selected scalar period can be smaller than the
+multiplicative order. Supplying the period table can itself cost O(r).
+
+For the natural low-k/high-(t-k) cut one may sharpen the exact upper bound to
+min(2^k, 2^(t-k), r/gcd(r,2^k)): the high bits access at most
+r/gcd(r,2^k) distinct residues. This refinement follows by counting distinct
+high-bit residue classes, independently of the measured numerical ranks.
+
+These statements concern an ideal scalar function, not the full scratch-space
+arithmetic pullback. The latter's observed ranks, the sampled intermediate
+ranks, and numerical tolerances are recorded in §TR. Small final ranks do not
+bound all intermediate ranks or the cost of discovering a representation.
+
+---
+
+## C49 — Conditional work-state instruments reproduce tested order-finding distributions and sample wide outputs without an exponent state vector; setup and work storage remain exponential
 
 *status: established · paper: B*
 
-# F12 — Function-level dichotomy is absolute
+# C49 — A validated conditional order-finding baseline
 
-**Status.** established
+For a |+⟩ control with branch work permutations P0,P1, phase feedback theta
+and measured bit b, the unnormalized conditional work update is
+
+    M_b = (P0 + (-1)^b exp(i theta) P1)/2.
+
+The probabilities are ||M_b psi||² and sum to one. Retaining the outcome
+preserves interference; the averaged channel does not supply these conditional
+probabilities. The implementation processes the largest exponent power first,
+using theta=-pi*prefix/2^step, with the first measured bit the output LSB.
+
+Equivalence to the original increasing-power arithmetic circuit followed by
+inverse QFT requires reordering the controlled arithmetic. It is valid here
+because modular multiplications commute on the reachable clean subspace,
+which each block preserves. This is NOT a general claim for arbitrary
+full-scratch permutations. A noncommuting-gate counterexample is a saved control.
+
+This is an implementation and validation of the known semiclassical/iterative
+order-finding route, not a new factoring algorithm. The prototype extracts
+branch maps with existing full-space permutation replay, then keeps a dense
+work vector. Both setup and vector storage are exponential in work width.
+The vector size is independent of exponent width; the sequence of maps,
+classical history, runtime, precision and distinct-map cache are not free.
+
+The sampler follows one history and does not receive the period or an
+enumerated orbit. Full distributions are enumerated only for small validation
+cases. The independent wide-output probability reference does receive the
+period; it is not part of the sampling algorithm. Results and sources: §CF.
+
+---
+
+## C50 — Same-layout clean-equivalent scratch extensions can change full Walsh support; conversely an invalid exponent-controlled output flip preserves support count while changing output statistics
+
+*status: established · paper: A*
+
+# C50 — Operational equivalence and full-support cost are distinct
+
+Let J embed the legitimate logical input space, and let U map it into a
+clean-output code. If W is identity on that code (up to one global phase),
+then WUJ=UJ up to that phase. The restricted observable
+J†U†W†OWUJ and all subsequent physical predictions therefore agree with
+those from U. The unrestricted full-space pullbacks can differ.
+
+The experiment appends products of CCX(b_j,t_j,x_0) to an unchanged
+same-layout modular-exponentiation circuit. Clean b and t registers make
+every guard identity on the entire valid output code, not just on one basis
+state. All legitimate inputs e and x<N, coherent code states, and complete
+order-finding output distributions are checked. Full Walsh support changes.
+
+Conversely, appending CNOT(e_0,x_0) changes the logical arithmetic, but its
+Z_x0 pullback multiplies the sign function by (-1)^e0 because e0 is preserved
+by U. This exactly translates the Walsh mask and preserves the support count
+and coefficient magnitudes. In the reported odd-order case it nevertheless
+changes the order-finding output distribution. The even-order example need
+not change that distribution, and is not presented as a universal assertion.
+
+The equivalence is explicitly on the code with clean ancillas and x<N, not
+on all scratch inputs or all x bit strings. This is a controlled separation
+of representation cost from physical prediction, not an asymptotic hardness
+or general compilation-optimization theorem. Measurements live in §SE.
+
+---
+
+## C51 — Descending-power conditional sampling reaches at most min(2^s, r/gcd(r,2^(t-s))) clean work labels after s steps; selected-input circuit replay avoids full-scratch tables but remains orbit-sized
+
+*status: proven · paper: B*
+
+# C51 — Reachable-state sampling removes scratch overhead, not orbit dependence
+
+Start from work state |1> and clean scratch, with t exponent controls. Process
+the modular multiplications in descending exponent-power order, as in C49.
+After s controls, every possible work label has the form
+
+    a^(2^(t-s) j) mod N,  0 <= j < 2^s.
+
+This follows by expanding the product of s conditional instruments: the subset
+sum of the processed binary powers is 2^(t-s)j. The cyclic subgroup generated
+by a^(2^(t-s)) has order r/gcd(r,2^(t-s)), where r=ord_N(a). Consequently
+
+    reached labels <= min(2^s, r/gcd(r,2^(t-s))).
+
+The bound applies to the union before choosing the outcome; cancellation may
+reduce support. The individual classical gates are bijections, so replaying a
+branch on selected labels cannot multiply their number, even when intermediate
+labels have nonzero scratch. Finished blocks return to the clean code. The
+reordering requires commutation on that preserved code, NOT on arbitrary
+scratch inputs. No precomputed r or orbit is needed for this implementation.
+
+`walsh.classical_images` now exposes the existing replay kernel on selected
+inputs; `lab.reachable` memoizes queried branch actions and evaluates the C49
+instrument with sparse amplitudes. It does not implement another Pauli
+propagator. Both inactive and active compiled branches are replayed. There is
+no tolerance truncation; only exactly zero floating-point amplitudes are dropped.
+
+This is O(r) work amplitudes in the worst case, not sub-orbit compression.
+For d distinct compiled multipliers the transition cache can use O(d*r)
+entries; code stores O(t) pair references plus emitted gate lists and
+temporary vectors. Counts of stored amplitudes are not peak process bytes.
+Setup compiles circuits but enumerates no basis images. Clean-input correctness
+gates use separate caches, so they do not prewarm the measured sampler.
+The current selected replay uses int64 labels and at most 63 physical qubits.
+
+This is an elementary reachability bound and a validated engineering baseline,
+not a new general simulation theorem. Measurements, classical comparators,
+rare-output checks, and interpreter provenance are in §RO. C52 explains why
+even an orbit-sized work vector is not a necessary memory cost for the output
+sampling task once the order is available.
+
+---
+
+## C52 — Ideal order-finding outputs are a uniform latent-eigenphase mixture: known r permits scalar conditional sampling without a work vector, despite coherent exponent/work Schmidt rank min(r,2^t)
+
+*status: proven · paper: B*
+
+# C52 — Spectral sampling separates state memory from order discovery
+
+**Known phase-estimation structure, not a novelty claim.** See Cleve, Ekert,
+Macchiavello and Mosca, *Quantum Algorithms Revisited*, §6, equations 6.2–6.4
+and the following measurement-commutation argument:
+[quant-ph/9708016](https://arxiv.org/abs/quant-ph/9708016).
+
+Let U|a^j mod N> = |a^(j+1) mod N> on the orbit of 1 of length r. Its normalized
+eigenvectors |phi_k> have eigenvalues exp(2*pi*i*k/r), and
+
+    |1> = (1/sqrt(r)) sum_{k=0}^{r-1} |phi_k>.
+
+All conditional work instruments are polynomials in U. For any whole measured
+history, M_y^dagger M_y is diagonal in this eigenbasis. Thus its probability on
+|1> equals the uniform average of the probabilities on the |phi_k>. One may
+sample k uniformly once, then use scalar conditional probabilities
+
+    Pr(b | prefix,k) = |1 + (-1)^b exp(i(theta + 2*pi*k*2^i/r))|^2 / 4,
+
+where i is the descending exponent bit and theta is inverse-QFT feedback.
+This yields the exact ideal distribution in mathematical arithmetic, with
+O(t) scalar updates after r is known and no work-state vector. This is not
+a constant bit-complexity or numerical-precision claim. The sampled
+conditional-on-k path probability is NOT the marginal output probability.
+
+The baseline obtains r by multiplying by a until returning to 1: O(r)
+modular multiplications and constant many O(log N)-bit integers, without
+storing the orbit. This is merely a simple charged baseline, not an optimal
+classical order-finding algorithm. The possible exponential order-discovery
+time has not disappeared. The circuit-derived sampler in C51 does not receive
+r; the spectral comparator explicitly discovers and uses it.
+
+For contrast, the coherent pre-QFT exponent/work state has Schmidt rank
+min(r,Q), Q=2^t. Group its exponent terms by distinct orbit label. The grouped
+exponent vectors have disjoint nonempty support and are mutually orthogonal;
+the distinct work labels are orthogonal too, giving precisely min(r,Q) terms.
+A scalar output function may have much smaller tensor rank (C48). Neither
+rank is a lower bound on memory for this restricted output-sampling task.
+
+Scope: ideal noiseless modular arithmetic on clean scratch and initial |1>,
+with exponent-output measurements. The sampled hidden eigenphase is not a
+replacement physical work state for arbitrary later noncommuting operations
+or work-state tomography. General perturbations invalidate this reduction.
+Evidence and the useful next question are in §RO / TODO 14.
+
+---
+
+## C53 — Single-defect output effects identify detectable spectral coherences; diagonal work phases can transfer to exponent phases, so noncommutation does not imply sampling hardness
+
+*status: proven · paper: B*
+
+# C53 — Detectable coherence and a surviving phase-transfer shortcut
+
+## Exact single-defect effects
+
+Let U be modular multiplication restricted to the orbit of |1>, with length
+r and eigenvalues lambda_k=exp(2*pi*i*k/r). Keep the actual ascending-power
+arithmetic order. After s low exponent controls, insert a work unitary V that
+preserves this orbit, then finish the remaining controls and inverse QFT.
+Set Q=2^t, L=2^s, H=Q/L. Writing e=l+Lh gives the output work operator
+
+    K_y = (1/Q) sum_{l=0}^{L-1} sum_{h=0}^{H-1}
+                exp(-2*pi*i*y*(l+Lh)/Q) U^(Lh) V U^l.
+
+In the U eigenbasis this factors, WITHOUT commuting V through anything, as
+
+    A_y(k) = (1/L) sum_l exp(2*pi*i*(k/r-y/Q)*l),
+    B_y(k) = (1/H) sum_h exp(2*pi*i*(k/r-y/Q)*Lh),
+    K_y = diag(B_y) V diag(A_y),     E_y = K_y^dagger K_y.
+
+The E_y form a POVM on the orbit. For any initial orbit state rho,
+p(y)=Tr(E_y rho). With initial |1>, rho[k,k']=1/r. Replacing this state by
+the uniform incoherent eigenphase mixture instead gives Tr(E_y)/r; its error is
+
+    p(y) - p_dephased(y) = (2/r) sum_{k<l} Re(E_y[k,l]).
+
+Initial spectral dephasing preserves this output measurement for ALL orbit
+inputs iff every E_y is diagonal. For a particular input, off-diagonal
+contributions can vanish or cancel, so an off-diagonal E_y does not itself
+prove a nonzero error on |1>. Neither does [U,V] != 0. A commuting V is
+sufficient to recover the original C52 statistics for |1>, but not necessary.
+Final eigenbasis coherences can always be discarded AFTER the last work
+operation, because the work register is traced out.
+
+The diagonal-POVM criterion is standard coherence-detection theory, not a new
+result: see Theurer, Egloff, Zhang and Plenio, *Quantifying Operations with an
+Application to Coherence*, Definition 1 and Proposition 2,
+[arXiv:1806.07332](https://arxiv.org/abs/1806.07332). The factorization above
+is the elementary finite-sum specialization to this circuit.
+
+## A different classical representation can still succeed
+
+If V is diagonal in the computational work basis, with V|x>=v(x)|x>, then
+on the specific clean input |1> its only effect after the low controls is
+
+    |e>|a^e mod N> -> v(a^(e mod L) mod N) |e>|a^e mod N>.
+
+Thus it is exactly replaceable, on this input, by a diagonal operation on the
+first s exponent bits. Move that exponent operation before the arithmetic;
+it commutes with the exponent-controlled arithmetic. C52's initial latent
+eigenphase replacement is now valid for the REWRITTEN circuit, although it
+may be invalid for the original physical work-defect circuit. The phase
+function may be complicated: in general it is a length-L table, not a product
+of one-bit phases. This identity alone is not a cheap general sampler.
+
+For the tested N=7,a=3,s=2 example, low exponents 0,1,2,3 reach work labels
+1,3,2,6. Their low bit is 1-e_1. Consequently a work Rz(theta) on that bit is,
+up to a common phase, diag(1,exp(-i*theta)) on exponent bit 1. A uniformly
+sampled eigenphase followed by C52's scalar bit sampler with that one phase
+offset therefore samples the perturbed distribution in O(t) scalar updates
+once r is known. The equivalence holds for every t>=2 and every theta, not
+just the measured width. At s=1 this same work rotation is only a global phase
+on the two early reachable labels, despite failing to commute on the full orbit.
+
+This is a task/input-specific phase-transfer identity, not a novelty or speedup
+claim. Order discovery and recognizing the transferable phase function still
+have costs. The implementation's optional phase vector stores O(t) real numbers;
+the default ideal route allocates no such vector. Both routes avoid a work
+state vector, not integer/precision costs. General non-diagonal defects and
+orbit leakage are outside the phase-transfer statement.
+
+## General exponent-unitary transfer is stronger, but state optimality is not task optimality
+
+The earlier scalar replacement has a standard generalization at the SAME
+insertion. Write the normalized pre-kick pure state as
+
+    |Psi> = sum_(l=0)^(L-1) |l> A[:,l],    ||A||_F=1,
+
+where the columns are conditional work vectors divided by sqrt(L) for
+uniform early controls. A work unitary G gives B=G A; an early-exponent
+unitary E instead gives A E^T. E acts at this boundary and need not commute
+with earlier controlled arithmetic. Exact replacement is possible iff
+
+    G rho G^dag = rho,    rho=A A^dag.
+
+Necessity follows by tracing out the exponent; sufficiency follows from
+unitary freedom of purifications with the same ancillary dimension. This
+can hold even when individual columns of A are not eigenvectors of G, so
+failure of scalar per-history phases alone does not exclude it.
+
+More explicitly, put C=A^dag B and take an SVD C=U Sigma V^dag. Expanding
+the squared Frobenius residual and maximizing its real trace gives
+
+    E_opt=(U V^dag)^T,
+    F_root=||C||_1,
+    min_E ||B-A E^T||_F^2=2-2 F_root,
+    min_E pure_joint_trace_distance=sqrt(1-F_root^2).
+
+Here ||.||_1 is trace norm and F_root is UNSQUARED fidelity of rho and
+G rho G^dag. Root fidelity, purification freedom and the polar-unitary
+optimization are established quantum information facts; see
+[Uhlmann, Sections 2 and 3, especially (3), (12), (17)–(20)](https://arxiv.org/pdf/1106.0979).
+The rectangular SVD argument above directly covers rank-deficient A and
+does not require extending the actual exponent register to dimension r.
+
+The largest diagonal-phase overlap is F_diag=sum_l |C_ll|; omission gives
+F_omit=|Tr C|, with F_root>=F_diag>=F_omit. These optimize the JOINT STATE,
+not a specified output law. Subsequent identical gates and measurement
+give TV upper bounds from the corresponding joint trace distances, but do
+not preserve the candidates' ordering by error. UT's frozen C76 interior
+phase rows give a finite counterexample: the joint-optimal candidate has
+worse measured-output TV than omission. A separate nontrivial Fourier
+purification control admits exact general transfer while diagonal transfer
+fails. The actual nonzero-kick rows do not admit exact transfer at numerical
+diagnostic precision; this is not a general no-rewriting theorem.
+
+Constructing A, its r-by-L boundary and an L-by-L E can itself be expensive.
+No cheap physical synthesis, efficient sampler, optimal observable-specific
+approximation or finite-precision certificate follows from this identity.
+
+## A measured-output obstruction for early-register-only replacements
+
+One can sometimes rule out that restricted class directly on the output,
+without demanding equality of the joint state. Suppose t=s+1, the s early
+controls form the columns of A at the insertion, and only the high control
+remains. Its work branches are I and U^(2^s), followed by a common terminal
+work unitary and the exponent inverse QFT. Let L=2^s and rho=A A^dag. Then
+
+    p(y even) = [1 + Re Tr(U^L rho)]/2.
+
+Indeed, output parity pulls back through the inverse QFT to X on the high
+exponent bit: translation by half the Fourier-register length. The early
+exponent bits do not appear in this observable. Tracing the controlled work
+gate gives the displayed overlap; the common final work unitary cancels
+without needing to commute with U^L.
+
+Every trace-preserving channel acting ONLY on the early exponent register
+at that boundary leaves the complementary high/work state unchanged. Thus
+it preserves this parity marginal, including every possible early unitary,
+not only the polar or diagonal candidates tested above. A work kick G instead
+replaces rho by G rho G^dag. Consequently ANY early-register-only surrogate
+has output error at least
+
+    TV >= (1/2) |Re Tr[U^L (G rho G^dag-rho)]|.
+
+This is a task-specific no-signalling/data-processing application, not a
+lower bound on an arbitrary classical algorithm. UT evaluates the bound
+at the frozen C76 insertion and checks it against complete physical laws.
+Its positive floating-point values are diagnostic witnesses, not certified
+decimal lower bounds. Channels involving work or the remaining high bit,
+postselection, other circuit rewrites and output samplers are outside this
+restriction. A vanishing parity gap would not establish full-law equality.
+
+## What the diagnostics mean
+
+The experiment records individual off-diagonal pair contributions and the
+numerical rank of their real linear response map across all outputs. That
+rank counts independent linear statistics sufficient for this fixed POVM and
+arbitrary inputs. It does NOT give a minimal representation for one known
+input, a required number of stored density-matrix entries, or a memory lower
+bound for sampling. In particular, the successful phase-transfer sampler is
+not obliged to retain the original representation's detectable coherences.
+Finite measurements, precision checks and allocation/setup limits live in §SD.
+
+---
+
+## C54 — A single orbit-preserving defect admits final-eigenphase sampling with a coherent early prefix; known D-sparse orbit columns give uniform rejection with expected D proposals
+
+*status: proven · paper: B*
+
+# C54 — A final-eigenphase mixture survives a genuine work-label mixer
+
+## Conditioning at the right time
+
+Keep C53's original time ordering and notation: t exponent bits, a defect V
+after s low controls, L=2^s, H=2^(t-s), Q=LH. V preserves the length-r orbit.
+Define, in the computational orbit basis,
+
+    c_k(l) = <phi_k|V|a^l>,       0<=l<L,
+    w_k = (1/L) sum_l |c_k(l)|^2.
+
+The weights sum to one, because each V|a^l> is normalized and the phi_k are
+an orthonormal basis. A final work-eigenbasis measurement commutes with all
+later controlled powers of U. It can therefore be moved back to just AFTER
+V, without crossing V or any earlier arithmetic. This produces latent k with
+probability w_k and the conditional exponent state
+
+    (sum_l c_k(l)|l> / ||c_k||)
+      tensor (sum_h exp(2*pi*i*k*Lh/r)|h> / sqrt(H)).
+
+Zero-weight k are omitted. The later controls are still a product of one-bit
+phase states; only the early s controls need a coherent state vector. Initial
+eigenphase dephasing can fail (C53) while this FINAL-eigenphase mixture is exact.
+Uniform final weights are not generally valid either.
+
+To sample the inverse-QFT output, first sample q in [0,H) using the existing
+scalar eigenphase sampler with phase index kL mod r and width t-s. Multiply
+early amplitude l by exp(-2*pi*i*q*l/Q), take its normalized L-point inverse
+quantum Fourier transform (negative-sign FFT), and sample z in [0,L). Return
+
+    y = q + H*z.
+
+Indeed exp(-2*pi*i*y*(l+Lh)/Q) factors into the high-register Fourier kernel
+for q and the early feedback/Fourier kernel for z. This proves the sampling
+identity without an invalid reversal of the physical arithmetic schedule.
+
+## Avoiding a table of all final eigenphase weights
+
+Suppose every required column V|a^l> is supplied as at most D distinct known
+orbit-index terms,
+
+    V|a^l> = sum_j alpha_lj |a^j>,      sum_j |alpha_lj|^2 = 1.
+
+Let h_k(l)=sum_j alpha_lj exp(2*pi*i*k*j/r)=sqrt(r)*c_k(l). Cauchy-Schwarz gives
+|h_k(l)|^2<=D, hence w_k=||h_k||^2/(Lr)<=D/r. Propose k uniformly from [0,r)
+and accept with
+
+    acceptance(k) = ||h_k||^2/(L*D).
+
+The unconditional acceptance probability is exactly 1/D in mathematical
+arithmetic. Repeated independent proposals therefore return the required
+w_k distribution with expected D proposals. D may be a conservative supplied
+bound, in which case that same bound determines this implementation's mean
+attempt count. No enumeration of all r weights is needed.
+
+Streaming the L columns builds one h_k row with O(L+D) numerical workspace,
+plus oracle-owned state. Counting scalar arithmetic and O(D) work to enumerate
+a column, expected per-sample work is O(L*D^2 + t + L*log L), not a
+bit-complexity bound. The current helper additionally sorts indices on each
+column validation, adding up to a log(D) validation factor; it performs L
+column validations during setup. The early
+FFT remains exponential in s; this is not a solution when the coherent prefix
+itself is large. Naively representing generic dense columns has D=r.
+
+## The input contract is substantive
+
+The sampler receives r AND the orbit indices j of every returned work label.
+An arbitrary computational label x is not an orbit index: finding j such that
+x=a^j mod N can require orbit enumeration or a discrete-log computation. These
+costs cannot be omitted in a simulation comparison. Order discovery remains
+external and potentially exponential too.
+
+For the physical N=7,a=3 mixer of |1> and |5>, the endpoints are 1 and a^-1,
+so their indices are known directly as 0 and r-1 once r is known. Its columns
+have D<=2. The corresponding abstract family on a cyclic orbit mixes indices
+0 and r-1 for any supplied r. No discrete-log lookup is needed for THIS indexed
+construction. Large-r oracle tests are not large compiled modular circuits.
+
+`lab/prefix.py` implements the streamed-column sampler. Its current numerical
+limits include s<=12, t<=63, int64-range r and complex128 amplitudes. It drops
+no amplitudes by tolerance. A rejection-attempt cap raises on exhaustion;
+it does not silently return a biased fallback. Returned conditional-on-k and
+joint (k,y) probabilities are NOT the marginal p(y).
+
+## Positioning
+
+This is an elementary deferred-measurement/Fourier/rejection construction and
+a validated task-specific baseline, not a novelty claim or factoring advance.
+It demonstrates that the original eigenbasis's detectable coherences need not
+be stored as a work density matrix. The early-control state and oracle costs
+replace that representation's costs rather than disappear.
+
+Related primary literature includes Van den Nest's computationally tractable
+states and sparse-operator framework, especially §4 of
+[arXiv:0911.1624](https://arxiv.org/abs/0911.1624). Its guarantees should not
+be conflated with this conditional sampler. Likewise Schwarz and Van den Nest,
+Theorem 1 of [arXiv:1310.6749](https://arxiv.org/abs/1310.6749), assumes an
+approximately sparse OUTPUT distribution; here D bounds columns of the
+defect in a known orbit basis, not output sparsity. These readings establish
+relevant context, not exhaustive priority for this specialization. Experimental
+evidence, agent verification and limitations are recorded in §PF.
+
+---
+
+## C55 — One defect with finite known orbit-basis support admits Fourier output sampling without orbit/prefix arrays; coherent-component rejection has mean at most 5(d+1) over the sampled eigenphase
+
+*status: proven · paper: B*
+
+# C55 — Finite basis support removes the early-prefix vector
+
+## Contract and algebra
+
+Use C54's time order: t ascending low-to-high exponent controls, with ONE
+orbit-preserving work unitary V after s controls. Put L=2^s, H=2^(t-s), Q=LH.
+The period r and d distinct affected orbit indices S are supplied. V equals
+identity outside S and its d-by-d block is supplied explicitly. This is
+**finite support in the orbit basis**, not merely low matrix rank, sparse
+columns, or locality on d physical qubits. Those weaker promises do not imply
+the construction below. Discovery of r and conversion of work labels to orbit
+indices remain external costs.
+
+For k in [0,r), p in S, define
+
+    delta_p(k) = sum_{j in S} (V[j,p]-1_{j=p}) exp(2*pi*i*k*j/r),
+    n_p = #{0<=l<L : l mod r=p}.
+
+Then C54's unnormalized conditional early row is
+
+    h_k(l) = exp(2*pi*i*k*l/r) + sum_p delta_p(k) 1_{l mod r=p},
+    S_k = ||h_k||^2
+        = L + sum_p n_p (|exp(2*pi*i*k*p/r)+delta_p(k)|^2-1).
+
+The count n_p is zero for p>=L and otherwise 1+floor((L-1-p)/r). For numerical
+evaluation a positive disjoint-support expression for S_k/L avoids subtraction
+of nearly equal O(L) quantities. Final phase weights are w_k=S_k/(Lr).
+C54's phase rejection applies with D=max(1,d), so k requires D proposals on
+average in mathematical arithmetic, without evaluating all r weights.
+
+Sample the late output q as in C54. For early Fourier output z, y=q+Hz, let
+G_n(x)=sum_{j=0}^{n-1} exp(-2*pi*i*x*j), and define
+
+    b_0(z) = G_L(y/Q-k/r)/L,
+    b_p(z) = delta_p(k) exp(-2*pi*i*y*p/Q) G_{n_p}(y*r/Q)/L.
+
+The early conditional probability is |sum_i b_i(z)|^2/(S_k/L). The joint
+latent/output probability is p(k,y)=p(q|k)*|sum_i b_i(z)|^2/r, not p(y).
+These are finite geometric sums; no prefix vector is needed to evaluate them.
+
+## The progression component really can be sampled
+
+For an interval of n labels in a T=2^b dimensional register with amplitudes
+exp(-2*pi*i*eta*m)/sqrt(n), consider the LOW j Fourier output bits a. Set
+M=2^j, d'=T/M and n=u*d'+e, 0<=e<d'. Summing over the unmeasured outputs
+forces input differences to be divisible by d'. The d' residue classes have
+u or u+1 members, giving
+
+    P(low j bits=a) = [(d'-e)|G_u(a/M+eta*d')|^2
+                          +e|G_(u+1)(a/M+eta*d')|^2]/(n*M).
+
+Each prefix needs two geometric norms. Two child-prefix probabilities give
+the next bit's conditional probability. Thus a Fourier sample of this interval
+needs O(b) scalar evaluations and no length-T distribution. Zero-probability
+forced paths are omitted, not conditioned on.
+
+For a nonwrapping progression p+r*m in [0,L), n terms, with linear feedback
+phase exp(-2*pi*i*xi*(p+r*m)), put g=gcd(r,L), T=L/g, beta=r/g. Its output
+probability is |G_n(r*z/L+r*xi)|^2/(nL). Sample an interval Fourier outcome w
+in dimension T with eta=r*xi, solve z=beta^(-1)w mod T, then choose uniformly
+among the g lifts modulo L. beta is invertible modulo T; T=1 is trivial.
+The offset p is a global phase for THIS component's probability, but cannot
+be discarded from the coherent sum of components.
+
+## Rejection sampling restores the interference
+
+Let m=d+1 and T_k=L+sum_p n_p|delta_p(k)|^2. Parseval gives
+
+    sum_z sum_i |b_i(z)|^2 = T_k/L,
+    sum_z |sum_i b_i(z)|^2 = S_k/L.
+
+Choose the plane/progression component with weights proportional to its input
+norm squared: L or n_p|delta_p|^2. Sample that component as above. The resulting
+proposal is g_k(z)=sum_i |b_i(z)|^2/(T_k/L). Accept with
+
+    A_k(z) = |sum_i b_i(z)|^2 / [m sum_i |b_i(z)|^2] <= 1.
+
+Cauchy-Schwarz supplies the inequality. Conditional on acceptance the output
+is exactly the coherent early distribution. Its expected proposals at fixed k
+are C_k=m*T_k/S_k. This can be arbitrarily large; there is NO pointwise 5m
+bound. Feedback does not change component or total norms, so C_k does not
+depend on q.
+
+However, averaging over the ACTUALLY SAMPLED phase cancels S_k:
+
+    sum_{k:S_k>0} w_k C_k
+      = m/(Lr) sum_{k:S_k>0} T_k
+      <= m/(Lr) sum_k T_k <= 5m.
+
+For each p, Fourier orthogonality gives
+sum_k |delta_p(k)|^2 = r ||(V-I)|p>||^2 <= 4r, while sum_p n_p<=L.
+This proves the final inequality, including zero-weight phases. It is the
+averaging step, not a lower bound on each conditional norm, that controls cost.
+
+Counting exact scalar arithmetic/geometric evaluations as unit cost, setup
+unitarity checking costs O(d^3); per-sample expected work is
+O(D*d^2 + (d+1)*(s+d) + t), with O(d^2) scalar storage including the supplied
+block. No array of length r, L or Q occurs. Integer storage/arithmetic, uniform
+random-bit generation and accurate trigonometry are additional costs. This
+statement is NOT an arbitrary-precision or bit-complexity theorem.
+
+## A simple approximation can limit the impact
+
+Let F=sum_p n_p/L be the pre-defect probability of hitting the affected basis
+support. The global pure states immediately after V versus identity have
+squared vector distance
+
+    (1/L) sum_p n_p ||(V-I)|p>||^2 <= 4F.
+
+Subsequent identical unitaries preserve this distance; partial trace and output
+measurement cannot increase trace distance. Pure-state trace distance is at
+most vector distance, so their output distributions satisfy
+
+    TV(p_defect,p_ideal) <= min(1, 2*sqrt(F)).
+
+Consequently the existing ideal sampler can already be a good approximation
+when F is small. For d supplied indices, F<=d/r+d/L; approaching d/r requires
+enough complete orbit traversals. At fixed L, increasing r alone need NOT
+send F to zero (p=0 is always hit for the endpoint defect). This is an upper
+bound, not a monotonicity law for actual TV. Exact output coincidences at some
+resonant orders do not show smooth dilution or a broad simulator advantage.
+
+## Implementation and positioning
+
+`lab/fourier_sampling.py` and `lab/localized.py` implement the identities in
+float64/complex128, with t<=63, int64-range r and d<=64. Integer phase products
+are reduced before conversion to floating point. No tolerance deletes small
+amplitudes. Unitarity validation itself uses a numerical tolerance. Rejection
+caps raise on exhaustion; they never return a biased fallback. Caps are not
+part of the uncapped exact-math theorem: discarding failed calls and keeping
+only successful ones can itself reweight the latent phases. The numerical
+limits and finite tests do not certify all rare outcomes or guarantee mathematical
+exactness from a finite random/float implementation. See §LF for evidence.
+
+This strengthens C54 for a substantially narrower input family. It is a
+task-specific structured sampler, not order discovery, a generic perturbed
+Shor simulator, a tensor-memory lower bound, or an established novelty claim.
+Known order remains a particularly substantive assumption for factoring.
+
+The terminating-QFT/adaptive-measurement framework is prior art:
+[Browne, quant-ph/0612021, pp. 2–3](https://arxiv.org/abs/quant-ph/0612021)
+explains product-state and bounded-bond MPS simulation. The arithmetic interval
+marginal and finite-support rejection proof above identify the structure used
+here; citing Browne does not establish their priority. C54 discusses the
+related computationally tractable/sparse-operator literature and its different
+contracts. A complete priority comparison for this specialization remains open.
+
+---
+
+## C56 — Repeated b-site orbit blocks preserve a coarse Fourier sector: known-order output sampling with multiple noncommuting defects needs O(t*b^3) scalar work and O(t*b^2) storage, without orbit or exponent arrays
+
+*status: proven · paper: B*
+
+# C56 — Conserved coarse sectors, not a single-defect restriction
+
+## Input and output contract
+
+The known orbit has length r=b*M, with indexed basis |j>, j in [0,r),
+translation U|j>=|j+1 mod r>, and initial work state |0>. Each of t exponent
+controls starts in |+> and controls U^(2^i), in the ORIGINAL ascending order
+i=0,...,t-1. Work is traced after a terminating inverse QFT on the controls;
+the task is sampling its computational-basis output y, not the joint state.
+
+At insertion s (after s controls), an allowed work defect applies the SAME
+supplied b-by-b unitary W_s to every consecutive block bm,...,bm+b-1.
+There may be multiple separated, mutually noncommuting W_s. Gates at one
+insertion can first be composed, with that construction cost charged. A gate
+at s=0 is allowed. There are no other work operations in this contract.
+
+Orbit order, indexing, divisibility, and the repeated-block representation are
+inputs, NOT discoveries. Repeated orbit blocks need not be few-physical-qubit
+gates. This is a perturbed known-order circuit family, not generic Shor
+simulation or a factoring algorithm.
+
+## Why coarse dephasing is valid
+
+Define the b-dimensional eigenspaces of U^b by
+
+    |alpha,p> = M^(-1/2) sum_{m=0}^{M-1}
+                    exp(-2*pi*i*alpha*m/M) |bm+p>,
+    alpha in [0,M), p in [0,b).
+
+Every arithmetic power and every repeated block commutes with U^b and hence
+preserves each alpha sector. The final work trace eliminates cross-sector
+terms. Therefore a measurement of alpha can be moved to the beginning without
+changing any exponent output probability. For the initial |0>, alpha is
+uniform, and the within-sector state is |p=0>.
+
+This is NOT full initial U-eigenphase dephasing: the retained sector has
+dimension b and can contain detectable coherences between fine eigenphases.
+C53's counterexample to discarding those coherences remains applicable.
+
+Inside a sector, U becomes the twisted cycle T_alpha. Its direct integer power
+has a single nonzero entry per column:
+
+    T_alpha^n[(p+n) mod b, p]
+        = exp(2*pi*i*alpha*floor((p+n)/b)/M).
+
+Each W_s acts as its supplied b-by-b matrix. Sampling one uniform alpha reduces
+the remaining task to a sequential circuit with work dimension b, independently
+of M. No commutation between W_s and T_alpha, or between different W_s, is
+assumed. In particular, reversing the arithmetic/defect schedule is invalid
+in general.
+
+## Sampling in the original order with forward states and backward effects
+
+The following finite-work identity also applies beyond periodic defects. For
+control i, let B_i0 and B_i1 be its two unitary work branches, including any
+following work-only gate on the LEFT of both branches. In this construction,
+
+    B_i0 = W_(i+1),    B_i1 = W_(i+1) T_alpha^(2^i),
+
+with absent W equal to identity, and initial work state W_0|0>.
+Let rho_i be the work state just before control i when all earlier controls
+are unmeasured and traced for this contraction. It obeys
+
+    rho_(i+1) = (B_i0 rho_i B_i0^dag + B_i1 rho_i B_i1^dag)/2.
+
+Terminating inverse-QFT measurements visit i=t-1,...,0. At step j=t-1-i,
+let a denote the already selected LOW j output bits and define
+
+    K_z = [B_i0 + (-1)^z exp(-i*pi*a/2^j) B_i1]/2,  z=0,1.
+
+Initialize the later-outcome effect E=I. The two nonnegative weights are
+
+    w_z = Tr(E K_z rho_i K_z^dag).
+
+Choose z with probability w_z/(w_0+w_1), append it as output bit j, then
+replace E by K_z^dag E K_z, up to any positive scalar normalization. This
+effect carries the dependence on measurements of the LATER controls; rho_i
+carries the earlier unmeasured history. Contracting either side of the circuit
+gives the trace above. Completeness of the two measurement outcomes gives
+their sum as the probability of the already selected prefix. Induction then
+gives the correct conditional probability at every step and hence the correct
+sample. A zero-probability branch is never conditioned on.
+
+The implementation uses factors rather than subtractive density-matrix
+expressions. Write rho_i=R_i R_i^dag and E=C^dag C. Forward propagation forms
+A=[B_i0 R_i, B_i1 R_i]/sqrt(2); a thin QR of A^dag gives a new square R with
+AA^dag=R R^dag. Backward weights are squared Frobenius norms
+||C K_z R_i||_F^2. No singular-value truncation or amplitude threshold is used.
+
+For supplied matrices, this uses O(t*b^3) scalar arithmetic and O(t*b^2)
+storage with forward checkpoints. Drawing alpha and evaluating the integer
+twists need no array indexed by r, 2^s or 2^t. There is no rejection step.
+These are arithmetic-operation and scalar-storage bounds, NOT bit-complexity
+or arbitrary-precision guarantees. Order/index discovery, constructing the
+blocks, integer arithmetic and requested numerical accuracy remain costs.
+
+## Two different sufficient invisibility mechanisms
+
+For ONE repeated block W after s controls, put L=2^s. If b divides L,
+the defect commutes with every later arithmetic power. It moves to the end
+and cannot affect any exponent output because the final work is traced.
+Thus b=2^v is invisible at or after s=v. If other subsequent noncommuting
+defects are present, that move also requires commutation with those defects;
+do not apply the single-defect corollary to an arbitrary multi-defect schedule.
+
+C65 supplies a stronger COLLECTIVE statement: for b=2^v, all W_s with
+s>=v can be removed together, preserving their mutual order while crossing
+only operations on the coarse/control subsystem. This does not require
+pairwise commutation of the late work gates, and also permits coherent coarse
+routing. Early gates and retained fine-work observables remain outside that
+invariance. The single-gate movement caution above concerns removing one gate
+while leaving the other gates fixed.
+
+For odd b>1, b never divides L. This removes the preceding guarantee but
+DOES NOT prove visibility at every input, insertion or choice of W.
+
+There is a separate input-specific mechanism, not requiring repeated blocks:
+assume L divides r and the one defect V preserves span{|0>,...,|L-1>}
+unitarily. Write j=Lm+p. Just before V the early exponent and p registers
+are maximally entangled, while m=0. V acts on that initial p span, and every
+later U^L acts only on m. Tracing work leaves the early exponent maximally
+mixed, independent of V, tensor the same late exponent state as without V.
+Thus even the entire reduced exponent state before its inverse QFT is unchanged.
+V's action on the orthogonal complement of the initially reached span is
+irrelevant at insertion. This uses ONE defect with ideal arithmetic on either
+side; it is not a general statement about early states after other mixers.
+
+## The original one-defect harmonic route is also valid
+
+For one repeated b-block after s controls, C54's early row has the form
+
+    A_p(k) = sum_q W[q,p] exp(2*pi*i*k*q/r),
+    f_p(k) = exp(-2*pi*i*k*p/r) A_p(k),
+    h_k(l) = exp(2*pi*i*k*l/r) f_(l mod b)(k).
+
+Expanding f in its b-point Fourier series gives
+h_k(l)=sum_u c_u(k) exp(2*pi*i*(k/r+u/b)*l). Unitarity and Parseval imply
+sum_u |c_u|^2=1. If S_k=||h_k||^2, the sum of component input norms is L.
+The same coherent-component rejection argument as C55 gives expected proposals
+b*L/S_k at fixed k with S_k>0. Averaging over the ACTUAL final fine-phase
+weights S_k/(Lr) gives at most b. This is not a pointwise bound. C54's sparse
+phase proposal also has mean b. Each component is a scalar plane-wave Fourier
+sampler. Finite tests additionally enumerate its normalized accepted law.
+
+This gives an alternative single-defect route, but it was not implemented as
+a second production rejection sampler: the conserved coarse-sector algorithm
+already covers several separated defects without rejection. Fine FINAL k in
+this paragraph and coarse INITIAL alpha in the main construction are different
+latent variables and must not be interchanged.
+
+## Implementation, evidence and prior art
+
+`lab/periodic.py` constructs the sectors; `sequential_path` in
+`lab/semiclassical.py` implements the two-sided instrument contraction. Existing
+samplers retain their previous APIs and default behavior. The implementation
+uses complex128, b<=64, t<=63 and positive int64-range r. Array dimensions are
+capped before conversion; direct integer phase reduction avoids amplifying a
+float phase error by repeated squaring through exponentially large powers.
+Small positive probabilities are not deliberately removed, but floating-point
+underflow and finite random-number resolution remain limitations. Validation
+of unitarity and normalization uses explicit tolerances. See §PS for finite
+coverage, resource accounting and retained failed tests.
+
+The machinery has strong existing baselines. Sequential finite-dimensional
+ancillas give matrix-product descriptions; see
+[Schön et al., quant-ph/0501096, pp. 1–2](https://arxiv.org/abs/quant-ph/0501096).
+Our conditional pure joint state retains the work terminal; the controls alone
+can be mixed, so no final ancilla-decoupling assumption is made.
+[Browne, quant-ph/0612021, pp. 2–3](https://arxiv.org/abs/quant-ph/0612021)
+explains terminating-QFT sampling via adaptive measurements for tractable
+inputs, including bounded-bond MPS. The forward-state/backward-effect
+probability identity is also explicit in
+[Gammelmark, Julsgaard and Mølmer, arXiv:1305.0681, Eq. (2)](https://arxiv.org/abs/1305.0681).
+
+The result here identifies and implements a sufficient conserved-sector
+promise for this specific arithmetic-output task. It is standard symmetry
+reduction combined with known measurement calculus, not an established
+novelty claim, tensor-memory lower bound or general simulation breakthrough.
+The absence of the symmetry does not itself establish hardness.
+
+C57 studies one localized violation. It preserves this exact result for the
+unperturbed background but distinguishes a failed initial-dephasing shortcut,
+a complete-output boundary formula and a certified mathematical omission bound.
+
+C58 extends the sufficient sampling condition to control-independent bijective
+sector routing. Individual-sector conservation here is sufficient, not necessary.
+
+---
+
+## C57 — Bounded orbit displacement certifies omission of one localized kick after periodic mixers; its exact low-rank fixed-output correction still requires a sector sum in the tested construction
+
+*status: proven · paper: B*
+
+# C57 — Symmetry breaking need not defeat a good approximation
+
+## Contract and the two different questions
+
+Start with C56's original ascending controlled powers, initial orbit label 0,
+known r=b*M, and supplied repeated b-by-b background mixers. Insert ONE
+additional unitary K after s controls and after any background gate at that
+same insertion. K is identity outside d supplied orbit-basis labels S. Later
+background gates and the terminating inverse QFT remain unchanged.
+
+The exact conserved-sector shortcut need not survive: K can couple coarse
+sectors, so dephasing the initial coarse phase changes the output law in the
+tested physical example. This is a finite counterexample to that shortcut,
+NOT a lower bound on simulation memory or proof of exponential hardness.
+The useful positive result below concerns an approximation by OMITTING K.
+
+## An exact support cone in a co-moving orbit coordinate
+
+Put L=2^s. Before K, the early exponent/work state has the form
+
+    |Psi> = (1/sqrt(L)) sum_{l=0}^{L-1} |l>|phi_l>,
+    ||phi_l||=1.
+
+The unprocessed exponent controls factor out. Each conditional arithmetic
+power changes both the baseline partial exponent label and the work index by
+the same amount, modulo r. A repeated b-block changes a work index bm+p to
+bm+q, a displacement q-p in [-(b-1),b-1]. Therefore, after m background
+mixers preceding K, induction on the original gate sequence gives
+
+    supp(phi_l) subset {l+delta mod r : -R<=delta<=R},
+    R=m*(b-1).
+
+This is a SUPPORT upper bound. Interference can remove paths but cannot create
+a basis label outside that set. It does not assume that the conditional work
+state is a classical mixture or that mixers commute. A supplied identity block
+may be counted conservatively in m. A block before any control counts too.
+More generally, known displacement radii can be added; the implemented
+background wrapper uses the conservative common b-1 radius.
+
+Let A be the union of circular intervals [p-R,p+R] modulo r for p in S. Since
+the early controls are orthogonal and uniform,
+
+    F = <Psi|I tensor P_S|Psi>
+      = (1/L) sum_l ||P_S phi_l||^2
+      <= F_cover = #{0<=l<L : l mod r in A}/L.
+
+If the disjoint half-open intervals making up A are [a_j,c_j), write
+L=u*r+v, 0<=v<r. The count is exactly
+
+    C = u sum_j(c_j-a_j) + sum_j max(0,min(c_j,v)-a_j).
+
+There are at most 2d intervals before merging, so this needs O(d log d)
+integer operations and O(d) storage, with no orbit or prefix enumeration.
+The elementary union bound also gives
+
+    F <= F_cover <= min(1, d*(2R+1)*(1/r+1/L)).
+
+The old bare residue count on S itself is NOT a valid general replacement for
+F after earlier mixers: the measured counterexample in §LC exceeds it.
+
+## Omission error and its scope
+
+Because K-I vanishes outside S and ||K-I||<=2,
+
+    ||(K-I)|Psi>||^2 <= 4F <= 4F_cover.
+
+Identical subsequent unitaries preserve this vector distance. Partial trace
+and measurement cannot increase trace distance, and pure-state trace distance
+is bounded by vector distance. Consequently
+
+    TV(p_with_K, p_background)^2 <= min(1,4*C/L).
+
+This bound applies to the entire measured output law, not only selected peaks.
+It is an exact mathematical guarantee for an exact background sampler. The
+complex128 sampler has an additional, not yet globally certified numerical
+error; this must not be silently included in the rational omission certificate.
+
+If L>=r then TV<=min(1,sqrt(8*d*(2R+1)/r)). Thus, when d and b are fixed and
+m=O(log r), localized-kick impact is provably small at sufficiently late
+insertion. Increasing r at FIXED L alone need not give vanishing error. The
+bound is conservative and can be trivial when the expanded support covers
+much of the early exponent range. It is not a monotonicity law for actual TV.
+
+For a two-level Rx(theta) kick, X_S^2=P_S gives the sharper state-specific
+identities, with normalized pre-kick work state rho,
+
+    delta^2 = 4*sin(theta/4)^2 * F,
+    g = Tr(K rho)
+      = 1 + [cos(theta/2)-1]*F - i*sin(theta/2)*Tr(X_S rho),
+    TV <= sqrt(1-|g|^2) <= min(1,sqrt(delta^2)).
+
+Computing the exact F and coherence in these formulas is a separate task.
+They were measured from the tiny physical pre-kick state, not presumed cheap
+for arbitrary large instances. The support-only bound avoids that computation.
+
+## What low matrix rank buys for one COMPLETE output
+
+There is also an exact finite-boundary identity, but it does not finish the
+sampling problem. Write K=I+E Delta E^dag, where E embeds the d supported
+orbit labels, and Delta is the supplied d-by-d block minus identity.
+In C56's coarse basis put H_alpha=F_alpha^dag E. For support label j=b*m+p,
+the corresponding column is
+
+    H_alpha[:,j] = exp(2*pi*i*alpha*m/M) |p>/sqrt(M).
+
+Here the column is indexed by that label's position in the supplied support
+list. Let Q=2^t and FIX a complete output y. Define the background factors
+
+    A_i(alpha,y) = W_(i+1) [I+exp(-2*pi*i*y*2^i/Q) T_alpha^(2^i)]/2,
+    P_alpha = A_(s-1)...A_0 W_0,
+    S_alpha = A_(t-1)...A_s,
+    v = |p=0>.
+
+Missing W gates are identity and empty products are identity. The factors
+include normalization from preparing and Fourier-measuring each control.
+The pre-kick boundary vector and final sector amplitudes are
+
+    c(y) = (1/sqrt(M)) sum_alpha H_alpha^dag P_alpha v,
+    a_gamma(y) = S_gamma [P_gamma v/sqrt(M) + H_gamma Delta c(y)],
+    p(y) = sum_gamma ||a_gamma(y)||^2.
+
+This follows directly by inserting the rank-d update between the early and
+late Fourier-filtered factors. The baseline and correction interfere; their
+squared norms cannot simply be added. Nor can c(y) be replaced by only its
+same-sector contribution. Both shortcuts fail in measured probabilities.
+
+Two passes over all M sectors suffice: compute c, then RECOMPUTE each early
+factor while accumulating the final norms. For example, straightforward dense
+b-by-b products cost O(M*t*b^3 + M*b*d + d^2) scalar operations per complete
+output, with O(t*b^2+b*d+d^2) scalar storage including supplied background
+blocks. The small support representation removes an M-sized state array but
+NOT the M-sector sum in this construction. Integer/precision costs are extra.
+These are upper bounds for this formula, not lower bounds on other methods.
+
+The tested implementation enumerates only tiny output registers for comparison;
+it is not a production sampler. Efficient evaluation of a COMPLETE p(y) does
+not give the LOW-bit marginal needed for a sampling path. Deriving those
+marginals without expensive sector sums or conditioning remains unresolved.
+
+## Implementation and positioning
+
+`lightcone_cover` in `lab/periodic.py` implements the circular union/count
+with exact integers. `PeriodicOrbitCircuit.localized_kick_bound` supplies the
+background-derived radius and returns a rational squared-TV bound. It does
+not receive a kick matrix and therefore does not verify the asserted support
+promise. Caps are width<=63, positive int64-range r and d<=64. The already
+existing background sampler is unchanged. §LC owns measurements, failed
+controls, numerical caveats and the distinction between initial and audited
+boundary implementations.
+
+The co-moving support argument is an application of finite propagation, not
+a new physical light-speed law. Orbit-index distance is not physical-qubit
+distance, and controlled arithmetic makes huge translations before the
+co-moving subtraction. For relevant existing mathematics, see the causal
+quantum-walk definition, periodic grouping and ring discussion in
+[Gross, Nesme, Vogts and Werner, arXiv:0910.3675, Section 3.1](https://arxiv.org/abs/0910.3675).
+The connection here is our application of that finite-range viewpoint to
+conditional arithmetic branches; their index/classification theorems are not
+needed. C56 supplies the symmetry and sequential-measurement baseline.
+
+Standard unitary error composition also supplies useful context; see
+[Häner, Roetteler and Svore, arXiv:1807.02336, Lemma II.1](https://arxiv.org/abs/1807.02336).
+Our bound is state-specific through the hit probability, not a small
+operator-norm claim for K-I on all inputs. No novelty, general-purpose
+simulation speedup or factoring claim follows from these bounded tests.
+
+---
+
+## C58 — Control-independent bijective sector routing preserves initial coarse dephasing and finite-work sampling; a physical pi phase realizes this beyond individual-sector conservation
+
+*status: proven · paper: B*
+
+# C58 — A sector may move without becoming a quantum branching variable
+
+## Contract and sufficient condition
+
+Use C56's known indexed orbit of length r=b*M, initial work label 0,
+ascending controlled translations U^(2^i), and terminating inverse QFT on t
+initial |+> controls. Work is traced; the task is the exponent output law.
+Keep the same b-dimensional coarse eigenspaces H_alpha of U^b.
+
+Every controlled arithmetic branch preserves H_alpha. Allow a work-only
+intervention V_s that maps each H_alpha unitarily into H_(pi_s(alpha)), where
+pi_s is a permutation of sector labels. Its within-sector map may depend on
+alpha. The permutation is independent of the exponent-control values.
+All these are exact promises, not conclusions obtained from small numerical
+matrix entries. Efficient construction/evaluation of the permutations and
+within-sector maps is an additional input requirement for a cost bound.
+
+For a fixed initial alpha, every exponent history ends in the SAME final work
+sector Pi(alpha), where Pi is the chronological composition of the pi_s.
+Since Pi is injective, cross terms between different initial sectors have zero
+partial trace over work. Therefore replacing the initial work state by its
+coarse block dephasing leaves the entire final reduced exponent state
+unchanged, and hence leaves every inverse-QFT output probability unchanged.
+
+This is a sufficient condition, not a necessary one. It does not require V_s
+to commute with U^b or preserve its individual eigenspaces. Conversely,
+coherently control-dependent routes are outside this argument: their final
+sector need not be determined by initial alpha alone. A coherent sum of
+different work-only routes also need not retain the dephasing identity.
+Failure of this condition is not a simulation lower bound.
+
+For initial orbit label 0, the sector weight remains 1/M and the within-sector
+state is |p=0>. Draw one initial alpha and follow its route. C56's original-order
+forward-state/backward-effect instrument then gives normalized conditional
+output bits with a b-dimensional work register. For supplied b-by-b branches,
+the dense cost is O(t*b^3) scalar arithmetic and O(t*b^2) scalar storage, plus
+the cost of evaluating the sector route and matrices. No sum over M sectors
+is needed for an actual sample. This does not give the marginal p(y) from one
+forced joint p(alpha,y).
+
+## Implemented specialization: integer cell characters
+
+Write j=b*m+p and define
+
+    D_q |b*m+p> = exp(2*pi*i*q*m/M) |b*m+p>,
+    |alpha,p> = M^(-1/2) sum_m exp(-2*pi*i*alpha*m/M) |b*m+p>.
+
+Then D_q|alpha,p>=|alpha-q mod M,p>. A repeated b-by-b block W_s commutes
+with D_q, and the work insertion D_q W_s applies W_s to the retained p state
+while updating alpha to alpha-q. At control i, use the CURRENT alpha in
+T_alpha^(2^i), apply W_(i+1) after that controlled power, then update alpha.
+At insertion zero, apply W_0 and the initial route before any controlled power.
+
+`RoutedOrbitCircuit` in `lab/periodic.py` implements exactly this specialization,
+reusing `sequential_path`. It does not implement arbitrary block permutations
+or infer a routing promise from a physical gate. Supplied q values are reduced
+modulo M; direct integer phase reduction precedes floating-point trigonometry.
+There are O(t) routing integers in addition to the finite-work matrices.
+The existing periodic APIs are unchanged. Diagonal D_q adds zero orbit-basis
+displacement, so the inherited C57 localized-kick bound remains valid with the
+same conservative radius from preceding repeated blocks.
+
+The implementation uses complex128, b<=64, t<=63 and positive int64-range r.
+Its scalar bounds exclude order/index discovery, physical gate synthesis,
+integer bit complexity and requested numerical precision. Matrix unitarity is
+checked with tolerance; no amplitude truncation is used. Finite precision,
+underflow and finite random-bit resolution still prevent an arbitrary-accuracy
+sampling claim. A supplied huge r execution is not order discovery or evidence
+of factoring speedup.
+
+## Physical one-qubit phases: two exact small-instance explanations
+
+An actual work-qubit phase has orbit restriction
+
+    K(theta)|j> = exp[-i*theta*z(j)/2]|j>,
+    z(j)=(-1)^bit(a^j mod N).
+
+It is diagonal and cannot leave the clean orbit, but K-I generally acts on
+every orbit label. Physical few-qubit locality therefore does not imply the
+finite orbit-basis support in C55/C57. Zero displacement alone does not make
+the latter's extensive-support omission bound useful.
+
+For N=7,a=3,r=6,b=3 and work bit 1, the exact integer sign sequence is
+
+    z = [1,-1,-1,-1,1,1],    z(j+3)=-z(j).
+
+Thus Z=diag(z)=D_1 repeated_diag(1,-1,-1) routes the two coarse sectors.
+At theta=pi, K=-i Z, so the implemented route uses q=1 and
+W=-i*diag(1,-1,-1). At -pi the block has the opposite global factor.
+At intermediate angles, K=cos(theta/2) I-i*sin(theta/2) Z is a coherent
+sum of two routes; the fixed physical background in §SR gives a measured
+counterexample to initial coarse dephasing. At plus/minus pi the dephasing
+identity is restored, exactly as predicted before the angle sweep. Restored
+dephasing does NOT mean the phase gate has no observable effect.
+
+For this Mersenne modulus, multiplication by a^(r/2)=-1 complements all three
+physical bits, explaining the analogous sign relation for each bit. For a
+general odd N with a^(r/2)=-1, the least-significant bit flips under x -> N-x,
+but the higher bits need not. Do not extrapolate the N=7 bitwise complement.
+
+The independently compiled next fixture N=13,a=2,r=12 has work-bit-1 signs
+
+    [1,-1,1,1,-1,-1, 1,-1,1,1,-1,-1].
+
+Its minimal cyclic period is six. Grouping two original b=3 blocks into b'=6
+restores C56's conserved-sector promise for every theta, with W'_s equal to
+two repeated copies of W_s. The finite physical comparison uses theta=pi/4.
+This is a supplied, enumerated tiny-orbit reduction, not an asymptotic law or
+an efficient general algorithm for recognizing physical-phase periods.
+
+C53's input-specific exponent-phase transfer remains a comparator, but its
+simple low-exponent-bit replacement fails with the earlier mixers in the N=7
+fixture. This refutes that replacement, not every possible exponent-side
+representation. Likewise, an incorrect period-three phase for N=13 bit 1 is
+input-specifically invisible at the tested early insertion despite being a
+different operator; §SR preserves the control that exposed that distinction.
+
+## Status and prior-art positioning
+
+The routing criterion and the integer/sign identities above are proved by
+their constructions. Circuit comparisons, controls, numerical errors and
+resource measurements are finite evidence recorded in §SR. Neither absence
+of routing nor nonzero sector coherences prove hardness.
+
+Block-permutation unitaries and block dephasing are standard mathematics; see
+[Chakraborty et al., arXiv:2605.30588, Section II, Eqs. (2)–(3)](https://arxiv.org/abs/2605.30588).
+The application here is the control-independent routing criterion for this
+specific output task, combined with C56's already established contraction.
+No priority or novelty claim is established.
+
+This use of sector permutations must not be conflated with the full
+Abelian-group normalizer-circuit theorem. Its gate class consists of group
+Fourier transforms, automorphisms and quadratic phases; an arbitrary supplied
+within-sector W is not automatically such a gate. See
+[Van den Nest, arXiv:1201.4867, Section 2 and Theorem 1](https://arxiv.org/abs/1201.4867).
+Known order and the indexed representation remain substantive assumptions here.
+
+---
+
+## C59 — Few coherent routing histories provide table-free prefix amplitudes and two conditional samplers, even when exact static sector regrouping joins the entire orbit
+
+*status: proven · paper: B*
+
+# C59 — Coherent histories supply the amplitudes needed for sampling
+
+## Contract and the implemented family
+
+Retain C56's supplied indexed orbit r=b*M, work input |orbit 0>, t initial
+|+> controls, original ascending controlled translations U^(2^i), repeated
+b-by-b work unitaries W_s and terminating inverse QFT. The requested output
+is an exponent sample; a final work-sector label may also be returned.
+Order/index discovery and recognizing or synthesizing the gate promise are
+not supplied by this result. This is a perturbed indexed-orbit circuit, not
+a general simulation or factoring algorithm.
+
+Use C58's basis |alpha,p> and cell character D_q. Define
+
+    R |b*m+p> = |b*(-m mod M)+p>,
+    J_q = D_q R,                  J_q |alpha,p> = |-alpha-q mod M,p>,
+    K_s = cos(theta_s/2) I - i*sin(theta_s/2) J_(q_s).
+
+Since R D_q R=D_(-q), J_q is Hermitian and unitary, and K_s is unitary for
+real theta_s. At insertion s apply W_s, then K_s; s=0 and s=t are allowed.
+There is at most one K at each insertion. Unlike C58's deterministic route,
+a generic K is a coherent superposition of routes; initial coarse-sector
+dephasing is not generally valid. Cell reflection has long orbit displacement,
+so C57's localized-kick light-cone bound is not inherited.
+
+`lab/coherent_routes.py:CoherentReflectionCircuit` implements this family by
+composition with `PeriodicOrbitCircuit`. It does not implement arbitrary
+linear combinations of block permutations. Its caps are positive int64-range
+r, b<=64, t<=63 and k<=8 supplied reflection rotations. The following history
+argument also applies mathematically to a finite supplied unitary linear
+combination of normalized routed circuits with computable inverse routes.
+
+## Coherent-component rejection
+
+Expand the k rotations into H<=2^k histories h, with coefficients c_h.
+Fix a FINAL sector gamma. The h component must start in
+alpha_h=Pi_h^(-1)(gamma), where Pi_h is that history's chronological route.
+All initial alpha_h have amplitude 1/sqrt(M) in |orbit 0>. In the common
+final-sector basis, let a_h(gamma,y) be the b-vector amplitude of output y
+for the normalized component circuit. Relative phases are indispensable.
+
+    p(gamma,y) = ||sum_h c_h a_h(gamma,y)||^2 / M,
+    B = sum_h |c_h| = product_s (|cos(theta_s/2)|+|sin(theta_s/2)|),
+    q(gamma,y) = sum_h |c_h| ||a_h(gamma,y)||^2 / (M*B).
+
+The target normalizes by unitarity of the full circuit. The proposal
+normalizes because each component, for each final gamma, starts in a
+normalized work state and has a normalized output law. Weighted
+Cauchy-Schwarz gives p<=B^2*q. Draw gamma uniformly, choose h with weight
+|c_h|/B, sample its output with the existing finite-work instrument, and
+accept with probability p/(B^2*q). Resample BOTH gamma and h each attempt.
+The accepted joint law is p and the uncapped mathematical mean number of
+proposals is B^2<=2^k. Uniform gamma is a proposal, not a claim about the
+true final-sector marginal. Zero proposal mass implies zero target mass.
+
+`sample_rejection` implements this construction. It streams EVERY nonzero
+history to evaluate acceptance; cheap factorized selection of one history
+does not remove this cost. A finite proposal cap raises on exhaustion and
+does not substitute a fallback sample. The envelope is mathematically exact;
+the implementation's floating-point checks are not an accuracy certificate.
+
+## Prefix amplitudes and gate-by-gate sampling
+
+There is a second sampler: the established gate-by-gate method of
+[Bravyi, Gosset and Liu, Algorithm 2](https://arxiv.org/abs/2112.08499).
+Its input requirement is amplitudes of CIRCUIT PREFIXES, not merely final
+output probabilities. The finite-history contraction supplies them here.
+
+For each prefix history and requested current sector, invert that prefix's
+route, start its within-sector vector at |p=0>, and apply the arithmetic and
+work gates in their original order. An unmeasured fixed exponent bit x_i
+contributes T_alpha^(2^i*x_i)/sqrt(2). Once the high ell exponent bits have
+been Fourier-measured with low output prefix a, their factors are
+
+    (I + exp(-2*pi*i*a*2^i/2^t) T_alpha^(2^i)) / 2.
+
+The remaining low exponent bits are still fixed, not summed or traced.
+At an intermediate arithmetic prefix, each as-yet-unvisited prepared control
+also contributes 1/sqrt(2). Apply W_s and the selected route only if the
+requested boundary includes them. Sum the coefficient-weighted component
+vectors. `prefix_vector` returns sqrt(M) times the joint amplitude vector,
+not a normalized conditional state. The common sqrt(M) factor cancels in
+each sampling block.
+
+For completeness, the sparse-block version of the gate-by-gate argument is
+short. Suppose a unitary preserves a known partition of basis states into
+blocks, and an exact sample from the previous prefix Born law is available.
+Identify its block and resample within that block proportional to the next
+prefix's squared amplitudes. Unitarity preserves the block's total mass, so
+the resulting probability of every basis state is exactly its next-prefix
+Born probability. Zero-mass blocks cannot be selected in exact arithmetic.
+Monomial gates just update the sampled basis label. This is an application
+of the cited algorithm's induction, not a new sampling principle.
+
+Here the sampler's initial Born-basis draw has independent uniform sector and
+exponent labels, with p=0. This does not physically dephase the circuit; its
+coherent state remains in the amplitude oracle. Arithmetic is monomial in the
+sector basis; W_s has a block of b
+within-sector labels; K_s has a known two-cycle {alpha,-alpha-q_s}, or a
+singleton; and each terminating Fourier measurement uses a two-outcome
+block. A singleton phase needs no random update but remains in all later
+prefix amplitudes. These are explicitly known block partitions, not an
+assertion that every row-sparse unitary admits this procedure cheaply.
+
+`sample` uses this algorithm, recomputing the coherent histories at each
+nontrivial block. It retains relative phases in the amplitude oracle even
+though the running classical state consists only of sampled labels. No
+rejection loop or sector/output probability table is needed. Returning a
+joint (gamma,y) sample, or evaluating p(gamma,y), still does not evaluate
+the marginal p(y) without further work.
+
+## Charged costs and the stronger regrouping baseline
+
+Let d_W<=t+1 be the number of supplied background blocks. With dense b-by-b
+arithmetic as implemented, one prefix query costs
+O(H*((t+1)*b^2+k)) scalar operations. Histories are generated serially;
+there is no H-vector cache. A gate-by-gate draw uses at most d_W+2*k+2*t
+prefix-vector queries, for
+
+    O((t+k+1)*H*((t+1)*b^2+k)) scalar work.
+
+The rejection alternative has expected scalar work
+
+    O(B^2*((t+1)*b^3 + H*((t+1)*b^2+k))).
+
+Charge an additional O(d_W*b^3) setup for supplied-block unitarity checks.
+Both methods use O((t+1)*b^2+k+t) scalar/integer storage, including supplied
+blocks, temporary matrices and the rejection instrument's branch effects.
+Streamed histories require O(k) route integers, not O(H) stored histories.
+These are arithmetic/storage bounds, not measured peak process memory.
+Integer bit complexity, input construction and requested precision are extra.
+No exponential array in r, M or 2^t is allocated by the production helper.
+
+Removing B^2 rejection does NOT imply a faster implementation: gate-by-gate
+adds O(t+k) prefix queries. For small k and large t, rejection can be cheaper.
+The finite timing diagnostic in §CH illustrates this, without a crossover or
+asymptotic speedup claim. Both methods can be exponential in k.
+
+C71 subsequently gives a stronger finite-time backward-support method when
+there are at most two distinct reflection labels. Its coherent merged vectors
+avoid the explicit history enumeration charged here; these C59 costs are not
+lower bounds on every contraction of this circuit family.
+C72 then uses merged intermediate prefixes in this same gate-by-gate loop,
+removing both explicit histories and rejection under that routing promise.
+
+First compare exact static sector regrouping. Reflections
+f_q(alpha)=-alpha-q generate translations q_i-q_0. Put
+
+    g = gcd(M, q_1-q_0, q_2-q_0, ...).
+
+The invariant group of alpha is the union of the residue cosets
+alpha+g*Z_M and -alpha-q_0+g*Z_M. Its size is M/g if
+2*alpha+q_0=0 mod g, and 2*M/g otherwise. This follows by composing
+reflections and then applying one reflection to the resulting translation
+orbit. With only one distinct q there are at most two old sectors per group;
+the grouped finite-work method is then a stronger simple baseline. With
+q=0 and q=1, g=1 and the static group contains all M sectors for ANY M,
+while two actual coherent insertions still give only four histories.
+This separates static group size from finite-time history count. It is not
+a lower bound against other bases, time-dependent groupings or tensor methods.
+
+## Evidence, precision and positioning
+
+The identities, normalization, sampling induction and charged mathematical
+bounds are proved above. §CH owns finite evidence: full-r prefix and joint-law
+references, exhaustive tiny transition-law enumeration, an existing
+Circuit/statevec implementation of two r=8 indexed reflections, negative
+controls and supplied-wide executions. The tiny circuit is not proof that
+large-M reflections have constant physical gate cost.
+
+Production uses complex128, integer modular phase reduction and no
+tolerance-selected amplitude/history deletion. Exact floating-point zero,
+roundoff, cancellation, underflow, approximate unitarity checks and finite RNG
+resolution remain relevant. The gate-by-gate paper's robustness Lemma 1 uses
+a global state-approximation promise; our tested pointwise amplitude errors
+do not establish that promise. No arbitrary-accuracy numerical sampling
+certificate has been proved here.
+
+Coefficient-norm and decomposition-size costs have established precedents:
+[Bravyi et al., Section 2.3.2](https://arxiv.org/abs/1808.00128) studies
+sum-over-Clifford simulation. Our histories need not be stabilizer states,
+and this chosen B^2 is not an optimized stabilizer extent. The contribution
+recorded here is a proved specialized contraction and validated implementation
+under an explicit indexed-input promise. Neither priority nor a general
+quantum-simulation breakthrough is established.
+
+---
+
+## C60 — Full-prefix amplitude error controls sparse-block sampling without a minimum block mass; a uniform scaled-coordinate bound yields an exact-rational budget, not yet a certificate for the floating sampler
+
+*status: proven · paper: B*
+
+# C60 — Rare conditional denominators can be charged by their mass
+
+## Scope: an error-oracle theorem, not a certified float implementation
+
+Use C59's normalized ideal circuit and known small basis-block partitions.
+Let s index stochastic block updates, not individual amplitude queries.
+Write P_s for the FULL ideal post-prefix Born law on all work/control basis
+coordinates. Let phi_s be any fixed approximate raw amplitude function, and
+R_s its normalized squared-amplitude law. These are not just distributions
+of block masses. The approximate kernel resamples within its current block
+using R_s's conditional law. If the entire approximate block has zero weight,
+the mathematical approximate algorithm uses a specified normalized law on
+that block, such as uniform. It never drops the block's current probability.
+
+The approximation function must be defined for every basis label, with a
+uniform error promise; it cannot depend inconsistently on which candidate
+was queried first. Different prefix functions need NOT be successive states
+of one approximate circuit. The induction below compares each one to its
+own ideal prefix and uses ideal unitarity to conserve block mass.
+
+The actual `CoherentReflectionCircuit.sample` raises on a zero numerical
+denominator and uses floating-point normalization. It does not implement
+all these approximate-kernel semantics or prove the uniform oracle promise.
+Consequently this claim does NOT numerically certify that existing sampler.
+
+## Block-kernel error bound
+
+For normalized full laws P,R and a partition into blocks B, let p_B=P(B),
+r_B=R(B). For r_B>0,
+
+    sum_(i in B) |P(i)-p_B*R(i)/r_B|
+      <= sum_(i in B) |P(i)-R(i)| + |r_B-p_B|.
+
+For r_B=0, any normalized fallback F_B gives
+sum_(i in B)|P(i)-p_B*F_B(i)|<=2*p_B, which is bounded by the same
+right-hand side. Summing and dividing by two yields
+
+    sum_B p_B TV(P(.|B), R(.|B)) <= 2 TV(P,R),
+
+where zero-p_B conditionals are immaterial and zero-r_B conditionals mean
+the declared fallback. This uses FULL-law TV. Equal block masses alone
+cannot control conditional directions inside a block.
+
+Let K_s be the approximate kernel. The ideal previous and next prefixes
+have identical block masses, since their intervening gate is unitary within
+each block. If Q_(s-1) is the actual approximate sampling law, stochastic
+contraction and the previous inequality give
+
+    TV(Q_(s-1) K_s, P_s)
+      <= TV(Q_(s-1),P_(s-1)) + 2 TV(P_s,R_s).
+
+Monomial gates transport basis labels exactly and add no error. Thus, for
+an exact initial draw and an additional per-update categorical-kernel error
+rho_s measured uniformly over blocks,
+
+    TV(Q_final,P_final) <= min(1, 2*sum_s TV(P_s,R_s) + sum_s rho_s).
+
+The same bound holds after discarding work labels. There is no minimum
+nonzero block mass in this statement. A large error conditioned on a rare
+block is weighted by that block's probability. This does not make errors
+on common blocks harmless or authorize uncharged amplitude pruning.
+
+This is a direct sparse-block error argument for the algorithm already
+credited in C59. [Bravyi–Gosset–Liu, Lemma 1 and its supplemental proof](https://arxiv.org/abs/2112.08499)
+establish robustness using a different approximate-prefix construction:
+apply the next exact gate to an approximate previous state. Their proof
+uses stochastic contraction and global state error, not a lower bound on
+conditional denominators. The proof above specifies our direct post-prefix
+oracle contract; no novelty or priority claim is made for these inequalities.
+
+## From raw amplitudes to a global bound
+
+For a normalized ideal psi and any nonzero raw phi, put v=phi/||phi||.
+The trace distance of their pure states is
+sqrt(1-|<psi,v>|^2). This is the distance from psi to the complex line
+spanned by v, and so is at most ||psi-phi||. Basis measurement cannot
+increase that distance. Therefore
+
+    TV(Born(psi), Born(phi/||phi||)) <= ||psi-phi||.
+
+The raw phi need not be normalized. Its actual approximation error must
+include normalization drift; merely renormalizing a table does not establish
+closeness to the ideal state. If phi is the zero vector, its L2 error is one;
+any normalized replacement is covered only by the trivial bound.
+
+Suppose every real AND imaginary coordinate of C59's sqrt(M)-scaled prefix
+vector has error at most eta_s. There are M*b*2^t physical basis coordinates
+at every prefix. During partial Fourier measurement, use the 2^ell measured
+output prefixes and 2^(t-ell) remaining exponent labels ONCE each; do not
+double-count unused high exponent bits. Dividing scaled amplitudes by sqrt(M)
+gives the uniform global bound
+
+    ||psi_s-phi_s|| <= sqrt(2*b*2^t)*eta_s.
+
+M cancels. Combining the inequalities gives a conservative budget
+
+    TV(Q_final,P_final)
+      <= min(1, 2*sqrt(2*b*2^t)*sum_s eta_s + sum_s rho_s).
+
+The exponentially large coefficient does not require exponentially many
+accuracy bits: eta=2^(-p) needs p=t/2+O(log b+log S+log(1/delta)) for S
+updates and target delta. This is an ABSOLUTE oracle-accuracy requirement,
+not a sufficient machine mantissa. Input errors, history cancellation,
+arithmetic growth and special-function errors must be bounded separately
+to know how to deliver that oracle.
+
+For C59, S<=d_W+k+t. Exact inverse-CDF comparison with L uniformly random
+bits changes a d-outcome conditional law by at most (d-1)/2^L in TV: each
+internal CDF boundary moves by less than one grid spacing. Here d<=max(b,2).
+This does not automatically cover floating-point CDF summation/division,
+biased initial integer draws, or correlations in a pseudorandom generator.
+Exact initial uniform integers can be drawn by rejection from unbiased bits.
+
+`lab/sampling_error.py` supplies `prefix_error_budget` and
+`plan_prefix_accuracy`. They use exact integers/Fractions, replace the square
+root by its integer ceiling, and explicitly label the uniform-oracle promise
+and lack of certification of the float sampler. Their setup/storage is O(S)
+rational numbers, with bit arithmetic charged by operand length; no amplitude
+table is created. The planner returns requested coordinate accuracy and
+random-bit counts, not a machine-precision prescription.
+
+## Rejection comparator and remaining work
+
+Suppose the ideal one-attempt accepted subprobability measure is p/C with p
+normalized. If an approximate nonnegative accepted measure s obeys
+||s-p/C||_1<=zeta, then normalizing s yields
+
+    TV(s/sum(s),p) <= min(1,C*zeta).
+
+Indeed, changing the measure and its total mass each costs at most zeta in
+L1 when normalized against the ideal mass 1/C. If sum(s)=0 then zeta>=1/C
+and only the trivial bound survives for any declared replacement law.
+`rejection_error_budget` implements this conditional exact-rational budget.
+C59 has C=B^2. Proposal errors, acceptance errors and cap exhaustion cannot
+be omitted from the interpretation; rounding a final amplitude table alone
+does not measure the error of an actual rejection implementation.
+
+The mathematical bounds above are proved; §PE records finite controls and
+precision diagnostics separately. C61 now supplies an exact-input
+specialization with a verified uniform oracle and covered finite-bit kernel;
+§VP records its tests and limits. A higher-precision rerun or a tiny
+maximum-error table alone would not be that oracle. C63 now implements a
+certified rejection comparison through this accepted-measure analysis;
+TODO 24 owns the remaining precision/proposal-complexity questions.
+No certificate for the existing float sampler or general simulation
+breakthrough is claimed.
+
+---
+
+## C61 — Exact rational-pi gates admit a verified finite-prefix oracle and finite-bit sparse-block sampler under explicit arithmetic/randomness assumptions; backend-wide working-precision complexity is separate
+
+*status: proven · paper: B*
+
+# C61 — Making the absolute-error oracle executable
+
+## Scope and status
+
+This is a conditional mathematical construction with a finite-tested software
+realization, not a machine-checked proof of FLINT or the Python implementation.
+It instantiates C59/C60; it is not a new general simulation principle.
+`lab/verified_prefix.py` adds `VerifiedReflectionCircuit` under these promises:
+
+- A supplied, indexed orbit period r divisible by b, with default b=2 or
+  opt-in `block_size=3`, and M=r/b. No order,
+  orbit-index, physical-embedding or gate-decomposition discovery is supplied.
+- Width t<=63, at most k<=8 supplied reflection rotations, and one background
+  Rx or Rz per insertion, embedded on fine labels 0/1 and identity on any
+  remaining fine label. Background and reflection angles are exact rational
+  multiples of pi, not floating numbers or arbitrary rounded matrices.
+- The C59 original-time-order finite contraction and its normalized initial
+  state/terminating inverse-QFT interpretation. K_q uses the same cell
+  reflection and phase convention as C59, not arbitrary sector mixing.
+- Correct, convergent Arb/Acb enclosures and exact integer operations, plus
+  independent unbiased random bits. Seeded pseudorandom tests do not establish
+  the last assumption. The arithmetic context is not modified concurrently.
+
+The implementation bounds r by signed int64, rational angle input numerator
+and denominator lengths by 2048 bits, and requested coordinate/random bits
+by 4096. Angles reduce modulo four in units of pi, exactly. This is a stronger
+input promise than C59's float interface, whose sampling law is still NOT
+numerically certified by this result.
+
+The odd-block extension retains the existing API and b=2 default. Its third
+coordinate is not an added qubit or an arbitrary three-dimensional unitary.
+For example a background rotation by 2*pi is minus identity on labels 0/1
+but PLUS identity on label 2; discarding it as a global phase would be wrong.
+The scalar shortcut in C65 rejects b=3. §OB owns the extension's finite evidence.
+
+## Enclosed finite expression, then exact dyadic output
+
+The ordinary and verified paths share `_contract_route_component` in
+`lab/coherent_routes.py`. The callbacks supply arithmetic, not different
+gate-order algorithms. In the verified path, all trigonometry is rebuilt
+from exact rational inputs at each working precision P. Rational-turn phase
+evaluation uses exp(pi*i*z); rotation coefficients use sin/cos(theta/2).
+Each of the at most 2^k histories is included and summed coherently, even if
+its coefficient encloses zero. No tolerance test removes histories.
+
+For each full prefix label and requested eta=2^(-p), refinement starts at
+P=max(64,p+16) and doubles P until all 2*b real/imaginary ball radii are at
+most eta/2. The midpoint and outward radius are extracted to exact Fractions
+from binary mantissa/exponent pairs, never through decimal strings or floats.
+Each midpoint is rounded to the nearest eta grid point, with ties to even.
+If a returned real coordinate is a, midpoint m and exact target x, then
+
+    |a-x| <= |a-m| + |m-x| <= eta/2 + eta/2 = eta.
+
+The same holds independently for imaginary coordinates. Returned amplitudes
+are signed integer pairs times 2^(-p); their squared magnitudes are integer
+weights with a common factor 2^(-2p), which cancels in categorical sampling.
+
+Every fixed input/label expression is finite, with elementary analytic
+functions at finite inputs and division only by nonzero constants. There is
+no division by an amplitude, block norm or accepted probability. Under the
+convergent enclosure premise, radii tend to zero as P increases, including
+at exact cancellations. Hence the uncapped mathematical refinement terminates
+for every valid label. The deterministic schedule depends on the complete
+label/input/accuracy, not on query order or a trajectory-dependent cache.
+Thus the output defines a fixed approximate function on ALL labels, not only
+on one successful sampled path; each coordinate meets the same tolerance.
+
+This termination argument does not supply an explicit worst-case P bound or
+a polynomial bit-runtime theorem for the selected backend. A measured maximum
+precision is not such a bound. The optional `max_precision` argument belongs
+only to a diagnostic oracle call and raises on exhaustion. The sampler does
+not set it. Hardware exhaustion, backend failure, or user-imposed termination
+does not certify a law conditioned on the runs that happened to finish.
+
+**Enclosure-strategy follow-up:** C62 adds an opt-in norm-aware local-residual
+mode to the same finite contraction. The rectangular mode described above
+remains default; both use the same final radius-plus-rounding check. C62
+distinguishes conditional primitive-error scaling from a proved backend-wide
+precision constant, and §NG records the measured precision/runtime tradeoff.
+
+## Integer categorical sampling and the whole-law bound
+
+For d nonnegative integer weights w_i, let T=sum_i w_i. At T=0 replace all
+weights by one, an explicit normalized within-block fallback. For uniform
+integer U in {0,...,2^L-1}, choose the first i satisfying
+
+    U*T < 2^L * sum_(j<=i) w_j.
+
+All comparisons and sums are exact; no floating normalization or CDF is used.
+The strict tie convention assigns grid-boundary words to the next nonempty
+bin. Internal CDF boundaries move by less than one grid spacing, so the
+categorical TV error is at most (d-1)/2^L as in C60. The all-zero fallback
+has this same finite-grid charge; it need not have exactly uniform finite-word
+counts for every d. Initial sector labels use exact rejection from unbiased
+bits, and initial exponent labels use exactly t bits. No attempt cap or modulo
+reduction introduces an uncharged initial bias.
+
+The sampler uses C59's W, reflection-pair and Fourier-bit block sequence.
+Monomial arithmetic updates are exact. With S<=d_W+k+t stochastic updates,
+b in {2,3}, and uniform requested coordinate error eta, C60 yields
+
+    TV(actual output law, ideal output law)
+      <= min(1, 2*ceil(sqrt(2*b*2^t))*S*eta + S*(b-1)/2^L).
+
+`accuracy_plan` chooses p,L with this exact-rational bound below the requested
+target. Skipped reflection self-loops only reduce the number of updates.
+The certificate bounds the full algorithm's law, including the work labels,
+and hence also the exponent output marginal. It does not estimate accuracy
+from the observed path or from a tiny reference table. Reference enumeration
+is solely an implementation diagnostic.
+
+## Cost accounting, including what is not yet bounded
+
+There are at most d_W+2k+2t prefix-vector queries per sample. A query at one
+working precision uses O(2^k*(t+k+1)) scalar operations/function evaluations
+for fixed b in {2,3}; no array scales with M or 2^t. It stores O(t+k+1) ball scalars and
+small route/input labels, streaming histories. This counts objects, not bytes:
+their mantissa/exponent/operand bit lengths must be charged.
+
+More explicitly, let P_(j,l) be the actual precisions attempted for query j,
+and C_ball(P,I) the charged cost of the ball and exact-input operations at
+that precision and input bit length I (including rational reduction and
+trigonometry). The execution cost includes
+
+    O(sum_j sum_l 2^k*(t+k+1)*C_ball(P_(j,l),I))
+
+plus exact midpoint conversion and integer categorical/planner arithmetic at
+their actual operand lengths. Dyadic weights have O(p+k+1) bits in this capped
+finite-history representation; CDF products add L bits. The initial uniform
+integer rejection has fewer than two attempts in expectation, but no finite
+worst-case random-bit count. Backend scalar caches/native allocations are
+not zero merely because orbit-sized arrays are absent.
+
+This parameterized accounting must not be simplified to unit-cost arithmetic
+or to p as the machine mantissa. C63 now supplies a separate same-accuracy
+certified rejection comparator, using these verified prefix proposals; it does
+not certify C59's ordinary float rejection or its faster finite-work instrument.
+The separate C64 verified finite-work implementation now accepts this same
+b=2/3 promise. TODO 24 owns the remaining backend-wide bit-complexity boundary. No general
+quantum speedup, factoring breakthrough, or unconditional practical worst-case
+runtime guarantee is claimed.
+
+## Trusted arithmetic and evidence
+
+[python-flint's Arb documentation](https://python-flint.readthedocs.io/en/stable/arb.html)
+specifies midpoint/radius semantics and binary extraction;
+[Acb](https://python-flint.readthedocs.io/en/stable/acb.html) specifies rational-turn
+complex exponential evaluation, and the
+[precision context documentation](https://python-flint.readthedocs.io/en/stable/general.html)
+specifies `workprec`. The tested optional dependency is python-flint 0.9.0.
+[FLINT's correctness and platform caveats](https://flintlib.org/doc/issues.html)
+remain part of the trust boundary: enclosures are designed to be rigorous,
+not a promise that software is bug-free or arbitrary machine-sized precision
+arguments are safe. No resource-failure event is silently conditioned away.
+
+§VP owns finite results, independent-reference limitations, preserved verifier
+failures, regression commands, and measured resources. Those observations do
+not replace the uniform oracle/kernel argument above.
+
+---
+
+## C62 — Exact contractive step norms let verified local residuals add without repeated rectangular wrapping; lower working precision need not mean faster sampling
+
+*status: proven · paper: B*
+
+# C62 — Separate numerical enclosure geometry from physical amplification
+
+## A rectangular enclosure can grow under a unitary map
+
+A complex uncertainty rectangle has separate real and imaginary radii. For
+equal axis radius e, multiplication by exp(i*pi/4) produces an axis-aligned
+bounding rectangle with radius sqrt(2)*e. Repeating alternating rotations
+exp(+i*pi/4), exp(-i*pi/4), while enclosing each intermediate rectangle
+independently, gives axis radius 2^(n/2)*e after n steps. Yet every even
+mathematical product is identity, and the original set's Euclidean radius
+is unchanged. The growth is an enclosure representation effect, not a
+quantum-state sensitivity or a small-probability denominator.
+
+This is standard interval wrapping/dependency. [FLINT's Acb definition](https://flintlib.org/doc/acb.html)
+explicitly uses a real/imaginary rectangle rather than a disk.
+[Its guide to enclosure quality and accuracy](https://flintlib.org/doc/using.html)
+explains that dependency can enlarge error bounds exponentially with the
+number of operations, that working precision and output accuracy differ,
+and that tighter enclosures can cost more computation. No novelty claim is
+made for this phenomenon or the norm-based error argument below.
+
+## Local verified residuals plus an exact operator-norm promise
+
+Let v_j=L_j v_(j-1), with exact ||L_j||_2<=1, and let m_(j-1) be an EXACT
+dyadic midpoint vector. Evaluate L_j m_(j-1) with verified ball arithmetic,
+obtaining a local box centered at m_j. If rho_j bounds the Euclidean radius
+of this box, then
+
+    ||v_j-m_j||_2
+      <= ||L_j(v_(j-1)-m_(j-1))||_2 + ||L_j m_(j-1)-m_j||_2
+      <= ||v_(j-1)-m_(j-1)||_2 + rho_j.
+
+Thus E_0=0, E_j=E_(j-1)+rho_j is a valid vector-norm enclosure. In software,
+round E_j UP; never replace it by a rounded midpoint that could be smaller.
+For C61's two complex coordinates, rho_j=2*max(four real/imag radii) is
+conservative because sqrt(4)=2. Prior uncertainty is NOT inserted into each
+new rectangular operation. Only the exact midpoint is passed to it, while
+the separate norm radius retains every previous error.
+
+C61's opt-in b=3 extension uses ceil(sqrt(2*b))=3 times the maximum of six
+real/imaginary radii. The vector-norm proof is unchanged; retaining the old
+factor two would not be a valid general six-coordinate bound. §OB records
+the dimension-aware implementation tests. The conditional precision model
+below treats the supported b as fixed; its constants are not dimension-free.
+
+Crucially, the norm premise concerns the exact specified gate, not the
+rounded matrix or every matrix represented by its coefficient intervals.
+Those coefficient/trigonometric uncertainties are included in the new local
+residual. Replacing arbitrary rounded matrices by supposedly exact unitaries
+would not justify this argument.
+
+## Application to the existing finite contraction
+
+Each C59 history has these complete vector steps:
+
+- Background W_s, an exact Rx/Rz unitary under C61's rational-pi promise.
+- A fixed unmeasured control: I/sqrt(2) or T/sqrt(2), norm 1/sqrt(2).
+- A measured control: (I+z*T)/2 for unit-modulus z and unitary T, norm<=1.
+- The unused-control tail scalar 2^(-(t-stop)/2), norm<=1.
+
+Routing changes the sector label; its within-sector action is identity.
+The local callback wraps COMPLETE control steps: reboxing and resetting
+errors separately at suboperations without correct correlation accounting
+would not establish the same recurrence.
+
+`VerifiedReflectionCircuit(..., enclosure_mode="norm")` implements this
+argument through the existing shared `_contract_route_component` and its
+optional `apply_step` arithmetic callback. It returns exact midpoints from
+each step, accumulates outward norm radii, and converts the vector-norm
+enclosure to coordinate boxes only ONCE at the end of each history. The
+coefficient multiplication and coherent history sum remain verified Acb
+operations; they are not dropped or reinterpreted as an incoherent mixture.
+
+The final boxes enter C61's unchanged radius-plus-dyadic-rounding check.
+Consequently the uniform coordinate promise and C60 whole-law sampling bound
+are preserved. Mode selection is fixed circuit input, not a query-order or
+sample-path-dependent choice. Rectangular mode remains the default. Neither
+mode is claimed to dominate runtime or enclosure width for every input.
+
+## Precision scaling: a conditional model, not a backend constant
+
+Suppose, additionally, that basic arithmetic and coefficient evaluation on
+the bounded input/midpoint domain have UNIFORM absolute residual at most
+C*2^(-P) for working precision P. This is stronger than inclusion correctness
+alone. Charge the tail power and coefficient products by their operation
+counts, rather than calling arbitrarily complex functions unit-cost.
+
+Writing u=2^(-P), n=O(t+d_W+1) for component depth and H<=2^k, norm transport
+gives O(n*u) component error, provided midpoint magnitudes stay bounded.
+The bootstrap is valid when n*u is sufficiently small: the exact component
+norm is at most one, so a small accumulated error bounds midpoint norm too.
+Coefficient products add O(k*u) per history; converting a norm ball once and
+summing histories adds fixed geometric factors and H-fold accumulation. A
+conservative final coordinate bound is
+
+    C' * H * (n+k+1) * 2^(-P).
+
+Hence P=p+k+ceil(log2(n+k+1))+O(1) suffices under this explicit primitive
+model. This is an absolute-error statement; no division by the final
+amplitude or minimum conditional probability occurs.
+
+For comparison, a conservative rectangular recurrence is
+R_(j+1)<=4*R_j+C*u under the analogous primitive-error/magnitude assumptions.
+The constant four deliberately bounds compound phase/matrix steps; it must
+not be replaced by one merely because the EXACT operator is unitary. Charging
+histories/coefficients gives, for example,
+
+    C' * 2^k * 4^(n+k) * (n+k+1) * 2^(-P),
+
+and therefore P=p+O(t+k+log(t+1)) is a conservative model bound. Exponential
+radius inflation need only cost linearly more working bits; it is not by
+itself exponential bit runtime. These constants are not optimized.
+
+The actual norm implementation evaluates and checks its local residuals;
+it does NOT establish a uniform numerical value of C for all supported
+FLINT inputs. FLINT documents generic behavior and a soft operation-time
+guarantee, not the full primitive constant needed to promote this model to
+an unconditional backend-specific working-precision theorem. This gap is
+retained in TODO 24; the error certificate itself does not depend on guessing C.
+
+## Scope, evidence and resource limits
+
+The proof above establishes the norm-error invariant and its conditional
+precision consequence. §NG owns the finite tests, corrected controls, timing
+comparison, and the distinction between an adaptive doubling endpoint and
+the smallest observed sufficient precision. Neither is a worst-case bound
+over unqueried labels. The extra norm bookkeeping costs time despite reducing
+refinements in the reported fixture. It does not change C61's order/index,
+exact-input, backend, random-bit or resource-failure assumptions.
+
+No second propagator, orbit/output table, certified rejection implementation,
+paper edit or general simulation breakthrough follows from this result.
+
+---
+
+## C63 — Verified component proposals and one-sided absolute acceptance enclosures certify coherent-history rejection without a minimum proposal probability; retries and arithmetic costs remain charged
+
+*status: proven · paper: B*
+
+# C63 — Control rejected mass, not relative error in a rare acceptance ratio
+
+## Scope
+
+This specializes C59's rejection envelope and C60's accepted-measure error
+bound to C61's supplied exact rational-pi, b=2/3 indexed circuit. The requested
+law is the JOINT final coarse sector gamma and exponent output y; its
+exponent marginal is covered too. The proposal's internal within-sector work
+label is NOT a sample from the target's full joint law and is not returned.
+No order/index discovery, generic gate recognition, arbitrary rounded-input
+unitarity, PRNG discrepancy estimate, or general quantum simulation is supplied.
+
+`lab/verified_rejection.py:VerifiedRejectionSampler` uses verified enclosures,
+exact rational/integer comparisons, independent unbiased bits, uncapped
+refinement and uncapped rejection. These are the same arithmetic/randomness
+trust assumptions as C61, not a machine-checked software proof. It reuses the
+shared finite contraction and C61 prefix sampler for its proposals. It does
+NOT certify the existing floating finite-work instrument or float rejection.
+
+C64 and C65 now supply opt-in verified finite-work and scalar component
+proposals under this SAME accepted-law budget. The prefix proposal and its
+cost below remain the unchanged default, not the strongest available option.
+
+## An absolute-width acceptance bound
+
+Put Q=2^t, retain C59's normalized target p and proposal q on M*Q cells,
+and write C=B^2<=Cbar=2^k. At cell x=(gamma,y), use scaled quantities
+
+    P_x = M*p_x = ||sum_h c_h a_h(x)||^2,
+    D_x = M*C*q_x = B*sum_h |c_h|*||a_h(x)||^2.
+
+The exact inequalities are 0<=P_x<=D_x. Suppose verified finite endpoints
+satisfy PL<=P<=PU, DL<=D<=DU and
+
+    (PU-PL)+(DU-DL) <= epsilon
+
+at EVERY cell. Set l=max(0,PL). For DU>0, set a0=l/DU and
+ahat=floor(2^L*a0)/2^L. For DU=0, P=D=0 and set ahat=0. A negative DU
+or inconsistent bounds is a verifier error, not a sampling fallback.
+All endpoint extraction, division, floor and comparisons are exact.
+
+If D>0, 0<=ahat<=a0<=P/D<=1. Moreover
+
+    P-D*a0 = (P-l) + l*(DU-D)/DU
+             <= (PU-PL)+(DU-DL).
+    0 <= P-D*ahat <= epsilon + D*2^(-L).
+
+The second inequality also holds at D=0, including intervals that contain
+zero without proving an exact-zero radius. Indeed P=0 forces PL<=0, hence
+ahat=0 even when DU>0. No equality-to-zero decision or minimum D is needed.
+Division by the POSITIVE rational upper endpoint is done only after the
+absolute-width stopping test; no relative-accuracy refinement is required.
+
+Under the ideal proposal, the accepted measure q*ahat is dominated by p/C.
+Summing the nonnegative loss, using sum_x D_x=M*C, gives
+
+    ||q*ahat-p/C||_1 <= Q*epsilon/C + 2^(-L).
+
+M cancels from this bound. Uniform epsilon needs t+O(log(1/delta)) requested
+absolute accuracy bits, not an M*Q-entry probability table. These bits are
+not a sufficient backend mantissa bound.
+
+## Proposal approximation and normalization
+
+Let the actual NORMALIZED proposal qtilde satisfy TV(qtilde,q)<=delta_q.
+Since 0<=ahat<=1, multiplication by ahat contracts L1 distance:
+
+    ||qtilde*ahat-p/C||_1
+       <= 2*delta_q + Q*epsilon/C + 2^(-L).
+
+By C60, the normalized accepted output law obeys
+
+    TV(output,p) <= beta
+      := 2*Cbar*delta_q + Q*epsilon + Cbar*2^(-L),
+
+or the trivial bound one if beta>=1. For beta<1, the actual one-attempt
+success probability is at least (1-beta)/C, hence at least (1-beta)/Cbar.
+Independent repeated attempts terminate almost surely with expected count
+at most Cbar/(1-beta). This includes rejected attempts; it is not a bound
+conditioned on observed successful trajectories.
+
+A fixed iid attempt cap with an explicit abort has a separately bounded
+failure probability; conditional on any success it preserves this accepted
+law. Returning an uncharged fallback on failure does NOT. Query-dependent
+precision/resource caps can introduce different conditioning effects. The
+implemented sampler has neither cap and supplies no resource-failure guarantee.
+
+## Constructing the certified proposal
+
+Choose history bits independently with true probabilities
+
+    beta_s = |sin(theta_s/2)| / (|cos(theta_s/2)|+|sin(theta_s/2)|).
+
+Their product is C59's |c_h|/B history law; each denominator is at least one.
+Enclose each beta_s to absolute width <=2^(-Lh), floor its nonnegative lower
+endpoint onto that dyadic grid, and use an exact Lh-bit Bernoulli threshold.
+Each probability error is at most 2^(1-Lh). Product coupling gives history
+TV <= delta_h=2*k*2^(-Lh), including exact zero/unit probabilities.
+
+For a selected history, keep only its deterministic J routes. C61's prefix
+sampler can sample this normalized routed circuit with error <=delta_c.
+Implementation `_RoutedComponent` evaluates ONE component in the existing
+contraction. Its listed K(pi) gates differ from J by -i: at every prefix
+this changes only a fixed global phase, leaving all Born block weights and
+C61's proof unchanged. The sampler uses the same block partitions, including
+its conservative general reflection-pair updates; no claim of optimality.
+
+The exact component joint law is ||a_h(gamma,y)||^2/M: initial sector is
+uniform and the final route is a bijection independent of exponent controls.
+Thus sampling a fresh initial sector inside each component is equivalent to
+C59's fresh final-sector proposal. Both history and sector are resampled on
+EVERY rejection attempt. Marginalization and mixture coupling yield
+
+    TV(qtilde,q) <= delta_c + delta_h.
+
+The planner uses delta_c=delta/(8*Cbar), chooses delta_h<=delta/(8*Cbar),
+epsilon=delta/(4*Q), and Cbar*2^(-L)<=delta/4. Therefore beta<=delta<1.
+All four sources—component oracle/kernel error, history choice, acceptance
+interval loss and acceptance random-bit floor—are charged. Certifying only
+the acceptance computation would not establish this result.
+
+## Termination, resources and comparison boundary
+
+Each acceptance enclosure streams ALL coherent histories, evaluates their
+coherent norm P, and forms B times the positive-weight mixture for D. No
+uncertain-zero coefficient or amplitude is deleted. It rebuilds scalars at
+P_work=max(64,ceil(log2(1/epsilon))+16) or higher, doubling until the finite
+endpoint widths pass. The fixed finite expressions converge under C61's
+backend premise, including cancellations. History probabilities have a
+nonzero constant-bounded denominator; component queries inherit C61's
+termination. Each label therefore has a fixed, total approximate kernel.
+
+For fixed b in {2,3}, let n=t+k+1 and H<=2^k. Ignoring precision only to expose arithmetic
+counts, one proposal costs O(n^2) through single-history prefix queries;
+one acceptance evaluation costs O(H*n). Expected scalar work is therefore
+O(Cbar*(n^2+H*n)/(1-beta)), plus history setup and planning. Refinement replaces
+each scalar count by the SUM of its actual ball/integer operation costs at
+every attempted precision and input/operand bit length. Expected attempts
+alone does not establish a practical bit-runtime bound.
+
+Storage is O(n) scalar/input/route objects, with streamed histories and no
+orbit/output or history-vector tables. Scalar bit lengths, exact endpoint
+ratios, trig reduction, backend temporary allocation and caches are additional;
+object counts are not RSS. Per attempt, randomness includes k*Lh history bits,
+t exponent bits, component block words, L acceptance bits and exact uniform
+sector rejection. The latter has fewer than two trials in expectation, not
+a bounded worst-case bit count.
+
+C59's FLOAT finite-work instrument is a stronger O(t*b^3) proposal in the
+arithmetic model. Its faster proposal cost must not be assigned to this
+prefix-based certified implementation. Nor does beating C61 on finite timing
+rows prove an asymptotic advantage or optimality against that instrument,
+static sector regrouping, dynamic groupings or tensor methods. C62's explicit
+primitive-error model and unproved backend-wide constant caveat still apply.
+
+C64 removes that proposal implementation gap with verified forward states and
+backward effects. C65 identifies a still stronger binary scalar proposal and
+explains why the fixed benchmark's late mixers are unobservable. Their costs
+must be charged according to their own contracts; §FW owns the new comparison.
+
+The b=3 extension sums all three fine components in P and D and preserves b
+when constructing each routed proposal. The acceptance/mass-loss proof is
+dimension-independent once those complete norms are used. C61's prefix
+proposal charges its b-dependent coordinate/CDF constants; C64's finite-work
+proposal uses binary output kernels. §OB owns their b=3 complete-law tests
+and matched timing. This extension does not extend C65's scalar shortcut.
+
+This is an application of known rejection and perturbation arguments, not a
+new exact-real sampling principle. The prior-art/implementation comparison
+and finite evidence, including verifier failures, live in §RA. Numerical
+certification of this specialized conditional sampler is not a factoring or
+general classical-simulation breakthrough.
+
+---
+
+## C64 — Unnormalized prefix-mass enclosures certify a sequential finite-work proposal with one forward/backward pass per working-precision level, including zero branches and charged replay
+
+*status: proven · paper: B*
+
+# C64 — Verified forward states and backward effects retain linear-depth work
+
+## Mathematical and software scope
+
+The probability-tree lemma below is independent of work dimension. Applying
+it to C56's finite-work identity gives a verified proposal whenever the branch
+unitaries and normalized initial state are supplied by convergent exact-input
+enclosures. `lab/verified_finite_work.py:VerifiedFiniteWork` implements
+C61's b=2/3 rational-pi circuit and a selected deterministic C59 route history.
+It does not accept arbitrary rounded unitary matrices or certify the existing
+complex128 `sequential_path` implementation. C65 supplies a stronger scalar
+baseline for this particular b=2 family; do not omit it from comparisons.
+
+Initial sector is exact-uniform, each selected history has deterministic
+routes, and the output is (final coarse sector gamma, exponent y), with
+within-sector work traced. The order/index and gate promise remain inputs.
+Trusted convergent Arb/Acb enclosures, exact integers, independent unbiased
+bits and a nonconcurrently modified precision context are required as in C61.
+
+## Absolute child masses control the whole binary tree
+
+For a normalized depth-t binary output law, a node x at depth j has
+unnormalized child masses w_0,w_1>=0 and parent mass m_x=w_0+w_1.
+Suppose v_0,v_1>=0 approximate them with |v_z-w_z|<=eta, uniformly at every
+node. These are ABSOLUTE probability errors, not amplitude or conditional
+probability errors. Put V=v_0+v_1.
+
+If m_x,V>0, the normalization inequality gives
+
+    m_x * TV(w/m_x,v/V) <= sum_z |w_z-v_z| <= 2*eta.
+
+For V=0, m_x<=2*eta, so any declared normalized fallback satisfies the same
+bound. For m_x=0 the true-weighted contribution is zero, even if approximate
+earlier kernels can reach that node. The implemented fallback is uniform.
+
+Telescoping prefix kernels using the IDEAL prefix masses yields a contribution
+at most 2^(j+1)*eta at depth j. Exact two-bin inverse-CDF sampling on L unbiased
+bits adds at most 2^-L per depth, because true parent masses sum to one. Thus
+
+    TV(actual full law,ideal full law)
+       <= min(1, 2*(2^t-1)*eta + t*2^(-L)).
+
+The node count is charged algebraically; no tree is allocated by the sampler.
+`prefix_mass_error_budget` and `plan_prefix_mass_accuracy` in
+`lab/sampling_error.py` implement this exact-rational budget, allocating half
+the requested delta to each term. The requested mass-accuracy bits are
+p=t+O(log(1/delta)), not a sufficient machine mantissa. Width zero needs no
+binary updates and has zero sampling error.
+
+## Producing the unnormalized weights without repeatedly contracting prefixes
+
+Use C56's ORIGINAL ascending branch matrices B_i0,B_i1 and normalized rho_0.
+Store forward checkpoints
+
+    rho_(i+1) = (B_i0 rho_i B_i0^dag + B_i1 rho_i B_i1^dag)/2.
+
+Descending inverse-QFT measurement at step j=t-1-i uses the already chosen
+low output bits a and
+
+    K_z = (B_i0 + (-1)^z exp(-i*pi*a/2^j) B_i1)/2.
+    E_z = K_z^dag E K_z,       w_z = Tr(E_z rho_i),       E_initial=I.
+
+These are the actual unnormalized prefix masses because the selected later
+effects are retained with their full scale. No numerical trace normalization,
+QR compression or effect rescaling is performed. The forward density identity
+and inverse-QFT branch construction are shared helpers in `lab/semiclassical.py`;
+this is verified arithmetic for the existing finite-work contraction, not a
+second generic circuit propagator.
+
+At working precision P, weights are real parts of enclosed traces (their exact
+imaginary parts are zero). Require each real radius <=eta/2, extract the exact
+binary midpoint, round to the nearest eta-grid value, and clamp negative
+integers to zero. The clamp cannot increase distance from a nonnegative exact
+weight. Hence each returned weight has error <=eta. Feed these integer weights
+to C61's exact finite-bit CDF, not a float normalized ratio.
+
+The ordinary float instrument may harmlessly rescale its effects when computing
+exact conditional ratios. Importing that rescaling without tracking it would
+invalidate THIS unnormalized-mass oracle and its absolute-error budget.
+`acb_mat` supplies [verified complex matrix arithmetic, conjugation, transpose
+and trace](https://python-flint.readthedocs.io/en/stable/acb_mat.html);
+entrywise conjugation alone is not an adjoint. No approximate solver, matrix
+chop, or eigenvalue threshold is used.
+
+## Adaptive replay, termination and costs
+
+Starting at P=max(64,p+16), build the forward checkpoints once and advance
+backward incrementally. If a queried weight enclosure is too wide, double P,
+discard obsolete OWN checkpoints, rebuild all forward states and replay the
+already selected output bits to reconstruct E at the new precision. Do not
+redraw those bits or retroactively change their earlier approximate kernels.
+Only refinement rebuilds prefixes; successive successful steps reuse E.
+
+Every possible prefix/state must obey the uniform weight error and terminate.
+For this fixed deterministic schedule, computational state is determined by
+input and output prefix. More generally, conditional mixtures over numerical
+histories obey the same uniform kernel bound. Fixed exact-input expressions
+contain no divisions by small weights; convergence gives termination on every
+finite label, including zero-probability paths used by diagnostic forced runs.
+No precision cap or success-conditioned resource-failure promise is supplied.
+
+Each working-precision level performs O(t*b^3) matrix arithmetic and stores
+O(t*b^2) scalar entries in the default full-storage mode. C67 adds an opt-in
+checkpoint/recompute strategy with the SAME absolute-mass contract and a
+different storage/work tradeoff; it does not rely on forward mixing.
+With R refinements, the actual operation count is
+O((R+1)*t*b^3), not O(t^2) merely because there are t outputs. Charge each
+level at its actual ball/input bit cost, plus rational rounding and CDF costs.
+R and the backend-wide primitive-error constant are not bounded by finite
+timings. Native temporary allocations are not measured by counting matrices.
+
+`VerifiedRejectionSampler(...,component_method="finite_work")` uses this
+component law with C63's unchanged proposal-mixture and acceptance budget.
+Rejected attempts, forward rebuilds and backward replay are reported together.
+The default remains `component_method="prefix"`; no existing float API is
+silently promoted to certified status. C65's scalar option is the stronger
+simple baseline within b=2. Finite evidence and verifier corrections live
+in §FW, with the b=3 extension and same-accuracy comparison in §OB. The output
+tree remains binary when the work block changes, so the mass-error budget does
+not acquire a b factor; its matrix arithmetic and storage do. Neither linear
+arithmetic count is a general simulation breakthrough.
+
+---
+
+## C65 — For dyadic work blocks, all sufficiently late repeated work mixers factor into a final traced unitary even with coherent coarse routing; b=2 history proposals consequently admit normalized scalar sampling
+
+*status: proven · paper: B*
+
+# C65 — A collective late-work invariance strengthens the b=2 baseline
+
+## The arithmetic tail acts on a different subsystem
+
+In C56/C59's supplied indexed basis, the work space factors as coarse alpha
+and fine p. A repeated W_s is I_alpha tensor W_s; every reflection J_q is
+a permutation of alpha tensor I_p. Controlled arithmetic retains C56's twist
+
+    T_alpha^n[(p+n) mod b,p]
+        = exp(2*pi*i*alpha*floor((p+n)/b)/M).
+
+If b=2^v, then for every i>=v,
+
+    T_alpha^(2^i) = exp(2*pi*i*alpha*2^(i-v)/M) * I_p.
+
+Hence every non-background operation after insertion v acts trivially on p:
+the remaining controlled arithmetic and coherent K_q rotations act on the
+coarse/control systems, while the terminating QFT acts only on controls.
+All W_s with s>=v can be collected at the end, preserving THEIR mutual order,
+as the unitary product W_t ... W_v on p. They need not commute with each other.
+Only crossings of background gates with operations on the other subsystem
+are required. Removing the final p unitary leaves the full (gamma,y) law
+unchanged when p is traced, including arbitrary initial correlations.
+
+This strengthens the joint-removal interpretation of C56's single-late-mixer
+invisibility statement. Pairwise noncommuting W's do not defeat the collective
+argument. Coherent coarse routing also does not defeat it, since routing
+still acts as identity on p. This is an elementary commuting-algebra/partial
+trace argument, not a claimed new general simulation principle.
+
+The scope matters:
+
+- W_s before v can affect the law and must not be removed by this argument.
+- Retaining the final p label or a non-invariant p observable can reveal the
+  final work unitary. This is output-law equivalence, not state equality.
+- Arbitrary non-unitary backgrounds do not disappear under trace.
+- For b with an odd factor, no 2^i is divisible by b; this structural scalar
+  tail does not follow. Its absence is not a hardness proof.
+- A width shorter than v simply has no guaranteed late range. Width zero
+  has only traced work operations and a deterministic exponent output.
+
+## A stronger certified component proposal when b=2
+
+Here v=1. For a FIXED C59 history, let alpha_i be the deterministic sector
+just before control i, including the selected route at insertion i. Put
+psi_0=W_0|0>. All W_s for s>=1 can be discarded for the requested law.
+
+At measurement step j=t-1-i with already chosen low bits a, let
+z=exp(-i*pi*a/2^j). For i>=1, the normalized binary weights are
+
+    w_d = |(1 + (-1)^d*z*exp(2*pi*i*alpha_i*2^(i-1)/M))/2|^2.
+
+The backward effect before the last i=0 step is a nonnegative SCALAR times
+identity. Its scale cancels analytically. The final normalized weights are
+
+    w_d = ||(I + (-1)^d*z*T_(alpha_0))*psi_0/2||^2.
+
+Both pairs sum to one by exact unitarity. These normalized formulas extend
+to every forced prefix, including a prefix of zero probability. They never
+divide by a small prefix mass. Retain W0: it is before the only non-scalar
+controlled shift and is demonstrably observable on some inputs.
+
+`VerifiedScalarWork` in `lab/verified_finite_work.py` evaluates these scalar
+or two-component expressions from exact rational inputs, enforces a uniform
+real weight radius <=eta/2, rounds midpoints to the eta grid and clamps at
+zero. The exact CDF and its normalized all-zero fallback are as in C61.
+The analytic normalized-weight promise gives the stronger law bound
+
+    TV(actual component law,ideal component law)
+       <= min(1, 2*t*eta + t*2^(-L)).
+
+`plan_conditional_weight_accuracy` chooses eta,L with this rational budget
+below delta. It requires only p=O(log t+log(1/delta)) requested weight bits,
+unlike C64's unnormalized-mass requirement. Neither is a backend mantissa
+bound. The stronger promise was DERIVED from this input structure, not
+obtained by normalizing uncertain rare masses and asserting small error.
+
+Uniform initial alpha and history-mixture selection give C63's proposal q.
+`VerifiedRejectionSampler(...,component_method="scalar")` therefore inherits
+C63's whole accepted-law certificate. Coherent histories still interfere in
+the OUTER acceptance computation; this is not an incoherent replacement of
+the complete quantum circuit. The default sampler is unchanged.
+
+The implementation uses O(t) scalar evaluations plus O(t*k) small integer
+route checks, with no forward matrix checkpoints. It retains supplied
+O(t+k) gate/route data; scalar/label bit lengths and refinement are additional.
+Outer acceptance still streams up to 2^k histories and pays rejected attempts.
+No order/index discovery or general factoring claim follows.
+
+## Consequence for interpreting benchmarks
+
+The old C61/C63 fixed b=2 fixture contains only W1 and W3, so its late mixers
+are invisible to (gamma,y). The timing and numerical-certification results
+remain observations about the actual implementations on that input, but do
+not demonstrate persistent observable fine-work mixing. It remains a valid
+invariance and numerical stress fixture. §FW adds an observable W0 control,
+independent full-r checks, full scalar laws and matched certified comparisons.
+Changing b to include an odd factor is a discriminating boundary test, not
+license to assume odd-block hardness or reuse a b=2 oracle unchanged.
+
+---
+
+## C66 — Shared forward-state errors control the output law with backward effects retained; a certified phase mesh bounds every twelve-step repeated three-state Rx(pi/7) channel product below 4/5
+
+*status: proven · paper: B*
+
+# C66 — Forward memory loss with backward measurement memory retained
+
+## Contract and full-law bound
+
+Fix C56's unitary branch sequence B_i0,B_i1 and normalized initial density
+matrix. A selected deterministic C59 route history is allowed: its branches
+remain independent of the output prefix. The observable is the terminating
+inverse-QFT output with final work traced, not the joint quantum state.
+Order/index, branch construction and route history remain supplied inputs.
+
+Let rho_i be the exact forward states. For every i choose ONE normalized PSD
+matrix rho_tilde_i, independent of all already measured output bits. The
+matrices need not be related by a common approximate forward channel. Keep
+the exact backward effects E_a and C56's exact QFT branch operators. Normalize
+the nonnegative approximate child weights
+
+    v_(a,z) = Tr(K_(i,z)(a)^dag E_a K_(i,z)(a) rho_tilde_i).
+
+If both weights vanish use a declared normalized fallback. Then the resulting
+full output law obeys
+
+    TV(P_tilde,P) <= min(1, sum_i ||rho_i-rho_tilde_i||_1).
+
+The norm is the trace norm, not half of it. There is no minimum nonzero
+prefix mass in this statement. For an exact mixture of initial sectors or
+deterministic histories, their weighted component bounds suffice by convexity.
+Coherent-history ACCEPTED outputs additionally require C63's acceptance
+analysis; this claim does not silently certify a changed rejection sampler.
+
+## Proof: the same state error is measured by a complete POVM
+
+Write F_(a,z)=K_(i,z)(a)^dag E_a K_(i,z)(a). All effects are positive. At a
+fixed depth the feedback phase cancels when the next bit is summed:
+
+    sum_z F_(a,z)
+      = (B_i0^dag E_a B_i0 + B_i1^dag E_a B_i1)/2.
+
+Starting with E_empty=I, induction over all output prefixes gives
+sum_a E_a=I and hence sum_(a,z) F_(a,z)=I. Using only sum_z K_z^dag K_z=I
+would NOT establish this step with varying E_a; the cancellation above is
+essential. For Delta_i=rho_i-rho_tilde_i, its positive/negative decomposition
+and POVM completeness imply
+
+    sum_(a,z) |Tr(F_(a,z) Delta_i)| <= ||Delta_i||_1.
+
+Let w_(a,z)=Tr(F_(a,z)rho_i), m_a=sum_z w_(a,z), V_a=sum_z v_(a,z).
+C64's normalization inequality yields
+
+    m_a TV(w_a/m_a,v_a/V_a) <= sum_z |w_(a,z)-v_(a,z)|.
+
+For V_a=0 the fallback costs at most m_a, equal to the right-hand sum; for
+m_a=0 the true-weighted cost is zero. Sum over parents, then telescope kernels
+using the IDEAL prefix masses. Stochastic contraction carries forward earlier
+errors, including approximate paths reaching ideal-zero prefixes. This proves
+the bound without assuming channel consistency of the approximate states.
+
+## Finite arithmetic must still be charged
+
+Suppose each computed nonnegative dyadic child weight differs from v_(a,z)
+by at most eta uniformly, and the two-bin CDF uses L unbiased random bits.
+Applying the same true-mass inequality directly to the computed weights gives
+
+    TV(P_implemented,P)
+      <= min(1, sum_i ||Delta_i||_1 + 2*(2^t-1)*eta + t*2^(-L)).
+
+The state-correlated error avoids a tree-size coefficient; unrelated numerical
+mass errors do not. In particular, sum_z v_(a,z) need not be the ACTUAL parent
+mass of the approximate chain. Applying C64 a second time as if those masses
+formed a consistent approximate probability tree would be unjustified.
+This is an oracle contract, not a new sufficient backend mantissa formula.
+
+The bounded experiment builds exact-input forward/effect enclosures, uses
+rho_tilde_i=(1-epsilon)rho_i+epsilon I/b, and checks the absolute weight radius
+before dyadic rounding. It bounds trace error by sqrt(b) times an outward
+Frobenius norm, not a floating eigensolver. Its exhaustive tiny finite laws
+are not a production checkpoint-compression implementation. See §FM for
+coverage, numerical limits, controls and failed verifier history.
+
+## Consequence of a separately established mixing promise
+
+The forward channels Phi_i(X)=(B_i0 X B_i0^dag+B_i1 X B_i1^dag)/2 are unital
+and Hilbert–Schmidt nonexpansive, by the triangle inequality and unitary norm
+invariance. Suppose every consecutive ell-channel product contracts traceless
+Hermitian matrices in Hilbert–Schmidt norm by at most c<1. Then
+
+    ||rho_i-I/b||_1 <= sqrt(b)*||rho_0-I/b||_F*c^floor(i/ell).
+
+Choose rho_tilde_i=rho_i for i<h and I/b for i>=h, with h=ell*m. The summed
+state error is at most
+
+    sqrt(b)*||rho_0-I/b||_F * ell*c^m/(1-c).
+
+For a pure initial state its leading state factor is sqrt(b-1). This is a
+width-independent sufficient warm-up at fixed accuracy, CONDITIONAL on the
+uniform product bound. It is not evidence that the numerical warm-up is small.
+Only the first min(t,h) FORWARD states need be retained in this mathematical
+construction. Gate descriptions, branch storage or on-demand reconstruction,
+the exact backward effect, scalar precision, output bits and arithmetic work
+remain costs. No constant-total-memory or sublinear-output-time claim follows.
+
+For repeated W and fixed b=3 sector, the FORWARD channel has period two for
+any supplied M: T_alpha^3=exp(2*pi*i*alpha/M)I, so conjugation by its powers
+depends only on 2^i mod 3. This argument removes a global phase only inside
+the averaged channel. It does not remove that phase from inverse-QFT branch
+interference or the coherent rejection acceptance computation. Establishing
+the two-step gap's numerical optimum is separate work. The qualitative
+existence statement and a certified twelve-step bound below hold uniformly.
+
+## A qualitative uniform gap for one fixed three-state mixer
+
+Take NO routes and W=embedded Rx(pi/7), repeated after every control, with
+the third fine label fixed. For every theta=alpha/M, each of the two-step
+forward-channel products has induced norm strictly below one on traceless
+HERMITIAN matrices in Hilbert–Schmidt norm. There is a common c<1 for all
+theta in [0,1] and both parity offsets. This is an exact mathematical result,
+not a conclusion from a finite sector mesh. It supplies no explicit value of c.
+
+To prove it, let A_T(X)=(X+TXT^dag)/2. Unitary conjugation gives the identity
+
+    ||A_T(X)||_F^2 = ||X||_F^2 - ||X-TXT^dag||_F^2/4.
+
+Thus a norm-preserving input for a two-step product would satisfy
+
+    [X,T_theta]=0,       [W X W^dag,T_theta]=0,
+
+since T_theta and T_theta^2 have the same commutant. Suppose X is nonzero,
+traceless and Hermitian. In dimension three it has at least one simple
+eigenvalue. Since T_theta has simple spectrum, its corresponding normalized
+eigenvector v is also a T_theta eigenvector. The second commutation implies
+Wv is a T_theta eigenvector too, with the same simple X-eigenvalue after
+conjugation. Distinct T_theta eigendirections are orthogonal. However,
+
+    ||W-I||_op = 2*sin(pi/28) < sqrt(2),
+
+so W cannot take v to an orthogonal direction, even up to phase. Hence Wv
+lies in the same line as v: it would be a common W,T_theta eigenvector.
+That is impossible. Every twisted-cycle eigenvector has all three coordinates
+nonzero; W has three distinct eigenvalues and eigenvectors proportional to
+(1,1,0), (1,-1,0), and (0,0,1). This excludes equality for every nonzero
+traceless Hermitian X. Compactness of its unit sphere yields strict induced
+norm contraction at fixed theta. Continuity in theta, compactness of [0,1]
+and the finite set of offsets then give a common c<1.
+
+This establishes the preceding warm-up corollary with ell=2 for the specified
+fixed mixer and any supplied order divisible by three. The existence proof
+does not quantify the warm-up, justify an arbitrary gate angle, cover routed
+histories, or prove hardness in the absence of mixing. The work marginal can
+mix while the measured outputs remain correlated, as the control below shows.
+
+For the SEPARATE finite-order r9 specialization, the experiment supplies a
+computer-assisted twelve-step Hilbert–Schmidt upper bound of 4/5, covering
+all three sectors and every parity offset. It encloses the exact channel
+product in an orthonormal traceless basis and bounds its operator norm by
+its Frobenius norm. Exact periodicity reduces this case to finitely many
+windows. This numerical certificate assumes convergent outward Arb/Acb
+arithmetic as in C61; its full window evidence and conservative warm-up
+consequences live in §FM. The subsequent mesh certificate below extends that
+twelve-step constant to arbitrary M; the qualitative TWO-step theorem does
+not assert the same constant at two steps.
+
+## A quantitative uniform twelve-step certificate
+
+For r=1,2, the difference T_theta^r-T_phi^r is the phase difference
+exp(2*pi*i*theta)-exp(2*pi*i*phi) times a nonzero partial permutation.
+Consequently its operator norm is at most 2*pi*d_circle(theta,phi). Expanding
+the difference of conjugations gives
+
+    ||Phi_theta-Phi_phi||_(HS->HS) <= 2*pi*d_circle(theta,phi).
+
+The half in the channel average cancels the two conjugation-difference terms.
+Every forward step is Hilbert–Schmidt nonexpansive. Telescoping either
+alternating twelve-step product P therefore gives
+
+    ||P_theta-P_phi||_(HS->HS) <= 24*pi*d_circle(theta,phi).
+
+A uniform circular N-point phase mesh has nearest distance at most 1/(2N).
+Thus an outward Frobenius upper bound c_mesh for every sampled product implies
+the UNIFORM induced-norm bound c_mesh+12*pi/N. There is no extra sqrt(8):
+Frobenius bounds the sampled product, whereas the perturbation bound is
+already in induced norm. Nor may the large scalar phase in T^(2^i) be
+differentiated here; its cancellation in conjugation was proved first.
+
+`experiment_uniform_phase_gap.py` checks both parity products at N=2048 and
+P192/P256, including branch/basis audits, using the exact-input builder at
+theta=j/N. With the verified rational pi upper bound 355/113, all sampled
+Frobenius bounds plus the charged between-mesh padding are strictly below
+4/5. This computer-assisted certificate therefore covers EVERY theta and
+every supplied M, not just the grid sectors. It assumes the same convergent
+outward arithmetic as C61. §UG retains all mesh bounds, runtime/allocation
+scope and verifier corrections. It establishes a rate for the specified
+fixed mixer with no routes, not a practical saving or a new general mixing
+principle. C67 supplies a checkpoint baseline without a mixing assumption.
+
+## Limits and positioning
+
+A prefix-dependent rho_tilde_(i,a) cannot in general use one maximum trace
+error in the above bound. A complete five-dimensional diagonal POVM with four
+parents, F_a0=|0><0|/4 and F_a1=|a><a|, has exact rho=|0><0|. Choosing
+rho_tilde_a=.9|0><0|+.1|a><a| gives trace error 1/5 at every parent, but
+aggregate true-weighted conditional TV 4/13. This refutes the GENERAL
+extension; it is not asserted to be a b=3 QFT realization.
+
+Nor does a mixed work marginal imply output decoupling. With b=r=3, t=2,
+no backgrounds and mixed initial work I/3, all forward states equal I/3.
+The exact output law is (3/8,1/4,1/8,1/4); resetting E gives uniform output,
+TV 1/8. Keeping the backward effect is still necessary even at exact mixing.
+
+The argument applies established measurement contraction and kernel
+telescoping to this circuit contract. General channel-product memory loss is
+prior work: main read the deterministic good-block proof (Proposition 3.9)
+and the Hilbert–Schmidt/trace-norm comparison (Appendix B, Definition B.1 and
+Proposition B.2 including its proof) in
+[Pathirana, arXiv:2605.00157v1](https://arxiv.org/html/2605.00157v1).
+We do not import its random-environment assumptions or claim a new general
+mixing principle. Novelty of this specific application has not been established.
+
+---
+
+## C67 — On-demand branches and block recomputation reduce verified finite-work matrix storage to O((t/k+k)b^2) without a state approximation, with all forward reconstruction and effect replay charged
+
+*status: proven · paper: B*
+
+# C67 — Checkpointing is a stronger storage baseline than forgetting states
+
+## Scope and construction
+
+Keep C64's exact-input b=2/3 contract and one deterministic route history.
+The observable is the complete terminating inverse-QFT output with fine work
+traced. No changed initial state, randomized circuit, order discovery,
+approximation of rho, amplitude truncation or mixing promise is introduced.
+
+`VerifiedFiniteWork(circuit,mask,checkpoint_spacing=k)` stores rho_i only
+at block starts i=0,k,2k,... below t. The option accepts exact integers
+1<=k<=63; None preserves the full-storage default. During descending output
+measurement, it reconstructs all interior rho_i of the current block from
+its retained start, consumes them in reverse order, then discards that block.
+The recurrence and exact-input branch constructors are shared with the
+full-storage implementation. The two child traces share one block cache.
+
+Branch matrices are reconstructed on demand too; there is no hidden full
+branch table. The pre-control sector is recomputed by applying supplied routes
+at insertions <=i, in insertion order. Insertion zero precedes branch zero;
+insertion t is included when reporting the final sector. Gate/route input
+descriptions remain stored. A width-zero path remains normalized and needs
+no QFT update.
+
+## Correctness and numerical scope
+
+Induction from the retained exact rho at a block start gives exactly C64's
+mathematical recurrence throughout the reconstructed block. At precision P,
+the same operations produce convergent enclosures of those same matrices.
+C64's absolute child-mass tests, dyadic rounding, finite-bit CDF and declared
+all-zero fallback are unchanged. The identical law-error certificate follows;
+there is no additional state-approximation term.
+
+Precision refinement discards obsolete OWN checkpoints and local arrays,
+rebuilds at the new precision, and replays the already selected bits to
+reconstruct E. It never redraws a bit or replaces E with identity at an
+intermediate prefix. Weak references from the lazy storage helpers avoid
+ownership cycles retaining native matrices after a cursor is discarded.
+External references deliberately kept by a diagnostic are outside this
+ownership count.
+
+Tiny complete finite-bit laws match the default as exact Fractions in the
+tested fixtures; selected wide forced paths and seeded samples match too.
+Bitwise identity of every possible Arb enclosure or random trace is not
+needed for the certificate and is not inferred from these finite tests.
+Rare-weight refinement still has no precision cap or resource-conditioned
+success guarantee. This option does not change C64's requested mass accuracy.
+
+## Costs and comparison boundary
+
+At each precision level, the initial pass takes t forward density updates.
+Each block's interior is reconstructed at most once during descending
+traversal, contributing at most t additional updates. Intermediate precision
+failure can stop that traversal early; rebuilding starts a new charged level.
+The arithmetic count remains O(t*b^3) per level, with a larger constant, plus
+on-demand phase/branch construction and route-index arithmetic. Replay costs
+at most t backward updates per level and is separately recorded.
+
+Persistent forward matrices number O(ceil(t/k)+k); persistent branch matrices
+number zero in checkpoint mode. With k near sqrt(t), working matrix storage
+is O(sqrt(t)*b^2), while full storage is O(t*b^2). The implementation reports
+forward steps, recomputed steps, branch-pair constructions, maximum retained
+forward matrices and conservative structural matrix allowances separately.
+Those are not measured RSS, native temporaries or bit storage. Scalar bit
+lengths, supplied gate/route data, order/index data and output bits remain.
+
+Checkpointing can be slower. No optimal scheduling, universal speedup or
+lower bound against other sampling decompositions is claimed. C65's scalar
+method remains the stronger simple baseline on its binary family. The new
+option is available for direct finite-work components; coherent rejection
+has not acquired a checkpoint-selection option in this change.
+
+This is standard checkpoint/recompute applied to the existing two-sided
+contraction, not a new memory principle. Main read Algorithm 1 and §4.3
+(including its storage calculation) in
+[Chen et al., arXiv:1604.06174v2](https://arxiv.org/pdf/1604.06174).
+That work describes the same segmented forward-recomputation tradeoff in
+reverse-mode neural-network calculations and credits earlier checkpointing
+literature. Our backward objects are measurement effects, not gradients;
+the scheduling analogy does not equate their scientific tasks.
+
+---
+
+## C68 — A reverse quantum instrument plus initial-boundary rejection samples each unitary finite-work component with mean b attempts, without forward states; C69 separately certifies an implementation
+
+*status: proven · paper: B*
+
+# C68 — Sample backward and reject at the initial boundary
+
+## Exact mathematical contract
+
+Fix C56's b-dimensional unitary branch pairs B_i0,B_i1, t initially |+>
+controls acting in ascending arithmetic order, and normalized initial work
+rho_0. Final work is traced; the target is the terminating inverse-QFT
+output. A fixed deterministic route history and initial coarse sector are
+allowed. Their branches are independent of the measured output prefix.
+Order/index, gate descriptions and route data remain supplied, not discovered.
+
+At measurement depth d, i=t-1-d and prefix a contains already selected bits
+in ascending measurement-order positions. Use the EXISTING branch helper:
+
+    K_z(a) = (B_i0 + (-1)^z exp(-i*pi*a/2^d) B_i1)/2.
+
+Both sum_z K_z^dag K_z=I and sum_z K_z K_z^dag=I follow by cancelling
+cross terms and using branch unitarity. Thus A_z=K_z^dag defines a valid
+trace-preserving reverse instrument at every adaptive prefix. This does
+not require the forward work state to mix or its channels to commute.
+
+Start sigma=I/b. At each depth sample z with probability
+w_z=Tr(K_z^dag sigma K_z), then set sigma=K_z^dag sigma K_z/w_z.
+At the leaf accept with probability Tr(rho_0 sigma). If rejected, restart
+the proposal, retaining the specified component. Zero-probability branches
+are never sampled; no division by their zero trace is required.
+
+## Why the accepted law is the target
+
+Let E_y be C56's unnormalized backward effect for complete output y. The
+reverse path probability telescopes to q_y=Tr(E_y)/b and its normalized
+terminal state is E_y/Tr(E_y). Positivity and Tr(rho_0)=1 give an acceptance
+probability in [0,1]. Hence
+
+    q_y a_y = Tr(rho_0 E_y)/b = p_y/b.
+
+For completeness, the adaptive tree satisfies sum_y E_y=I. It is not enough
+to assert that an arbitrary adaptive collection of unital instruments has
+this property. Here summing the next bit gives the PREFIX-INDEPENDENT map
+
+    sum_z K_z(a)^dag E_a K_z(a)
+      = (B_i0^dag E_a B_i0 + B_i1^dag E_a B_i1)/2.
+
+Induction over all parents therefore maps sum_a E_a=I to I. The QFT
+feedback phase cancels in this sum, not in each measured branch. It follows
+that total acceptance is exactly 1/b and mean independent attempts are b.
+Conditioned on acceptance the output law is exactly p. This is independent
+of t, the sector phase, rho_0 and the chosen deterministic unitary history.
+
+## Pure-state unraveling
+
+The reverse density need not be stored. Choose j uniformly in {0,...,b-1},
+start v=e_j, sample z with w_z=||K_z^dag v||^2, and replace v by
+K_z^dag v/sqrt(w_z). At the leaf accept with <v|rho_0|v>. In the current
+pure-input contract rho_0=|psi_0><psi_0| this is |<psi_0,v>|^2, including
+the supplied initial background gate.
+
+Write F_y=K_(t-1)...K_0, with each chosen K carrying its actual adaptive
+phase, so E_y=F_y^dag F_y. The joint proposal weight is
+
+    q_(j,y) = ||F_y^dag e_j||^2/b.
+
+After multiplying by acceptance, normalization of v cancels and gives
+<e_j|F_y rho_0 F_y^dag|e_j>/b. Summing j again gives p_y/b. The auxiliary
+j labels only the b-dimensional proposal boundary, not an orbit of size r.
+This proves the same accepted law and mean attempts for a pure trajectory.
+
+## Costs, implementation boundary and positioning
+
+The exact density trajectory uses O(b^2) state entries and O(t*b^3) dense
+arithmetic per attempt; the pure trajectory uses O(b) state entries and
+O(t*b^2) dense matrix-vector arithmetic. On-demand branch matrices still
+require O(b^2) temporaries, and all branch construction, route-index work,
+input storage, output bits and scalar precision must be charged. Expected
+arithmetic includes the b attempts. There is no forward checkpoint array.
+For the existing b=2/3 API this is a bounded rejection factor, not constant
+cost if b itself grows.
+
+The tiny raw-effect probe checks complete enclosed laws against the shared
+prefix contraction and an independent full-r floating diagnostic. An exact
+rational nonnormal-matrix regression checks the pure-boundary identity and
+refutes dropping either the rejection or the adjoint. These initial tests are NOT a
+production finite-bit reverse sampler, a working-precision theorem, or a
+measured runtime/storage comparison for normalized trajectories. C69 now
+certifies an UNNORMALIZED-vector implementation without rare-prefix division;
+it does not establish a stronger normalized-trajectory precision bound. Resource errors
+or finite attempt caps cannot be conditioned away without charging them.
+
+C65 remains stronger for its scalar binary family. Coherent-history cross
+terms still require C59/C63's outer machinery; this claim alone does not
+replace its acceptance rule. Arbitrary nonunitary branch pairs or feedback
+that changes the averaged channel are outside this proof. No general Shor
+simulation or new factoring algorithm follows from the supplied contract.
+
+This applies known quantum-operation reversal, not a new general principle.
+Main read the Kraus/adjoint and conditional-state formulas (Eqs. 4–8), the
+reversal derivation (Eqs. 10–11) and its trace-preservation proof in
+[Crooks, Quantum Operation Time Reversal, arXiv:0706.3749v1](https://arxiv.org/pdf/0706.3749).
+Our specialization to invariant state I/b reduces the reverse operators to
+adjoints; the adaptive phase cancellation and boundary rejection above are
+derived explicitly for this task. Novelty of this application has not been
+established, and the thermodynamic conclusions of that paper are not invoked.
+
+---
+
+## C69 — Unnormalized reverse vectors and downward boundary acceptance certify streaming finite-work rejection without forward checkpoints or rare-vector normalization, with all retries charged
+
+*status: proven · paper: B*
+
+# C69 — Finite-TV reverse sampling without vector normalization
+
+C70 separately implements local-error projective compression. Its stronger
+requested-coordinate bound is not retroactively a bound on this raw sampler.
+
+## Contract and implementation
+
+`lab/verified_reverse_work.py:VerifiedReverseWork(circuit,mask)` implements
+one deterministic C68 history for C61's exact rational-pi b=2/3 indexed input.
+The target is joint final coarse sector and inverse-QFT output, fine work
+traced. This does not replace coherent-history outer acceptance, discover
+order/index, accept arbitrary rounded unitaries or certify the float simulator.
+
+The module reuses `VerifiedFiniteWork`'s input snapshot, route semantics and
+on-demand branch construction, but never builds forward densities or a branch
+table. It applies the shared QFT operator to a PURE backward vector, retaining
+its physical norm. There is no norm division, square root, QR, rescaling or
+amplitude cutoff in the trajectory. Convergent outward Arb/Acb, exact integer
+arithmetic, independent unbiased bits and a nonconcurrent precision context
+remain C61's trust assumptions. This is not a machine-checked software proof.
+
+## Proposal and accepted-law proof
+
+Fix an initial coarse sector. For each boundary j, start v=e_j. At depth d
+form v_z=K_z(a)^dag v and dyadic approximations to D_z=||v_z||^2. These are
+unnormalized prefix masses of a normalized j-conditional proposal, since
+sum_z K_z K_z^dag=I. C64's absolute-mass and finite-CDF bound applies,
+including its declared all-zero rounded fallback. Averaging exact-uniform j
+gives a joint proposal TV error <=delta_q with no extra dimension factor.
+
+At a leaf write
+
+    D_(j,y)=||F_y^dag e_j||^2,
+    N_(j,y)=|<psi_0,F_y^dag e_j>|^2,
+    q_(j,y)=D_(j,y)/b,       s_(j,y)=N_(j,y)/b.
+
+C68 gives 0<=N<=D, sum D=b, sum N=1 and sum_j s_(j,y)=p_y/b.
+Evaluate N,D without normalization. Require outward endpoint widths
+(NU-NL)+(DU-DL)<=epsilon and floor max(0,NL)/DU downward on an L-bit grid.
+The existing `conservative_threshold` also covers DU=0. C63's inequality is
+
+    0 <= N-D*ahat <= epsilon + D*2^-L.
+
+Summing b*Q cells, Q=2^t, and dividing by b gives
+
+    ||q*ahat-s||_1 <= Q*epsilon + 2^-L,
+    ||qtilde*ahat-s||_1 <= e := 2*delta_q + Q*epsilon + 2^-L.
+
+The exact accepted mass is 1/b, so C60's normalization lemma yields
+
+    TV(accepted output,p) <= beta := b*e,
+    success_probability >= (1-beta)/b,
+    expected_attempts <= b/(1-beta),        beta<1.
+
+The planner requests delta_q<=delta/(8b), epsilon=delta/(4bQ) and
+2^-L<=delta/(4b), using the ACTUAL planned proposal bound in beta. Hence
+beta<=3delta/4<delta; the slack is intentional. These are requested absolute
+accuracies, not sufficient backend mantissas. Q is counted without a table.
+A stronger normalized-instrument precision bound is not imported here.
+
+## Which variables must be redrawn
+
+`sample` draws the initial sector exactly uniformly ONCE, then holds it fixed
+through independent rejection attempts. EACH attempt draws a fresh uniform j.
+Every fixed sector has positive eventual acceptance and its own beta bound,
+preserving the sector mixture; the deterministic final-sector bijection then
+preserves the joint-law bound. The returned sample omits the proposal j,
+which is not a target final-work measurement.
+
+Holding j through rejection would instead normalize each j-component before
+mixing, generally giving the wrong law. The claims suite exhibits that bias
+with exact rational nonnormal Kraus operators and a pure initial vector.
+Conversely, fixing the coarse sector prevents approximately unequal success
+rates from reweighting a mixture justified by separate sector certificates.
+
+## Refinement, zero branches and costs
+
+Child norms use polynomial real/imaginary multiplications. The radius test,
+exact midpoint extraction, dyadic rounding and nonnegative clamp are C64's.
+Refinement replays unchanged j and selected output bits from e_j. Terminal
+refinement replays the complete output without changing earlier finite
+proposal kernels; psi_0=W0|0> is also reconstructed at the new precision.
+General real exponentiation across zero is not used for polynomial squares.
+
+Each fixed label is a finite exact-input expression without small-norm
+division, so queries terminate under the convergence premise, including
+forced ideal-zero paths. True D=0 implies N=0 and a nonpositive lower
+numerator, hence zero acceptance. Approximate fallback paths are charged.
+Rejection terminates almost surely with the stated expected count. Precision
+or attempt caps and resource-conditioned guarantees are not supplied.
+
+Each precision level takes O(t*b^2) reverse matrix-vector work, PLUS branch
+construction, route/phase arithmetic, initial-vector builds and acceptance
+inner products. The existing dense branch builder must not be assigned the
+matrix-vector cost. Counters include replay, failed child evaluations, initial
+builds, acceptance evaluations and rejected attempts. Runtime charges every
+operation at its actual precision and operand/input bit length; no universal
+speedup or uniform bound on refinement count follows from finite timings.
+
+Retained trajectory state is O(b) complex entries; branch/adjoint/Kraus
+temporaries require O(b^2), with no persistent branch or forward table.
+Reported vector bounds and conservative temporary allowances are structural,
+not native RSS. Gate/route inputs and output bits still require O(t) objects
+or bits as applicable: this is not constant TOTAL memory. Exhaustive tiny
+diagnostics retain their own law tables, unlike the production sampler.
+
+C67 remains a no-rejection checkpoint comparator and C65 remains stronger
+on its binary scalar family. §RV records full-law, edge and matched-cost
+evidence and failures. This combines C68's known reverse-instrument method
+with existing error lemmas; no application novelty, general simulation
+breakthrough or new factoring algorithm is claimed.
+
+---
+
+## C70 — Local joint output/work error certifies dyadically compressed reverse trajectories with logarithmic requested work-coordinate bits, without a full-output-tree precision factor; the tested implementation is slower
+
+*status: proven · paper: B*
+
+# C70 — Quantize the state, and charge error in the joint process
+
+## Contract
+
+`lab/verified_quantized_reverse.py:VerifiedQuantizedReverseWork` is opt-in
+for one deterministic route component of C61's exact rational-pi b=2/3 input,
+t<=63. It samples joint final coarse sector and inverse-QFT output, fine work
+traced. Order/index and the gate promise are supplied. This is not coherent
+outer rejection, generic factoring, or certification of the float sampler.
+
+The argument below is a mathematical error certificate with an audited
+implementation and bounded tests, not a machine-checked software proof.
+Convergent outward Arb/Acb, exact integer arithmetic, independent unbiased
+random bits and a nonconcurrent backend precision context are assumptions.
+
+## Local operator error
+
+At a fixed classical output prefix use C68's shared reverse operators
+A_z=K_z^dag, z=0,1. Their stack V is an isometry. Let W stack approximations
+L_z, with ||W-V||<=nu<1. For any normalized pure parent u, put x_z=A_z u,
+y_z=L_z u. The rank-one trace inequality and Cauchy-Schwarz give
+
+    sum_z ||x_z x_z^dag-y_z y_z^dag||_1
+      <= sum_z (||x_z||+||y_z||)*||x_z-y_z||
+      <= (2+nu)*nu =: d.
+
+The approximate total branch mass S=sum_z ||y_z||^2 obeys
+S>=(1-nu)^2>0 and |S-1|<=d. Dividing the whole approximate classical/quantum
+block state by S costs trace norm exactly |S-1|, so its distance from the
+exact instrument output is at most 2d. This division is state-dependent;
+the approximate normalized instrument is NOT asserted to be linear or CPTP.
+
+The operator-to-channel continuity step is known mathematics. See
+[Kretschmann, Schlingemann and Werner, Proposition 3 and its proof, Eqs. (13)–(14)](https://arxiv.org/pdf/0710.2495).
+Main read that complete proof and its defining context. The state-dependent
+normalization, compression and hybrid argument here are derived separately;
+the source's full converse theorem is not needed or claimed as audited.
+
+## Canonical compression and finite branch choice
+
+Fix eta=2^-p. Store Gaussian-integer vectors, interpreting their projective
+direction only. For a nonzero child w, divide its real and imaginary
+coordinates by r=max coordinate magnitude, then round to the eta grid with
+exact rational ties-to-even rounding. A maximal coordinate is exactly +1 or
+-1 before rounding and remains so afterward. Both representatives are
+nonzero, and the unrounded representative has Euclidean norm at least one.
+
+Coordinate rounding error is at most eta/2. Normalization changes a vector
+perturbation by at most twice its relative Euclidean norm; the trace norm
+between its pure projectors is at most twice their normalized-vector distance.
+Consequently compression changes each conditional projector by at most
+
+    kappa = 4*b*eta,       (a conservative bound for b>=1).
+
+There is no lower bound on the physical child norm in this argument. Branch
+weights MUST be computed from integer norms BEFORE compression. Rescaling
+each child and then using its new norm would erase physical relative weights.
+
+The two-bin L-bit CDF adds TV at most 2^-L, hence classical/quantum trace
+error at most 2*2^-L, with the same conditional states. Therefore the local
+joint error is at most
+
+    ell = 2*(2+nu)*nu + kappa + 2*2^-L.
+
+Child norm weights are exact nonnegative integers, not rounded probabilities.
+Their sum cannot vanish by nu<1. A zero-weight child has exactly zero CDF
+count and cannot be sampled. Forced diagnostics may continue it using the
+declared basis-vector fallback; their path probability remains zero even
+if the diagnostic terminal acceptance is positive.
+
+## Why depth, not number of prefixes, is charged
+
+Retain the classical boundary j and entire output prefix in the mathematical
+joint state. At every depth compare the implemented step on its own pure
+conditional parent with the EXACT instrument on that same parent. The
+uniform local bound above averages to at most ell over all parent weights.
+Then apply the exact feedback-controlled CPTP map to the difference of
+the preceding joint states; Hermitian trace norm is contractive. Induction
+gives total joint error at most t*ell, and proposal-output TV at most t*ell/2.
+This does not assume contraction of nonlinear state normalization or define
+compression on arbitrary mixed-state decompositions. The retained prefix/j
+labels identify the pure trajectory used by the implementation.
+
+Let psi_0=W0|0> and approximate its normalized projector with error at most
+mu. Applying the terminal acceptance effect to the joint state adds at most
+mu to the accepted-submeasure L1 error. Flooring its exact integer-overlap
+ratio to La random bits costs at most 2^-La. Hence
+
+    e = t*ell + mu + 2^-La,
+    beta = b*e,
+    TV(accepted output,target) <= beta,
+    success_probability >= (1-beta)/b,
+    expected_attempts <= b/(1-beta),             beta<1.
+
+C68 supplies ideal accepted mass 1/b and C60 supplies the normalization
+inequality. Draw the initial sector uniformly ONCE per returned sample and
+keep it fixed through rejection; redraw j and the output on EVERY attempt.
+Normalize each fixed sector's accepted law before mixing sectors. Global
+pooling could bias sectors with different finite-kernel success rates.
+
+## Implemented grids and integer sizes
+
+The verified oracle requires each real/imaginary coordinate radius <=eta/4
+and rounds its exact midpoint on the eta/2 grid. Total coordinate error is
+then <=eta/2. The stacked matrix Frobenius bound permits nu=2*b*eta.
+The initial vector is rounded on this same operator grid, with nonzero norm
+and normalized-projector error mu<=4*b*eta. Its grid differs from the
+trajectory grid; the scale cancels in the terminal overlap ratio.
+
+The planner chooses p so nu<1 and
+
+    b*[t*(2*(2+nu)*nu+4*b*eta)+4*b*eta] <= delta/2,
+    2^-L <= delta/(8*b*t) for t>0,
+    2^-La <= delta/(4*b).
+
+Thus beta<=delta. For general finite b this has
+p=O(log(b^2*(t+1)/delta)); for the fixed implemented dimensions it is
+O(log((t+1)/delta)), not C69's full-tree requested accuracy. The planner
+caps grid bits at the existing exact-kernel API limit, not backend precision.
+
+Dynamic state coordinates have magnitude <=2^p and at most p+1 magnitude
+bits. Initial-vector and rounded-operator coordinates have magnitude
+<=2^(p+1)+1 and at most p+2 bits. A raw child coordinate has magnitude
+
+    <= 2*b*(2^(p+1)+1)*2^p.
+
+Norm weights, overlap numerator/denominator and compression integer operands
+therefore have O(p+log b) bits; recompression prevents depth-growing work
+operands. This statement excludes route labels, rational-pi input data, phase
+denominators, output prefixes and random words, which have their own costs.
+
+## Resources and limits
+
+Higher oracle precision rebuilds only the CURRENT branch/initial operator.
+It never changes a past rounded matrix, replays selected vectors, or revises
+earlier finite branch kernels. Queries terminate under the convergence
+premise because the exact finite expressions contain no small-norm division.
+Precision refinement and rejection have no caps.
+
+Each attempt has two dense integer b-by-b matvecs and one vector compression
+per output bit, plus verified branch construction, norm/CDF work and terminal
+overlap arithmetic. Every rejected attempt and failed oracle refinement is
+charged. The retained cursor has initial/current/two-child vectors; transient
+rounding vectors and O(b^2) ball/integer operators are additional. Reported
+24*b^2+8*b slots are a conservative COMPLEX-coordinate working allowance,
+with two integers per Gaussian-integer slot, not bytes or native RSS; backend
+scratch, variable bit storage and Python object overhead are excluded.
+Gate/route input and output storage still depend on t. Tiny exhaustive
+diagnostics allocate law tables that production never does.
+
+No universal sufficient Arb mantissa, backend-wide primitive complexity,
+actual-memory win or runtime improvement follows from these requested-bit
+bounds. C67 and full finite work remain no-rejection comparators; C65 is
+stronger on its binary scalar family. The matched implementation comparison
+in §QD is negative. No default sampler or manuscript is changed, and no
+general quantum-simulation breakthrough or application novelty is claimed.
+
+---
+
+## C71 — Two fixed coherent reflection routes have only linear finite-time backward sector support; coherent merging and boundary rejection replace explicit exponential history enumeration in the arithmetic model
+
+*status: proven · paper: B*
+
+# C71 — A small reverse walk can replace a large history expansion
+
+## Statement and scope
+
+Use C59's supplied indexed orbit r=b*M, initially uniform |+> exponent
+controls, original ascending controlled translations, arbitrary supplied
+exact unitary within-sector W_s, coherent reflections
+
+    R_s = c_s I + d_s J_(q_s),
+    c_s=cos(theta_s/2), d_s=-i*sin(theta_s/2),
+    J_q|alpha,p> = |-alpha-q mod M,p>,
+
+and a terminating inverse QFT. The initial work state is orbit label zero,
+or M^(-1/2)*sum_alpha |alpha,0> in the sector basis. At each insertion W_s
+precedes R_s, including allowed insertions zero and t.
+
+If all k reflection labels belong to at most TWO fixed values, a sparse
+reverse sampler has O((t+1)*S*b^2+k*S*b) arithmetic work per attempt and
+exact mathematical mean b*S attempts, with S<=min(M,2^k,1+2k).
+No history enumeration or M-/2^t-sized array is required. This is a variable-k
+mathematical statement; the prototype retains the existing b<=64,t<=63,k<=8
+caps. Its finite measurements do not establish an asymptotic runtime law.
+
+The target is joint final coarse sector gamma and exponent output y, fine
+work traced; its y marginal is covered. Order/index and the gate promise
+are inputs, not discoveries. This is not generic Shor simulation or factoring.
+The proof assumes exact mathematical unitary gates/arithmetic/random draws;
+`lab/coherent_reverse.py:SparseCoherentReverse` is an audited FLOAT diagnostic,
+not an exact-real or finite-TV-certified implementation.
+
+## Finite-time support, not static grouping
+
+Let f_q(alpha)=-alpha-q mod M. Each f_q is an involution. A reduced word
+in two involutions alternates, so there are at most two reduced words of
+each positive length and one identity. Any selected subsequence of k
+chronological reflections therefore lies among at most 1+2k words.
+For a fixed final gamma, reverse insertion order gives the set recurrence
+
+    A <- A union f_q(A),       A_initial={gamma}.
+
+The same bound holds at every intermediate depth. Sector-preserving shifts,
+QFT branch combinations and W gates cannot enlarge it. With no reflection
+S=1; with one distinct q, S<=2. Collisions, fixed points, modular wrap and
+the trivial 2^k bound can only reduce these bounds. No invertibility of
+q1-q0 and no affine relabeling assumption is required.
+
+Different histories at the same label add as COMPLEX b-vectors. Future
+operations depend on the current vector/label, not how the label was reached,
+so linearity permits merging even when intermediate W gates do not commute.
+Neither history probabilities nor coefficient sums without the intervening
+work evolution are a substitute for these vectors.
+
+For q0=0,q1=1 the generated static reflection group can cover all M sectors
+by C59, while the finite-time backward cover is small. This is not a lower
+bound against other bases, dynamic groupings or input-state simplifications.
+For arbitrary q labels the safe generic bound reverts to min(M,2^k).
+For example, pairs f_0,f_(w_i) give independent subset translations when
+the w_i and modulus prevent collisions; exponentially many labels are then
+possible as the number of distinct supplied labels grows.
+
+## Reverse instrument and coherent boundary acceptance
+
+On the FULL sector/fine Hilbert space write
+
+    B_i0 = R_(i+1) W_(i+1),
+    B_i1 = R_(i+1) W_(i+1) T^(2^i),
+    K_z(a) = [B_i0+(-1)^z*phase(a)*B_i1]/2.
+
+The shared C68 construction gives both completeness relations, in particular
+sum_z K_z K_z^dag=I. A reverse child is K_z^dag v: apply R^dag, then W^dag,
+then [I+(-1)^z*conj(phase)*T^dag]/2. The physical circuit is not reordered;
+these are adjoints of its original-time factors.
+
+Draw final gamma and fine boundary j uniformly. Starting at |gamma,j>,
+sample reverse output bits using child norm ratios. For each fixed boundary
+the proposal law is normalized, and its unnormalized leaf vector is
+v=F_y^dag|gamma,j>, with joint proposal mass
+
+    q_(gamma,j,y) = ||v||^2/(M*b).
+
+Finish the initial boundary exactly once: u=W0^dag R0^dag v. R0 is a coherent
+unitary, NOT a permutation; its extra support expansion is included in S.
+Put D=||u||^2=||v||^2 and N=|sum_alpha u_(alpha,0)|^2. Cauchy-Schwarz gives
+0<=N<=S*D. For D>0 accept with a=N/(S*D); a zero vector has zero proposal
+mass and may be assigned acceptance zero in forced diagnostics. Hence
+
+    q_(gamma,j,y)*a = N/(M*b*S)
+                    = p_(gamma,j,y)/(b*S).
+
+Summing over j yields the desired joint (gamma,y) submeasure. Normalization
+of the original unitary circuit gives total success 1/(b*S), so independent
+rejection has mean b*S and the normalized accepted law is the target.
+The law proof uses the actual full QFT contraction, not an assertion that
+every adaptive collection of unital maps would give this boundary identity.
+
+Both gamma AND j must be redrawn after each rejection. The target coherent
+gamma marginal need not be uniform; fixing gamma through acceptance would
+normalize its components separately and incorrectly mix them uniformly.
+Similarly, use a single GLOBAL S bound. Dividing by an uncorrected
+gamma-dependent cover size could bias accepted sectors.
+
+## Implementation and charged resources
+
+The opt-in adapter snapshots the existing `CoherentReflectionCircuit`, uses
+its sector shifts/work gates, and calls the existing QFT branch helper. It
+retains raw complex128 sparse vectors and algebraic cover keys; no amplitude
+threshold or history deletion is used. It does not call `_histories` or build
+forward densities, orbit matrices or an exponent-output table. The zero-prefix
+continuation is diagnostic only; sampled zero/nonfinite mass raises.
+
+Count O((t+1)*S*b^2+k*S*b) scalar work per attempt, including dense W0^dag
+endpoint work, shifts/branch construction, reflection additions and terminal
+overlap. Expected arithmetic is that quantity times b*S. Dense supplied-block
+validation costs O((t+1)*b^3) at setup. Dictionary operation bounds assume
+ordinary constant-time lookup in the arithmetic model; key arithmetic,
+modular phases, rational/float precision, RNG and input description bit
+lengths are additional costs, not silently unit-cost complexity theorems.
+
+Working vectors occupy O(S*b) complex entries; current small matrices occupy
+O(b^2). Gate input storage is O((t+1)*b^2+k), plus output bits and route keys.
+The reported complex-slot allowance includes multiple simultaneous vectors
+and branch temporaries, but excludes Python object overhead/backend memory;
+it is not native RSS. A sparse cover can equal all M labels on tiny instances.
+
+The float implementation validates W unitarity only numerically and can have
+roundoff, cancellation, underflow and finite-RNG errors. It has an explicit
+proposal cap which RAISES on exhaustion, with no fallback output. The exact
+uncapped mean above is not a certified bound on that floating implementation,
+and C70's different fixed-component certificate is not imported automatically.
+
+## A small-separation approximation can beat the exact grouping story
+
+Large exact group size alone is weak evidence in the neighboring q=0,1
+benchmark. This follows at the actual input, NOT in operator norm. Define
+the cyclic coarse finite difference (D psi)_alpha=psi_(alpha+1)-psi_alpha,
+including all other registers in each block. Put L=D^dag D, the cyclic
+graph Laplacian. Sector-independent W commutes with L. Every J_q is a
+dihedral symmetry of the cycle, so J_q^dag L J_q=L; since J_q is an
+involution it commutes with L. Consequently the UNITARY coherent rotation
+R_q also satisfies R_q^dag L R_q=L. Both W and R_q preserve ||D psi||
+EXACTLY, not just up to a coefficient-sum growth factor. The translation
+by d=2^i has integer wrap phases, giving
+
+    ||D C_d psi|| <= ||D psi|| + [2*pi*ceil(d/b)/M] ||psi||
+
+for the controlled shift as well: its exponent blocks are orthogonal, with
+no additional sqrt(2) factor. The wrap from M-1 to 0 obeys the same bound.
+The initial uniform coarse state has D psi=0. Moreover
+||(J_1-J_0)psi||=||D psi||. Telescoping replacements of q=1 rotations by
+q=0 rotations, with the same angle theta and n1 replaced rotations,
+therefore bounds the final pure-state distance, and hence any joint output
+measurement TV, by
+
+    E <= n1*|sin(theta/2)|
+          * (2*pi/M) * sum_(i=0)^(t-1) ceil(2^i/b).
+
+One may safely replace n1 by the total reflection count k. Subsequent
+unitary gates and the final QFT do not amplify the hybrid state error.
+This proof requires the uniform
+coarse input and sector-independent W, not arbitrary input states.
+
+For §CM's M=2^40-1,b=3,t=15,k=8,n1=4,theta=pi/4, use pi<22/7 and
+|sin(pi/8)|<383/1000 to obtain E<1e-7. The ideal all-q=0
+replacement has at most two sectors per static group and is a simple
+approximate alternative if that error is acceptable. This does not certify
+its floating implementation or assert exact equality. The operator-norm
+difference between J_1 and J_0 is near two, not O(1/M).
+
+§CM also retains a separately frozen widely separated coprime route test.
+The above one-step displacement estimate is not small for that replacement;
+failure of this sufficient approximation bound still does not prove hardness.
+
+## Positioning
+
+Sparse amplitude storage and coherent merging are established techniques;
+see [Venev et al., qblaze, Sections 3.3 and 4.2.1](https://qblaze.org/oopsla2025.pdf).
+Main read their sparse representation, gate grouping and sequential cost
+analysis. This prototype does not implement their sorted-array algorithm or
+claim superiority over qblaze; the local contribution is the reached-set
+bound and its use with the task's coherent boundary sampler.
+
+[Van den Nest, Section 3 and Theorem 3](https://arxiv.org/pdf/0911.1624)
+provide related CT-state/sparse-operator sampling machinery. Main read the
+theorem and complete proof: its stated target is polynomial-accuracy matrix
+element/observable estimation, not automatically this complete joint-output
+sampler. That distinction is not a claim that no prior general sampler could
+cover this promise. C68 already identifies reverse-instrument prior work.
+
+This improves the explicit C59 history implementations on a restricted
+promise, not a lower bound on all classical methods. §CM owns the numerical
+law/control evidence and matched FLOAT timing comparison. Broader application
+novelty, bit-runtime certification, arbitrary routes and manuscript positioning
+remain separate questions; no general quantum-computing breakthrough is claimed.
+
+C72 subsequently applies the same support mechanism to every intermediate
+prefix, allowing the existing gate-by-gate sampler to avoid rejection too.
+Its batched-column costs and working storage differ from the vector trajectory
+here; neither method is uniformly faster merely from its rejection count.
+
+C73 subsequently extends the support promise to any fixed alphabet size,
+with an explicit input-only API beyond the original eight-insertion cap.
+The historical two-label implementation/evidence above remains scoped to
+its original cap; the legacy history API has not been globally uncapped.
+
+---
+
+## C72 — Coherently merged backward blocks supply every intermediate prefix amplitude for the existing gate-by-gate sampler, removing explicit history enumeration and rejection for two fixed reflection routes
+
+*status: proven · paper: B*
+
+# C72 — A merged prefix oracle removes the history/rejection choice
+
+## Contract and result
+
+Retain C59's supplied indexed orbit r=b*M, initial orbit-zero work state,
+initial |+> controls, original ascending controlled translations, repeated
+sector-independent unitary work blocks W_s, coherent reflections
+R_s=cos(theta_s/2)I-i*sin(theta_s/2)J_(q_s), and terminating inverse QFT.
+Each insertion applies W_s before R_s; insertion zero and t are allowed.
+The requested task is sampling the joint final sector/output, or its exponent
+output marginal, with fine work traced. Order/index and gate recognition are
+supplied promises, not discoveries or efficient physical compilation claims.
+
+For at most two distinct supplied reflection labels, every circuit-prefix
+amplitude has a sparse backward contraction with peak support bounded by
+C71. Feeding these amplitudes into C59's established gate-by-gate sampler
+eliminates BOTH explicit coherent-history enumeration and rejection.
+
+Put S=min(M,2^k,1+2k), sharpened to 1 or 2 for zero or one distinct route.
+With dense b-by-b batched arithmetic, one b-vector prefix query costs
+O((s+1)*S*b^3+k_prefix*S*b^2), where s is its visited-control count. The
+complete sample uses at most Q=d_W+2k+2t queries, so a safe arithmetic bound is
+
+    O((t+k+1)*((t+1)*S*b^3+k*S*b^2)),
+
+plus input setup. Working blocks use O(S*b^2+b^2) complex entries, besides
+the supplied gates and route/output integers. This is a variable-k
+mathematical result, not an asymptotic conclusion from the prototype's
+inherited b<=64,t<=63,k<=8 cap. Generic route labels retain the 2^k bound.
+
+`lab/merged_prefix.py:MergedCoherentPrefixes` is an opt-in complex128
+implementation. The theorem assumes exact mathematical gates/arithmetic and
+random draws; the implementation is NOT finite-TV certified. No general
+Shor/factoring algorithm, classical hardness lower bound or priority claim
+follows from this specialized contraction.
+
+## Every boundary, not only the completed output
+
+Use C59's `prefix_vector(gamma,exponent,stop,boundary,measured,output)`
+convention: sqrt(M) times the physical b-vector amplitude. The unvisited
+controls remain prepared |+>; fixed unmeasured exponent bits are NOT traced.
+Positive `measured` requires stop=t and the reflection boundary. High
+exponent bits already measured are ignored; output records the selected LOW
+inverse-QFT bits. No conditional-state normalization is performed.
+
+For a target final fine label j, start at |gamma,j> and reverse the actual
+prefix. At s=stop,...,1, include R_s^dag iff s<stop or boundary is reflection,
+then W_s^dag iff s<stop or boundary is not arithmetic. Then for i=s-1 use
+
+    T_alpha^(-2^i*x_i)/sqrt(2)                  [fixed unmeasured bit]
+    [I+conj(phi_i)*T_alpha^(-2^i)]/2            [measured bit]
+    phi_i = exp(-2*pi*i*output*2^i/2^t).
+
+The full-output phase phi_i ALREADY contains the selected bit's sign; do not
+multiply by a second (-1)^z. The shared QFT helper's zero branch with this
+full phase implements the displayed measured factor exactly.
+
+Finally include R0^dag iff stop>0 or boundary is reflection, then W0^dag iff
+stop>0 or boundary is not arithmetic. This is the adjoint of the included
+R0 W0; each endpoint gate acts once, and neither acts at stop=0 arithmetic.
+The unvisited prepared controls supply tau=2^(-(t-stop)/2).
+
+Batch all b target fine columns by starting with a b-by-b identity at gamma.
+Let V_alpha be the resulting reverse block after the included endpoint gates.
+The initial state is M^(-1/2)*sum_alpha |alpha,0>, hence duality gives
+
+    prefix_vector_j = tau * conj(sum_alpha (V_alpha)_(0,j)).
+
+Only reached alpha labels enter this sum, although the physical initial state
+is coherently supported at every sector. Reflection collisions add COMPLEX
+blocks. W, translations and the measured control factors preserve labels;
+the included reflection word gives C71's bound at EVERY intermediate step.
+Apply the bound to k_prefix included reflections, not gates beyond the queried
+boundary. Zero/cancelled blocks retain their algebraic cover keys; no
+tolerance-selected deletion is used.
+
+This is the same adjoint contraction for all target columns, not a new circuit
+propagator. The adapter reuses C71's reflection/work adjoint helpers, existing
+sector shifts, the shared QFT constructor, and C59's request validator.
+
+## Why this suffices to sample
+
+C59's block-mass induction applies unchanged. The exact initial basis draw
+has uniform sector and exponent labels with fine p=0. Monomial arithmetic
+updates the sampled label; a W gate resamples its b-label block; a reflection
+resamples its known two-cycle unless it is a singleton; each Fourier step
+resamples two output candidates. Ideal unitarity conserves each block mass,
+and the exact post-prefix amplitudes give the correct conditional law.
+
+The adapter calls the existing `CoherentReflectionCircuit.sample` loop with
+the new oracle. It does not implement a second sampling transition algorithm.
+Singleton reflections can reduce the query count, so Q above is an UPPER
+bound. The sampled classical labels are not a physical dephasing operation;
+all required coherent information stays inside the amplitude calculation.
+
+Only squared magnitudes of COMPLETED oracle outputs are consumed by sampling.
+Thus replacing the returned b-vector componentwise by its absolute value is
+law-preserving, though it violates the complex-amplitude API for other users.
+This does not permit deleting phases inside the contraction: doing so can
+change the resulting magnitudes through lost interference. §MP retains the
+original failed control that prompted this distinction.
+
+## Costs, implementation limits and positioning
+
+Batching uses b columns per reached label. Each dense work/control product
+costs O(b^3); a reflected block contribution costs O(b^2). Phase evaluation,
+support construction, dictionary merges, endpoint W0 and terminal row sums
+are charged. Setup validates dense supplied unitaries in O(d_W*b^3) work;
+gate storage is O((d_W+1)*b^2+k). The adapter owns one input snapshot.
+Its counters count b-by-b BLOCK products/contributions, not C71's vector
+operations. The working complex-slot allowance includes simultaneous blocks
+and matrix temporaries; it excludes Python overhead and is not native RSS.
+Integer keys, phases, RNG and precision require additional bit-cost analysis.
+
+Compared with C71, no rejection is paid, but more prefixes are recomputed and
+each has b columns. Neither the arithmetic bounds nor one finite timing sweep
+imply a universal runtime winner. C71's neighboring-route approximation and
+cheap exact static/input simplifications remain relevant stronger baselines.
+The new oracle is not evidence that every large exact orbit is difficult.
+
+Numerical zero/nonfinite sampling blocks still raise through the existing
+float CDF; there is no certified rare-block handling or arbitrary-accuracy
+promise. C60 supplies a possible separate uniform-oracle budget, not this
+implementation's certificate. C70's reverse-trajectory proof cannot simply
+be assigned to batched approximate prefix functions.
+
+[Bravyi, Gosset and Liu, Algorithm 2 and its proof](https://arxiv.org/pdf/2112.08499)
+already supply the sampling reduction. Main read the algorithm's full
+block-mass induction, its adaptive-measurement extension and the complete
+Lemma 1 robustness proof. That lemma uses a specified global approximate-
+state construction; the observed complex128 residuals do not establish it.
+C71 records sparse-amplitude prior art. The contribution here is the
+specialized merged oracle, its charged costs and validated implementation,
+not a new sampling principle. §MP owns finite evidence and main-audit failures.
+
+C73 subsequently extends the reached-sector bound to any fixed route alphabet
+and separates a larger structural-input API from the capped legacy history
+class. MP's historical comparison retains its original eight-insertion scope.
+
+---
+
+## C73 — A fixed alphabet of d coherent reflection routes has O(k^(d-1)) finite-time sector support, extending merged prefix sampling beyond two labels in the supplied-input arithmetic model
+
+*status: proven · paper: B*
+
+# C73 — Fixed route alphabets, not fixed insertion counts
+
+## Contract and result
+
+Retain C72's supplied indexed orbit, actual coherent initial state, original
+controlled-arithmetic order, sector-independent unitary work mixers and
+coherent reflection rotations. Let k be the number of supplied insertions
+and d the number of DISTINCT labels modulo the coarse modulus M. The labels
+may have arbitrarily large separations and noninvertible differences.
+
+For d>=1 put h=d-1 and
+
+    L_h(k) = sum_(j=0)^min(h,k) 2^j binom(h,j) binom(k,j).
+    S <= min(M, 2^k, 2 L_h(k)).
+
+For d=0 use S=1. Keep C71's sharper S<=2 for d=1 and S<=1+2k for d=2,
+also intersected with M and 2^k. These are GLOBAL bounds over all target
+sectors and every intermediate contraction, not just the final support.
+For fixed d>=2, S=O(k^(d-1)) uniformly in the label values and modulus.
+The dependence on d is not polynomial uniformly when d grows with k.
+
+Substituting this S into C71 and C72 gives polynomial arithmetic work in
+k,t,b for any fixed d. In particular, C72's unchanged gate-by-gate sampler
+requires neither history enumeration nor rejection. Its working storage is
+O(S*b^2) complex entries plus gates/integers, and its existing prefix-query
+factor remains charged. C71 uses smaller vector storage but pays its global
+boundary rejection envelope. This does not assert equal runtime constants
+or automatically certify either complex128 implementation.
+
+Order/index and recognition of the gate structure remain supplied promises.
+There is no efficient arbitrary physical compilation result, factoring
+algorithm, general simulation lower bound or novelty claim about group growth.
+
+## Normal-form proof
+
+Fix a label q0 and let Delta_j=q_j-q0 for j=1,...,h. Every word in
+f_q(alpha)=-alpha-q can be expressed as one of
+
+    alpha + sum_j n_j Delta_j,
+    -alpha-q0 + sum_j n_j Delta_j.
+
+Initially the first form has n=0. Left multiplication by f_(q_j) toggles
+the form and sends n to -n-e_j; for j=0 take e_0=0. Thus after ell
+selected reflections, sum_j |n_j|<=ell. This calculation works directly
+modulo M; it does not divide q0 by two or invert any label difference.
+
+Choose j nonzero coordinates of an integer vector n: binom(h,j) choices.
+Choose their signs: 2^j choices. The number of positive magnitude tuples
+with total at most k is binom(k,j), including one empty tuple for j=0.
+Consequently L_h(k) counts the entire integer L1 ball. The two forms give
+the displayed cover. Modular collisions or coincident forms only reduce it.
+Each selected subsequence of the supplied chronological word has length
+at most k. Reversing an arbitrary queried prefix gives the same argument
+with its INCLUDED labels and insertion count, covering every intermediate.
+
+Arithmetic/QFT branch factors and the W_s gates preserve the current sector
+label. Reflections add complex vectors or blocks at the reached labels.
+Linearity therefore permits the same merging despite noncommuting fine-work
+evolution. This is a bound on the number of reached labels, not a claim that
+the coefficients of all paths to one label can be added before applying
+their intervening work gates.
+
+## Why fixed alphabet size matters
+
+Take chronological pairs (0,3^j), j=0,...,m-1, and modulus M=3^(m+1).
+Selecting both reflections in any chosen pair, and neither in the others,
+gives distinct signed subset translations. Their magnitudes sum to less
+than M, so no modular collisions identify those 2^m choices. Here k=2m
+and d=m+1. Exponential reached support is therefore possible when the
+alphabet grows. This disproves a universal fixed-degree SUPPORT bound,
+not the existence of some other efficient representation or sampler.
+
+Even a finite cyclic translation subgroup has this finite-time distinction.
+Calling the full finite group virtually abelian alone gives no useful bound
+uniform in the input modulus and generator description. The explicit
+coefficient ball supplies that uniform bound here. It can be loose: algebraic
+relations, the PARTICULAR chronological word and stabilizers can shrink
+actual support considerably. A large bound is not a lower bound.
+
+## A tighter word-specific global envelope
+
+An inexpensive stronger envelope can exploit the supplied chronological word,
+not only its alphabet. Start E={0}, O=empty and visit labels q in REVERSE
+order. Update simultaneously from the old sets:
+
+    E <- E union {-o-q mod M : o in O},
+    O <- O union {-e-q mod M : e in E}.
+
+The exact reached set at target gamma is (gamma+E) union (-gamma+O).
+Therefore S_word=min(M,|E|+|O|) is a valid global envelope for that word
+and its reverse intermediate prefixes. The sets grow monotonically; the
+setup takes O(k*(|E|+|O|)) modular set work and O(|E|+|O|) integer entries,
+without enumerating histories. The complete word's global envelope is also
+safe for any queried circuit prefix, whose selected subsequences it contains.
+A sharper PREFIX-SPECIFIC envelope uses that prefix's included word; rebuilding
+such envelopes for many queries requires separately charged setup work.
+
+The two parts overlap precisely when 2gamma belongs to O-E modulo M.
+Writing g=gcd(2,M), there are M/g attainable doubled-sector values. If
+|E|*|O|<M/g, some gamma avoids that difference set, so the global maximum
+support is EXACTLY |E|+|O|. This is a sufficient condition, not necessary.
+It can prove tightness without scanning M sectors. A cover computed only at
+gamma=0 is not a substitute: stabilizer collisions there can lower its count
+and invalidate a global rejection envelope. Finite examples are in FA.
+
+Both merged adapters now implement this refinement through opt-in
+`support_mode="word"`; `"alphabet"` remains the default. The helper
+`word_support_plan` returns only scalar counts and releases E/O before
+sampling. It uses the smaller of the word and alphabet GLOBAL envelopes.
+Every queried prefix uses this complete-word bound, intersected with its
+existing included-alphabet bound; no query rebuilds E/O.
+
+Before an update with H old offset entries, setup rejects if 3H exceeds
+its explicit live-entry cap (at most 65,536). Old plus new sets contain at
+most 3H entries. This is deliberately conservative: it may reject before a
+collision-heavy update that would actually fit. Setup reports copied and
+reflected entries, number of updates and peak live integer-set entries;
+these are neither CPU instructions nor native bytes. Setup is charged once
+per constructed adapter, even though its scalar metadata accompanies each
+returned result. No gamma scan, Cartesian difference set or history list is
+constructed. TODO 32 owns the independent integration checks and matched
+comparison; the implementation alone does not establish a runtime advantage.
+
+## Implementation boundary
+
+`CoherentReflectionInput` in `lab/coherent_routes.py` contains the shared
+gate validation and prefix request contract, but NO history enumerator or
+sampler. Its explicit structural input allows at most 64 insertions under
+the existing t<=63 and one-insertion-per-boundary rules. The legacy
+`CoherentReflectionCircuit` subclass retains its k<=8 constructor guard;
+its history generator also rejects an accidental unbound call on structural
+input. Existing legacy defaults and sampling loops are unchanged.
+
+The two merged adapters accept structural input and snapshot its gates.
+For this new path they reject a global cover above 65,536 labels or a
+conservative declared arithmetic payload above 16 MiB BEFORE propagation.
+The reverse-vector and batched-prefix allowances are different and include
+their owned gate snapshot. These guards are sufficient resource caps, not
+native RSS measurements; Python objects, keys and the caller's retained
+input object are additional memory. Legacy alphabet-mode input caps remain
+as before; opting into word mode also enforces its setup and payload caps.
+There is no amplitude truncation or fallback sample on failure.
+
+The current finite caps are implementation limits, not the asymptotic theorem.
+Phase evaluation, input validation, integer/bit arithmetic and finite-randomness
+accuracy remain separate from the scalar arithmetic model. C60's oracle
+budget has not been instantiated as a certificate for these merged blocks.
+FA records the initial fixed-alphabet tests; WE records the opt-in word
+integration, independent support/law checks and comparison checkpoint.
+
+## Positioning
+
+The normal form is an elementary generalized-dihedral action: a quotient
+of a fixed-dimensional integer translation lattice with a two-valued
+orientation. Integer-coordinate descriptions of virtually abelian words
+are established mathematics; see [Evetts, Section 2.1, equations (5)–(8)](https://arxiv.org/pdf/1808.06371).
+Main read that construction, not merely its abstract. We do not import
+its stronger growth-series results or claim those proofs were audited.
+The uniform finite-word cover above is proved directly, while C71/C72
+already credit sparse coherent storage and the sampling reduction.
+The local extension is a supplied simulation promise beyond two labels,
+with a safe larger-k input and explicit costs, not new group theory.
+
+---
+
+## C74 — With supplied order and small b, physical cell reflection needs only a small subgroup lookup, whereas uniformly accurate classical cell-phase evaluation recovers discrete-log coordinates
+
+*status: proven · paper: B*
+
+# C74 — Separate a physical gate from its coordinate description
+
+## Contract
+
+Let a be a unit modulo N of supplied EXACT order r=bM. Inputs x are promised
+to lie in its cyclic orbit: x=a^j, 0<=j<r, and j=bm+p with 0<=p<b.
+Small b is charged as a parameter, not assumed free. The task here is
+classical evaluation of coordinate functions and an oracle reduction, NOT
+simulation of an arbitrary circuit, order discovery or a quantum-gate lower
+bound. The statements work for composite N and non-coprime b,M.
+
+## Fine coordinates and cell reflection
+
+The element a^M has exact order b. A b-entry lookup table for its powers
+therefore recovers p from x^M=(a^M)^p, without learning m. C59's cell
+reflection has the physical orbit action
+
+    R(x) = a^(2p) * x^(-1) mod N = a^(-bm+p) mod N.
+
+This gives classical evaluation using a b-entry setup, modular exponentiation,
+lookup and inversion. Charge O(b) stored modular residues and their bit sizes;
+modular arithmetic has polynomial bit cost in log N and log r. The input
+promise and exact order are NOT obtained by this construction. Plain inversion
+is generally wrong because it negates p too. This basis-action result does
+not by itself specify a full clean-ancilla quantum circuit or its action off
+the promised orbit. C75 subsequently supplies that construction and its scope.
+
+## Phase precision reveals a coordinate
+
+C58's D_q phase on x, in turns modulo one, is qm/M. Put
+
+    d=gcd(q,M),  s=M/d,  q'=q/d.
+
+For s>1 the phase lies on the 1/s grid. A CLASSICAL phase evaluator with
+circular error strictly below 1/(2s) determines q'm mod s by nearest-grid
+rounding. Inverting q' modulo s gives m mod s; combining with the previously
+recovered p gives j mod bs. If s=M this is the full discrete logarithm.
+For s=1 the phase is trivial and supplies no coarse-coordinate information.
+Exact rational phase evaluation is consequently a substantive input promise.
+
+Even a constant-accuracy oracle suffices under a UNIFORM error guarantee on
+every orbit input. Extract p and form y=x*a^(-p)=a^(bm). Set
+L=ceil(log2 s). Query D_q on y^(2^i), for i=0,...,L, obtaining rational
+turns u_i within epsilon=1/16 of 2^i q'm/s modulo one. These inputs require
+only L modular squarings after y; no discrete log is used to form them.
+
+Initialize v_L=u_L. Descending through i=L-1,...,0, the two inverse-doubling
+candidates for v_(i+1) differ by one half-turn. Choose the candidate nearest
+u_i in circular distance. If the previous error is delta<=epsilon, the
+correct lift lies within delta/2 of the true phase; its distance to u_i is
+at most epsilon+delta/2<1/4. The other lift is farther than 1/4. Thus the
+choice is unique and the error halves. Eventually
+
+    circular_error(v_0) <= epsilon/2^L < 1/(2s).
+
+Nearest-grid rounding and modular inversion recover m mod s. There are
+L+1 oracle calls. The sufficient local condition is epsilon<1/6; this proof
+does NOT justify replacing it by epsilon<1/4. Rational arithmetic needs only
+polynomially many bits for the displayed fixed-precision oracle and decoder.
+The existence of an efficient oracle is an assumption, not an output of the
+test, which generates reference phases using known coordinates.
+
+## Cheap low-order phases also have a simple classical baseline
+
+If s is small, let B=bs, which divides r. The element a^(r/B) has order B.
+A B-entry subgroup lookup on x^(r/B) recovers j mod B and hence m mod s,
+providing a direct evaluator for D_q without an r-entry orbit table.
+Charge this O(bs) setup and storage; it is not efficient when s is large.
+
+For several labels q_i of orders s_i=M/gcd(q_i,M), set S0=lcm(s_i).
+Their generated additive subgroup in Z_M has size S0. The subgroup generated
+by differences q_i-q_0 is contained in it. C59's exact static reflection
+groups therefore have size at most 2S0 (and at most M). Equality with S0 is
+NOT asserted: a single primitive label already has only one- or two-sector
+reflection groups despite its large individual phase order. For a fixed
+number of small-order labels, the static regrouping baseline can already be
+polynomial, independent of C73's finite-time support argument.
+
+## Meaning and prior art
+
+This sharpens the supplied-coordinate caveat; it is not a new discrete-log
+algorithm or an unconditional hardness result. A fast quantum implementation
+does not imply a fast CLASSICAL evaluator for its basis phases. In particular,
+the oracle above is not a black-box quantum gate with uncharged access to
+exponentially large powers, nor does a constant-size phase grid alone compute
+an unknown x-to-phase map. Special physical gates, other encodings and
+input-specific simplifications remain possible.
+
+Coordinate inversion is explicitly distinguished from forward encoding in
+[Bermejo-Vega, Lin and Van den Nest, Appendix B.1.1](https://arxiv.org/pdf/1409.4800);
+B.2 also states the classical phase-description premise. Main read these
+passages and the Theorem 6 statement, not every dependency of its simulation
+theorem. Arbitrary fine-work W and coherent rotations are not automatically
+normalizer gates.
+
+Hardness of extracting partial discrete-log information is established prior
+art; see [Long and Wigderson, Section 2, Theorems 2.1–2.2](https://www.math.ias.edu/~avi/PUBLICATIONS/MYPAPERS/LW88/LW88.pdf).
+Main read those definitions/statements, not the full noisy-average-case proof.
+Our stronger, uniformly bounded-error oracle permits the elementary direct
+proof above; no priority claim or import of their broader theorem is needed.
+The later physical-phase lead also identified a particularly direct antecedent:
+[van Dam and Seroussi, Lemma 2 and its proof](https://arxiv.org/pdf/quant-ph/0207131)
+recover discrete logs using approximately evaluated character phases and
+successive powers through a Gauss-sum oracle. Main read that proof and the
+finite-field definitions. Our explicit inverse-doubling tolerance is not a
+new general powering-reduction principle.
+PC records the exact finite tests, controls, budgets and remaining synthesis
+question at its earlier checkpoint; C75/CG record the subsequent clean-gate
+follow-up separately from these mathematical reductions.
+
+---
+
+## C75 — Supplied exact order and a small fine-coordinate table permit clean physical repeated mixers and cell-reflection rotations without recovering the coarse discrete logarithm
+
+*status: proven · paper: B*
+
+# C75 — Clean orbit gates from partial coordinates
+
+## Contract
+
+Let a be a unit modulo N with supplied exact order r=bM. The logical input
+is any coherent superposition of |a^(bm+p)> with 0<=m<M, 0<=p<b, together
+with clean scratch. The computational encoding is the modular residue x,
+NOT a supplied register containing its discrete logarithm. The theoretical
+construction cost includes arithmetic and the b-entry setup; experimental
+counters below are not an exhaustive runtime account. A unitary W on the b-dimensional fine
+space is supplied by a small-register gate implementation, extended by
+identity to unused binary encodings. Its implementation/precision cost is
+additional, not claimed polynomial in log b for an arbitrary dense W.
+
+There is a clean reversible construction for repeated W and for cell
+reflection R:|a^(bm+p)> -> |a^(-bm+p)>. There is also a one-extra-qubit
+construction for exp(-i theta R/2). The arithmetic overhead is polynomial
+in b, log N and log r, using ordinary reversible simulation of classical
+arithmetic. This is an existence/construction statement. The accompanying
+tiny gate compiler enumerates truth tables and is NOT that polynomial
+arithmetic implementation. It validates phases, encoding and cleanup.
+
+## Total reversible coordinate transformation
+
+Use n=ceil(log2 N) work bits and k=ceil(log2 b) coordinate bits. Define a
+total classical function p0(x): for x<N, look up x^M modulo N in the
+b-entry table {a^(Mp):0<=p<b}; return its unique p when present, and zero
+otherwise. Set p0(x)=0 for padded x>=N. C74 proves p0(a^(bm+p))=p.
+
+The following are total permutations on the binary registers:
+
+    C: (x,z) -> (x, z XOR p0(x)).
+    F: (x,z) -> (x*a^(-z) mod N,z), if x<N and z<b;
+                 (x,z), otherwise.
+    V: x -> x^(-1) mod N, if x<N and gcd(x,N)=1;
+            x, otherwise.
+
+F is a permutation because its multiplier is a unit for each admitted z;
+its inverse uses a^z. V is an involution and fixes nonunits/padding. Both
+these functions and their inverses have polynomial arithmetic cost with the
+stated parameter charges. This holds for composite N and gcd(b,M)>1.
+
+Compute-copy-uncompute implements a classical function as a clean XOR
+oracle. A bijection f with an efficiently computable inverse can then be
+made in-place: compute f(x) in a spare register, XOR f^-1 of that register
+out of the original, and swap. Thus C,F,V have phase-free reversible
+implementations with polynomial additional scratch, all erased at their
+boundaries. This is the standard reversible-computation construction, not
+a new synthesis principle; see [Bennett's introduction and main theorem](https://www.cs.princeton.edu/courses/archive/fall04/cos576/papers/bennett73.html).
+Main read those passages and the three-stage construction, not the paper's
+physical/thermodynamic discussion. No no-cloning step is used: the copied
+functions are computational-basis data, and the resulting unitary acts
+linearly on superpositions.
+
+Let U=FC, with C applied first. On the clean promised code,
+
+    U |a^(bm+p),0> = |a^(bm),p>.
+
+Applying W to the second register and then U^-1 therefore gives
+
+    U^-1 (I tensor W) U |a^(bm+p),0>
+      = sum_p' W[p',p] |a^(bm+p'),0>.
+
+The final C recomputes p0 from the NEW output x, not from a stale saved
+input. This is why cleanup survives a coherent change of p. The same
+conjugation with V on the first register gives R with clean scratch.
+The unitary is globally defined by the displayed extensions; its desired
+logical action and clean-coordinate guarantee are only asserted on the
+promised orbit, not every padded or nonunit input.
+
+## Exponentiating the involution without leaving a measurement record
+
+In stripped coordinates, add a clean flag and define
+A=H_flag controlled-V H_flag. For a V-eigenvector with eigenvalue
+lambda=+1 or -1, A sends flag zero to flag (1-lambda)/2. Consequently
+
+    A^-1 Rz_flag(theta) A |0,lambda>
+       = exp(-i theta lambda/2) |0,lambda>.
+
+Conjugating this gadget by U implements exp(-i theta R/2) and clears both
+the coordinate register and flag. Two controlled uses of V are needed.
+Crucially, the controlled V must have the correct relative phase: using
+controlled (-V) reverses the rotation, even though its computational-basis
+transition probabilities look identical. Approximate synthesis of W or Rz
+has its own accuracy cost; the identities here are exact unitary algebra,
+not a certification of floating-point simulation or a particular gate set.
+
+## Classical baseline and significance
+
+These gates do not supply C74's high-order classical phase evaluator. They
+remove the need for a full discrete logarithm from the repeated-mixer and
+q=0 reflection construction only. With q=0 at every insertion, C59's static
+sector sets {alpha,-alpha} have size at most two, hence coherent work
+dimension at most 2b. Sampling can use this baseline; a finite diagnostic
+may enumerate its few groups, but a large-instance sampler need not do so.
+
+R commutes with repeated W because they act on different stripped factors.
+It does NOT generally commute with the intervening controlled arithmetic:
+already R U_arith^b = U_arith^(-b) R. Separated rotations cannot simply be
+combined across those controls. The static baseline preserves that chronology.
+
+This is a constructive closure of an input-model gap, not a new discrete-log
+algorithm, evidence of classical hardness or a simulation-speed breakthrough.
+CG records independent gate/output checks and their resource limits.
+
+---
+
+## C76 — An additive residue phase uses only logarithmically many physical rotations but has exactly full coarse-sector coupling over a prime field; this is a representation boundary, not sampling hardness
+
+*status: proven · paper: B*
+
+# C76 — Cheap physical phases need not have few sector routes
+
+## Contract and physical gate
+
+Let N be prime, a a supplied primitive root, and r=N-1=bM with supplied
+b. Work basis label j denotes the actual modular residue a^j. The coarse
+b-dimensional sectors are spanned by
+
+    |alpha,p> = M^(-1/2) sum_m exp(-2*pi*i*alpha*m/M) |a^(bm+p)>.
+
+For supplied integer k not divisible by N define
+
+    G_k |x> = exp(2*pi*i*k*x/N) |x>.
+
+If x is held on n=ceil(log2 N) binary qubits, then
+
+    G_k = exp(i*pi*k*(2^n-1)/N)
+          product_(ell=0)^(n-1) Rz_ell(2*pi*k*2^ell/N).
+
+This exact identity uses n single-qubit rotations and a global phase. It
+also defines the padded binary labels; no orbit enumeration or discrete
+logarithm is needed to emit the phase. Arbitrary-rotation synthesis and
+accuracy costs are additional. G_k is an ADDITIVE physical character, not
+the multiplicative cell character D_q of C58/C74. It satisfies
+G_k G_l=G_(k+l) and G_-k=G_k^-1.
+
+## Exactly full sector coupling
+
+Direct projection, without reordering any arithmetic gates, gives
+
+    <beta,p'|G_k|alpha,p> = delta_(p',p) H_(p,k)(beta-alpha),
+    H_(p,k)(delta) = (1/M) sum_m
+        exp(2*pi*i*k*a^(bm+p)/N) exp(2*pi*i*delta*m/M).
+
+EVERY H_(p,k)(delta) is nonzero. This is an exact algebraic statement,
+not a count using a floating cutoff. To prove it, put F=Q(zeta_M).
+Since gcd(N,M)=1, the cyclotomic compositum has relative degree
+
+    [Q(zeta_N,zeta_M):Q(zeta_M)] = phi(NM)/phi(M) = N-1.
+
+Thus the minimal polynomial of zeta_N over F is still
+Phi_N(X)=1+X+...+X^(N-1). A zero H would give P(zeta_N)=0 for
+
+    P(X) = sum_m zeta_M^(delta*m) X^(k*a^(bm+p) mod N).
+
+Its exponents are distinct, nonzero residues; P is nonzero, has degree
+at most N-1 and has constant coefficient zero. Divisibility by Phi_N would
+force P to be a scalar multiple of Phi_N, contradicting that constant
+coefficient. This applies for every p and delta, including M=1.
+
+The proof uses standard cyclotomic irreducibility and degree identities;
+see [Evans, Theorem 6.2 and Lemma 6.2](https://maths.dur.ac.uk/users/daniel.evans/GaloisTheory/Notes/cyclotomic-extensions.html).
+Main read the theorem, proof and coprime compositum argument. The source's
+first displayed inclusion proof repeats an exponent typographically; the
+used identities are zeta_N=zeta_(NM)^M, zeta_M=zeta_(NM)^N and Bezout's
+identity. No novelty claim is made for these field-theoretic facts or their
+elementary application here.
+
+Each inter-sector b-by-b block is therefore diagonal with no zero diagonal
+entries. Any nonzero input confined to ONE initial coarse sector has a
+nonzero output component in every sector, even with an arbitrary coherent
+fine vector: different p components are orthogonal and cannot cancel.
+No nontrivial grouping made from whole coarse sectors is invariant under
+this gate. The prime assumption matters: at N=9,a=2,b=2,r=6,k=1, each p
+kernel has just one nonzero frequency, as GS's exact control confirms.
+
+## A quantitative bound, with a narrower state contract
+
+For full-field multiplicative characters chi_s(a^j)=exp(2*pi*i*s*j/r),
+let G(chi_s,c)=sum_(x!=0) chi_s(x) exp(2*pi*i*c*x/N). The subgroup
+indicator gives the independent decomposition
+
+    H_(p,k)(delta) = (1/r) sum_(t=0)^(b-1)
+                              G(chi_(delta+tM), k*a^p).
+
+Nontrivial Gauss sums have magnitude sqrt(N); the trivial-character sum
+is -1. These are established finite-field facts, not results of the pilot;
+see [van Dam and Seroussi, finite-field definitions and facts](https://arxiv.org/pdf/quant-ph/0207131).
+Consequently |H|<=sqrt(N)/M. For a normalized input supported in one
+coarse sector, each final-sector probability is at most N/M^2. Keeping
+only L sectors loses squared norm at least
+
+    max(0, 1 - L*N/M^2).
+
+Thus constant retained mass can require Omega(M/b) sectors for fixed b.
+This quantitative restriction is on this sector-sparse STATE representation,
+not on the complexity of sampling a selected observable. It does NOT apply
+unchanged to inputs already coherent across several sectors. In particular,
+the physical initial |1> is coherent across all M sectors. Such amplitudes
+can interfere; a G_k followed by G_-k cancels exactly. There is no claim
+that every execution must store M independent state entries.
+
+## Why simple magnitudes do not give a sampler
+
+For b=1 the squared kernel magnitudes are especially simple: 1/r^2 at
+delta=0 and N/r^2 elsewhere. Their phases remain necessary for coherent
+composition. Replacing coefficients by positive magnitudes fails even the
+inverse-gate identity, and replacing the initially coherent sectors by a
+mixture is not licensed by C58 when G_k coherently mixes them.
+
+The elementary multiplication covariance also does not remove the issue:
+with M_c:|x>->|c*x mod N>, M_c G_k M_c^-1=G_(k*c^-1 mod N).
+Across exponent-CONTROLLED multiplication the transformed k becomes
+control-dependent. This is an exact rewrite, not an already supplied scalar
+conditional sampler.
+
+C53's scalar exponent-phase transfer requires the actual reachable work
+state for each low-control history to be an eigenvector of the inserted
+diagonal gate. Earlier fine-work mixers can violate that premise. GS tests
+this premise directly as well as the complete physical output law; those
+finite discrepancies are NOT a theorem that every circuit in the family is
+observable or hard. Terminal work gates remain invisible after tracing work.
+
+This identifies a physically simple boundary of the current few-route
+methods. Dense sector coupling, even proved exactly, establishes neither
+general classical hardness nor a new efficient simulation algorithm.
+
+---
+
+## C77 — Finite orbit displacement can certify exactly uniform low inverse-QFT output bits despite dense sector mixing; two Euclidean floor sums check the sufficient separation condition without history enumeration
+
+*status: proven · paper: B*
+
+# C77 — Uniform output prefixes from separated work supports
+
+## State and observable contract
+
+Let Q=2^t and suppose the state immediately before the terminating exponent
+inverse QFT, or before an additional COMMON terminal work unitary, is
+
+    |Psi> = Q^(-1/2) sum_(e=0)^(Q-1) |e>|phi_e>,   ||phi_e||=1.
+
+Work is traced out. Assume a supplied orbit of length r and the support promise
+
+    supp(phi_e) subset {e+delta mod r : -R<=delta<=R}.
+
+C57's co-moving argument establishes this for the original ascending controlled
+translations from orbit label zero and finite-displacement work mixers: add
+their displacement radii, including any initial mixer. ANY orbit-diagonal
+unitaries at any insertion preserve that support. This includes the additive
+physical phases in C76, without restricting them to a small number of sectors.
+A common terminal work unitary can be stripped before evaluating the promise
+because it preserves all work inner products; controlled terminal gates cannot
+be stripped by this argument. Orbit distance is not physical-qubit distance.
+
+For a requested LOW-output prefix z=y mod H, put H=2^d and L=2^(t-d), so
+e=l+Lh with 0<=l<L, 0<=h<H. Fourier orthogonality after summing the unobserved
+output values enforces equal low INPUT l. Explicitly,
+
+    p_d(z) = (1/(L H^2)) sum_l
+                    ||sum_h exp(-2*pi*i*z*h/H) phi_(l+Lh)||^2.
+
+Equivalently this measures the H-dimensional high-input density matrix
+
+    rho_H[h,h'] = (1/Q) sum_l <phi_(l+Lh')|phi_(l+Lh)>
+
+in the Fourier basis. This is the repository's swapped/standard QFT bit
+convention; LOW output bits correspond here to HIGH input histories.
+
+## Sufficient exact separation criterion
+
+If
+
+    dist_r(Lq,0) > 2R   for every integer 1<=q<H,
+
+the two inclusive support intervals of phi_(l+Lh) and phi_(l+Lh') are
+disjoint whenever h!=h'. Their inner product vanishes, rho_H=I/H, and
+
+    p_d(z)=1/H   for every z.
+
+The inequality is STRICT. Equality can share an endpoint and does not
+guarantee orthogonality. The d=0 result is vacuous. If the criterion fails,
+the result is INCONCLUSIVE, not a nonuniformity theorem; amplitudes can have
+smaller support or orthogonal overlaps. The same circuit may satisfy a
+sharper radius after stripping a common terminal work gate.
+
+For example, at r=60,L=16,H=4,R=6, conditional high-history basis labels
+relative to l can be (54,16,32,54). Their displacements from the four centers
+are (-6,0,0,+6) modulo r. They obey the support promise, but histories 0 and
+3 coincide. Their prefix law is (6,4,2,4)/16, not uniform. This separate
+support-promise witness establishes why merely replacing > by >= is invalid;
+it is not the actual additive-phase circuit in UP.
+
+## Checking the criterion without enumerating H
+
+Put D=2R and a=L mod r. Count
+
+    C = #{1<=q<H : dist_r(aq,0)<=D}.
+
+If H=1 then C=0. If H>1 and D>=floor(r/2), C=H-1. Otherwise the residue
+intervals [0,D] and [r-D,r-1] are disjoint. Writing
+
+    F(n,m,a,b)=sum_(q=0)^(n-1) floor((aq+b)/m),
+
+their indicators and subtraction of q=0 give
+
+    C=H-1-F(H,r,a,r-D-1)+F(H,r,a,D).
+
+Two Euclidean floor sums therefore decide C=0 in O(log r) integer iterations
+with constant many live integer variables, not an H-entry array. This is
+standard lattice-point arithmetic, not a new floor-sum algorithm. Main read
+the [AtCoder Library documentation](https://atcoder.github.io/ac-library/production/document_en/math.html)
+and its [CC0 Euclidean implementation](https://github.com/atcoder/ac-library/blob/master/atcoder/internal_math.hpp).
+The helper uses exact Python integers rather than the source's modulo-2^64
+overflow semantics. Integer bit arithmetic is an additional cost.
+
+`lab.periodic.uniform_prefix_certificate` implements this count for supplied
+positive int64-range r, t<=63, 0<=d<=t and nonnegative int64-range R. It
+rejects booleans/floats and invalid dimensions, reports iterations and exact
+counts, and does not inspect a circuit or discover its order. Its rational
+uniform-prefix result is conditional on the SUPPORT PROMISE; passing a
+floating simulation does not certify that promise on an arbitrary input.
+
+## What is and is not simplified
+
+Given a valid certificate, the prefix alone can be sampled with d fair bits
+and no phase evaluation or work-state propagation. This does NOT justify
+discarding it when sampling the remaining output. The conditional remaining
+state and law can depend on its value. UP's fixed circuit has uniform first
+two bits but nontrivial prefix/suffix correlations and a nonuniform full law.
+Neither an efficient full sampler nor a speedup over the strongest complete-
+task baseline has been implemented or proved here.
+
+In particular, when p_d(z)=1/H, the normalized remaining low-input/work state
+before its L-point inverse QFT is
+
+    eta_z = (LH)^(-1/2) sum_(l,h) exp(-2*pi*i*z*h/H)
+                          exp(-2*pi*i*z*l/Q) |l>|phi_(l+Lh)>.
+
+Without uniformity this expression has norm squared H*p_d(z), so that norm
+must be divided out. The second phase is the ordinary Fourier feedback,
+not an optional correlation correction. FB checks this conditioning formula
+and the stronger high-input-history-dephased comparator on the same fixture.
+Even with feedback retained, discarding the h!=h' terms need not be exact.
+
+The ingredients are standard Fourier orthogonality, which-work-history
+distinguishability, finite propagation and integer counting. For the established
+terminating-QFT measurement/feedback framework, see
+[Griffiths and Niu, equations (1)–(11) and the measurement argument](https://arxiv.org/pdf/quant-ph/9511007).
+The support criterion is this project's elementary specialization; no novelty
+claim is made for the underlying measurement or number-theoretic principles.
+This result coexists with C76's dense sector coupling because it concerns a
+particular reduced observable, not a sparse representation of the full state.
+
+---
+
+## C78 — Work-first conditioning gives sparse-row Fourier sampling under charged column access; a single late repeated mixer and pointwise diagonal phase yield few progression components instead of a Q/r-sized row
+
+*status: proven · paper: B*
+
+# C78 — A different latent basis can avoid the dense sector representation
+
+## Work-first conditioning and its input contract
+
+Suppose the pre-QFT state is
+
+    |Psi> = Q^(-1/2) sum_e |e>|phi_e>,  Q=2^t,  ||phi_e||=1.
+
+Let a_(e,j)=<j|phi_e> in a supplied indexed work basis. A common terminal
+work unitary can be stripped under the final work trace. Measuring j in this
+basis commutes with the exponent inverse QFT. Its marginal and conditional
+exponent amplitudes are
+
+    Z_j = sum_e |a_(e,j)|^2,    p(j)=Z_j/Q,
+    |psi_j> = Z_j^(-1/2) sum_e a_(e,j)|e>,  for Z_j>0.
+
+One can draw j WITHOUT enumerating its marginal: draw an auxiliary e uniformly,
+evaluate its COHERENT work column phi_e, then sample its basis probabilities.
+Summing this classical joint distribution over e gives exactly Z_j/Q. Discard
+that auxiliary e and reconstruct the entire conditional exponent row. Keeping
+only its sampled history would incorrectly dephase the exponent register.
+Zero-weight work labels are never conditioned on; uniform j is not implied.
+
+This requires efficient column sampling/evaluation AND a way to list and
+evaluate the compatible row amplitudes. Small support alone does not supply
+those oracles. Order, indexed coordinates, gate descriptions, phase evaluation,
+integer arithmetic and numerical precision are charged inputs/costs.
+
+## Finite displacement supplies short rows only in a specified regime
+
+Under C57/C77's support promise a_(e,j)=0 unless j-e lies in [-R,R] mod r,
+enumerate distinct residues e=(j-delta) mod r and their lifts into [0,Q).
+If 2R+1<=r, the candidate row length satisfies
+
+    S_j <= min(Q, (2R+1)*ceil(Q/r)).
+
+A wider cone can use min(r,2R+1) distinct residues, but usually loses the small
+bound. Zeros can be retained; numerical thresholding is unnecessary. For
+bounded Q/r and small R, this removes orbit/exponent-sized rows, conditional
+on the column oracle. It does NOT remove the Q/r cost at high precision.
+
+For a sparse row and H=2^d,L=Q/H, Fourier orthogonality gives
+
+    P_d(z|j) = 1/(H Z_j) sum_(c mod L)
+       |sum_(e=c mod L) a_(e,j) exp(-2*pi*i*z*floor(e/L)/H)|^2.
+
+The common phase exp(-2*pi*i*z*c/Q) cancels within a group. Only occupied
+groups need be stored. Evaluating two child masses per bit gives the full
+Fourier sample in O(t*S_j) scalar/phase terms and expected hash-grouping
+operations, or O(t*S_j*log(S_j+1)) with comparison sorting. Column evaluation
+cost is additional: with a T_col full-column oracle, constructing the row
+costs at most S_j*T_col, plus the initial column draw. Storage is O(S_j)
+plus the oracle's workspace. These are arithmetic, not bit-complexity bounds.
+
+Uniform-output rejection is a simpler alternative: accept y uniform in [0,Q)
+with |sum_e a_(e,j) exp(-2*pi*i*y*e/Q)|^2/(S_j Z_j). Cauchy-Schwarz bounds
+acceptance by one and Parseval gives mean S_j attempts. The grouped-prefix
+method avoids this rejection penalty when individual labels are available.
+
+## Few late controls turn long rows into few arithmetic progressions
+
+A stronger, narrower structural case avoids individual row enumeration even
+when Q/r is large. Let r=b*M, L=2^s, H=2^(t-s). Initial work is W_0|0>
+within the first b-cell. The ONLY intermediate non-translation work gates are
+a repeated b-by-b unitary W_1 after the first s controls, followed there by
+an arbitrary pointwise computable orbit-diagonal unitary D_g. There are no
+other intervening mixers/phases, apart from common terminal work unitaries
+that can be removed under the trace. Thus, in original ascending order,
+
+    phi_(l+Lh) = U^(Lh) D_g W_1^rep U^l W_0|0>.
+
+The late controls have been combined only because no work gate separates them.
+This is not a commutation claim for a general multi-defect schedule.
+
+Fix work j and h. Put v=(j-Lh) mod r, c=b*floor(v/b), and p=v mod b.
+Initial labels u=0..b-1 and intermediate source labels c+q, q=0..b-1,
+contribute only when l=(c+q-u) mod r. For each distinct such residue rho define
+
+    gamma_(h,rho) = g(v) sum_(u,q : c+q-u = rho mod r)
+                                      W_1[p,q] W_0[u,0].
+
+Its exponent labels form the nonwrapping progression
+
+    e=Lh+rho+n*r,   0<=n<n_(rho),
+    n_(rho)=max(0,1+floor((L-1-rho)/r)).
+
+Coefficients are CONSTANT on each progression. Merge equal residues first;
+distinct components then have disjoint input supports, including across h.
+The number of nonempty components obeys m<=H*min(r,2b-1), because q-u has
+only 2b-1 possible values. Their norm is the positive sum
+Z_j=sum_c n_c |gamma_c|^2. Enumerating h and the b^2 local pairs costs
+O(H*b^2) scalar terms plus phase/modular costs, not O(Q/r) or O(r).
+
+Column sampling is also explicit in this schedule. For a chosen (l,h), shift
+the b initial amplitudes by l, apply W_1 coherently inside the reached cells,
+multiply each reached amplitude by g, and translate by Lh. At most b^2 terms
+are accumulated before equal labels are merged. This gives the normalized
+column without an orbit array; it is not sampling an incoherent mixer path.
+
+For output y, write the unnormalized Fourier component as
+
+    B_c(y)=gamma_c exp(-2*pi*i*y*start_c/Q)
+                     G_(n_c)(-y*r/Q),
+    G_n(x)=sum_(k=0)^(n-1) exp(2*pi*i*x*k).
+
+Choose a component with probability n_c|gamma_c|^2/Z_j and Fourier-sample its
+progression using C55's existing interval/progression identity. The proposal
+law is q(y)=sum_c |B_c(y)|^2/(Q Z_j). Accept with
+
+    A(y)=|sum_c B_c(y)|^2 / (m sum_c |B_c(y)|^2).
+
+Cauchy-Schwarz gives A<=1. Disjoint INPUT supports and Parseval give
+sum_y |sum_c B_c(y)|^2 = sum_y sum_c |B_c(y)|^2 = Q Z_j.
+Consequently the acceptance probability is EXACTLY 1/m, and the accepted
+law is the desired conditional Fourier distribution. A component with zero
+weight is not proposed. Zero-weight work rows do not occur in the latent draw.
+Keep the sampled work label j FIXED during retries. Redrawing j after each
+rejected output would instead weight its marginal by the j-dependent 1/m.
+At a zero proposal denominator the proposal itself is zero; define acceptance
+there as zero instead of evaluating 0/0. Do not drop small positive proposals
+by an arbitrary floating threshold.
+
+In exact scalar arithmetic, expected sampling work is O(m*(t+m)) after the
+O(H*b^2) row construction, and O(m+b^2) scalar storage suffices, excluding
+supplied oracle/gate storage and integer/precision costs. An uncapped loop
+terminates almost surely. A finite attempt cap must raise, not return a biased
+fallback; discarding exhausted calls can reweight work labels. The bound is
+useful when the number H of late control histories is small, NOT merely when
+the number of late control BITS is polynomial. For the UP schedule, H=2 and
+b=3 give at most ten progression components after stripping the final W.
+
+## Status, evidence and positioning
+
+C80 subsequently refines the component proposal with optional square-root
+mass weights, sharing this same conditional loop. The mean-m calculation
+above remains the default mass-weight scheme; C80 owns the new envelope,
+extra arithmetic and its representation-dependent limitations.
+
+The identities and bounds above are algebraic proofs. WF owns the bounded
+sparse-row pilot and literal progression formula tests, including genuine
+multi-term progressions and retained verifier failures. The row pilot uses a
+CHARGED dense boundary oracle. The later diagnostic constructs literal sparse
+columns and progression rows with pointwise modular phases, but enumerates
+tiny laws for verification. The subsequent opt-in `lab/work_first.py`
+implementation now returns samples using the existing progression primitive,
+with work fixed through retries, structural preflights and explicit exhaustion.
+WF records independent tiny joint-law/FFT/sequential checks, complete actual
+first-attempt RNG traversal, scripted retries and bounded seeded draws.
+TODO 38 is complete at this implementation/diagnostic scope. The same-output
+comparison tests enumerated tiny float laws at stated TV thresholds; it does
+NOT certify the finite-RNG sampler at those thresholds. Mathematical correctness
+must not be confused with a certified float implementation or demonstrated
+timing advantage. Existing default samplers are unchanged.
+
+This uses standard deferred measurement, Fourier orthogonality and coherent-
+component rejection (compare C54/C55). Related primary context is
+[Van den Nest, Definition 1 and Section 4.3/Theorem 3](https://arxiv.org/pdf/0911.1624):
+sample/query access and sparse operators have distinct requirements. Its
+overlap-estimation theorem is not being cited as this full-sampling theorem.
+[Schwarz and Van den Nest, Theorem 1](https://arxiv.org/pdf/1310.6749) instead
+assumes a sparse OUTPUT distribution; the conditional rows/components here
+need not produce sparse Fourier outputs. These comparisons are not a complete
+priority search, and no novelty claim is made for this specialization.
+
+Arbitrary D_g may be dense in C76's coarse-sector basis while the small late-
+history progression description remains valid. This supplies a restricted
+escape from that representation, not a contradiction of C76 or a lower bound
+against another simulator. Known order/index and small H are substantive
+promises. No generic Shor/factoring advance or general multi-defect sampler
+follows.
+
+---
+
+## C79 — One earlier diagonal phase admits complementary residue-cycle and remaining-history progression covers; choose the smaller construction factor, recomputing phase-weighted cancellations
+
+*status: proven · paper: B*
+
+# C79 — A binary prefix induces a cycle along an orbit progression
+
+## Schedule and coefficient formula
+
+Use C78's supplied known/indexed r=b*M, Q=2^t, L=2^s, H=Q/L,
+small unitaries W0/W1 and pointwise late phase g. Insert one additional
+pointwise unit-modulus phase f after exactly v ascending low controls,
+0<=v<=s. No other intervening mixers are allowed. Put A=2^v and e=l+Lh.
+The initial label u reaches (u+(l mod A)) mod r at that insertion, so the
+extra factor on that local path is
+
+    f((u+(l mod A)) mod r).
+
+Fix final work j and high history h. Write w=(j-Lh) mod r,
+c=b*floor(w/b), p=w mod b. As in C78, local pairs u,q contribute to
+rho=(c+q-u) mod r and l=rho+n*r, with
+
+    N_rho=max(0,1+floor((L-1-rho)/r)).
+
+Do not discard a geometric candidate rho merely because its OLD summed
+coefficient vanished. Its new coefficient at progression step n is
+
+    gamma_(h,rho)(n) = g(w) sum_(u,q : c+q-u = rho mod r)
+        W1[p,q] W0[u,0] f((u+((rho+n*r) mod A)) mod r).
+
+The phase can differ between pairs that share rho; it must be applied
+BEFORE merging those amplitudes.
+
+## Cycle and refined progressions
+
+The residue walk (rho+n*r) mod A has period
+
+    P=A/gcd(r,A)=2^(v-min(v,nu_2(r))).
+
+Indeed, its first return requires A to divide n*r, whose least positive
+solution is A/gcd(r,A). This is an exact statement about the residue walk;
+the phase or summed coefficients can have a smaller period.
+
+For each z=0,...,min(P,N_rho)-1, the coefficient is constant for n=z+P*k.
+That class has the nonwrapping exponent progression
+
+    start=Lh+rho+r*z, stride=r*P=lcm(r,A),
+    count=1+floor((N_rho-1-z)/P), coefficient=gamma_(h,rho)(z).
+
+The classes have disjoint input supports: they partition each old geometric
+progression, different rho have different residues modulo r, and different
+h occupy disjoint length-L intervals. Consequently their norm is the positive
+sum of count*|coefficient|^2, and C78's component Fourier identity applies.
+The number of nonempty components obeys
+
+    m <= sum_h sum_(geometric candidate rho for h) min(P,N_rho)
+      <= H min(L, P*min(r,2*b-1)).
+
+Construction uses at most O(H*P*b^2) local terms/pointwise queries, with
+truncation to actual nonempty classes; integer and phase precision costs are
+additional. Column evaluation remains local because the extra diagonal phase
+does not expand support. A bound large in P does not prove another method hard.
+
+## Two constant-coefficient cases and a cancellation trap
+
+At v=0 there is an even stronger implementation reduction: replace W0 by
+diag(f(0),...,f(b-1))*W0 and omit the separate early phase. This is still a
+b-by-b unitary and gives the SAME literal columns in C78's original schedule.
+Thus the existing C78 sampler already handles this endpoint exactly in its
+arithmetic model; an omitted-phase approximation is not the strongest
+classical baseline there. This observation requires only b pointwise queries,
+not an orbit table. It does not absorb a general interior insertion.
+
+If A divides r, then P=1 and the original GEOMETRIC component bound survives.
+This covers v<=nu_2(r), not merely the initial endpoint. It does not imply
+that the full output law is unchanged by the added phase.
+
+At the other endpoint v=s, l<A=L, so
+
+    (u+(l mod A)) mod r = (u+l) mod r = (c+q) mod r.
+
+The coefficient is again constant on each old progression, even if the
+generic P bound is large. The phase is now evaluated at the source of the
+late mixer. This is a separate local identity, not tightness of the cycle bound.
+
+Neither case bounds the NEW nonzero count by P times the OLD nonzero count.
+For example take r=6,b=2,L=4,H=1, W0=W1=Hadamard, j=1, v=1 and f(x)=(-1)^x.
+The rho=0 old coefficient is (1-1)/2=0; its new coefficient is (1+1)/2=1.
+The only other nonempty candidate rho=1 remains nonzero. Thus the count grows
+from one to two although P=1. The valid bound uses all geometric candidates,
+including prior cancellations, and recomputes the phase-weighted sum.
+
+## Complementary remaining-history cover
+
+Write l=a+A*k, with 0<=a<A and 0<=k<K=L/A. Fix (j,h,k), retaining w,c,p
+above, and merge local pairs by rho'=(c+q-A*k-u) mod r. The path constraint
+becomes a=rho'+n*r. Its early phase argument is now constant:
+
+    (u+a) mod r = (c+q-A*k) mod r.
+
+Consequently the same row has another disjoint progression representation:
+
+    start=Lh+A*k+rho', stride=r,
+    count=max(0,1+floor((A-1-rho')/r)),
+    gamma=g(w) sum_(u,q: c+q-A*k-u = rho' mod r)
+                    W1[p,q] W0[u,0] f((c+q-A*k) mod r).
+
+Different k occupy disjoint length-A intervals, different h occupy disjoint
+length-L intervals, and canonical rho' label disjoint residues inside each
+interval. This also covers A<r and aliases when r=b. Recompute cancellations
+within every (h,k,rho'); the earlier warning still applies.
+
+Let R=min(r,2*b-1). At most min(A,R) candidates per (h,k) are nonempty, so
+
+    m_dual <= H*K*min(A,R) = H*min(L,K*R).
+
+This construction uses O(H*K*b^2) local terms/pointwise queries. Choosing
+between the two covers BEFORE building either gives the sufficient bounds
+
+    construction: O(H*b^2*min(P,K)),
+    components:   m <= H*min(L,R*min(P,K)).
+
+For either cover, the independent finite-support cap
+m<=H*R*ceil(L/r) also holds: every component contains a distinct exponent in
+one of the R original geometric residue classes. It is an upper bound, not
+a reason to scan those input labels in production. The K=1 endpoint is now
+part of this general construction; one insertion before it has K=2.
+
+The largest min(P,K) over insertion positions is
+2^floor(max(0,s-nu_2(r))/2). This follows by balancing v-nu_2(r) against
+s-v when v>=nu_2(r); earlier positions have P=1. This square-root-type
+improvement over the largest one-sided period factor can STILL be exponential
+in exponent width. It neither proves a general polynomial simulator nor
+compares all alternative contractions. Both covers use elementary modular
+regrouping; no novel meet-in-the-middle algorithm is claimed.
+
+## Complete output and the remaining two-history coherence
+
+For H=2 let chi_l=U^(l-a) D_early U^a W0|0>, a=l mod A, and define
+
+    F_y=sum_(l<L) exp(-2*pi*i*y*l/Q) chi_l,
+    B=D_late W1_rep, z=y mod 2.
+
+The literal branch is U^(Lh) B chi_l, hence the normalized full output and
+the candidate dephased only in h are
+
+    p(y)=||(I+(-1)^z U^L) B F_y||^2 / Q^2,
+    q(y)=2*||F_y||^2 / Q^2.
+
+Equivalently q draws z uniformly and Fourier-samples the length-L columns
+chi_l exp(-2*pi*i*z*l/Q), then interleaves y=z+2w. Dropping this fractional
+feedback is a different approximation. Both laws normalize by unitarity and
+Fourier orthogonality. Where F_y is nonzero,
+
+    p(y)/q(y)=1+(-1)^z Re<BF_y,U^L BF_y>/||F_y||^2 in [0,2].
+
+At F_y=0 both masses vanish; the ratio is undefined, not a zero-probability
+fallback. The bound is C59's coherent-component Cauchy-Schwarz principle.
+With exact q samples AND inexpensive exact ratio queries it would give
+mean-two-proposal rejection. Neither input capability follows from computing
+a tiny complete law; this is not an implemented or costed new sampler.
+
+In the ER fixture, the initial work offsets are [0,2] and the sole late
+block mixer moves labels by at most two. Diagonal phases preserve support,
+so a common translation centers the support cone at radius three. The two
+high histories are separated by dist_60(128,0)=8>6. C77 therefore proves a
+uniform first output bit for every earlier insertion. This is independent
+of the above envelope and does NOT make the remaining output bits independent.
+
+## Opt-in sampler and charged construction
+
+`lab/work_first.py:EarlierPhaseProgressions` now implements this restricted
+schedule, reusing C78's column/work draw, progression proposal and coherent
+rejection loop. It adds `early_split`, `early_phase` and `cover` to the
+original supplied-input contract. Rows retain three-tuples
+(start,count,coefficient) and carry a separate `stride` field; that stride
+feeds BOTH the geometric Fourier sum and the progression sampler. C78
+defaults remain unchanged. The earlier phase is pointwise and deterministic;
+queried values, not the entire unspecified callable, are checked for finite
+unit modulus. Noncallables and structural caps reject before matrix copies.
+
+Auto mode chooses a conservative construction bound BEFORE building either
+cover. Let P_eff=1 at v=s and otherwise P, and put
+F=min(P_eff,ceil(L/r)). The implemented cycle loop visits at most
+H*b^2*(1+F) local pairs: grouping plus phase-weighted recomputation. The dual
+loop visits at most H*K*b^2, caching the early phase once per local q.
+Auto chooses the smaller pair-visit bound, with cycle winning ties. This is
+not an optimization of measured time, realized nonzero count or total expected
+sampling work. Either component bound also uses the finite-support cap above.
+Explicit cycle/dual modes preserve the same requested caps, not an exemption.
+
+One draw adds b^2 column-local terms. Cycle early-phase queries per row are
+bounded by H*b^2*F; dual early-phase queries by H*K*b. Each row also uses H
+late-phase queries; the column adds at most b early and b^2 late queries.
+Reported total phase queries INCLUDE these early/late subcounts. Setup charges
+two b-by-b unitarity checks; oracle storage, order/index discovery and bit
+precision are additional. No orbit, exponent, output or expanded-progression
+arrays are allocated by the helper. Numeric-payload reserves are not process
+RSS measurements or bounds on arbitrary caller-owned oracle internals.
+
+Disjoint input supports preserve C78's normalized component proposal and
+mean-m exact-arithmetic rejection proof for either stride. Work is drawn once
+and held fixed through retries. A finite cap raises on exhaustion; filtering
+failed calls can bias work. ER owns independent complete-joint tests, actual
+weighted tiny RNG traversal, cancellation/alias/zero-row controls and selected
+long-progression references. This validates a FLOAT prototype, not a numerical
+certificate. The long comparison tests selected conditional laws, not the
+full large joint law or every alternative simulator. A full-r sequential
+baseline remains width-linear for the fixed-r family; a cycle/dual component
+gap alone does not establish superiority over it.
+
+C80 adds an opt-in root-mass proposal to the shared loop. It refines expected
+rejection cost for a fixed cover, not the progression construction itself;
+the default proposal and the cover-selection rule above are unchanged.
+
+## Scope and evidence
+
+This is elementary modular arithmetic and the literal C78 gate construction,
+not a novelty claim. An independent lower-cost proof audit confirmed the
+period/refinement and endpoint identities; main caught the canceled-component
+caveat, which the auditor independently verified. Subsequent independent
+audits checked the dual cover and the two-history output identity. ER owns
+bounded coefficient and complete-output tests and their limitations. These
+proofs do not certify float arithmetic, infer order/index access, establish
+a generic complete-output difference, sampling hardness or a factoring
+advance. `LateWorkProgressions` still implements only C78's original schedule;
+the new specialization must be explicitly requested. C80 and completed TODO39
+own the weighted-proposal follow-up; TODO40 tests a multiple-diagonal-phase
+extension. Numerical certification and wider host-dependent
+timings remain separate.
+
+---
+
+## C80 — Square-root component weights minimize the universal coherent-mixture rejection envelope for a fixed disjoint decomposition; the resulting cost is representation-dependent
+
+*status: proven · paper: B*
+
+# C80 — Component masses refine the rejection envelope
+
+## Fixed disjoint decomposition
+
+Use a nonzero C78/C79 conditional row with disjoint input components c.
+Let omega_c=count_c*|gamma_c|^2, Z=sum omega_c, and let F_c(y) denote
+its UNNORMALIZED Fourier contribution. Omit exact-zero components only.
+Disjoint input supports and Parseval give
+
+    sum_y |F_c(y)|^2 = Q*omega_c,
+    sum_y |sum_c F_c(y)|^2 = Q*Z.
+
+Thus the target p(y)=|sum F_c(y)|^2/(Q*Z) and each normalized component
+law p_c(y)=|F_c(y)|^2/(Q*omega_c) are probability distributions. This is
+an application of C59's weighted Cauchy-Schwarz argument, not a new rejection
+principle, a sparse-output assumption or a general circuit theorem.
+
+Put R=sum sqrt(omega_c), choose component c with sqrt(omega_c)/R, and use
+the existing progression kernel to sample p_c. Writing
+
+    S(y)=sum_c |F_c(y)|^2/sqrt(omega_c),
+    q(y)=S(y)/(Q*R),
+
+weighted Cauchy-Schwarz gives |sum F_c|^2<=R*S. Accept with probability
+|sum F_c(y)|^2/(R*S(y)). At S=0 the target is zero too; acceptance is zero,
+not a division or a positive-probability fallback. The accepted submeasure
+is p(y)*Z/R^2, so the uncapped mathematical mean attempts is
+
+    E=R^2/Z=(sum_c sqrt(lambda_c))^2,  lambda_c=omega_c/Z,
+    1<=E<=m.
+
+Equal masses give E=m, recovering the old envelope. For unequal masses the
+upper inequality is strict. Work j is drawn ONCE with its original marginal;
+geometric retries normalize each conditional law separately, even if E_j
+varies. Redrawing work after rejection biases it by 1/E_j. Discarding failed
+finite-cap calls also biases work; with capT its success weight is
+1-(1-1/E_j)^T. No common all-work envelope is required for uncapped fixed-work
+retries. This distinction is independent of floating-point implementation.
+
+## What is optimal, and what is not
+
+For arbitrary positive component selection weights w_c summing to one, the
+same universal Cauchy-Schwarz argument gives
+
+    p(y) <= E(w)*sum_c w_c*p_c(y),
+    E(w)=sum_c lambda_c/w_c.
+
+Cauchy-Schwarz on sqrt(lambda_c/w_c) and sqrt(w_c) shows
+E(w)>=(sum sqrt(lambda_c))^2, with equality at w_c proportional to
+sqrt(lambda_c). This minimizes THIS sufficient envelope among component
+mixtures for the FIXED supplied decomposition. It does not minimize the true
+pointwise maximum p/q, all rejection schemes, or all ways of decomposing the
+same state. Computing a smaller pointwise maximum over a complete tiny law
+does not provide a free oracle at large width.
+
+Splitting a nonzero progression into two disjoint nonzero pieces preserves
+the target state but replaces sqrt(omega) by sqrt(omega_1)+sqrt(omega_2),
+strictly increasing R. Proposal cost is therefore representation-dependent;
+the cycle/dual choice and coherent merging still matter after reweighting.
+
+Even optimal expected attempts need not mean optimal runtime. Suppose a
+chosen component c has fixed mean proposal cost k_c, all attempts additionally
+cost C, and d_c=C+k_c>0. Independent retries give expected cost
+
+    E(w)*sum_c w_c*d_c >= (sum_c sqrt(lambda_c*d_c))^2,
+
+with equality at w_c proportional to sqrt(lambda_c/d_c). This optimizes the
+conservative envelope-cost model, not measured runtime or a tighter
+state-specific acceptance scheme. Setup is separate. For the implemented
+common-stride row, the progression kernel's marginal-query count per attempt
+is independent of c; other native/precision costs need not be.
+
+## Opt-in float implementation and evidence
+
+`LateWorkProgressions` and `EarlierPhaseProgressions` accept
+`proposal="root_mass"` in sample and forced_joint. The default `"mass"`
+retains the old component probabilities and RNG ordering. Preparation uses
+raw omega, avoiding an unnecessary normalization by Z before square roots.
+It is performed once per sampled row and shares the existing conditional
+loop; forced scalar queries charge their own preparation. Returned
+expected_attempts is the mathematical envelope diagnostic, not observed
+attempts or a timing prediction.
+
+The new counters separate m component-weight preparation terms, m square
+roots for root_mass only, and m weighted divisions per root-mode Fourier
+ratio. Existing local/phase/progression/Fourier/marginal counters remain
+separate. Extra lists fit the existing conservative numeric-payload reserve;
+there is no orbit/Q-sized sampler array. Order/index access, oracle internals,
+gate setup and integer/precision costs remain charged assumptions.
+
+Nonfinite values and detected nonzero underflow raise; exact zeros are not
+replaced with floors. These checks and the existing roundoff allowance on
+acceptance are NOT a finite-RNG or floating-point accuracy certificate. The
+private isolated-row hook is a test of the conditional loop, not evidence
+that an arbitrary synthetic row is a full physical joint circuit. CW owns
+the independent tiny and physical experiments, controls and audit history.
+
+---
+
+## C81 — Nested binary phases admit a hybrid progression cover and exact finite-truncated construction counts; largest-gap bounds alone can misrank cuts
+
+*status: proven · paper: B*
+
+# C81 — Several diagonal insertions share one nested-prefix period
+
+## Schedule and coherent coefficients
+
+Retain C78/C79's supplied known/indexed r=b*M, Q=2^t, L=2^s and H=Q/L.
+The initial work state is W0|0> in the first b-cell. Ascending controlled
+translations are interrupted by d pointwise unit-modulus phases f_i after
+v_i low controls, with 0<=v_i<=s. There are NO intervening mixers. At split s
+apply the repeated b-by-b mixer W1 and pointwise late phase g, then the high
+translations. This is a restricted perturbed order-finding schedule, not
+ideal Shor output or arbitrary full-scratch reversible arithmetic.
+
+Fix final work j and high history h. Write j_h=(j-Lh) mod r,
+c=b*floor(j_h/b), p=j_h mod b. For a local initial label u and mixer source
+x=c+q, compatibility means u+l=x mod r, where 0<=l<L. The literal phase
+argument at v_i is (u+(l mod 2^v_i)) mod r.
+
+Choose any cut w in [0,s], A=2^w, K=L/A, and l=a+A*k. For v_i>=w,
+
+    u+(l mod 2^v_i)
+      = x - 2^v_i*floor(k/2^(v_i-w)) mod r.
+
+This is fixed within (h,k,q), including a phase exactly AT the cut. For v_i<w
+the argument is (u+(a mod 2^v_i)) mod r. Let V be the largest STRICT-left
+insertion position. All left residues along a=rho+n*r have common period
+
+    P=2^V/gcd(r,2^V),
+
+or P=1 if no phase is strictly left. This is the lcm of nested powers of two,
+not their product. A particular phase product can have a smaller period.
+
+For each (h,k), group all local pairs by rho=(c+q-A*k-u) mod r. Put
+N_rho=max(0,1+floor((A-1-rho)/r)). For each z<min(P,N_rho), the component is
+
+    start = Lh + Ak + rho + r*z,
+    stride = r*P,
+    count = 1+floor((N_rho-1-z)/P).
+
+Its constant coefficient is
+
+    gamma = g(j_h) sum_(u,q in this rho group)
+                W1[p,q] W0[u,0] product_i f_i(xi_i),
+
+where xi_i is the fixed right argument above if v_i>=w, and
+u+((rho+r*z) mod 2^v_i) mod r otherwise. Multiply phases BEFORE summing pairs.
+All geometric candidates must be recomputed: old canceled coefficients can
+revive. For example, C79's r6,b2,L4 Hadamard row j1 has old rho0 coefficient
+zero; parity at v1 followed by i^(j mod2) at v2 gives gamma=(1+i)/2.
+
+The n mod P classes partition each compatible residue progression. Different
+rho are disjoint modulo r within a slice, different k occupy disjoint A-sized
+slices, and different h occupy disjoint L-sized intervals. Thus every compatible
+exponent appears once, with its literal coherent amplitude. The norm is the
+positive sum of count*|gamma|^2, and C78's geometric Fourier identity applies.
+
+## Structural bounds and charged work
+
+Let R=min(r,2*b-1) and F=min(P,ceil(A/r)). For each (h,k) there are at most R
+geometric residue candidates, at most F classes per candidate, and at most A
+occupied exponents. Therefore
+
+    m <= H*K*min(A,R*F).
+
+Independently m<=H*R*ceil(L/r), since each component contains a distinct
+exponent from one of the R original compatible residue classes per h. These
+are upper bounds on the new geometric cover, not multiples of the OLD nonzero
+component count and not lower bounds on another representation.
+
+A direct implementation visits H*K*b^2 pairs to group residues and at most
+H*K*b^2*F coefficient pairs. Evaluating all d phases afresh per coefficient
+pair costs at most H+d*(coefficient-pair visits) pointwise phase calls,
+including the H late phases. Phase products, grouping, Fourier queries,
+oracle internals and integer/precision costs remain distinct. Caching or
+special phase functions may improve this conservative construction.
+
+The column remains local: diagonal phases do not enlarge the initial b-label
+support before the sole late mixer. Thus C78's work-first sampling argument
+and C80's optional weighted envelope apply when these row/column and progression
+oracles are implemented and charged. The opt-in implementation below supplies
+these oracles; the mathematical transfer does not certify floating arithmetic.
+
+## Largest-gap identity for the untruncated factor
+
+For the sufficient untruncated factor K*P, define alpha=nu_2(r) and
+B=max(0,s-alpha). Sort the distinct effective positions
+max(0,v_i-alpha), including endpoints 0 and B. Let Delta be the largest
+adjacent gap, or zero when B=0. Then
+
+    min_(0<=w<=s) K*P = 2^(B-Delta).
+
+If s<=alpha, all left periods are one and w=s achieves this value. Otherwise,
+cuts w<alpha cannot improve on w=alpha. For w>=alpha, the exponent of K*P is
+
+    B - (w-alpha) + max(0,V_left-alpha).
+
+Between insertion positions it decreases as the cut advances. At a phase or
+boundary cut it equals B minus the effective gap ending there; a phase AT the
+cut remains on the right. Taking the largest gap proves the identity. Initial
+phases, final phases and duplicate positions are all covered by this argument.
+
+There are at most d+1 gaps over length B, so Delta>=ceil(B/(d+1)). This gives
+the sufficient worst-case upper factor 2^floor(d*B/(d+1)); the d=1 case
+recovers C79. The bound can still be exponential in exponent width. It is not
+a phase-oracle complexity bound, a finite-precision certificate, or a generic
+polynomial simulation result.
+
+## Why this is not an actual cost optimizer
+
+Finite truncation can reverse the preferred cut. For r60,b3,L128,H2,j0 and
+insertions (3,6), cut6 has K*P=4 while cut7 has K*P=16. Yet BOTH covers have
+only singleton progressions: their strides exceed their A-sized slices.
+Each visits the same 42 compatible coefficient pairs. Grouping takes 36 pair
+visits at cut6 versus 18 at cut7, hence 78 versus 60 combined local pair
+visits in the stated direct implementation. Their naive phase-product work
+is equal. This is an exact finite counting counterexample, not a timing result.
+
+Thus minimizing the largest-gap factor need not minimize actual construction
+work. A cost-aware selector must include truncation, grouping and charged
+phase queries; actual nonzero counts and cancellation structure may matter
+further. C80's rejection envelope is also representation-dependent. A full-r
+sequential method remains a relevant fixed-r width-linear baseline.
+
+## Exact finite-truncated counts without constructing the rows
+
+The preceding counterexample rules out optimizing K*P alone, but the finite
+correction itself has a simple closed form. For a fixed work row define
+
+    n_L(rho) = max(0,1+floor((L-1-rho)/r)),
+    T = sum_(h,u,q) n_L((c_h+q-u) mod r),
+    S = sum_h sum_(distinct rho=(c_h+q-u) mod r) n_L(rho).
+
+Here c_h=b*floor(((j-Lh) mod r)/b). T counts compatible local-pair incidences;
+S counts compatible exponent labels before coefficient cancellation. Because
+the difference set q-u is a contiguous interval, each h has exactly
+R=min(r,2*b-1) distinct residue candidates, including the alias r=b.
+
+For the direct construction above, the exact coefficient-pair visit count C
+and geometric-component count G BEFORE cancellation are
+
+    C(w) = min(H*K*b^2*P, T),
+    G(w) = min(H*K*R*P, S).
+
+Proof: for canonical rho the slice length N_rho is either floor(A/r) or
+ceil(A/r). If the integer P<=floor(A/r), every class contributes P and all
+local pairs contribute P times. If P>=ceil(A/r), no class is clipped and the
+disjoint k-slices recover all full-L incidences or labels, giving T or S.
+There is no remaining integer case. At an integral A/r the two cases agree.
+The clipped count is at most the full-L count and conversely in the unclipped
+case, proving the two minima. This argument does not assume nonzero matrix
+entries or coefficients: the specified naive constructor visits every pair.
+
+Thus T and S can be computed once with O(H*b^2) local integer terms and
+O(R) streamed residue storage, without enumerating K or P and without a
+phase-oracle call. Candidate cuts then have exact grouping cost H*K*b^2,
+phase-call count H+d*C(w), and phase-product count (d+1)*C(w)+G(w) for the
+uncached evaluation specified here. Integer bit cost and the d-dependent
+preparation/sorting of insertion positions remain charged separately.
+
+Between insertion positions P is fixed and K decreases. Therefore the phase
+positions together with s suffice to minimize any fixed nonnegative weighted
+sum of these named construction counts. A weight choice is a cost model,
+not a measured machine-time optimum. This exact geometric selector does NOT
+predict nonzero components after cancellation, norm accumulation work, phase
+caching, specialized endpoint implementations, Fourier queries, rejection
+attempts or working precision. A smaller actual count in a different
+implementation does not contradict these identities.
+
+## Opt-in sampler and structural preflight
+
+`lab/work_first.py:NestedPhaseProgressions` implements the restricted schedule
+with a sequence of (position, pointwise phase) pairs. It subclasses C78's
+helper and inherits `sample`, `_sample_row` and `forced_joint` unchanged,
+including C80's `mass` default and optional `root_mass` proposal. The local
+column applies every phase to each initial label before the sole mixer;
+it uses b^2 local matrix terms, at most d*b early queries and b^2 late queries.
+No orbit, exponent or output table is constructed by this helper.
+
+For `cut="auto"`, the named selection objective is grouping plus coefficient
+pair visits, with fixed nonnegative weights (1,1). The helper computes T/S
+once per work row and minimizes the exact objective over insertion positions
+and s; ties choose the larger cut. An explicit integer cut bypasses T/S.
+The chosen stride belongs to the ROW and feeds both the geometric Fourier
+sum and the actual progression draw. Different work labels can choose different
+cuts; there is no sampler-wide stride assumption.
+
+Here is a uniform pre-construction bound, needed before copying the unitaries.
+Put B0=H*b^2, U=ceil(L/r), and, for each candidate cut w,
+
+    B_w = B0*K_w + min(B0*K_w*P_w, B0*U),
+    B = min_w B_w.
+
+Because T<=B0*U, the selected actual grouping-plus-coefficient count is at
+most B. Its grouping count is at least B0, so its coefficient count and
+geometric-component count are at most B-B0. Thus the auto component reserve
+may use min(B-B0, H*R*U, Q). This bounds the SELECTED row without constructing
+all alternatives or reserving their sum. Explicit cuts use the corresponding
+earlier bounds. The selector itself additionally charges H*b^2 pair terms,
+H*R distinct-residue terms and at most d+1 candidate comparisons; metadata
+preparation, sorting and integer bit costs remain distinct.
+
+Optional `cache_right=True` retains only b right-phase products for the
+current (h,k) slice. If d_L and d_R count strict-left and right phases and
+D=H*K*b, then its row phase calls and products are respectively
+
+    H + d_L*C + d_R*D,
+    (d_L+1)*C + d_R*D + G.
+
+These count this implementation's operations, including geometric candidates
+that cancel. The live right cache is O(b), while total cache entries built
+are D. Caching can INCREASE calls when finite truncation gives C<D. The
+selector still optimizes grouping-plus-coefficient visits, not these cached
+counts, cancellation, rejection cost, oracle internals or native time.
+
+The implementation restricts b<=64, d<=64 and width<=63 and applies caller
+caps before matrix copies. Its conservative numeric-payload reserve covers
+copied matrices/check temporaries, local pair groups, schedule/cut metadata,
+row conversion and proposal/Fourier lists; Python object headers and arbitrary
+oracle storage are excluded. It stores only the current row through retries.
+`last_counters` retains the most recent operation's work even on exhaustion;
+comparisons must accumulate this before the next operation. Finite attempt
+caps raise and must not be hidden by restarting calls until one succeeds.
+
+These are algebraic construction/resource bounds and a float prototype.
+Preserving exact-zero-only coefficient omission does not make a near-canceled
+conditional law numerically stable, nor certify the finite-RNG output law.
+NS owns the independently reproduced tiny laws, actual weighted RNG paths,
+and bounded matched returned-sample comparison. The selected construction
+improves named sampling-work categories in that fixture, including against
+cached alternative cuts; this does not make its construction-only objective
+a general optimizer of total expected sampling work. TODO42 owns that question.
+
+## Evidence and limits
+
+Independent read-only audits confirmed the cut arguments, coefficient formula,
+bounds, largest-gap identity, exact cost counterexample and clipped-count
+selector. NC owns the integer, coherent-amplitude, edge and selected long-row
+evidence, including a retained near-zero conditional-normalization failure. The proof
+comes from the literal local-path construction, not extrapolation from finite
+rows. The opt-in nested helper extends the implemented schedules without
+changing the C78/C79 defaults. Known order/index access, efficient pointwise phases, the small
+local mixer and few high histories are substantive promises. No priority,
+generic sampling hardness, factoring advance or runtime superiority is claimed.
+
+---
+
+## C82 — A lazy binary Walsh frame replaces per-term CNOT relabeling by two frame XORs through atomic Toffoli gates; it preserves support and defers physical-key conversion
+
+*status: proven · paper: A*
+
+# C82 — CNOT updates can leave the coefficient dictionary in place
+
+This is an application of known Clifford-coordinate methods to the existing
+atomic diagonal PPS engine, with explicit output and filtering semantics.
+It is not a new Clifford simulation principle, a reduction in exact Walsh
+support, or a generic quantum-state memory bound. CF owns executed evidence
+and allocation measurements; the statement below is an algebraic proof.
+
+## Invariant and gate rules
+
+Over GF(2), represent the physical diagonal operator as
+
+    O = sum_k D[k] Z^(F k),    G = F^-1.
+
+Keep F as n row bitmasks R[q] and G as n COLUMN bitmasks C[q]. Initially
+F=G=I and the input dictionary contains the specified Z-mask with weight one.
+The physical bit z_q is parity(R[q] & k).
+
+Reverse propagation through CNOT(c,t) sends z to Lz with
+L=I+e_c e_t^T. Distinct control and target imply L^2=I, hence
+
+    F <- L F:  R[c] ^= R[t],
+    G <- G L:  C[t] ^= C[c].
+
+These two XORs leave D unchanged. An n-bit XOR has word cost proportional to
+ceil(n/word_bits); it is not constant cost as n grows. No CNOT run is stored
+in the frame, so its size is independent of CNOT depth.
+
+For X(q), multiply D[k] by (-1)^parity(R[q]&k). For an atomic Toffoli(a,b,t),
+retain D[k] unchanged when parity(R[t]&k)=0. Otherwise send D[k]/2 with signs
+(+,+,+,-) to
+
+    k, k^C[a], k^C[b], k^C[a]^C[b].
+
+Indeed F(k+G e_a)=Fk+e_a, and likewise for b. Combining colliding coefficients
+in the existing branch order therefore gives exactly the original atomic
+rule in different coordinates. Induction proves validity through arbitrary
+interleavings of valid X/CNOT/Toffoli gates; no commutation or resetting at a
+nonlinear gate is required. The frame remains linear; X signs stay in D.
+
+## Filters, contraction and outputs
+
+A bijective key map preserves coefficient thresholds. The first processed
+gate must still apply the existing threshold (a lone CNOT with delta>1 must
+drop the initial coefficient). Later CNOTs can skip an identical coefficient
+filter after it has already been applied. Physical weight truncation is
+popcount(Fk)<=max_weight and must be applied after EVERY gate: two canceling
+CNOTs can still lose a term at the intermediate weight cutoff.
+
+C45's last-use contraction of an independent initial |+> qubit q keeps only
+parity(R[q]&k)=0. Multiple contracted qubits impose each separate constraint,
+not the parity of their combined mask. The existing sequence is preserved:
+gate, coefficient and weight filters, retained count, cap check, then trace.
+Thus an exceeded cap still prevents a shrinking contraction from hiding the
+pre-contraction support. Unused traced qubits contract at the initial boundary.
+
+`propagate_perm(..., affine_frame=True)` implements these rules in the SAME
+gate loop as the default engine. Its `final_terms` is a read-only `FramedTerms`
+Mapping of physical integer keys. Iteration/items compute Fk one at a time;
+lookup computes Gz; values and the |0>/contracted-|+> expectation use D
+directly. No later propagation mutates the returned frame or dictionary.
+The default option still returns its ordinary concrete dictionary.
+
+This Mapping is not a mutable dict: integer-mask lookups are its contract and
+items() streams rather than providing a set-like ItemsView. Explicit
+`dict(result.final_terms)` retains the framed dictionary while allocating a
+physical-key dictionary. Generic consumers such as equality may also allocate;
+no claim is made that every Mapping operation streams. Physical iteration and
+lookup charge frame conversion work, even when no second dictionary is built.
+
+## Resource scope and numerical limits
+
+The frame stores O(n^2) bits plus two Python lists and integer objects, on top
+of the S-entry coefficient dictionary. An ordinary CNOT after initial filtering
+does not traverse or rebuild that dictionary. A weight filter or a scheduled
+trace still scans it and can allocate a filtered dictionary. X and Toffoli
+use the existing accumulation/filter buffers. Circuit storage and per-gate
+`n_terms` diagnostics remain proportional to circuit length.
+
+Since F is bijective, support cardinality at every step, including C17's
+retained peak and C45's pre-contraction count, is unchanged. Less cumulative
+CNOT allocation does not imply lower whole-run peak: nonlinear buffers, a
+small support relative to the frame, or final materialization can determine
+that peak. Packed in-place relabeling and batched materialization are relevant
+inexpensive alternatives; their conversion, lookup and nonlinear costs must
+be counted for the same requested output. CF records the bounded comparison.
+
+The exact identities concern real coefficients. The implementation inherits
+the original float threshold: abs(v)>=delta for delta>0, otherwise
+abs(v)>1e-13. This is not an exact-arithmetic or numerical-error certificate.
+The branch/insertion order is retained under the key bijection. Tests cover
+finite fixtures and specified boundary behavior, not all inputs or host
+reliability. The opt-in path validates in-range masks and distinct in-range
+gate operands; it need not reproduce legacy handling of invalid circuits.
+
+## Prior art boundary
+
+Binary linear Clifford transformations and their inverse structure are
+explicit in Dehaene and De Moor, Section III, equation (3),
+[PRA 68, 042318](https://harvest.aps.org/v2/journals/articles/10.1103/PhysRevA.68.042318/fulltext).
+Clifford recompilation through non-Clifford gates is explicit in Qassim,
+Wallman and Emerson, Section 2, equations (4)–(11),
+[arXiv:1902.02359v2](https://arxiv.org/html/1902.02359v2).
+
+Current [IBM Pauli propagation documentation](https://qiskit.qotlabs.org/docs/api/pauli-prop/propagation)
+provides Clifford deferral for its supported instruction set; it does not by
+itself establish atomic Toffoli support. Chase and Labib's
+[Clifft, Section 2](https://arxiv.org/html/2604.27058v1) separates Clifford
+coordinates from an active state vector and also targets active dimension.
+These are direct reasons not to claim novelty in dynamic Clifford coordinates
+or generic active-subspace compression. The present implementation retains
+atomic diagonal closure and the repository's weight, trace and output
+contracts; no comparative performance superiority over those tools is proved.
+
+---
+
+## C83 — Affine-support quadratic signs admit exact local Toffoli closure tests and streamed signed Walsh queries with polynomial working memory and exponential cut replay
+
+*status: proven · paper: A*
+
+# C83 — Exact quadratic-cell certificates for a selected coefficient
+
+This is a specialization of known stabilizer/quadratic-form simulation, not
+a new simulation principle or a generic memory breakthrough. The proof below
+defines a restricted circuit certificate. QC owns finite validation, resource
+measurements, failed verifier provenance and the stronger-baseline loss.
+
+## One-cell closure theorem
+
+Work over GF(2), reducing Boolean squares by x_i^2=x_i. Represent a signed
+cell by its injective embedding x=o+Vy and a quadratic Boolean phase q(y).
+Its value is (-1)^q(y) on that support and zero elsewhere. Different cells
+need not share a tangent space. Initially a supplied k-coordinate output cut
+partitions the whole space into 2^k cells of dimension d=n-k; the observable
+Z^z has q(y)=z dot (o+Vy).
+
+Reverse conjugation by a self-inverse classical gate transports the signed
+function by that gate. X flips the relevant offset bit. CNOT(a,t) XORs
+embedding row a into row t and offset bit a into bit t; q is unchanged.
+These are physical STATE-coordinate updates, unlike C82's Walsh-key updates.
+
+For Toffoli(a,b;t), restrict its controls to
+
+    A(y)=a0+alpha dot y,  B(y)=b0+beta dot y.
+
+If rank(alpha,beta)<=1, AB is affine. Transport the embedding by
+
+    V_t <- V_t + a0 beta + b0 alpha + (alpha & beta),
+    o_t <- o_t + a0 b0,
+
+leaving q unchanged. Here & denotes componentwise product of masks. This
+case includes dependent nonzero control forms, not just constant controls.
+
+If rank(alpha,beta)=2, the cell image is affine if and only if e_t is in
+im(V). If it is absent, projection along e_t identifies the image with the
+graph of the genuinely quadratic function AB over the old cell, so it is
+non-affine. If it is present, solve Vv=e_t; the cell is invariant and its
+new parameter map is y -> y+v AB. The distinct target and controls imply
+alpha dot v=beta dot v=0. Write the quadratic derivative
+
+    q(y+v)+q(y) = delta + L dot y.
+
+The transported phase is quadratic if and only if
+
+    L in span(alpha,beta).
+
+Indeed, its possible cubic term is the product of the three homogeneous
+linear forms alpha, beta and L. After an invertible change of Boolean
+coordinates this has degree three exactly when their rank is three. When
+L=mu alpha+nu beta, Boolean idempotence gives the exact update
+
+    q <- q + gamma AB,
+    gamma = delta + mu a0 + nu b0 + mu + nu.
+
+These tests are necessary and sufficient for this individual signed cell
+to remain an affine-support quadratic sign under the gate. They are not
+necessary for a sum of cells, a later circuit endpoint, or a selected scalar
+query to have some other easy representation. An escaped cell is rejected;
+no cubic term is discarded and no successful partial sum is returned.
+
+In full-space physical quadratic coordinates, the familiar specialization is
+q(Tx)=q(x)+x_a x_b D_tq(x): closure holds exactly when the quadratic neighbors
+of t lie in {a,b}. The x_a x_b coefficient toggles by l_t+Q_ta+Q_tb.
+Thus q=x_t x_u with u distinct from a,b,t is a cubic failure witness, whereas
+q=x_t(x_a+x_b) is unchanged. Non-Clifford count does not decide closure.
+
+## Cell geometry and signed output
+
+For an initial parallel partition Cx=c with K=ker(C), let r be the rank of
+the two controls restricted to K. If Ce_t=0, every cell is invariant (the
+action inside need not be affine). If Ce_t!=0, r=0 gives translated parallel
+cells, r=1 gives affine images with different tangent spaces across cells,
+and r=2 gives curved images. Hence a common parallel partition survives
+exactly when Ce_t=0 or r=0. The rank-one distinction follows because the
+constant control value, or constant difference between equal restricted
+controls, takes both values across the full partition. The induced shear
+then changes the tangent space since e_t is outside K.
+
+For example, cutting b and t before Toffoli(a,b;t) gives tangent span(e_a)
+on b=0 and span(e_a+e_t) on b=1. Cutting t alone gives a curved graph t=ab.
+Keeping individual embeddings permits the former case in the implementation.
+Setwise invariance alone does not ensure quadratic phase closure.
+
+For physical query s, the cell's raw signed contribution is
+
+    (-1)^(s dot o) sum_y (-1)^(q(y)+(V^T s) dot y).
+
+Evaluate this integer Gauss sum by eliminating each active quadratic pair:
+sum_ab (-1)^(ab+aA+bB)=2(-1)^(AB). The remaining affine sum is zero if any
+linear coefficient survives, otherwise a signed power of two. In particular,
+q=xy+x+y has normalized sum -1/2; polar rank alone does not give its sign.
+The desired full-space Walsh coefficient is the SIGNED sum of all cell
+contributions divided by 2^n. Disjoint supports and injectivity follow
+inductively from reversible transport. Taking magnitudes or probabilities
+before summing cells generally destroys cancellations.
+
+## Implemented contract and resource bound
+
+`lab/quadratic_cells.py:quadratic_cell_walsh(circuit, observable, query,
+cut_qubits=...)` implements this certificate for valid X/CNOT/Toffoli circuits.
+It returns one exact `Fraction`, branch count, dimension and operation counts.
+Cut coordinates refer to the OUTPUT side of the reverse walk. Each branch
+replays the full circuit and computes its own Gauss sum; no truth vector,
+expanded polynomial, order oracle or free circuit recognition is supplied.
+The qubit/branch caps are checked before cell construction.
+
+Only one cell is retained at a time, with embedding, polar matrix and binary
+solver/Gauss workspace occupying O(n^2) bits plus Python objects. Exact sums
+need O(n)-bit integers. Input circuit storage is additional. For G gates and
+k cut bits, a conservative arithmetic bound is O(2^k (G+1) n^3) binary work;
+CNOT itself updates one n-bit row and an offset bit per branch. The memory
+bound does not remove the exponential replay factor. In particular, k=n is
+ordinary exhaustive basis enumeration. Dense binary elimination and bitmask
+operations are not constant time as n grows.
+
+The coefficient also equals the real amplitude
+<s|H^n U^dagger Z^observable U H^n|0>. This API does not return a full Walsh
+list, samples, a general biased-product expectation, or trace/truncation
+semantics. It does not find a cut or guarantee acceptance of easy endpoints.
+Producing an explicit exponential output still costs its length.
+
+## Prior-art boundary
+
+Affine quadratic phase expansions and their use for stabilizer simulation
+are established; see de Beaudrap and Herbert,
+[Fast Stabiliser Simulation with Quadratic Form Expansions](https://arxiv.org/html/2109.08629v2),
+Sections 2 and 6. The real signed Gauss elimination used here is the recursion
+in Bravyi et al., Section 4.3, equations (71)–(75),
+[Simulation of quantum circuits by low-rank stabilizer decompositions](https://arxiv.org/html/1808.00128v2).
+Conditioning into 2^k quadratic cells therefore supplies a known stabilizer
+decomposition, and streaming its terms is a space/time tradeoff.
+
+Toffoli splitting and recombination also have explicit prior art: Khesin and
+Ren, Theorem V.1, Proposition V.2 and Section VI.2,
+[Extending the Graph Formalism to Higher-Order Gates](https://arxiv.org/html/2108.02686).
+The present local predicate and exact PPS coefficient interface are useful
+specializations. No priority claim for their mathematical ingredients, or
+performance superiority over generic phase-sensitive stabilizer splitting
+and merging, has been established.
+
+---
+
+## C84 — Toffoli preserves a pure stabilizer exactly when three local commutator columns have rank at most two; accepted inputs admit eight exact Clifford replacements, matching C83
+
+*status: proven · paper: A*
+
+# C84 — A generic stabilizer baseline already recognizes C83's local boundary
+
+This is an algebraic consequence of stabilizer measurement and overlap
+theory, not an asserted new simulation principle. PR owns finite evidence,
+implementation audit, numerical limits and failed-run provenance. The result
+closes a proposed exclusive recognition advantage for C83. It does not compare
+complete simulators or establish a broad memory breakthrough.
+
+## Projector-reflection theorem
+
+Let psi be a normalized PURE stabilizer state, allowing complex amplitudes
+and any global phase. Let Pi be a projector onto specified simultaneous
+eigenvalues of commuting Hermitian Paulis, and R=I-2Pi. Joint stabilizer
+measurement outcomes are uniform on an affine binary space: either the
+specified outcome is impossible and p=<psi|Pi|psi>=0, or p=2^-r for the
+number r of independent random outcome bits. Then
+
+    R psi is a stabilizer state up to global phase
+    iff p=0 or r<=2.
+
+To prove the probability statement and sufficiency, write the requested
+signed conditions as M_j=+1. Modulo the unsigned stabilizer group, choose
+r independent ORIGINAL conditions. A negative deterministic relation makes
+Pi psi=0. Otherwise the omitted conditions follow from the chosen ones and
+positive stabilizer relations, so on psi
+
+    Pi psi = product_(j=1..r) [(I+M_j)/2] psi.
+
+Every nonempty product of the chosen M_j has expectation zero; expansion
+gives p=2^-r. The exact vector actions are:
+
+    p=0:       R psi = psi,
+    r=0:       R psi = -psi,
+    r=1:       R psi = -M_1 psi,
+    r=2:       R psi = (I-M_1-M_2-M_1 M_2) psi / 2.
+
+The last operator is Clifford. An explicit phase-sensitive factorization is
+exp(i pi/4) times the product of exp(i pi P/4) for
+P=M_1,M_2,M_1 M_2. On the joint eigenspaces it has sign -1 only when both
+M_j eigenvalues are +1. This also proves sufficiency for complex states.
+
+For necessity, distinct stabilizer rays have overlap magnitude at most
+1/sqrt(2). Their squared overlap is zero if their shared unsigned stabilizers
+have incompatible signs, otherwise 2^(k-n), where k is the dimension of
+their intersection. This follows by tracing their Pauli-expanded density
+matrices; distinct compatible rays have k<=n-1. But for r>=3,
+
+    <psi|R|psi> = 1-2^(1-r) lies in [3/4,1).
+
+It is too large for another stabilizer ray and smaller than one, proving
+necessity. Purity is essential: the argument uses a maximal stabilizer group
+and is not a theorem about mixed stabilizer states or arbitrary sums of kets.
+
+## Toffoli recognition and exact replacement
+
+For distinct physical qubits a,b,t, put P=(Z_a,Z_b,X_t). Then
+
+    Pi=(I-Z_a)(I-Z_b)(I-X_t)/8,   Toffoli=I-2Pi.
+
+Let S_i, i=1..n, be independent stabilizer generators for psi. Form B with
+three rows and n columns, B_(j,i)=1 iff P_j anticommutes with S_i. A product
+of P_j lies in ker(B^T) exactly when it commutes with all S_i, hence belongs
+to the unsigned stabilizer group. Thus r=rank(B) is the random outcome rank.
+
+The three P_j are themselves independent. At r=3 there is no deterministic
+relation to exclude the requested outcome, so p=1/8 and closure fails. At
+r<=2, p is either zero or at least 1/4 and closure holds. Consequently
+
+    Toffoli psi is stabilizer iff rank(B)<=2.
+
+Only the bits (x_a,x_b,z_t) of each S_i are required. Stabilizer signs do not
+enter recognition. A streaming basis of three-bit columns uses O(n) reads
+and O(1) extra rank workspace given random-access tableau entries. Existing
+O(n^2)-bit tableau storage and its construction/conversion are additional.
+For more than three independent projector conditions, rank>=3 alone does
+not exclude an incompatible outcome; that shortcut is specific to this case.
+
+For an actual update, signs determine whether the joint negative conditions
+are compatible. If compatible, choose independent members of the ORIGINAL
+ordered set (Z_a,Z_b,X_t), using their rows in B. Then the exact action on psi
+is one of these eight operators:
+
+| condition | replacement on this input |
+|---|---|
+| incompatible requested outcome | I |
+| compatible, rank zero | -I |
+| independent condition Z_a only | Z_a |
+| independent condition Z_b only | Z_b |
+| independent condition X_t only | X_t |
+| independent conditions Z_a,Z_b | CZ(a,b) |
+| independent conditions Z_a,X_t | CNOT(a,t) |
+| independent conditions Z_b,X_t | CNOT(b,t) |
+
+These are equalities of their action on the supplied state, not equalities
+of full-space gate operators. A different input can require a different
+replacement or fail the stabilizer promise. All entries preserve the input
+global phase exactly; -I must survive in coherent sums. The rank predicate
+alone supplies neither compatibility nor a signed output amplitude.
+
+## Equivalence to C83
+
+Normalize a C83 cell as 2^(-d/2) sum_y (-1)^q(y)|o+Vy>. Use its notation
+A=a0+alpha.y, B=b0+beta.y, h=rank(alpha,beta), E={y:A=B=1}.
+If E is empty, p=0. Otherwise its measure is w=2^-h. Writing D_E for the
+control projector gives
+
+    p = (w - <psi|D_E X_t|psi>)/2.
+
+If e_t is outside im(V), the target-translated support is disjoint and the
+cross term vanishes. Then p=2^-(h+1): exactly the h=2 curved-support failure.
+If e_t=Vv, write q(y+v)+q(y)=delta+L.y. The cross term is the signed affine
+sum 2^-d sum_(y in E) (-1)^(delta+L.y). It vanishes precisely when L lies
+outside span(alpha,beta); otherwise the derivative is constant on E and the
+cross term is +w or -w. For h=2 this yields p=1/8 exactly at C83's cubic
+failure, and otherwise p=0 or1/4. All h<=1 cases succeed.
+
+When h=2 and L=mu alpha+nu beta, the derivative on E equals
+delta+mu(1+a0)+nu(1+b0), exactly C83's gamma. Every real stabilizer ray has
+an affine-support quadratic-sign representation after fixing global phase.
+Therefore this is the same one-cell acceptance boundary, not merely an
+alternative sufficient test. Neither local test recognizes all easy later
+endpoints or all useful cancellations between different cells.
+
+## Technical and prior-art limits
+
+`experiments/experiment_toffoli_stabilizer_rank.py` implements the rank scan
+against a supplied Stim preparation tableau. It retains at most three
+three-bit basis columns and selects independent original rows from that
+span. For signed compatibility it separately uses seven exact Stim Pauli
+expectations and p=(1-<P1>-<P2>-<P3>+<P1P2>+<P1P3>+<P2P3>-<P1P2P3>)/8.
+Those calls and their workspaces are not included in the rank-read count.
+No full phase-sensitive propagator or new production simulator is added.
+
+Standard measurement and affine-rank ingredients are explicit in de Beaudrap
+and Herbert, Section 5.2, Theorem 12 and proof,
+[Fast Stabiliser Simulation with Quadratic Form Expansions](https://arxiv.org/html/2109.08629v2).
+Khesin and Ren give the same CCX projector decomposition in Table 1 and a
+phase-aware merge with its global-phase proof in Section VII.5,
+[Extending the Graph Formalism to Higher-Order Gates](https://arxiv.org/html/2108.02686).
+The two-CCX example already recombines terms, so branch doubling without
+merging is not the strongest published comparator.
+
+Stim's [tableau cell API](https://github.com/quantumlib/Stim/blob/79ae4f118ca11c615d6d8de7c6eed7d189d3a6eb/doc/stim.pyi)
+documents constant-time output-Pauli cell access and absence of a defined
+ket global phase. This supports recognition, not direct signed extraction.
+Phase-sensitive CH representations retain the required scalar; see Bravyi
+et al., Section 4.1,
+[Simulation of quantum circuits by low-rank stabilizer decompositions](https://arxiv.org/html/1808.00128v2).
+Signed compatibility, Clifford updates, conversion and final extraction must
+all be charged in an end-to-end comparison. The O(n) predicate does not
+establish such a speedup. The bounded search did not locate this exact
+eight-entry formulation, but that is not evidence of priority or novelty.
+
+---
+
+## C85 — Every logical Cuccaro prefix reduces selected full-space signed Walsh queries to a known two-state carry contraction; a strict compiler avoids exponential term storage
+
+*status: proven · paper: A*
+
+# C85 — Actual adder prefixes admit the known carry-correlation baseline
+
+This is a construction-specific application of known arithmetic correlation
+and tensor contraction, with an exact implementation. It establishes no new
+general simulation principle or advantage over the strongest scalar baseline.
+CP owns finite evidence, failed predictions and source-audit provenance.
+
+## Full-space contract and wire invariant
+
+Let F_t be the permutation of the first t **logical** gates of
+`circuits.ripple_adder(w)`, for 0<=t<=6w+1 and w>=1. Its N=2w+2 input bits
+are c0, a_0,...,a_(w-1), b_0,...,b_(w-1), z. For arbitrary N-bit masks u,v,
+the output is one exact signed coefficient
+
+    Q_t(u,v) = 2^-N sum_x (-1)^(u.F_t(x) + v.x).
+
+Every input bit, including c0 and z, is uniformly summed. This equals a
+diagonal Pauli transfer coefficient and the Fourier-ket overlap
+<chi_u|U_(F_t)|chi_v>, where chi_v has amplitudes 2^(-N/2)(-1)^(v.x).
+
+Define c_(i+1)=maj(a_i,b_i,c_i). All additions in bit expressions below
+are XOR. The actual MAJ block acts on local original values as
+
+    (c_i,b_i,a_i)
+      -> (c_i,b_i+a_i,a_i)
+      -> (c_i+a_i,b_i+a_i,a_i)
+      -> (c_i+a_i,b_i+a_i,c_(i+1)).
+
+The last identity follows from
+a_i+(c_i+a_i)(b_i+a_i)=a_i b_i+a_i c_i+b_i c_i.
+The matching UMA first restores a_i by the same involutive Toffoli,
+then restores c_i and writes a_i+b_i+c_i. Higher matched blocks restore
+the local triple before the descending UMA reaches it. The middle CNOT
+only changes z to z+c_w. Induction over the actual schedule therefore
+shows that each physical wire at every atomic prefix is an XOR of at
+most three symbols from the original inputs and c_1,...,c_w. In particular
+the complete full-space map is
+
+    (c0,a,b,z) -> (c0,a,(a+b+c0) mod 2^w,z+c_w).
+
+No clean-ancilla assumption enters this identity. The original simple
+Cuccaro construction already permits incoming carry and arbitrary z;
+see [Cuccaro et al., Sections 2 and 4.2](https://arxiv.org/html/quant-ph/0410184).
+
+## Carry contraction, tensor rank and exact sign
+
+XORing the observed wires and the input query reduces the exponent to
+
+    zeta*z + delta0*c0 + sum_i(alpha_i*a_i + beta_i*b_i)
+                         + sum_(j=1..w) gamma_j*c_j.
+
+If zeta=1 the coefficient is zero. Otherwise define the two-state transfer
+
+    L(c)=(-1)^(delta0*c)/2,
+    M_i(c,d)=(1/4) sum_(a,b: maj(a,b,c)=d)
+                      (-1)^(alpha_i*a + beta_i*b + gamma_(i+1)*d).
+
+Then Q_t=L M_0 ... M_(w-1) (1,1)^T. This follows by expanding the
+independent input-bit sums and enforcing each deterministic carry relation.
+All additions retain signs; no positive-probability replacement is valid.
+
+Before summing each pair (a_i,b_i), these factors give a tensor train for
+the sign function with bond dimension at most two in the ordering
+c0,(a_0,b_0),...,(a_(w-1),b_(w-1)),z. Splitting a pair gives bond at most
+four inside that pair. Local Walsh transforms preserve the corresponding
+matrix ranks by C48. These bounds depend on the stated ordering; they do
+not apply to every physical-register cut or imply small chronological PPS
+support, a small stabilizer list, or cheap enumeration of every coefficient.
+
+There is a stronger known scalar evaluator. Simultaneously complementing
+all a_i,b_i,c0 complements every carry c_j. If Q0 denotes the same carry
+correlation with c0 fixed to zero, changing variables in the c0=1 half gives
+
+    Q_t = [zeta=0] [delta0 = wt(alpha)+wt(beta)+wt(gamma) mod2] Q0.
+
+Q0 is precisely the arbitrary carry-mask correlation of Wallén's
+[HUT-TCS-A84, Theorem 3.1 and Sections 3.2–3.3](https://research.ics.aalto.fi/publications/bibdb/HUT-TCS-A84.pdf).
+A dummy top bit with alpha_w=beta_w=0 includes the queried carry c_w.
+The known finite automaton returns zero or sign*2^-k; hence so does Q_t.
+The implementation transcribes its transitions, including sign flips,
+instead of comparing against an unnecessarily expensive dense calculation
+as the strongest scalable baseline. The same report also gives a faster
+bit-parallel word-RAM algorithm; this Python implementation makes no claim
+to implement that algorithm or match its bit complexity.
+
+## Implemented interface and charged resources
+
+`lab.carry_prefix.compile_ripple_prefix(circuit, observable)` checks the
+entire supplied logical trace against the exact register layout and schedule.
+An altered or nonclassical gate, excessive prefix, out-of-range mask or
+width above the configurable default cap rejects. Matched Toffoli targets
+are rewritten to their proved carry/original-input symbols. CNOTs XOR
+constant-size symbol sets. The result is a `CarryPrefix` certificate;
+construct it through the compiler rather than forging its public fields.
+
+`certificate.coefficient(query)` returns an exact `Fraction` through the
+known automaton. `backend="transfer"` provides the direct signed integer
+transfer for verification. The routine reads `Circuit.logical`; agreement
+with an independently edited `Circuit.gates` list is not certified. Prefixes
+inside compiled Pauli rotations, arbitrary surrounding gates, and inverse
+traces are outside this recognizer's contract.
+
+Compilation uses O(w) constant-size symbol sets with O(log w)-bit indices,
+hence O(w log w) abstract stored bits plus Python object overhead. It returns
+two O(w)-bit masks. Supplied circuit construction and storage are additional:
+the current compiled Pauli masks can themselves occupy O(w^2) bits. The
+compiler performs O(w) symbol operations; arbitrary-width mask construction
+and shifts are not unit-cost bit operations.
+
+The automaton makes O(w) bit visits and stores a state, sign and O(log w)-bit
+exponent beyond its input masks. Python mask temporaries and the returned
+Fraction denominator require O(w) bits. The direct transfer instead holds
+constant many O(w)-bit integer accumulators. Thus no exponential term list
+or truth table is required by the selected-scalar implementation; constant
+bit memory for the whole call is not asserted. No allocation or runtime
+speedup was measured against another optimized implementation.
+
+## A conditioned escape and later return, with its limitation
+
+Fix c0=h and prepare the normalized affine-support stabilizer
+
+    psi_h = 2^(-(N-1)/2) sum_(a,b,z) (-1)^(b_0) |h,a,b,z>.
+
+After the forward adder's first two CNOTs, local generators are
+-X_c X_a, (-1)^h Z_c Z_a, -X_b. Their commutator matrix against
+(Z_c,Z_b,X_a) has rows (1,0,0), (0,0,1), (0,1,0). It has rank three,
+so C84 proves that the next Toffoli leaves the stabilizer class. Yet the
+full adder preserves c0=h and its least-significant sum bit gives
+
+    U_add psi_h = (-1)^h 2^(-(N-1)/2)
+                      sum_(a,b,z) (-1)^(a_0+b_0) |h,a,b,z>.
+
+This is a different stabilizer, with its canonical permutation phase retained.
+The inverse adder has the same endpoint relation and local rank-three test.
+Compiled gates can contribute a common global phase, which cancels in Q_t.
+The least-significant-bit identity already explains this return; it does
+not establish a new merging method. For h=0, psi_0=(chi_b0+chi_(b0+c0))/sqrt2,
+so any Fourier-ket overlap at a forward prefix uses two implemented Q_t
+queries divided by sqrt2. No conditioned input is silently substituted
+for a full-space coefficient.
+
+The earlier proposed **unconditioned** chi_b0 witness is false as an escape
+example: after the first two CNOTs the target remains an X eigenstate,
+so the random-condition rank is two. CP preserves this failed prediction.
+The fixed-c0 witness must not be used to reinstate the unrestricted claim.
+
+Known phase-aware stabilizer coalescing already covers arithmetic examples;
+see [Garcia and Markov, Sections 3–6](https://arxiv.org/abs/1712.03554).
+Their Cuccaro benchmark has a different input/output contract, but rules
+out claiming arithmetic-wide coherent merging itself as new. The standard
+[Markov–Shi contraction method, Sections 3–4](https://arxiv.org/abs/quant-ph/0511069)
+also provides the generic tensor baseline for the exhibited narrow chain.
+
+---
+
+## C86 — Selected signed coefficients of two additions coupled by a planar bit permutation reduce to known matchgate/FKT contraction with polynomial resources
+
+*status: proven · paper: A*
+
+# C86 — Planar carry interactions admit exact matchgate contraction
+
+This is a proved arithmetic application of known matchgate and Pfaffian
+methods, with a bounded exact implementation. The source audit did not
+identify a publication of this exact arithmetic application; it establishes
+neither priority nor a new general simulation principle. No practical memory
+advantage over the strongest arithmetic baseline has been measured. MG owns
+the experimental evidence and audit provenance.
+
+## Exact scalar contract
+
+For width w>=1, let A,B,C be independent uniform w-bit words and c,d be
+independent uniform bits. Given an explicit permutation pi of bit positions,
+define
+
+    S = (A+B+c) mod 2^w,
+    P(S)_i = S_(pi(i)),
+    Y = (P(S)+C+d) mod 2^w.
+
+For w-bit masks alpha,beta,gamma,delta and bits lambda,mu, the output is
+
+    Q = 2^-(3w+2) sum_(A,B,C,c,d)
+        (-1)^(alpha.A + beta.B + gamma.C + delta.Y + lambda*c + mu*d),
+
+where mask inner products and exponent addition are over GF(2). This is a
+selected diagonal Pauli transfer coefficient of the full-space reversible
+map. Two actual `circuits.ripple_adder(w)` circuits implement it, with an
+intermediate permutation of their common accumulator realized by SWAPs
+(three CNOTs each). Their two separate output-carry XOR bits are unqueried;
+summing these uniform input bits cancels their extra normalization. C85 owns
+the full-space adder identity, including arbitrary incoming and output bits.
+
+Define the architecture graph to have vertices K_i,R_i, carry edges along
+each of these two paths, and edges K_(pi(i))--R_i. **If this graph is planar,
+Q has an exact polynomial-time, polynomial-memory evaluation** by the
+construction below. The implementation may also accept a nonplanar
+architecture when its query-specific zero edges leave a planar weighted
+matching graph. It checks that latter graph explicitly.
+
+## Local complement symmetry and basis change
+
+Retain the first sum bit s and both chains' carry bits. With tensor indices
+ordered (incoming carry, outgoing carry, sum-interface bit), the local
+unnormalized factors are
+
+    K_i(p,q,s) = sum_(a,b) (-1)^(alpha_i*a + beta_i*b)
+                [s=a XOR b XOR p] [q=maj(a,b,p)],
+    R_i(r,t,s) = sum_C (-1)^(gamma_i*C + delta_i*(s XOR C XOR r))
+                [t=maj(s,C,r)].
+
+Complementing a,b,p simultaneously complements q,s; complementing s,C,r
+complements t and the second sum bit. Therefore
+
+    K_i(1-p,1-q,1-s) = (-1)^(alpha_i+beta_i) K_i(p,q,s),
+    R_i(1-r,1-t,1-s) = (-1)^(gamma_i+delta_i) R_i(r,t,s).
+
+Apply H=[[1,1],[1,-1]] to every index of every tensor. The transformed K_i
+has support only on index triples of parity alpha_i+beta_i, and transformed
+R_i only on parity gamma_i+delta_i. To see this, pair x with x+(1,1,1) in
+the local Walsh sum: it cancels unless the Fourier index has that parity.
+The initial carry character [1,(-1)^lambda] transforms to [2,0] or [0,2];
+the final carry sum [1,1] transforms to [2,0]. The other chain is identical.
+Thus all transformed tensors have pure parity and arity one or three.
+
+## Explicit matchgates and signed Pfaffian
+
+A deletion signature f(x) is the weighted perfect-matching sum of a graph
+after deleting external vertices for which x_j=1. Every pure-parity ternary
+signature is realizable by a constant-size planar graph with all ports on
+its outer face. The general parity and matchgate-identity characterization,
+and external-leaf bit flips, are known; see
+[Cai and Gorenstein, Matchgates Revisited, Sections 2 and 5](https://theoryofcomputing.org/articles/v010a007/v010a007.pdf).
+Here is the explicit realization used, so the arithmetic reduction does
+not assume a free signature-construction oracle.
+
+For an even f, take three external vertices and one center. Give the edge
+from the center to port j weight f[7 XOR (1<<j)]. If one such weight u is
+nonzero, join the other two ports with weight f[0]/u. The three
+pair-deletion values and the all-present value are then exactly f. If all
+pair-deletion values vanish, use three private forced edges whose weights
+multiply to f[0]. The identically zero case is handled separately. For odd
+f, realize the even signature with its first index flipped, then append a
+unit-weight external leaf at that port. Deleting/preserving the new port
+flips exactly that index, without changing a sign. Unary even signatures
+use a forced edge; unary odd signatures use a port and a scalar factor.
+
+Join matching ports of adjacent gadgets by a unit-weight edge. Each perfect
+matching either uses that connector, deleting both ports from their local
+matching problems, or uses neither. This realizes the desired binary index
+contraction. Every ternary port ordering admits the local planar embedding,
+so a planar architecture gives a planar replacement graph with O(w) vertices.
+
+The known planar weighted perfect-matching method evaluates this graph by
+a Pfaffian orientation and skew-matrix elimination. The implementation
+solves odd face-orientation constraints, finds one unweighted perfect
+matching, and uses its permutation sign and edge orientations to calibrate
+the common Pfaffian sign. It does **not** take an absolute value: signed
+edge weights and exact cancellations survive. Missing perfect matchings,
+disconnected components and zero pivots are supported.
+
+Since H^T H=2I, every original contracted edge contributes a correction
+1/2. There are E=2(w-1)+w+4=3w+2 such edges, including the four boundary
+attachments. If Z is the transformed matching sum including gadget scalar
+factors, then
+
+    Q = Z / 2^(E+3w+2).
+
+This establishes the theorem for the stated full-space signed query.
+
+## Resource accounting and implementation boundary
+
+`lab/planar_carry.py` consumes the explicit word map, permutation and masks;
+it does not recognize arbitrary `Circuit` objects. Its constant-size local
+factor construction and replacement graph require O(w) objects. Planarity,
+face orientation and one perfect matching are computed. Dense exact
+Pfaffian elimination costs O(w^3) rational arithmetic operations and
+O(w^2) rational entries. These are not byte bounds: exact numerator and
+denominator lengths must also be charged. The local weights come from a
+fixed finite set; determinant/minor bounds give polynomial bit complexity
+for this rational computation. No floating-point tolerance is used.
+
+The experimental API defaults to width at most 64 and the matching helper
+to at most 1024 vertices; these are allocation guards, not measured scale
+records. NetworkX is an optional dependency pinned by the experiment's
+`uv run --with networkx==3.5` command, not added to project dependencies.
+Constructing the physical circuit for a reference comparison is extra work:
+the present compiled Pauli gate representation also stores O(w)-bit labels
+for O(w) gates. Gate recognition, setup and final extraction cannot be
+ignored in a comparison receiving a circuit rather than the word-map API.
+
+This is an endpoint scalar evaluator, not a full-operator representation,
+state sampler or bound on chronological PPS peak support. Partial adder
+prefixes or partial CNOT implementations of a SWAP are not covered by this
+two-path certificate. A fixed clean initial carry transforms to a
+mixed-parity unary tensor: splitting the two initial boundaries gives at
+most four parity branches, but that extension is not implemented here.
+An ordinary crossing is not a fermionic crossing. Arbitrary nonplanar
+permutations, general CNOT linear interfaces, shared operands and controlled
+modular-addition tensors do not inherit this theorem. Their transformed
+local tensors can have mixed parity or arity at least four, where parity
+alone no longer suffices.
+
+## Planarity is broader than constant graph width
+
+There exist planar graphs of exactly this two-path-plus-perfect-matching
+form with unbounded treewidth. This is a deduction from
+[Eppstein, On the Biplanarity of Blowups, Definition 3 and Section 5](https://jgaa-v5.cs.brown.edu/index.php/jgaa/article/download/2989/2992).
+The published construction gives maximal planar graphs of unbounded
+treewidth with a two-outerpath decomposition. Their cubic planar duals
+have unbounded treewidth and a vertex partition into two induced paths.
+
+In such a dual D, every internal path vertex has exactly one cross edge.
+Delete all cross edges incident to the four path endpoints, at most eight
+edges F. Suppress unmatched internal path vertices and trim unmatched
+ends. The remaining graph H has two paths linked by a perfect matching.
+Deleting F cannot lose more than |F| treewidth: from a decomposition of
+D-F, add one endpoint of each deleted edge to every bag. Degree-two
+suppression and leaf trimming preserve treewidth above two. Hence
+tw(H)>=tw(D)-8 when the right-hand side exceeds two, proving unboundedness.
+
+This is an existence construction, not an extracted permutation formula or
+a measured finite family. It concerns architecture geometry. A particular
+mask tuple may annihilate a factor or collapse the whole coefficient;
+graph treewidth does not lower-bound this signed scalar's computational
+cost. There is no established separation from all stronger arithmetic or
+symbolic reductions.
+
+## Strong arithmetic baselines and actual modular macros
+
+Before contracting the two independent-operand additions, cyclic
+convolution gives inexpensive necessary zero conditions. A nonzero Walsh
+character whose highest set bit is j has period 2^(j+1) and anti-period
+2^j as a function on Z/(2^w). Its ordinary cyclic Fourier support has
+v2(k)=w-1-j; the constant character is supported only at k=0. Thus the
+first operand convolution is identically zero unless alpha and beta have
+the same highest set bit, or both are zero. The same holds for gamma and
+delta in the second cross-correlation. Averaging over initial carries
+preserves these necessary conditions. A permutation that sends a required
+pivot to an ignored bit can cause another zero. These conditions are not
+sufficient for nonzero Q and are not implemented as prechecks here.
+
+The actual `toffoli_arith` macros require a different full-space contract.
+Write M=2^m, h=c0, f=anc, D=t+h, and Delta_v=v-2(t & v), with v reduced
+modulo M. An `_add_const(v, controls)` whose conjunction e uses unchanged
+wires outside b,t sends
+
+    b -> [b+D+e*Delta_v]_M
+
+and restores t,h and the controls. XOR-loading v into t proves the formula.
+Such macros commute and group while their operands and controls remain
+unchanged; disabled controls still add D on dirty scratch. In contrast,
+for the actual `cc_add_mod(c1,c2,c)`, put e=c1*c2 and
+
+    g  = f XOR msb([b+e*Delta_c-Delta_N]_M),
+    b' = [b+D+e*Delta_c-(1-g)*Delta_N]_M,
+    f' = g XOR 1 XOR msb([b-(1-g)*Delta_N]_M).
+
+The first add-c/inverse-add-N pair cancels D before the first sign check;
+the conditional restore and inverse-add-c cancel it before the second;
+the final add-c restores the displayed D contribution. This directly
+follows the actual flag schedule and restores the other wires. Only on
+the clean domain t=h=f=0, 0<=b<N, 0<=c<N does this reduce to the usual
+b'=(b+e*c) mod N with clean scratch. Dirty modular macros cannot be grouped
+using that clean identity. These construction deductions identify mandatory
+baselines and boundaries, not an extension of the planar theorem.
+
+C89 subsequently proves a conditional interval representation and exact
+Walsh contraction for prefixes of these actual shared-state modular macros.
+Its outer average remains explicit; it does not extend this planar theorem
+to an already-classified shared-control tensor.
+
+---
+
+## C87 — An explicit growing planar two-adder family has nonzero all-bit correlations equal to direct dimer counts; its reduced graph retains a growing grid minor
+
+*status: proven · paper: A*
+
+# C87 — Explicit carry geometry and the direct dimer baseline
+
+C86's arithmetic matchgate application admits a concrete growing family and
+a stronger specialization for an all-bit query. These are construction
+deductions using known planar counting methods. They establish neither a
+new general simulator nor a practical memory advantage. DM owns finite
+evidence, primary-source provenance and corrections to independent verifiers.
+The subsequent essential-edge and sparse-elimination results are in C88;
+ME owns the later bounded allocation comparison.
+
+## Explicit permutation and growing reduced graph
+
+For integer k>=2 set w=8k^2 and L=w/2. Define the zigzag label order
+
+    z_(2j)=j, z_(2j+1)=w-1-j,  0<=j<L,
+    inv(x)=2x if x<L, otherwise 2(w-1-x)+1,
+    pi(i)=inv((z_i+k) mod w).
+
+Use exactly the C86 word map and full-space query convention. The first
+carry path visits labels z_i and the second labels z_i+k modulo w; matching
+equal labels gives edges K_(pi(i))--R_i. This explicitly supplies the bit
+permutation, with O(w) integer operations and O(w log w) bits of stored
+indices if materialized. The existing C86 SWAP construction realizes it
+between completed additions; no arbitrary CNOT interface is assumed.
+
+This graph G is planar. Put labels in cyclic order on a circle. Each zigzag
+path consists of nested noncrossing chords in a disk. Put the two rotated
+paths in opposite hemispheres, separated by an annulus, and match equal
+labels by disjoint radial edges. This is an embedding on the sphere and
+hence in the plane.
+
+Contract the matching edges. The first path's edges have the two forms
+x--(-1-x) and x--(-x) modulo w, omitting fixed points. The second has
+x--(2k-1-x) and x--(2k-x). Contract the first path's x--(-x) edges; the
+interior quotient classes are {i,w-i}, 1<=i<L. The remaining first-path
+edges join i to i+1, and suitable second-path edges join i to i+2k.
+Select classes i=2kr+c, 1<=r,c<=k. They realize every edge of a k-by-k grid.
+
+In G itself, an explicit branch set for class i is
+
+    {K_inv(i), K_inv(w-i),
+     R_inv((i-k) mod w), R_inv((w-i-k) mod w)}.
+
+These sets are disjoint. Two matching edges and one first-path reflection
+edge connect each set. The indicated edges between classes supply every
+grid adjacency. Thus G contains the grid as a minor, independently of any
+heuristic elimination ordering.
+
+Let G' delete the four physical path endpoints. Their labels are 0,L on
+the first path and k,L+k on the second. For k>=2, every branch label obeys
+
+    k < 2k+1 <= i <= 2k^2+k < L,
+    w-i >= 6k^2-k > L+k.
+
+Therefore all branch vertices and adjacency witnesses survive: **G' has
+the same k-by-k grid minor**. In particular tw(G')>=k-1. A self-contained
+bound follows from the grid's row-column crosses: they are connected and
+pairwise intersect, so their bag subtrees have a common bag in any tree
+decomposition. Fewer than k vertices cannot hit all crosses, because an
+untouched row and column would form an untouched cross. The width bound
+is Omega(sqrt(w)). The k=1 indexing fixture is excluded from this
+endpoint-deletion proof.
+
+## All-bit scalar equals a positive weighted matching count
+
+For any bit permutation pi and width w>=2, set all four C86 word masks
+to a=2^w-1 and both initial-carry query bits to zero. The two transformed
+ternary factors, indexed by p+2q+4s, are
+
+    H K_11: {3:-4, 5:8, 6:4},
+    H R_11: {3: 4, 5:8, 6:4}.
+
+Every allowed index has exactly two active incident edges. Complementing
+edge bits therefore makes each vertex select exactly one matching edge.
+The four transformed boundary characters [2,0] force the four endpoint
+vertices to match their external boundary, leaving precisely G'.
+
+An internal carry matching edge contributes 8*4=32 and an interface
+matching edge contributes (-4)*4=-16. The four boundary unary factors and
+removed endpoint factors contribute 2^4*(4*8)^2. Dividing by C86's complete
+normalization 2^(6w+4), and using w-2 remaining matching edges, gives
+
+    Q = 2^-w sum_(M perfect matching of G') (-1/2)^c(M),
+
+where c(M) counts interface edges. Each path has w-2 remaining vertices,
+so w-2-c(M) must be even. Every term has the same sign (-1)^w. Equivalently,
+
+    Q = (-1)^w 2^(2-2w) Z(G'),
+
+where Z assigns positive weight 2 to carry edges and 1 to interface edges.
+At even w, pairing consecutive vertices on each residual carry path is
+always a perfect matching with no interface edge. Consequently Q>=2^-w
+for every permutation, including the explicit growing family above.
+
+This is a nonzero arithmetic query whose direct weighted graph has growing
+treewidth, before additional forced-edge or algebraic simplifications.
+It contains no configuration-dependent sign cancellation. A negative value
+at odd w tests the global sign only. The all-zero query, by contrast, is
+exactly one on the same architecture at every width. Neither growing graph
+width nor nonzero Q lower-bounds scalar cost or proves practical advantage.
+
+The direct planar dimer/FKT algorithm is the appropriate baseline. It uses
+2w-4 graph vertices, omitting C86's generic local gadgets. The experiment
+uses the existing exact matching helper; dense skew elimination retains
+O(w^2) rational entries and performs O(w^3) rational operations. Input
+storage, graph construction, planarity, matching, orientation, exact bit
+lengths and extraction remain charged. No byte or runtime advantage is
+claimed. The algebraic matching identity also holds for nonplanar pi,
+but the planar evaluator does not thereby extend, and restricted nonplanar
+hardness has not been established.
+
+## A stronger independent arithmetic identity
+
+For any common word mask a, not necessarily all ones, and both carry masks
+zero, define on Z/(2^w)
+
+    chi_a(x)=(-1)^(a.x),
+    AC_a(s)=2^-w sum_x chi_a(x) chi_a(x+s),
+    g_a(s)=(AC_a(s)+AC_a(s+1))/2.
+
+Then
+
+    Q(a,a,a,a;0,0)=(-1)^popcount(a) 2^-w sum_s g_a(s) g_a(P(s)).
+
+To prove it, the second addition's weighted average at fixed s is g_a(s).
+The first addition's weighted output density is the cyclic convolution
+of chi_a with itself, averaged over the incoming carry. The identity
+chi_a(-x)=(-1)^popcount(a) chi_a(x-1) turns this into
+(-1)^popcount(a) g_a(s). Contracting the common intermediate word proves
+the formula. Constructing an explicit AC table is additional exponential
+work, not a constant-state solution of the permuted inner product.
+
+Global complementation supplies another useful check. Complement A,B,C,c,d
+in the actual word map; both S and Y complement bitwise. Let h be the
+parity of the total popcounts of the four word masks. If q_0 is the
+normalized coefficient conditional on c=0, still averaging over d with
+character mu, the conditional c=1 coefficient is (-1)^(h+mu) q_0. Hence
+
+    Q(alpha,beta,gamma,delta;lambda,mu)
+      = (1+(-1)^(h+lambda+mu))/2 * q_0.
+
+Thus a reference that mistakenly fixes c=0 can agree on every zero-carry-
+mask, equal-word-mask fixture. This agreement does not validate its stated
+full-space contract. Including both carry characters in the least-
+significant-bit query gives a simple independent counterexample: for the
+identity permutation, all four word masks equal to 1 and lambda=mu=1 give
+Q=1, whereas omitting c from the first sum gives zero.
+
+## Local rank excludes only specific alternative bases
+
+The full C86 alphabet does not transform wholly into affine or product-type
+ternary factors by invertible per-leg basis changes. Unequal-mask factors
+are pins/equalities, but every equal-mask factor has three nonzero entries
+and, after local bit flips and rescalings, is a W tensor
+
+    a|100> + b|010> + c|001>,  abc != 0.
+
+Its tensor rank is three. For example, its first-leg matrix slices span
+[[0,c],[b,0]] and [[a,0],[0,0]]. The determinant of their combination with
+coefficients x,y is -bc*x^2, so that two-dimensional span contains only one
+rank-one direction. A two-product decomposition would require two distinct
+rank-one generators of the slice span, a contradiction. Rank is invariant
+under invertible local changes; this is the known W/GHZ distinction of
+[Duer, Vidal and Cirac, Section III.2](https://arxiv.org/html/quant-ph/0005115).
+
+A ternary product of unary and equality/disequality factors has tensor rank
+at most two. An affine signature is, up to normalization, a stabilizer
+state. These are the classes defined in
+[Cai, Guo and Williams, Definitions 2.4 and 2.5](https://homepages.inf.ed.ac.uk/hguo/papers/HA-general.pdf).
+Every three-qubit stabilizer is locally Clifford equivalent to a graph
+state; its graph is product, Bell-by-single, or locally equivalent to GHZ,
+all of tensor rank at most two. See
+[Van den Nest, Dehaene and De Moor, Theorem 1](https://arxiv.org/html/quant-ph/0308151).
+The rank-three factors therefore obstruct either local transformation.
+
+This excludes those particular local reductions, not arbitrary grouping,
+boundary pinning, symbolic formulas, stabilizer sums or other scalar
+algorithms. It is not a hardness result. The direct dimer specialization
+above itself illustrates why a local obstruction cannot replace a complete
+baseline audit. Priority of the arithmetic application and practical
+simulation value remain unresolved.
+
+---
+
+## C88 — The carry grid survives exact matching reductions, while positive matched prefixes give a bounded-band exact Pfaffian recurrence
+
+*status: proven · paper: A*
+
+# C88 — Essential carry graphs and exact sparse elimination
+
+Use exactly C87's full-space word query, rotated-zigzag permutation,
+w=8k^2 and L=4k^2. Let H be its graph after deleting the four physical
+path endpoints. Define D_pi(z) as the perfect-matching sum with carry
+weights one and interface weights z. The conversion to the arithmetic
+coefficient is C87's identity. The deductions below apply known matching
+and elimination machinery. ME owns finite evidence and measured costs;
+there is no general CNOT simulator, restricted hardness or priority claim.
+
+## An exact interface-subset description
+
+The residual physical positions on either carry path are 1,...,w-2.
+Selecting interface edges leaves a unique internal carry matching exactly
+when every remaining gap has even size. Thus, if the selected first-path
+endpoints are i_1<...<i_c, c must be even and i_j=j modulo two. The sorted
+second-path endpoints must obey the same test. With C87's convention
+K_(pi(i))--R_i, they are pi^{-1}({i_1,...,i_c}). Sum z^c over all such
+subsets to obtain D_pi(z). This characterizes the polynomial but does not
+give a constant-state recurrence for two distinct endpoint orders.
+
+Let M0 pair (1,2),(3,4),... on each carry path. In cyclic labels, its
+first-path edges have form B0: x--(-x), and its second-path edges have
+form Bk: x--(2k-x), modulo w. The constant term of D is one.
+For exactly two interfaces, write their labels as x=i and y=w-i', where
+
+    k<i<L,  1<=i'<L-k.
+
+Their physical positions on the first path are 2i and 2i'-1, and on the
+second path 2(i-k) and 2(i'+k)-1. The odd endpoint precedes the even one
+on both paths exactly when i-i'>=2k. The other possible parity ranges,
+0<x<k and L<y<L+k, cannot obey the first-path ordering: they would require
+x+y>=w, whereas x+y<=L+2k-2<w. There are no other two-interface cases.
+Consequently, for k>=1,
+
+    D_pi(z)=1+binom(L-2k,2) z^2+O(z^4).
+
+The count is sum_(i'=1..L-2k-1)(L-i'-2k). Odd powers vanish because each
+residual path has an even number of vertices. Higher coefficients and a
+closed product formula are not determined by this argument.
+
+## The grid survives all forbidden-edge and forced-edge reductions
+
+Call an edge allowed if some perfect matching contains it, and forced if
+every perfect matching contains it. Every M0 edge is allowed. Choosing
+the two interfaces y=w-1 and x=L-1 is valid for all k>=1; it matches first-
+path positions 1 and w-2 externally and the interior as (2,3),(4,5),... .
+It therefore uses every non-M0 first-path carry edge and no first-path
+M0 edge. All first-path carry edges are allowed, and none is forced.
+
+The same two-interface criterion gives explicit matching witnesses for
+every interface label in [2k+1,L-1] and [L+2k+1,w-1]. For a lower-half
+label use partner w-1; for an upper-half label use partner L-1. Interfaces
+outside these ranges need not be forbidden. For example, when k is even,
+selecting all odd labels satisfies both path-gap tests and includes some
+boundary interfaces missed by every two-interface matching.
+
+For k>=2 each C87 grid branch has index i=2kr+c, 1<=r,c<=k, and
+
+    2k+1<=i<=2k^2+k<=L-2k-1.
+
+The last inequality is 2k^2-3k-1>=0. Hence both branch interfaces, labeled
+i and w-i, are allowed by explicit witnesses. Its internal B0 edge and
+all vertical Bk witnesses belong to M0; horizontal first-path witnesses
+are allowed by the matching constructed above. No edge of the grid
+certificate is forbidden.
+
+Every branch vertex also has two distinct allowed incident edges, its
+M0 carry edge and its interface. It cannot be an endpoint of a forced
+edge, since a matching using the other allowed edge would contradict
+forcedness. Deleting every forbidden edge and factoring out every forced
+edge therefore preserves all branch vertices and witnesses. The SAME
+k-by-k grid minor survives, so the remaining graph has treewidth at least
+k-1 by C87's argument. Iterating the reductions changes nothing: they
+preserve the remaining matching choices bijectively.
+
+This excludes a specific matching-support collapse. It does not exclude
+algebraic elimination, a special scalar formula or other representations,
+and it does not lower-bound time or memory for computing the coefficient.
+
+## Positive matched prefixes certify exact local pivots
+
+More generally, let a planar graph have strictly positive rational edge
+weights, a supplied perfect matching M0, and a Pfaffian orientation. Order
+the vertices as consecutive pairs of M0, in ANY order of whole pairs.
+Every leading even prefix and its complement are matched by M0. Complete
+any perfect matching of that prefix with M0 outside it. Since the full
+Pfaffian's matching terms have a common sign, so do all prefix terms:
+the fixed complement contributes one fixed sign and positive weight.
+Every leading even Pfaffian is therefore nonzero.
+
+For the C87 graph, the inverse zigzag position changes by at most two
+between adjacent labels around the circle. Thus |pi(i)-i|<=2k. Use order
+
+    K1,K2,R1,R2,K3,K4,R3,R4,... .
+
+The zero-based index of K_i is 2i-2-((i-1) mod2), and that of R_i is two
+larger. Carry edges span at most three indices and interface edges at most
+4k+2. The skew matrix therefore has bandwidth b<=4k+2.
+
+At elimination step r, set u=2r, v=2r+1 and p_r=A^(r)_(u,v). For remaining
+i<j, the usual skew Schur recurrence is
+
+    A^(r+1)_(i,j)=A^(r)_(i,j)
+       +(A^(r)_(v,i) A^(r)_(u,j)-A^(r)_(u,i) A^(r)_(v,j))/p_r.
+
+If F_r is the original leading-2r Pfaffian, p_r=F_(r+1)/F_r, with F_0=1.
+The proved nonvanishing removes all exact pivot searches. Multiplying the
+pivots gives the Pfaffian; calibrating its sign by the M0 term gives the
+positive weighted partition. With formal interface variable z, the same
+recurrence works over Q(z), since every prefix Pfaffian has nonzero
+constant term from its unique carry-only matching. This is a growing
+matrix recurrence, not a fixed-order scalar formula.
+
+Elimination couples only the next O(b) indices and preserves the band.
+There are O(w b^2)=O(w k^2) rational arithmetic operations and an O(b^2)
+entry active frontier if original edges are supplied as needed. The
+experiment retains the original sparse tail as well, giving
+O(|E(H)|+b^2)=O(w+k^2) stored matrix entries. Its entry-count instrumentation
+also performs O(w^2) integer bookkeeping. Graph, permutation, orientation,
+ordering and output storage are additional. In particular the existing
+orientation helper stores GF(2) equation masks that can take O(w^2) bits.
+
+At the fixed weights one and two, Schur entries are ratios of even
+principal Pfaffians: for eliminated prefix I, the entry at i<j is
+Pf(A[I union {i,j}])/Pf(A[I]) in inherited order. Degree at most three
+and edge weights at most two give the crude bound
+|Pf(A[J])|<=6^(|J|/2) by the matching expansion. The original matrix is
+integral, so reduced numerators and denominators have O(w) bits.
+Temporary products, pivots and accumulated output still cost bits. The
+active-frontier bound is conservatively O(w k^2) bits, not O(k^2) bytes.
+Symbolic Q(z) execution additionally charges growing polynomial degrees
+and coefficients. Nonzero exact pivots imply no floating-point stability
+or fixed-precision error guarantee.
+
+## Stronger known baselines and limits of the mask extension
+
+The same positive-prefix argument allows nested dissection of whole M0
+pairs. Contract M0 and discard loops and merge parallel adjacencies for
+the ordering graph only. This simple graph is planar; numerical vertices
+remain two-by-two matrix blocks. Use a separator ordering on that graph
+and eliminate each block with the certified two-vertex pivot. A block
+update fills only pairs of quotient neighbors. Constant block size thus
+preserves the separator
+fill bounds: O(w log w) stored factor entries and O(w^(3/2)) classical
+arithmetic operations. This is our transfer of the graph fill/count result
+in [Lipton, Rose and Tarjan, Generalized Nested Dissection](https://www.renyi.hu/~geza/liptonrosetarjan.pdf)
+to the supplied positive-matching instance; simply applying scalar
+positive-definite elimination to a skew matrix would not justify it.
+Neither this optimized baseline nor its allocated bytes was measured here.
+Their Section 4 also discusses reduced storage through recomputation:
+retained-factor fill is not a lower bound on memory for scalar evaluation.
+
+More advanced generic planar determinant methods give soft-O(w^(omega/2))
+arithmetic complexity for weighted matching. The current primary account,
+[Curticapean and Wang, introduction and Theorem 1](https://arxiv.org/pdf/2606.03975),
+explains both the Yuster upper bound and its relation to determinant
+complexity. Their lower bound allows variable, including negative, edge
+weights and does not apply as a lower bound to C87's fixed positive family.
+Arithmetic exponents do not supply byte or bit-time comparisons.
+
+The banded method above is ordinary exact skew elimination with a proved
+special pivot condition. It is not the banded Givens algorithm of
+[Wimmer, Sections II.D and III.A](https://arxiv.org/html/1102.3440), whose
+stated arithmetic count is O(b n^2) and whose band array has b*n entries.
+That numerically stable algorithm and this exact rational specialization
+have different contracts. No priority or best-known memory claim follows.
+
+Finally, extensive mixtures of C86's equal-mask 00 and 11 factors remain
+planar ternary matchgate networks. Signed configuration weights may remove
+the positive-prefix guarantee, but they do not remove general exact planar
+FKT evaluation. Internal cancellation alone is therefore not an escape
+from that known algorithmic class. A claimed extension to actual controlled
+additions with shared state requires a new local-signature and connectivity
+audit; neither the present proof nor its finite implementation supplies it.
+
+---
+
+## C89 — Conditioned actual modular-add prefixes have linearly many translated intervals and exact four-state Walsh contraction; the shared-variable average remains separate
+
+*status: proven · paper: A*
+
+# C89 — Actual controlled arithmetic as a conditional interval exchange
+
+Use the actual `toffoli_arith.ToffoliModExp.cc_add_mod` schedule and C86's
+full-space macro equations. Fix the scratch word t, incoming carry h, and
+all unchanged outside controls. The accumulator b and flag f remain free,
+including values outside the clean logical domain. A chronological prefix
+of q macros admits the exact representation below. This applies ordinary
+interval-exchange and arithmetic-transducer machinery; IX owns finite
+validation and source-review provenance. There is no general CNOT-memory,
+novelty, best-known performance or full-space polynomial-time claim.
+
+## Conditional map and at most sixteen intervals
+
+Set M=2^m, H=M/2, D=t+h, r=Delta_N, s=e Delta_c, with
+Delta_v=v-2(t&v) and fixed enable bit e. Let top(b) denote the most
+significant bit after reduction modulo M. C86 gives
+
+    g  = f XOR top(b+s-r),
+    b' = [b+D+s-r+g*r]_M,
+    f' = g XOR 1 XOR top(b-r+g*r).
+
+The other wires are restored. In particular a disabled dirty macro is
+generally not identity. The two sign checks have different arguments,
+and grouping the intervening operations as one translation is invalid.
+
+Bijectivity also follows algebraically. Let T_a translate b by a modulo M,
+E toggle f by top(b), X flip f, and C_r translate b by f*r. The displayed
+map is the chronological sequence
+
+    T_(s-r), E, C_r, T_(-s), E, X, T_(D+s).
+
+Each primitive is invertible. Encode both flag lanes by z=f*M+b in
+[0,2M). On either input lane, partition b at these residues modulo M:
+
+    0, H, r, r+H, r-s, r-s+H, -D-s+r, -D-s.
+
+The first sign test changes only at r-s and r-s+H. After g is fixed,
+the second changes at either 0,H or r,r+H. The final two cuts resolve
+output-b wraparound. Duplicate cuts are removed; each lane has at most
+eight half-open intervals. On each, both flags are fixed and the map is
+an ordinary translation z'=z+ell with no wrap within that interval.
+The images partition the whole domain, giving at most sixteen pieces.
+
+This is a discrete interval exchange. Extending integer endpoints and
+translations over their half-open real intervals gives the usual interval-
+exchange representation. See [Novak, introductory definitions and the
+preimage argument in Proposition 2.3](https://arxiv.org/pdf/0811.1014).
+His classification of powers of a single map is not needed for the
+varying-macro bound that follows.
+
+## Composition adds cuts
+
+Let F and G be bijective interval translations on P and R pieces.
+Refine F's intervals only at preimages of G's R-1 internal boundaries.
+Each new boundary has a unique preimage under F. If it coincides with
+an existing boundary, no additional interval is needed. Therefore
+
+    pieces(G after F)<=P+R-1,
+    pieces(q-macro prefix)<=1+15q.
+
+The inequality concerns a fixed assignment of the unchanged outside
+wires. It applies to any deterministic constant schedule, including
+cmult_mod's c_j=(a*2^j) mod N, e_j=u*x_j. Reusing the actual accumulator
+and flag creates no exponential flag-history tree under this conditioning.
+
+Scanning the current O(q) intervals against the at-most-sixteen intervals
+of each new macro constructs the result in O(q^2) endpoint comparisons
+and arithmetic operations. Endpoints and shifts have O(m) bits, so the
+representation takes O(qm) bits, plus input/circuit storage. Adjacent
+pieces with identical translations may be merged. The experimental
+implementation checks partition and image coverage and rejects violation
+of its fixed bounds. This is not a proved optimal construction algorithm.
+
+## Four-state exact range-Walsh contraction
+
+For d=m+1, B=2^d and input/output masks A,C on z, one interval contributes
+
+    sum_(lo<=z<hi) (-1)^(A.z + C.([z+ell]_B)).
+
+Both flag characters are included in the top bits of A and C. Compute
+prefix sums z<L and subtract. For 0<L<B, process bits from least to
+most significant with four states (c,v): carry in z+ell and borrow in
+z-L, initially (0,0). Reduce ell modulo B. For each proposed bit x,
+
+    y=(x+ell_j+c) mod2,
+    c_next=floor((x+ell_j+c)/2),
+    v_next=1 if x-L_j-v<0, otherwise0.
+
+Multiply the transition by (-1)^(A_j*x+C_j*y). At termination retain
+borrow-one states, which impose z<L, and sum over both addition carries:
+the output is modulo B. Prefix L=0 is zero; L=B accepts every input.
+This gives each interval sum in O(m) exact integer operations with O(m)
+bits of working storage. Intermediate signed counts have O(m) bits.
+
+The normalized conditional endpoint coefficient therefore costs O(qm)
+integer operations after interval construction. This is an operation
+count on growing integers, not unit-cost bit time or allocated bytes.
+No truth table over b,f, exponential flag histories or floating-point
+rounding is required. The method computes one specified signed scalar,
+not all amplitudes, a whole Pauli expansion, or PPS intermediate support.
+
+## The outer average and the clean baseline remain explicit
+
+For q used multiplicand bits, let y=(t,h,u,x_0,...,x_(q-1)). Since these
+wires are restored, their input and output Walsh masks combine into one
+mask rho. A full-space coefficient has the form
+
+    Q=E_y [(-1)^(rho.y) E_z[(-1)^(A.z+C.F_y(z))]].
+
+A nonzero combined spectator character makes the full coefficient zero;
+a zero character contributes normalized factor one. Straight enumeration
+of the remaining outside inputs has 2^(m+q+2) assignments. The conditional
+interval proof does not make this sum polynomial. Sequential enumeration
+avoids retaining all conditional tables, but its exponential time remains
+charged. This is a mandatory baseline for a proposed shared-control
+simulator, not a lower bound on all possible algorithms.
+
+When u=0, every enable bit is zero and the prefix is U_0^q, independent
+of all multiplicand bits and the constant words. A nonzero effective
+multiplicand character annihilates this sector. When that character is
+zero, the sector still contains the dirty U_0^q map. The u=1 sector
+retains the enabled schedule; no inexpensive general sum over x or t is
+proved here.
+
+On the separate clean reachable domain t=h=f=0 and 0<=b<N, the familiar
+map b'=(b+u*sum_j c_j*x_j) mod N is an additional baseline. It cannot
+replace the full-space macro. The conditional proof also stops before
+u_a's controlled swaps change the supposedly fixed register roles.
+Logical macro endpoints, not prefixes inside their Clifford+T expansion,
+are the present implementation contract.
+
+A shared representation can instead be sought using standard weighted
+automata or ordered decision diagrams. Their costs depend on the explicit
+representation size. [Kiefer, Theorem 3.6](https://arxiv.org/pdf/2009.01217)
+minimizes an already-built weighted automaton in polynomial arithmetic
+time; it does not bound the dimension of this outer sum. Likewise
+[Bryant, Sections 4.5 and 4.6](https://people.eecs.berkeley.edu/~russell/classes/cs289/f04/readings/Bryant:1986.pdf)
+provides exact composition/counting operations whose cost depends on
+function-graph size. No small combined graph or automaton is proved here,
+and a local matchgate tensor for the shared controls has not been classified.
+
+## Complementary shifts cancel in two exact scratch sectors
+
+Using operator products that act RIGHT TO LEFT, write U_s=T_D V_s with
+
+    V_s=T_s X E T_(-s) C_r E T_(s-r).
+
+Since X commutes with E and T_a, T_a commutes with C_r, and
+X C_r X=T_r C_(-r), inversion gives
+
+    V_s^(-1)=T_(r-s) E C_(-r) T_s E X T_(-s)=V_(r-s).
+
+Thus when D=0 modulo M, macros with complementary effective shifts
+s and r-s cancel on ALL b,f, in either order. This is stronger than
+cancellation restricted to the clean logical accumulator and flag.
+It does not assert that arbitrary V_s form a translation group;
+in particular V_0 need not be identity on every b,f.
+
+Since h is one bit, D=0 modulo M occurs exactly at (t,h)=(0,0) and (M-1,1).
+In the first sector Delta_v=v and in the second Delta_v=-v. Two enabled
+constants c_1+c_2=N therefore cancel throughout either sector. For
+arbitrary dirty D, the exact composition is instead
+
+    U_(r-s) U_s=T_D V_s^(-1) T_D V_s.
+
+Nonzero D removes the cancellation guarantee; it does not force every
+such pair to be nonidentity. This deduction explains the small identity
+fixture in IX and was made after its observation, not predicted before it.
+
+## Carry- and control-sensitive nonzero scalar probes
+
+For N=5,m=4,c=2 and independent uniform controls u,x_0, all other input
+bits also uniform, the first actual cmult_mod(ctrl,2) macro satisfies
+
+    E[(-1)^(b_0+b_3+t_2+h+f+b'_0)]=1/4,
+    E[(-1)^(b_0+b_3+t_0+t_1+t_2+h+f+b'_0)]=-1/8.
+
+Let epsilon_j=(-1)^t_j. Here r=epsilon_0+4epsilon_2 and
+s=2e*epsilon_1. The most-significant-bit character's cyclic
+correlation at shift s-r is
+
+    AC(s-r)=1-|s-r|/4
+           =-epsilon_0*epsilon_2/4+e*epsilon_1*epsilon_2/2,
+
+because |2e*epsilon_1-epsilon_0|<=3<4 and |s-r|<8. The low output
+bit is b_0 XOR t_0 XOR h XOR 1 XOR f XOR top(b+s-r). After averaging b,
+the two probe characters leave respectively -epsilon_0*epsilon_2 and
+-epsilon_1*epsilon_2. Averaging the scratch bits and E[e]=1/4 proves
+the two values. A reference fixing incoming h to zero makes both vanish;
+fixing e to zero makes the second vanish. These are explicit nonvacuous
+full-space probes, not symmetric fixtures that hide a missing carry.
+
+They are single-macro statements. Multi-macro grouping requires separate
+controls: at N=5,m=4,t=0,h=1,u=1,x=3,b=f=0, chronological constants
+2 then4 end at (b,f)=(3,0), while4 then2 end at (3,1), directly from the
+macro equations. The interval representation retains that chronological
+dependence. It does not authorize commuting shared-state macros.
+
+C91 subsequently evaluates a restricted two-macro full outside average and
+proves a stronger three-domain rotation reduction at clean fixed scratch.
+The arbitrary-endpoint growing dirty average remains outside those results.
+
+---
+
+## C90 — The raw causal cubic lift has a factored control-plane degree-drop test; native carries fail it, while every one-parity success admits two affine input branches
+
+*status: proven · paper: A*
+
+# C90 — Limits of one-parity degree drop in the causal circuit lift
+
+The object is one full-space Walsh coefficient of an actual logical
+X/CNOT/Toffoli permutation P. This statement concerns a particular circuit
+encoding, not the difficulty of its endpoint function. SA owns discovery,
+independent proof/source reviews and the decision not to execute a redundant
+raw-lift pilot. No implementation, performance or novelty claim is made.
+
+## Lift and exact normalization
+
+On n free input bits, write Q=E_x (-1)^(s.x+o.P(x)). Introduce a fresh AND
+output w_j at every chronological Toffoli and XOR it into the target. Each
+wire is now affine in x and earlier w variables. If its controls are A_j,B_j,
+Fourier multipliers lambda_j enforce the constraints:
+
+    F=L(x,w)+sum_j lambda_j*(w_j+A_j*B_j),
+    Q=2^(-(n+t)) sum_(x,w,lambda) (-1)^F.
+
+Here t is the retained constraint count and L is affine. Summing multipliers
+contributes 2^t on the unique causally valid w string per x. Normalizing by
+the full lifted cube instead gives bias(F)=2^(-t)Q; these are different
+normalizations. Fixed input pins must be substituted before this construction
+is interpreted as a clean-domain calculation.
+
+Let y=(x,w), and let alpha_j,beta_j be the homogeneous control forms.
+In the associated graded Boolean ANF algebra, squares vanish and the cubic
+part is the exterior three-form
+
+    T=sum_j lambda_j wedge q_j,   q_j=alpha_j wedge beta_j.
+
+The multiplier times w_j is only quadratic. Constants and coincident control
+variables likewise contribute lower-degree terms. A hyperplane normal a
+lowers the cubic degree exactly when a wedge T=0. This is the multiplication-
+kernel characterization in [Carlet, Feukoua and Salagean, Theorem 15](https://link.springer.com/article/10.1007/s10623-025-01702-z),
+applied to the degree-four part of aT. Either affine value of the recognized
+parity lowers degree. This uses the graded Boolean algebra, not ordinary
+polynomial multiplication without Boolean reduction.
+
+## Complete factored kernel
+
+Write a=p+sum_j v_j lambda_j with p on y. Separating multiplier degrees gives
+the necessary and sufficient equations
+
+    p wedge q_j=0                       for every j,
+    v_i*q_j+v_j*q_i=0                    for every i<j.
+
+For nonzero q_j, p wedge q_j=0 exactly when p lies in its two-dimensional
+support plane P_j=span(alpha_j,beta_j). There are three cases:
+
+1. All q_j vanish: T=0 and the lift is already quadratic.
+2. All nonzero q_j equal q: T=(sum_(q_j=q) lambda_j) wedge q is decomposable.
+   Its kernel is the three-space formed by that multiplier sum and P(q).
+   Multipliers of zero-q constraints do not enter this kernel.
+3. Two nonzero q_j differ: they are linearly independent over GF(2), so their
+   pair equation forces both v coefficients to zero. Pairing with all other
+   indices forces every v_j=0. The full kernel is the intersection of all
+   nonzero control planes.
+
+Thus no dense cubic tensor or quartic coefficient matrix is needed for this
+encoding. Each binary two-plane has three nonzero vectors; retain their
+intersection while scanning affine wire forms, together with whether all
+planes coincide. For a full-space n-wire circuit with G gates and t Toffolis,
+streaming needs O(n(n+t)) bits
+for wire forms and O(n+t) additional bits, plus circuit input storage.
+Each plane comparison/intersection uses a constant number of O(n+t)-bit
+operations. A conservative scan bound is O(G(n+t)) bit work. This is an
+ordinary linear-algebra specialization of the known kernel test, not a
+proved optimal recognition bound or an allocated-byte measurement.
+
+## Raw native carries force rejection
+
+The first two forward MAJs of `_add_t_into_b`, for width at least two, have
+control planes
+
+    P0=span(h+t0, b0+t0),
+    P1=span(t0+w0+t1, b1+t1).
+
+The new w0 coefficient forces its P1 coefficient to zero in any intersection
+vector. The b1 coefficient then forces the other coefficient to zero. The
+independent h,b0 coefficients eliminate P0's two coefficients. The planes
+are disjoint and their nonzero two-forms differ, so the raw lift has zero
+one-parity kernel. Later multipliers cannot remove these earlier equations.
+This holds even after the UMA uncomputation.
+
+Initial constant loads replace t0,t1 by affine loaded forms while leaving
+h,b0,b1 untouched, so the same argument applies to the first adder in actual
+full-space `_add_const`, `cc_add_mod` and `cmult_mod`. It is not a theorem
+about every possible pinned or simplified version of these circuits.
+
+The raw cubic part is independent of the observable L. It may reject an
+identity endpoint, a constant query or an easy arithmetic endpoint. For a
+concrete completed three-bit adder, the input character
+b2+t2+b1+t1+h against output b2 has coefficient -1/4. Indeed, with
+k1=maj(b0,t0,h), k2=maj(b1,t1,k1), its phase is k2+b1+t1+h.
+On p=b1+t1=0 it has zero mean sign; on p=1 it has phase k1+1+h and mean
+sign -1/2, because k1+h=(b0+h)(t0+h). Averaging the two branches gives
+the stated coefficient. The endpoint cubic part is
+
+    (b1+t1) wedge (b0+h) wedge (t0+h).
+
+It therefore has a one-parity quadratic restriction after eliminating carry
+constraints, despite the raw-lift rejection. These are endpoint Gauss sums;
+no acceptance by C83's gate-by-gate output-cut API is inferred.
+
+## Every raw success already has affine input branches
+
+After substituting fixed pins and recursively eliminating affine q_j=0
+constraints, the first nonlinear constraint has control forms depending
+only on original inputs. A nonzero common plane vector p therefore lies
+in original input space. On either branch p=epsilon, each control product
+is affine: a plane vector is one control's homogeneous form or their sum,
+and Boolean idempotence reduces the product in either case. Constants only
+change the resulting affine term. Causal substitution then makes every
+w_j and wire affine on each branch.
+
+The all-equal-q case also admits either input vector of the common plane;
+one need not use its multiplier-sum certificate. With no nonzero q_j the
+circuit is affine outright. Hence every raw one-parity success can be
+evaluated by at most two affine circuit restrictions, including exact input
+characters and branch signs. It supplies no hidden path-parity advantage
+over that baseline. Failure says nothing about higher-codimension cuts,
+nonlinear constraint elimination, other encodings or other exact algorithms.
+
+For an already-built general cubic polynomial, supplied hitting sets and
+linear changes followed by quadratic sums are established baselines;
+see [Montanaro, Propositions 13 and 14](https://arxiv.org/pdf/1607.08473).
+For the whole amplitude, [de Colnet et al., Corollary 1 and Theorem 4](https://arxiv.org/html/2605.29944v2)
+give an exact quadratic sign-edge encoding with O(4^k poly(p)) arithmetic
+work on a supplied rank decomposition of the expanded p-variable graph.
+Constructing that encoding and decomposition is part of any comparison.
+No favorable native width or general simulation breakthrough follows here.
+
+---
+
+## C91 — Two-macro low-bit Walsh coefficients admit a constant-state full shared-variable average; clean scratch has three commuting rotation domains, while dirty chronological probes remain distinct
+
+*status: proven · paper: A*
+
+# C91 — Exact shared-control reductions and their dirty-state boundary
+
+Use C89's actual `cc_add_mod` endpoint map on b,f, with fixed scratch t,
+carry h, M=2^m, H=M/2, D=t+h, r=Delta_N, Delta_c=c-2(t&c), and s=e Delta_c.
+The enable is e=u*x_j. N is odd, so r is odd. Logical gate boundaries and
+full-space dirty inputs are retained unless explicitly fixed below. SA owns
+finite validation, proof/source provenance and limitations of the experiment.
+These are arithmetic applications of known signed carry and cyclic methods,
+not general CNOT-memory or best-known performance claims.
+
+## Two-macro low-bit endpoints collapse to one autocorrelation
+
+For chronological shifts s1,s2 let g1 be the first macro's intermediate flag
+and set w=b-(1-g1)r modulo M. The first outputs obey
+
+    b1=w+D+s1,   f1=g1 XOR 1 XOR top(w).
+
+Taking low bits in the second macro and cancelling both appearances of D
+gives, with eta_i=e_i*(c_i mod2) and K=D+s1+s2-r,
+
+    b2_0 XOR b_0 = eta1 XOR eta2 XOR 1 XOR top(w) XOR top(w+K).
+
+Under uniform b,f, g1 is uniform conditional on b and each b-to-w branch is
+a translation. Thus w is uniform, and with R(z)=(-1)^top(z mod M),
+
+    E_(b,f) (-1)^(b_0+b2_0) = -(-1)^(eta1+eta2) AC(K),
+    AC(k)=E_w R(w)R(w+k)=1-4*distance(k,M*Z)/M.
+
+The distance is at most M/2. In particular this family is symmetric in the
+two enabled constants even on dirty scratch. Arbitrary additional characters
+on the restored outside wires preserve this order independence. It cannot
+by itself validate chronological interaction. Both endpoint flag masks and
+all other accumulator mask bits are zero in this theorem.
+
+## Full scratch/carry/enable average in O(m) integer operations
+
+Fix e1,e2 and reduce kappa=e1*c1+e2*c2-N modulo M. Then
+
+    K=kappa+h+sum_j a_j*t_j*2^j modulo M,
+    a_j=1+2*N_j-2*e1*(c1)_j-2*e2*(c2)_j in {-3,-1,1,3}.
+
+To sum AC(K) with any scratch character rho_t, process bits from low to high.
+Initialize carries 0 and 1 with respective weights 1 and (-1)^rho_h. For
+each state carry and each choice w_j,t_j in {0,1}, use
+
+    total=w_j+a_j*t_j+kappa_j+carry,
+    output_j=total mod2,   next_carry=floor(total/2).
+
+Multiply the weight by (-1)^(rho_t_j*t_j), and at the last column additionally
+by (-1)^(w_j+output_j). Discard final carry, since output addition is modulo M.
+The interval [-3,4] is invariant: total lies between -6 and 9. There are
+eight carry states, with four transitions each. Negative totals require floor
+division. Divide the final integer sum by 2^(2m+1), for w,t,h, then multiply
+by -(-1)^(eta1+eta2).
+
+For combined multiplicand mask rho_x and common-control mask rho_u, the
+correct signed enable weight is
+
+    W(e)=1_(e=00)*1_(rho_x=00)/2 + (-1)^(rho_u+rho_x.e)/8.
+
+It follows by separating u=0 from u=1. Sum the four fixed-enable answers
+with these weights. Equivalently enumerate the eight u,x0,x1 assignments,
+as the experimental implementation does. Replacing the shared enables by
+two independent uniform bits would change the answer.
+
+This computes one complete full-space coefficient with arbitrary combined
+outside masks in O(m) integer operations and O(m) working bits. Counts and
+the result have O(m) bits; this is not unit-cost bit time or measured allocated
+memory. Supplied macro parameters/masks and circuit input or recognition
+costs are additional. For native N,c1,c2<H, flipping t_(m-1) negates AC(K),
+so the full coefficient vanishes unless rho_t includes that bit. Spectator
+characters obey C89's zero rule.
+
+The implementation is `experiments/experiment_shared_control_average.py`.
+It covers exactly two macros and these low-bit endpoints. No growing-depth
+bound or arbitrary endpoint implementation is established by this recurrence.
+
+## Nonzero full-space and chronological probes are different
+
+For native N=3,a=2,m=3, constants 2 then 1, the full-space coefficient is
+
+    E[(-1)^(b_0+t_2+h+x_0+(b_final)_0)]=-1/16.
+
+After weighting by (-1)^t2, the h=0,h=1 averages of AC(K) over t0,t1 are
+(0,0) for enable pairs 00 and 10, (-1/4,+1/4) for 01, and (+1/4,-1/4) for
+11. The h character, macro prefactor and x0 character leave -1/4 in each of
+the latter two cases, each with full-space weight 1/8. This proves the value.
+Omitting incoming h makes the coefficient zero. Reversing the two macros
+does not change it, by the preceding theorem.
+
+A different conditional scalar detects order. For fixed t,h define
+
+    F(s1,s2)=E_(b,f) (-1)^(b_0+top(b)+f+(b_final)_0).
+
+The same change of variables gives
+
+    F=-(-1)^(eta1+eta2)/2 *
+      [E_w R(w)R(w+K)R(w+r)R(w+s1)-AC(K-s1+r)].
+
+For g1=0, b=w+r and f=top(w+s1); for g1=1, b=w and
+f=1 XOR top(w+s1-r). Their two terms prove the formula. For actual
+N=3,a=1,m=3, constants 1 then 2, fix t=2,h=0,u=1. Rows indexed by x0 and
+columns by x1 give F values [[1/2,1/2],[0,-1/2]]. Reversing the macro order
+while preserving each constant's enable gives [[1/2,0],[0,0]]. Weighting by
+(-1)^(x0+x1) and averaging gives -1/8 and +1/8 respectively. Treating disabled
+dirty macros as identity instead gives [[0,-1/2],[0,-1/2]], whose signed
+average is zero. These finite values follow from the displayed correlation
+formula; SA records the independently executed actual-gate comparison.
+They are fixed-t,h,u conditional statements, not full outside averages.
+
+## Clean fixed scratch is conjugate to three rotations
+
+Now fix t=h=0, with odd r=N<H, and take 0<=s<=r. This fixes neither b nor f.
+Write b=pH+x with p in {0,1}, 0<=x<H, eta=f XOR p, and A=M-r. The domains
+eta=0, x<r are invariant for each p separately: x maps to x+s modulo r.
+
+On the complement, consisting of eta=1 for all x and eta=0 for x>=r, define
+
+    nu=pA-2x+(1-eta)r modulo 2A.
+
+This is bijective. Within one p, opposite eta have opposite parity; across
+p with equal eta, the odd A separates parity. A cross-p/opposite-eta
+collision requires x_P-x_Q=H modulo A, where x_P in [r,H) and x_Q in [0,H).
+Their difference lies in [r-H+1,H-1], excluding H and H-A=r-H. Within a chart,
+multiplication by 2 is injective on its interval of length less than A.
+The complementary domain has exactly 2A points, proving the bijection.
+
+Its four branch transitions are:
+
+| input condition | p' | x' | eta' |
+|---|---|---|---|
+| eta=0, x>=r | p | x+s-r | 1 |
+| eta=1, x<r-s | p XOR 1 | x+s-r+H | 1 |
+| eta=1, r-s<=x<H-s | p | x+s | 0 |
+| eta=1, x>=H-s | p XOR 1 | x+s-H | 1 |
+
+Substitution gives nu'=nu+r-2s modulo 2A in every branch. Thus on all b,f,
+the clean-scratch macros are conjugate to rotations on domains of lengths
+r,r,2(M-r). After q macros, with S=sum_j e_j*c_j, their rotations are S,S
+and qr-2S. All these clean-scratch macros commute. The disabled macro still
+rotates the large domain and is not generally identity. Fixed-control
+prefixes therefore have constant chart complexity in this sector.
+
+For nonzero dirty D, interleaved T_D translations need not preserve the
+domains; dirty effective shifts may also leave [0,r]. C89's inverse identity
+at the fully dirty D=0 corner alone does not prove this conjugacy there.
+No such extension is asserted.
+
+## Cost of the clean signed average
+
+The cyclic signed kernels are 2^(-q) product_j(1+sigma_j*z^c_j) modulo z^r-1,
+and 2^(-q) z^(qr) product_j(1+sigma_j*z^(-2c_j)) modulo z^(2A)-1, where
+sigma_j=(-1)^rho_x_j. Cyclic Fourier coordinates diagonalize them, but
+materialized arrays still have Theta(M) entries. Ordinary exact cyclic DP
+costs O(qM) integer operations and O(Mq) coefficient bits. Factorization alone
+is not a polynomial-in-m full-scalar algorithm.
+
+There is a stronger constructive result for native a=1 or 2, odd N>=3,
+n=N.bit_length(), m=n+1 and q<=n, still at t=h=0. For a=1, S=X for the q-bit
+enable word. For a=2,q<n, S=2X. For a=2,q=n, condition only the top enable
+sigma and use S=2X_low+sigma*(H-N). In every case S<2H and N>H/2.
+
+For fixed small-domain input/output charts, x'=x+S-kr has only O(1) possible
+wraps. Complementary chart pairs satisfy
+
+    2x'=2x+2S+(p'-p)A+(eta-eta')r-qr modulo 2A.
+
+Reduce qr modulo 2A once. Parity excludes incompatible charts; the others
+give x'=x+S+C for O(1) offsets C, since x,x'<H and S<2H<2A. Chart conditions
+are intervals on x and x'. There are constantly many charts and wraps.
+
+An arbitrary specified b/f input/output Walsh scalar and signed enable mask
+therefore reduce to constantly many sums over x,X with affine integer
+addition x+lambda*X+C, lambda=1 or 2, and input/output interval constraints.
+A joint low-to-high digit DP retains the bounded addition carry, borrows for
+the finitely many interval inequalities, and, for lambda=2, the preceding X
+bit. Extra high columns enforce the actual output range. Chart-fixed flag
+and top-bit signs multiply the sum. This proves O(m) integer operations and
+O(m) working bits after constant-word setup, with supplied native parameters.
+The common-u sector is added using C89's exact marginalization.
+
+This last scalar DP and the clean rotation encoding are constructive proofs,
+not implemented or benchmarked APIs. They solve a clean conditioning sector;
+the growing-q shared dirty-scratch average remains unresolved.
+
+---
+
+## C92 — Dirty native macros share a reversing involution; growing disabled Mersenne prefixes admit polynomial signed contraction, while enabled prefixes retain a constructive exponential carry baseline
+
+*status: proven · paper: A*
+
+# C92 — Dirty-prefix symmetries and charged symbolic reductions
+
+Use the actual C89 `cc_add_mod` endpoint permutation on accumulator b and
+flag f, with M=2^m, H=M/2, fixed scratch t, incoming carry h, D=t+h,
+r=N-2(t&N), and s=e[c-2(t&c)], e=u*x_j. Put
+
+    g=f XOR top(b+s-r),   w=b-(1-g)r,
+    U_s(b,f)=(w+D+s mod M, g XOR 1 XOR top(w)).
+
+All top operations and b arguments are modulo M. Outside wires are restored
+by each macro. This claim concerns complete logical macro boundaries and
+one normalized full-space Walsh coefficient, not intermediate gate support,
+quantum output sampling or a measured memory advantage. DS owns finite
+evidence and proof/source provenance. The constructions below are applications
+of arithmetic and finite-state methods; no novelty or optimality is asserted.
+
+## A common reversing involution excludes a family of controls
+
+For any fixed D,r define
+
+    Q(b,f)=(H-1+D+r-b mod M, 1-f).
+
+Then Q is an involution and Q U_s Q=U_s^(-1), for every s. A direct proof
+uses top(H-1-z)=top(z). After applying U_s and then Q, the state is
+
+    (H-1+r-w-s, g XOR top(w)).
+
+Applying U_s again leaves its intermediate flag equal to g. Its output is
+
+    (H-1+D+g*r-w, g XOR 1 XOR top(w+s-g*r))
+      =(H-1+D+r-b, 1-f)=Q(b,f).
+
+Thus U_s Q U_s=Q. The same Q works for every macro in a fixed t,h fiber,
+irrespective of its constant or enable. If F=U_(q-1)...U_0 and
+F_rev=U_0...U_(q-1), then Q F Q=F_rev^(-1).
+
+Every character chi(b,f)=(-1)^(alpha*b_0+beta*f) is an eigenfunction of Q:
+its eigenvalue is (-1)^(alpha*(H-1+D+r mod2)+beta). Substitution by Q in
+the uniform autocorrelation, followed by substitution by F_rev in the
+inverse autocorrelation, therefore gives
+
+    E_(b,f) chi(b,f) chi(F(b,f))
+       = E_(b,f) chi(b,f) chi(F_rev(b,f)).
+
+This holds for each fixed t,h and enable word, at every depth. Arbitrary
+signed outside averages preserve it. Equal low-bit, equal flag, and equal
+low-bit-plus-flag endpoints cannot detect COMPLETE chronological reversal.
+It does not imply commutation or invariance under arbitrary permutations
+of three or more macros. Unequal endpoints are not excluded.
+
+## Two exact Walsh selection rules
+
+The simultaneous bit flips P: b->b+H, f->f XOR1 commute with every macro.
+The initial threshold and flag both flip, leaving g unchanged; the final
+accumulator top bit and flag both flip. Independently, J complements all
+bits of b,t and flips h,f. It sends D,r,s to -D,-r,-s, and b to -b-1.
+Again g is unchanged, and the outputs are complemented in the same way.
+Thus J commutes with the joint macro and every prefix.
+
+For W(A,C)=E_z (-1)^(A.z+C.F(z)), combine masks on restored outside wires
+as rho. The coefficient is zero unless both conditions hold:
+
+    (A_b)_(m-1)+A_f+(C_b)_(m-1)+C_f = 0 mod2,
+    |A_b|+A_f+|C_b|+C_f+|rho_t|+rho_h = 0 mod2.
+
+Nonzero combined masks on untouched spectator wires also give zero.
+These are necessary conditions, not nonzero-coefficient certificates.
+
+## A three-macro discriminator exists at every Mersenne width
+
+Now take N=2^n-1=H-1, m=n+1, a=1 and constants c_j=2^j, j<q<=n.
+For n>=3 and the first three macros, fix
+
+    t=2, h=u=1, x_0=x_1=x_2=1, f=0, b=H-8.
+
+Here D=3, r=H-5 and the enabled shifts are (1,-2,4). Direct substitution
+gives these endpoints:
+
+| schedule/reference | H range | intermediate g values | accumulator values | final flag |
+|---|---|---|---|---|
+| chronological | H>=8 | 1,1,0 | H-4,H-3,9 | 1 |
+| reversed | H=8 | 0,1,0 | 4,5,6 | 1 |
+| reversed | H>=16 | 0,1,1 | 4,5,9 | 0 |
+| chronological with incoming carry omitted | H>=8 | 1,1,0 | H-5,H-5,6 | 1 |
+
+The last reference substitutes D=t while preserving the physical input h.
+The output character C=b_0+f is zero on the chronological endpoint and one
+on both wrong endpoints. This proves that the sign functions differ.
+Walsh invertibility gives a full-space input mask distinguishing each pair.
+Moreover such a mask can be chosen with a nonzero chronological coefficient:
+if a wrong sign function agreed on every nonzero chronological coefficient,
+those coefficients would exhaust its Parseval norm one, forcing identical
+spectra and hence identical sign functions, a contradiction.
+
+The proof guarantees separate order and carry masks, not necessarily the
+same mask. It grows width with depth fixed at three; it gives neither a
+uniform mask formula nor a nonzero growing-q scalar. DS records the finite
+mask discovery and its independently verified full-space values.
+
+## Mersenne prefix coordinates retain the enable correlations
+
+Write t=T+pH, 0<=T<H, p in {0,1}, and delta=pH+h. Then
+
+    r=N-2T,   D=T+delta,   s_j=e_j*(1-2t_j)*2^j,
+    r+2D=N+2h mod M,
+    D+s_j=(t XOR e_j*2^j)+h,
+    r-2s_j=Delta_N(t XOR e_j*2^j).
+
+Let k_j count the decisions 1-g among the first j macros and let
+S_j=sum_(i<j) s_i. Summing the exact accumulator increments gives
+
+    b_j=b+jD+S_j-k_j*r
+       =b+(j+2k_j)T+j*delta+S_j-k_j*N mod M.
+
+At u=1, S_j=(T_lowj XOR X_lowj)-T_lowj. Although k_j has only j+1 values,
+it is not alone a closed state: its selection depends on the earlier flag,
+scratch and enable comparisons. Even in clean scratch, b=f=h=0 and q<n,
+every enable word gives a distinct final b=X while k_q=f_q=0. This does not
+prove a scalar lower bound; it rules out treating the count as the entire
+permutation state.
+
+## A polynomial full dirty average for the disabled common-control sector
+
+Fix u=0, so every s_j=0. Fix only p,h and the initial f, eight cases; retain
+integer b,T in 0<=b<M, 0<=T<H. For j<q, all possible first and second
+sign tests are top of the following affine forms:
+
+    E1(j,k)=b+(j+2k+2)T+j*delta-(k+1)N,  0<=k<=j,
+    E2(j,k')=b+(j+2k')T+j*delta-k'N,      0<=k'<=j+1.
+
+The second uses k'=k+1-g. Each form spans O(q) multiples of H on the
+rectangle. Include every line E1=ell*H and E2=ell*H that can cross it,
+as well as b=0,M. There are L=O(q^3) distinct nonvertical lines, each
+b+lambda*T=C with lambda=O(q) and C=O(qM). Their sign partition fixes the
+entire chronological history by induction from the fixed initial f.
+Within a cell, f_q and k_q are fixed and
+
+    b_final=b+(q+2k_q)T+q*delta-k_q*N mod M.
+
+Construct a partition using original lines, without enumerating histories.
+Sort the T coordinates of their pairwise intersections in [0,H], together
+with 0,H. Use open vertical strips between consecutive coordinates and
+separate singleton slices at each INTEGER critical coordinate in [0,H).
+For an open strip (a,d), its integer T range is
+floor(a)+1 <= T < ceil(d). Sort the original lines at a rational interior
+point; consecutive lines between b=0 and b=M give bands. On a singleton
+slice sort their evaluated heights. In both cases use lower-inclusive,
+upper-exclusive b bands, discarding empty bands. Every threshold form has
+b coefficient +1, so equality belongs to the band above the threshold.
+This assigns every integer input exactly once, including intersections.
+
+There are O(L^2) strips/slices and O(L) bands per strip, hence O(q^9)
+candidate cells in this conservative construction. Each cell requires two
+integer T bounds and two original line inequalities. Their coefficients
+remain O(q), and their constants have O(m+log q) bits. Arbitrary triangulation
+is unnecessary and could introduce diagonal coefficients scaling with M.
+Cell histories can be obtained from rational interior points; on singleton
+slices evaluate the actual integer threshold convention. A nonempty integer
+band has the same history as its continuous cell with these conventions.
+
+Sum arbitrary input/output accumulator characters and scratch characters
+on each cell with a least-significant-bit digit DP. It retains two T-bound
+borrows, carries for the two linear inequalities, and the output-addition
+carry. The three latter carries each have O(q) values. Input digits above
+their word widths are zero; O(log q) extra columns resolve integer comparison
+signs. Output-character digits above m are ignored because b_final is
+modulo M. Constants outside attainable comparison ranges are eliminated
+first; the remaining constants are read as digits, not placed in a large
+initial carry. Flag, p and h character signs are fixed in each case.
+
+Thus O(q^3) states per cell and O(m+log q) columns suffice. One deliberately
+unoptimized bound is O(q^12*(m+log q)) signed-integer operations, besides
+polynomial intersection sorting and history evaluation. Counts have O(m)
+bits. Rational setup, count bit arithmetic and supplied circuit/parameter
+costs are charged separately; they remain polynomial in m,q. Cells can be
+streamed and intersection/state storage is polynomial. No M-entry scratch
+table is required.
+
+Sum the eight fixed p,h,f cases and divide by 2^(2m+2), normalizing b,t,h,f.
+This is the conditional-u0 coefficient. Multiplicand averaging gives one
+for a zero combined x mask and zero otherwise. The full common-u average
+adds a factor 1/2 for this sector. This growing-depth construction is proved
+but unimplemented. It does not solve the enabled sector or establish a
+practical memory advantage.
+
+## A charged carry-transducer baseline for the enabled sector
+
+An exact bit-column construction is available for any specified endpoint
+masks in this Mersenne family. A native macro has five complete add/subtract
+calls: add c, subtract N, flag-controlled restore N, subtract c, add c.
+Each forward call has a binary carry initialized to h; each inverse call
+has a binary borrow initialized to h. Dirty loads only XOR controlled
+constant digits into t. Retain these five carry/borrow lanes per macro.
+
+Guess its intermediate restore flag g_j before the low-bit scan and retain
+it; verify the first sign test at the top column while propagating the
+actual flags chronologically. For each physical input there is exactly one
+accepting g vector. This gives 6q+O(1) binary frontier variables. Condition
+the common u,h and initial f in a constant number of cases. Because c_j=2^j,
+x_j occurs only at bit column j, where it can be summed with its character.
+At each column sum local b_i,t_i and, if present, x_i choices, sweep the
+five cells of each macro, and apply the final output digit character.
+Discard final carries, check all guessed flags and apply the flag character.
+
+Sparse transition generation costs O(q) per state and column. This gives
+O(m*q*2^(6q)) signed-integer operations. Counts have O(m+q) bits; a materialized
+frontier uses O(2^(6q)*(m+q)) bits. Enumerating g vectors sequentially reduces
+the frontier to 2^(5q) entries with the same conservative time bound.
+The normalized input count is 2^(2m+q+3), after removing untouched spectators.
+No hidden-path normalization factor is needed.
+
+C89 supplies a competing polynomial-memory construction: enumerate t,h,u,x
+and contract b,f through conditional intervals, in
+O(2^(m+q)*(q^2+q*m)) integer operations. Near q=n=m-1 this can be much less
+work than the conservative carry frontier. Take the better charged method;
+neither bound is a lower bound or an optimality statement.
+
+The arithmetic baseline follows established bit-serial construction ideas.
+[Bartzis and Bultan, Theorems 1–3](https://sites.cs.ucsb.edu/~bultan/publications/sttt-bar.pdf)
+construct linear-constraint BDDs with carry bounds whose product grows with
+the number of atoms. [Bryant's Table 1 and counting algorithm](https://people.eecs.berkeley.edu/~russell/classes/cs289/f04/readings/Bryant:1986.pdf)
+charge counting to the size of the supplied graph. [Kiefer, Theorem 3.6](https://arxiv.org/pdf/2009.01217)
+minimizes a supplied S-state weighted automaton in O(|Sigma|*S^3) arithmetic
+operations. These results do not supply a compact native representation
+before construction. [Klaedtke, Theorem 3.12 and the discussion after Theorem 4.6](https://arxiv.org/pdf/cs/0506008)
+distinguishes minimal automata from construction costs; [Bryant and Chen,
+Section 5](https://www.cecs.uci.edu/~papers/compendium94-03/papers/1995/dac95/pdffiles/32_1.pdf)
+give no polynomial general Apply-call bound for binary moment diagrams.
+
+For u=1, setting Y=T XOR X leaves S_j=(Y mod2^j)-(T mod2^j) in the sign
+tests. The ordinary affine arrangement above does not remove these nested
+dyadic terms. A compact bit-aware construction may exist; no polynomial
+bound for that signed full-space average, nonzero growing-q mask theorem,
+post-QFT sampler or general CNOT-memory breakthrough is established here.
+
+---
+
+## C93 — Growing enabled Mersenne endpoint coefficients admit an exact final-shift contraction in O(2^q poly(m,q)) time and polynomial memory for ascending or completely reversed native order
+
+*status: proven · paper: A*
+
+# C93 — Contracting enabled prefixes by their final signed shift
+
+Assume n>=2, m=n+1, H=2^n, M=2H, N=H-1, a=1 and 1<=q<=n.
+Use each native `cc_add_mod` constant c_i=2^i once, with its original
+multiplicand control x_i, in ascending order or complete descending order.
+All scratch, incoming carry, flag and common-enable inputs remain dirty and
+uniform. This is a result about complete logical macro endpoints and one
+exact diagonal Walsh/Pauli coefficient, not intermediate gate support or
+post-QFT output sampling. SC owns implementation evidence and provenance.
+
+For either order o, the specific implemented target is
+
+    W_o = E_(b,t,h,f,u,x) (-1)^(top(b)+h+(b_out)_0+f_out).
+
+There are 2m+q+3 used physical input bits. Untouched spectators have zero
+combined masks and cancel from the normalized average. The construction
+below gives O(2^q q^12 (m+log q)) signed-integer operations, plus polynomial
+exact geometric setup per shift, and polynomial working storage. The
+polynomial factors are deliberately conservative. The proof covers growing
+q; the guarded correctness prototype and its finite checks have narrower
+execution scope. No novelty, optimality or measured memory advantage is
+claimed. C92's enabled baseline is strengthened at this scope.
+
+## A disjoint signed-shift partition
+
+Use C89's actual dirty macro, with t=T+pH, delta=pH+h and 0<=T<H:
+
+    r=N-2T, D=T+delta, s_i=u*x_i*(1-2T_i)*2^i,
+    g=f XOR top(b+s_i-r), w=b-(1-g)r,
+    U_s(b,f)=(w+D+s_i mod M, g XOR 1 XOR top(w)).
+
+Top always acts modulo M. Condition u=1 and let Y=T_lowq XOR X. For each
+fixed T_lowq this is a bijection on X. Enumerate the true integer difference
+
+    S=Y-T_lowq,  -(2^q-1)<=S<=2^q-1.
+
+There are 2^(q+1)-1 sectors. For fixed S put a=S mod2^q and add its digits
+to T_lowq from least to most significant:
+
+    nu_0=0,
+    z_i=T_i+a_i+nu_i,
+    Y_i=z_i mod2, nu_(i+1)=floor(z_i/2), x_i=T_i XOR Y_i.
+
+Require nu_q=1[S<0]. Then Y-T_lowq=a-nu_q*2^q=S as an INTEGER.
+Conversely every physical (T_lowq,X) pair chooses exactly one S and carry
+path. The sector has 2^q-|S| low scratch/enable pairs; these unequal sizes
+sum to 2^(2q). Uniform averaging over sectors would be wrong.
+
+With a_[i]=S mod2^i, a_[0]=0, every low prefix shift is reconstructed by
+
+    P_i=Y_lowi-T_lowi=a_[i]-nu_i*2^i.
+
+Thus fixed S and one binary carry recover the nested dyadic terms that
+prevented C92's disabled affine construction from applying directly.
+This does not make macros commute or fix their correction history.
+
+## Forward and backward chronological states
+
+In ascending order let k_i count corrections 1-g before macro i. C92 gives
+
+    b_i=b+(i+2k_i)T+i*delta+P_i-k_i*N mod M.
+
+For every possible count and binary carry, tabulate top of
+
+    E1_F(i,k,v_next)
+      =b+(i+2k+2)T+i*delta-(k+1)N+a_[i+1]-v_next*2^(i+1),
+         0<=k<=i,
+    E2_F(i,k_after,v)
+      =b+(i+2k_after)T+i*delta-k_after*N+a_[i]-v*2^i,
+         0<=k_after<=i+1.
+
+On a cell where all these tops are fixed, denote them B1_F,B2_F. At digit
+i the addition supplies nu_i,nu_(i+1), and the actual history update is
+
+    g=f_i XOR B1_F(i,k_i,nu_(i+1)),
+    k_(i+1)=k_i+1-g,
+    f_(i+1)=g XOR 1 XOR B2_F(i,k_(i+1),nu_i).
+
+The first test uses P_(i+1), the second P_i. The cell need not fix a single
+history: the running count, flag and addition carry select table entries.
+
+For descending order the low-to-high digit scan works BACKWARD through
+chronology. At bit i its macro time is j=q-1-i. Shifts before and after
+that forward macro are S-P_(i+1) and S-P_i, respectively. Tabulate
+
+    E1_R(i,k_before,v)
+      =b+(j+2k_before+2)T+j*delta-(k_before+1)N+S-a_[i]+v*2^i,
+         0<=k_before<=j,
+    E2_R(i,k_after,v_next)
+      =b+(j+2k_after)T+j*delta-k_after*N+S-a_[i+1]+v_next*2^(i+1),
+         0<=k_after<=j+1.
+
+Given (k_after,f_after), solve the actual two flag equations:
+
+    g=f_after XOR 1 XOR B2_R(i,k_after,nu_(i+1)),
+    k_before=k_after-1+g,
+    f_before=g XOR B1_R(i,k_before,nu_i).
+
+Reject counts outside 0,...,j. E2 does not depend on a further guessed g
+once k_after is known, so this is deterministic. Initialize all final
+(K,F), with 0<=K<=q and F binary; terminate at k_0=0 and the physical
+initial f. Every accepted reverse path satisfies all forward equations.
+Forward determinism therefore gives exactly one accepted starting (K,F)
+for each physical input. Merging equal states sums real input counts and
+introduces no extra normalization.
+
+These two scans depend on native bit/time alignment. A general permutation
+of macros is covered by the separate ternary construction below, not by
+an unproved reordering of this recurrence.
+
+## Original-line cells and exact signed digit contraction
+
+Fix S,p,h and an order. Both catalogs contain O(q^2) affine forms
+b+lambda*T+C0, lambda=O(q), |C0|=O(qM). Each spans O(q) multiples of H
+over 0<=b<M, 0<=T<H. Include all threshold lines E=ell*H crossing that
+rectangle and b=0,M: L=O(q^3) lines b+lambda*T=C. Including unattainable
+carry alternatives only refines the partition.
+
+Apply C92's exact decomposition using original lines. Sort their rational
+pair-intersection T coordinates in the rectangle, with 0,H. Use open
+vertical strips between events and separate singleton slices at INTEGER
+critical T in [0,H). For a strip (a,d), its integer bounds are
+floor(a)+1<=T<ceil(d). Sort line heights at a rational interior T, and use
+consecutive b bands between b=0,M. At a singleton use the actual evaluated
+heights. Bands are lower-inclusive and upper-exclusive. Equality belongs
+above each threshold because every form has b coefficient +1.
+
+Every lattice input lies in exactly one cell, including intersections.
+All tabulated tops are constant on a cell with this boundary convention.
+There are O(L^2) strips/slices, O(L) bands each, hence O(q^9) candidate
+cells. Each needs two integer T bounds and two original-line inequalities;
+coefficients stay O(q), constants use O(m+log q) bits. No lattice-word
+enumeration or triangulation with modulus-sized slopes is required.
+
+For either order,
+
+    b_out=b+(q+2K)T+q*delta+S-KN mod M,
+    (b_out)_0=b_0+q*T_0+q*h+S_0+K mod2.
+
+The complete target phase is consequently
+
+    top(b)+b_0+q*T_0+(q+1)h+S_0+K+F mod2.
+
+It needs no output-addition carry or separate retained final K. In one
+cell, a least-significant-bit signed DP retains two binary T-bound borrows,
+two O(q)-valued original-line comparison carries, binary nu, and current
+k=O(q), f binary. Sum local physical b_i,T_i choices with their phase.
+At i<q use the aligned macro recurrence. Above q freeze its state, and
+above the physical widths pin input digits to zero. Read constants as
+digits instead of placing their full magnitude into initial carries.
+O(log q) extra columns settle integer comparisons by their final signs.
+The two line carries are bounded by the sum of their O(q) coefficients.
+
+Forward initialization sums both physical flags at k=0 with weight one;
+multiply (-1)^(k+f) at the terminal state. Reverse initialization assigns
+weight (-1)^(K+F) to every final (K,F); require k=0 at termination and sum
+the recovered physical flags. In both cases apply the common constant
+phase S_0+(q+1)h and enforce the signed-sector terminal carry. Comparisons
+finally accept only inputs belonging to the cell whose table was used.
+Using that table before all digits are read is legitimate conditional
+computation, not a guessed global history.
+
+There are O(q^3) states, a constant number of local digit choices and
+O(m+log q) columns per cell. Streaming cells and signed shifts yields
+
+    O(2^q q^12 (m+log q)) signed-integer operations,
+
+besides polynomial exact setup per sector. Sorting intersections, line
+orders and sign tables is charged; it stays polynomial in m,q. For example,
+the naive intersection list uses O(q^6(m+log q)) bits, and current/next
+count dictionaries use O(q^3(m+q)) bits. Counts, intermediate signed
+multiplicities and the total accumulator have O(m+q) bits. Bit arithmetic,
+parameter/mask storage, supplied circuit input and final extraction are
+additional polynomial costs. No array indexed by every scratch word or
+every flag history is built. Storing all output sectors simultaneously is
+unnecessary; only the bounded validation report does so.
+
+## Full common-enable average and symmetry
+
+Let N_o(S) be the unnormalized target sum for fixed S after summing all
+cells, b,T,p,h and both physical initial flags. Its unsigned mass is
+
+    2^(2m-q+2) * (2^q-|S|).
+
+S=0 forces X=0. Its map is U_0^q in either order, exactly the disabled
+u=0 map. The disabled sector has all 2^q spectator X values, so
+
+    W_o = [2^q*N_o(0)+sum_S N_o(S)] / 2^(2m+q+3).
+
+The first term supplies u=0; the second u=1. Hidden carry paths and reverse
+initializations supply no extra factors. The implementation uses this
+formula and therefore also implements the target's disabled contribution.
+The arbitrary-mask disabled construction in C92 remains proof-only.
+
+C92's complement J sends S to -S and preserves this target sign, giving
+N_o(-S)=N_o(S). Also N_forward(0)=N_reverse(0). Hence
+
+    W_forward-W_reverse
+      = sum_(S=1)^(2^q-1) [N_forward(S)-N_reverse(S)] / 2^(2m+q+2).
+
+The prototype checks all signed sectors; this optional pairing is not
+implemented. The identities alone prove neither a nonzero difference nor
+a closed formula as q grows.
+
+## General endpoints and arbitrary schedules
+
+For the same ascending/descending family, arbitrary endpoint and restored-
+wire characters have a polynomial-factor extension. Input and scratch
+signs are local; x_i=T_i XOR Y_i gives local x signs. An arbitrary output
+accumulator character needs the affine output carry. Enumerate proposed
+K=0,...,q, use b+(q+2K)T+q*delta+S-KN to produce its digits and accept only
+histories with that final count. In reverse fix K at initialization, retain
+the corresponding output-addition carry and apply the input flag sign on
+the recovered f_0. This adds one O(q) carry and an O(q) outer count loop:
+a safe bound is O(2^q q^14(m+log q)) integer operations plus polynomial
+setup, with polynomial streamed memory. A nonzero x mask annihilates u=0;
+otherwise add its C92 contraction with factor 1/2. Apply a u character
+only to the enabled term. This extension is proved, not implemented here.
+
+For an arbitrary declared permutation of the q constants, fix instead
+d_i=x_i(1-2T_i) in {-1,0,+1}. The zero case fixes x_i=0 with T_i free;
+the positive and negative cases fix (x_i,T_i)=(1,0),(1,1). Every prefix
+shift in that declared order is then a known constant S_j. C92's forms
+become
+
+    E1(j,k)=b+(j+2k+2)T+j*delta+S_(j+1)-(k+1)N,
+    E2(j,k')=b+(j+2k')T+j*delta+S_j-k'N.
+
+The same geometry fixes the entire history for each initial flag. Enforce
+scratch digit pins and fixed x signs in the C92 DP; they add no state.
+The output carry has O(q) states, giving the conservative
+O(3^q q^12(m+log q)) integer-operation construction, polynomial setup per
+sector and polynomial memory for arbitrary endpoints and schedules.
+If d has a nonzero digits its scratch multiplicity is 2^(m-a); the sum
+over sectors is 2^(m+q). Actual counts, not equal 3^(-q) weights, provide
+the same physical normalization. This construction is also proof-only.
+
+These sector counts are upper bounds from explicit constructions, not
+rank lower bounds. For instance the local scratch-versus-ternary matrix
+with an x-character sign sigma is [[1,sigma,0],[1,0,sigma]], of rank two.
+Replacing ternary sectors by a rank-two superposition loses the fixed
+prefix catalog; it supplies no lower bound and no automatic base-two
+arbitrary-schedule algorithm.
+
+## A folded-flag baseline and the one-macro zero
+
+C92's symmetry P permits a signed quotient, retaining its orbit sign.
+Write b=z+vH, 0<=z<H, eta=f XOR v and tau_a(z)=top(z+a mod M). Then
+
+    g=eta XOR tau_(s-r)(z), y=(z-(1-g)r) mod H,
+    z'=(y+D+s) mod H, eta'=g XOR 1 XOR tau_(D+s)(y),
+    kappa=tau_(-(1-g)r)(z) XOR tau_(D+s)(y), v'=v XOR kappa.
+
+Thus a P-odd function (-1)^v V(z,eta) pulls back as
+L_s V=(-1)^kappa V(z',eta'). The output representative is
+V_C=(-1)^(z_0+eta); the input representative is the constant (-1)^h.
+The cocycle follows by tracking the top bit through the two translations;
+discarding it would change the Walsh coefficient.
+
+Decompose V into eta-even and eta-odd components E,O. Flipping scratch
+top p sends L_s to -L_s R, with R flipping eta. A backward block path
+a_0=E,...,a_q=O gains (-1)^(number of E among a_1,...,a_q). Scratch-top
+averaging keeps even counts for this target. It does not force even-q
+cancellation: the all-O input-leg path is allowed at every depth and
+terminal propagation has both components.
+
+For q=1 put A(z)=tau_(-r)(z). Direct substitution simplifies the target to
+(-1)^(z_0+T_0+e+(1-g)A(z)), where e=u*x_0. Averaging eta keeps A(z)=0.
+For odd r this is z>=r if r>0, or z<H+r if r<0; its alternating sum is
+-sign(r). Thus the conditional b,f average including the h sign is
+
+    (-1)^(T_0+e+1+T_(n-1)) / H.
+
+Averaging u,x gives factor 1/2, and averaging T gives W=0 for all n>=2.
+Adding scratch character T_0+T_(n-1) instead gives -1/(2H), explicitly a
+fixed-depth family. Neither is a growing-depth nonzero theorem or pruning
+rule. For growing q, averaging the two enable pullbacks on two length-H
+arrays and enumerating T,p,h,u gives O(qH^2) integer operations and
+O(H(m+q)) bits, including direct transition construction. It removes the
+enable-word enumeration but still materializes exponential-width storage.
+
+## Charged comparisons and limits
+
+C89's interval method already supplies polynomial memory while enumerating
+outside variables in O(2^(m+q)(q^2+qm)) integer operations. The final-shift
+construction removes its exponential dependence on scratch width for this
+family. Near q=n it changes that exponential part from order 4^q to order
+2^q, with a much larger conservative polynomial factor. C91's clean-sector
+and fixed-two-macro formulas have different restricted scopes; they remain
+preferable when their hypotheses apply. Take the cheapest charged method
+for the actual parameters. Polynomial memory by itself is not new here.
+
+An endpoint carry construction also sharpens C92's five-word-lane baseline.
+Condition the intermediate g vector. For g=0 compute W=b-r, P=W+s,
+b'=P+t+h with carries (c,z,v). Their closed alphabet is z=0 with
+c in {-1,0,1}, v binary; z=1 with c in {-1,0},v=0; and z=-1 with
+c in {0,1},v=1: ten states. Before the impulse s, only the six z=0
+states occur. For g=1 compute P=b+s-r and b'=b+(t XOR e*2^i)+h;
+their carry pair lies in {(-1,0),(0,0),(0,1),(1,1)}: four states.
+
+These invariants follow from signed digit r_i=1-2T_i. At a positive
+impulse z=1 forces emitted P_i=0 and the addition carry zero; a negative
+impulse forces P_i=1 and carry one. Those restrictions persist until z
+dies. In the g=1 branch the excluded opposite carry corners cannot be
+entered from any allowed pair. Initialize subtraction/impulse carries
+zero and addition carry h, discard word-top carries, enforce
+g=f XOR top(P), and update f'=g XOR 1 XOR top(W) chronologically.
+Each physical input has one accepted g vector. The disjoint alphabets
+give O(mq14^q) integer operations and up to 14^q materialized entries;
+sequential g conditioning uses at most 10^q entries with the same total
+time bound. This proof-only baseline is weaker asymptotically than the
+sector constructions and is not an automaton-minimality result.
+
+Bit-serial arithmetic and automaton contraction are established methods.
+[Bartzis and Bultan, Theorems 1–3](https://sites.cs.ucsb.edu/~bultan/publications/sttt-bar.pdf)
+bound explicit arithmetic BDD construction; combining atoms multiplies
+their coefficient-sum bounds. [Kiefer, Theorem 3.6](https://arxiv.org/pdf/2009.01217)
+minimizes an already supplied S-state weighted automaton in
+O(|Sigma|S^3) field operations. Neither removes the cost of constructing
+the native representation. C92 records the broader primary-source scope.
+This is a project-specific construction using known ingredients, with no
+best-known-method or published-novelty claim.
+
+The algorithm remains exponential in q. No polynomial growing-q closure,
+general nonzero mask formula, practical allocation advantage over the
+strongest baseline, scalar hardness, or general CNOT-memory breakthrough
+is established. The source implements only the stated target and two
+aligned schedules, with n<=64, q<=8 and explicit geometry/state guards.
+
+---
+
+## C94 — Conditional modular-add Walsh queries admit exact itinerary replay in O(q²+qm) word operations and O(m+log(q+1)) auxiliary bits, avoiding the global interval table
+
+*status: proven · paper: A*
+
+# C94 — Exact conditional queries without a global interval table
+
+Fix the scratch word t, incoming carry h and all outside controls of a
+chronological q-macro prefix of actual native `cc_add_mod` operations.
+The register roles remain fixed as in C89. Set M=2^m and encode the free
+accumulator and flag by z=fM+b. For arbitrary (m+1)-bit masks A,C, compute
+
+    B(A,C)=sum_(0<=z<2M) (-1)^(popcount(A&z)+popcount(C&F(z))).
+
+The normalized conditional coefficient is B/(2M). No outside sign or
+outside average is included. For q>=1 and a fixed number of requested
+masks, the following construction uses O(q²+qm) arithmetic-word operations
+and O(m+log(q+1)) auxiliary bits, beyond the supplied schedule and inputs.
+IS owns implementation, independent validation and measured performance.
+This is a deduction from C89's interval exchange and range-Walsh machinery,
+with no published-novelty or optimality claim.
+
+## Replay one itinerary at a time
+
+C89 gives a bijective ordinary translation on at most sixteen local
+intervals per macro. With H=M/2, r=N-2(t&N), D=t+h and s=e(c-2(t&c)),
+its boundary residues in each input flag lane are
+
+    {0,H,r,r+H,r-s,r-s+H,-D-s+r,-D-s} modulo M.
+
+The terminal lane endpoint is M. At a current point z=fM+b, initialize
+the next-boundary distance to M-b and scan the constantly many residues,
+retaining the smallest positive cut-b. Repeated residues are harmless.
+The output-wrap residues must be retained; a flag lane is not a single
+ordinary translation merely because its modular formula is simple.
+
+For an original-domain start lo, perform this replay:
+
+    span=2M-lo; z=lo
+    for each chronological macro U_j:
+        span=min(span, next_local_boundary_distance(z))
+        z=U_j(z)
+    emit [lo,lo+span) with shift z-lo
+    lo=lo+span
+
+The induction invariant is that every original x in [lo,lo+span) follows
+the same ordinary translation at every processed macro. Intersecting its
+current image with the next local interval preserves that invariant, so
+the final map on the entire emitted interval is x -> x+(z-lo). Distances
+are positive. Advancing lo therefore covers the input domain disjointly.
+
+This traverses the full itinerary refinement, including cuts that later
+cancel. The image intervals of a prefix tile [0,2M) bijectively. Each new
+macro boundary lies in at most one such image interior and adds at most
+one original-domain cut. There are at most fifteen new boundaries per
+macro. Retaining earlier cuts still gives at most 1+15q raw segments.
+
+Hold one pending segment and merge the next segment into it whenever
+their final shifts agree. Adjacent equal translations have that same
+translation on their union. Every true final translation change is a raw
+boundary, so this procedure emits exactly the maximal pieces returned by
+C89's `_merge`, using constant additional storage. A merged piece need
+not have fixed input/output flags; the arbitrary-mask DP handles this.
+
+## Exact contraction and charged costs
+
+Each emitted piece contributes the difference of two C89 four-state
+range-Walsh prefix sums. This costs O(m) growing-integer operations per
+mask. Summing over the disjoint original intervals gives exactly B.
+The absolute partial scalar sum is at most 2M, and DP weights and temporary
+differences also have O(m) bits. Exact cancellation introduces no hidden
+large count buffer or precision parameter.
+
+Replay costs O(q²) word operations and contraction costs O(kqm) for k
+queries. A bound including q=0 is O(q²+k(q+1)m): the implementation emits
+one identity interval and contracts it normally at zero depth. A constant
+number of m-bit states, residues and segment triples, O(log(q+1))-bit
+counters and the four-state DP are live. For fixed k the auxiliary bound
+is O(m+log(q+1)); variable k also requires O(km) bits for masks and outputs.
+
+Schedule access, validation and supplied input storage must be charged.
+A materialized q-word schedule still occupies O(qm) input bits. For the
+native a=1 powers c_i=2^i, with packed multiplicand controls, a lazy view
+generates each paired constant/enable in ascending or reversed order from
+O(m+q) supplied bits. The implementation does not build a q-word list.
+It is an evaluator of the stated macro family, not a recognizer of an
+arbitrary supplied circuit. Other access costs remain additional.
+
+These are arithmetic-operation counts, not unit-cost bit time or allocated
+bytes. A conservative elementary bound, including word arithmetic and
+loop indices, is O((q²+k(q+1)m)(m+log(q+1))), plus schedule access. The
+guarded prototype accepts m<=4096 and q<=256; its actual finite validation
+and performance scope are narrower and recorded in IS.
+
+The current C89 compiler retains O(qm) auxiliary bits and has the same
+O(q²+kqm) word-operation bound. Replay removes its stored global table by
+recomputing itineraries. IS establishes a scoped task-allocation advantage
+over that current Python compiler using the same lazy inputs and outputs.
+IS also confirms a saving against a two-buffer packed C89 implementation,
+including its packed image-coverage validator and complete query work.
+Other packed or in-place algorithms and global optimality remain unmeasured.
+
+## Scope of the improvement
+
+The proof is conditional on all outside variables. Sequentially averaging
+over them can reuse this workspace, but direct enumeration retains C89's
+exponential outside time. C93 has a stronger time construction for its
+special fully averaged Mersenne target; it is a different output contract
+from the four fixed-outside scalars measured here. No removal of its
+exponential depth factor has been proved.
+
+The fixed-width allocation experiment does not establish m-scaling,
+repeatable process-RSS savings, or superiority over every representation.
+Neither the theorem nor the measurement describes intermediate Pauli or
+CNOT support, quantum state storage, full Shor output probabilities or a
+post-QFT sampler. The general quantum-simulation memory problem remains
+open; this result improves an exact conditional scalar subroutine.
+
+---
+
+## C95 — Native final-shift lifts require exponentially many convex sign cells; exact all-shift transitions have fixed-dimensional counting atoms, with repeated closure still open
+
+*status: proven · paper: A*
+
+# C95 — Final-shift geometry and the missing counting closure
+
+The literal three-variable lift of C93's sign-constant convex-cell method
+needs exponentially many cells, including on reachable native trajectories.
+This is a representation-specific obstruction. An exact all-shift set
+recurrence and fixed-dimensional encodings of its individual atoms follow
+below. No polynomial bound on intermediate representation size, faster full-average
+algorithm, scalar hardness or published novelty is proved. SG owns source
+and independent-review provenance; TODO50 owns the next closure question.
+
+Let n>=2, m=n+1, H=2^n, M=2H, N=H-1, Q=2^q, 1<=q<=n.
+The actual native constants are 2^i, used ascending or descending with
+original controls x_i and common u. Write t=T+pH, delta=pH+h,
+0<=T<H, r=N-2T and D=T+delta. The dirty macro is
+
+    g=f XOR top(b+s-r),  w=b-(1-g)r,
+    b'=w+D+s mod M,      f'=g XOR 1 XOR top(w),
+    s=u*x_i*(1-2T_i)*2^i.
+
+Here top(z)=floor(z/H) mod 2 for an arbitrary signed integer z; this
+agrees with reducing modulo M first. Outside wires are restored.
+The target is exactly
+
+    W_o=E (-1)^(top(b)+h+(b_out)_0+f_out),
+
+with 2m+q+3 used uniform physical bits, including all dirty wires.
+Untouched spectators carry zero combined masks.
+
+At u=1, set S=(T_lowq XOR X)-T_lowq. For fixed T, each allowed S has
+exactly one X. Thus the physical three-variable domain is
+
+    D_q = { (b,T,S) in Z^3 : 0<=b<M, 0<=T<H,
+                             0<=T_lowq+S<Q }.
+
+It implies -(Q-1)<=S<=Q-1. Set
+
+    P_i=((T+S) mod 2^i)-(T mod 2^i),  0<=i<=q.
+
+This is identical to C93's a_[i]-nu_i*2^i: both are the integer difference
+between the low i bits of Y and T. In particular P_0=0 and P_q=S.
+It replaces two pieces of notation, not the cost of resolving their bits.
+
+## Ascending convex-cell obstruction
+
+Fix T=p=h=0, the physical initial flag f=0, and b=M-2. For each
+S in {0,...,Q-1}, take X=S. This is in D_q and all addition carries
+nu_i are zero. The first chronological macro has s_0=S mod 2, so its
+actually used first top test is
+
+    top(b+s_0-r)=top(H-1+(S mod2))=S mod2.                 (1)
+
+This is also C93's E1_F(0,0,0) evaluated on this line; no unreachable
+alternative count or guessed carry is needed.
+
+Suppose a disjoint partition covers the integer inputs by intersections
+of convex real cells with the integer lattice, and the used test (1) is
+constant on each cell's physical lattice inputs. A cell containing two
+of these collinear integer points either contains points of opposite
+parity already, or contains the intermediate integer point of opposite
+parity by convexity. It can therefore contain at most one point of this
+line. At least Q=2^q cells are necessary.
+
+Open or half-open convex boundary conventions do not change the argument:
+if both endpoints lie in a convex cell, their segment lies in it.
+The witness uses a boundary slice T=0, which is part of the full dirty
+sum and cannot be discarded in an exact construction.
+
+## Descending obstruction with reachable final count
+
+Fix T=p=h=f=0 and, for every 1<=S<=Q-1, take X=S and b=N-S.
+These inputs lie in the clean code 0<=b<N; cleanliness is used only to
+provide physical witnesses inside the full dirty domain.
+
+For this code, a native macro adds s in {0,2^i} modulo N and restores
+f=0. For completeness: if b+s<N, then top(b+s-N)=1, g=1, and
+(b',f')=(b+s,0). If b+s>=N, then g=0, w=b-N<0 with top(w)=1,
+and (b',f')=(b+s-N,0). Each enabled s<=H/2<N and b+s<2N,
+so these two cases are exhaustive. This is a direct use of the dirty
+endpoint equations, not an assumption that arbitrary dirty macros commute.
+
+The total added shift is S, and the starting b=N-S. Hence b_out=0,
+f_out=0 and the total correction count K=1. Immediately before the last
+descending macro (constant 1), the accumulator is
+
+    b_before=(N-(S mod2)) mod N
+            =0 if S is even, N-1 if S is odd.
+
+If S is even, its zero shift gives g=1, w=0. If S is odd, its unit shift
+gives g=0, w=-1 mod M. Therefore its actually used second top test is
+
+    top(w)=S mod2.                                      (2)
+
+The C93 reverse catalog entry is E2_R(i=0,k_after=1,v_next=0).
+Here j=q-1 and, on this line,
+
+    E2_R=b-N+S-(S mod2)=-(S mod2),
+
+whose top agrees with (2). K=1 is the actual final count for every witness,
+and T=0 gives the actual prefix carry zero. The same convexity argument
+forces at least Q-1=2^q-1 cells. This applies to the literal C93 reverse
+sign-table lift, not just to a partition into full chronological histories.
+
+Crucially, the target sign on this entire reversed witness line is +1:
+b=N-S<H, h=0, and the endpoint is (0,0). Thus an exponentially alternating
+internal sign test can coexist with a constant final target. This concrete
+example rules out interpreting the cell lower bound as an endpoint-function
+or scalar-counting lower bound.
+
+## Why three coordinates and floors are not yet a polynomial algorithm
+
+For fixed S, C93 treats a_[i]=S mod2^i as a constant and builds original
+lines. When S varies, each such line has dyadic sawtooth pieces. Treating
+those pieces as ordinary affine sheets must charge their number; the
+witnesses above give an exponential lower bound without relying on a loose
+upper bound for the full arrangement.
+
+Introducing z_i=floor(S/2^i) supplies q bounded, constrained integer
+variables. Their uniqueness does not make the *ambient dimension* of that
+lift fixed. Adding history variables k_i and f_i has the same issue.
+Moreover, writing (i+2k_i)T with k_i variable is bilinear; to express the
+native conditions in Presburger linear syntax one can use a disjunction
+over k_i=0,...,i with fixed coefficients, but must charge those atoms and
+history variables. A polynomial-length existential description is not
+itself a polynomial-time counting algorithm.
+
+Likewise, the two parity classes already compress (1) as congruence sets;
+its signed polynomial is
+
+    sum_(S=0)^(Q-1) (-1)^S z^S = (1-z^Q)/(1+z).
+
+Thus the obstruction does not exclude compact rational representations.
+Their construction and closure, rather than the three physical coordinates
+alone, are the remaining issue.
+
+## Exact all-shift set recurrence
+
+This is a precise candidate for the next proof discriminator. Fix p,h
+and the physical initial flag f0. Let A_j(k,f) be the subset of D_q whose
+history after j actual macros has count k and flag f. Initially
+
+    A_0(0,f0)=D_q; all other sets are empty.
+
+For ascending order, at step j=i define, for fixed *label* k and g,
+
+    E1=b+(j+2k+2)T+j*delta+P_(i+1)-(k+1)N,
+    k'=k+1-g,
+    E2=b+(j+2k')T+j*delta+P_i-k'N.
+
+For descending order, at step j=q-1-i define instead
+
+    E1=b+(j+2k+2)T+j*delta+S-P_i-(k+1)N,
+    k'=k+1-g,
+    E2=b+(j+2k')T+j*delta+S-P_(i+1)-k'N.
+
+For every f,g,f' in {0,1}, transfer the set
+
+    A_j(k,f) INTERSECT {top(E1)=f XOR g}
+             INTERSECT {top(E2)=f' XOR g XOR 1}
+
+to A_(j+1)(k',f'). All coefficients k,k',j in these atoms are fixed
+state labels, not integer unknowns multiplying T. Transfers to the same
+destination are disjoint because the native history is deterministic
+for fixed f0; generating functions can therefore be added without
+inclusion-exclusion between predecessor paths. There are O(q) labels per
+layer and O(q^2) transfers across q layers, each with a constant number
+of local branches. This does not bound the complexity of the sets stored
+at those labels. The descending recurrence runs in actual chronology;
+it does not assume C93's low-to-high digit scan is available without
+fixed-sector tables.
+
+For a finite set A, write its generating function as
+
+    G_A(z_b,z_T,z_S)=sum_(b,T,S in A) z_b^b z_T^T z_S^S.
+
+Then intersection is the coefficientwise (Hadamard) product of these
+indicator generating functions. These operations describe an exact
+polynomial-size symbolic DAG of set operations. Evaluating that DAG to
+count its outputs is the unresolved computational step.
+
+## Every individual sign atom does have a fixed-dimensional lift
+
+This positive observation does not bundle q floor variables into one
+fixed-dimensional theorem application. It handles one atom at a time.
+Adjoin the unique domain quotient R by
+
+    0<=T-Q*R<Q,  0<=T-Q*R+S<Q.
+
+For one prefix P_i, introduce the two unique quotients U,V via
+
+    0<=T-2^i*U<2^i,
+    0<=T+S-2^i*V<2^i,
+    P_i=S+2^i*(U-V).
+
+For a prescribed top bit e, introduce its unique quotient L by
+
+    2H*L+eH <= E < 2H*L+(e+1)H.
+
+All strict upper integer bounds can be lowered by one. With the b,T
+bounds and the physical S bound these define a bounded rational polytope
+in exactly seven integer coordinates (b,T,S,R,U,V,L), or fewer when
+P_0 or P_q simplifies. Negative E causes no ambiguity. Its projection
+onto (b,T,S) is exactly the desired sign atom within D_q. Every witness
+quotient is unique, although the projection theorem does not require that.
+Coefficient and constant bit lengths are O(m+log q), and fixed k labels
+avoid bilinear expressions. Combining the two sign tests of ONE transfer
+can use separate quotient copies, still a fixed dimension independent of q.
+
+Consequently each individual transition set has a polynomial-size short
+generating function obtainable by the fixed-source-dimension projection
+theorem of [Barvinok and Woods, Theorem 1.7](https://arxiv.org/pdf/math/0211146). There are polynomially many such
+atoms to precompute. This handles their potentially exponential number
+of ordinary sawtooth pieces exactly.
+
+The missing theorem is closure of the intermediate G_A under q layers
+of these specific Hadamard products and disjoint sums. Generic closure
+results for a fixed number of operands do not establish that theorem.
+In particular denominator index (number of binomials per denominator),
+number of fractions, coefficient bits, preprocessing, and peak live
+storage must all be bounded and constructible. Calling a nested symbolic
+expression a short generating function would hide the original counting
+problem.
+
+## Signed extraction and disabled weight are retained
+
+The endpoint phase from C93 is
+
+    top(b)+b_0+(q mod2)*T_0+(q+1)*h+S_0+K+F mod2.
+
+For each terminal A_q(K,F), split b into its two top-bit halves and
+apply the remaining parity character in b,T,S. Equivalently, take the
+difference of the two half-domain generating functions and evaluate
+(z_b,z_T,z_S)=(-1,(-1)^q,-1), with constant sign
+(-1)^((q+1)h+K+F). This is an exact mathematical extraction; an algorithm
+using rational fractions must charge cancellation at removable poles,
+or use equivalent parity-class counting. Sum all p,h,f0 cases.
+
+Let N_o(S) be the resulting fixed-S numerator. The domain contains
+Q-|S| low scratch/enable pairs, and its full unsigned sector mass is
+
+    2^(2m-q+2)*(Q-|S|).
+
+At S=0, X=0 uniquely in u=1 and every macro has zero shift. In u=0,
+all Q multiplicand words induce that same map. The desired result is
+
+    W_o=[Q*N_o(0)+sum_S N_o(S)] / 2^(2m+q+3).
+
+For the all-shift set recurrence, obtain N_o(0) by restricting the
+terminal sets to S=0. No uniform weighting of shifts or extra hidden
+path normalization is permitted. C93's S<->-S symmetry may pair sectors,
+but does not remove this factor. The obstructed lines are witnesses only;
+no replacement of the full physical domain by those slices is proposed.
+
+## Counting-theorem scope and unresolved cost
+
+[Barvinok and Woods, Theorem 3.6 and Corollary 3.7](https://arxiv.org/pdf/math/0211146)
+fix the denominator index and, for their Boolean-operation statement, the
+number of operands. Intersection may double the stated index bound. These
+results justify individual atoms and a fixed number of operations; they do
+not give a uniform polynomial bound for the q successive native layers.
+Both the number of rational fractions and their denominator indices and
+coefficient bits must be bounded constructively. Keeping a short symbolic
+DAG with uncharged Hadamard evaluation does not meet that requirement.
+
+[Nguyen and Pak, Theorems 1.1 and 1.5 and their Section 1.5](https://arxiv.org/pdf/1708.08179)
+also prevent replacing these missing bounds by a general fixed-variable
+Presburger-counting slogan. Their quantified hard family is not the native
+dyadic recurrence, and no hardness conclusion is transferred here. SG records
+the audited primary-source hypotheses and the distinction from an earlier
+conditional positive theorem.
+
+C93 remains the established full-average construction. C94 is a different
+conditional subroutine. The positive result here is the exact set recurrence
+and fixed-dimensional per-atom encoding; whether its native dyadic structure
+admits polynomially charged repeated closure is open. The constant endpoint
+on the reversed witness line prevents confusing the convex-cell obstruction
+with difficulty of the requested scalar itself.
+
+---
+
+## C96 — Exact thresholded Walsh sums skip mask-free bit blocks in at most 2K+1 joint carry/borrow transfers, with growing-integer costs retained
+
+*status: proven · paper: A*
+
+# C96 — Sparse Walsh masks permit exact block contraction
+
+C89's four-state prefix contraction admits the following exact refinement.
+For n>=0, Q=2^n, integer 0<=L<=Q, masks 0<=A,C<Q and any signed
+integer s, define the unnormalized integer
+
+    W(n,L,s,A,C)=sum_(0<=x<L) (-1)^(popcount(A&x)+popcount(C&((x+s) mod Q))).
+
+Writing K=popcount(A|C), W can be evaluated in at most 2K+1 transfers
+of a four-entry joint carry/borrow state. Each transfer uses constantly
+many growing-integer operations, including general products for a block.
+This refines the number of transfers for sparse masks; it is neither a
+constant-time arbitrary-width algorithm nor a measured speedup. SB owns
+implementation evidence, source comparison and independent review.
+
+## Joint block counts and signed steps
+
+For L=0 return zero after validating the domain. Otherwise reduce S=s mod Q,
+retain full=(L==Q), and set L0=L mod Q. After processing the low p bits,
+state D[c,v] is the signed sum over their input words u with
+
+    c=floor((u+(S mod 2^p))/2^p),
+    v=1[u<(L0 mod 2^p)].
+
+The partial Walsh sign includes only positions below p. Both states
+start at zero; carry and borrow depend on the same input word and cannot
+be replaced by independent marginals. Each weight has O(p+1) bits,
+because the sum of absolute state weights is at most 2^p.
+
+For a mask-free block of w>=1 bits starting at p, put
+
+    B=2^w, a=(S>>p) mod B, ell=(L0>>p) mod B,
+    t=B-a-c, b=ell+v.
+
+For block input X in [0,B), outgoing carry is 1[X>=t] and outgoing
+borrow is 1[X<b]. The thresholds lie in [0,B]. In destination order
+(carry,borrow)=00,01,10,11, the exact transition counts are
+
+    (max(0,t-b), min(t,b), B-max(t,b), max(0,b-t)).
+
+These are lengths of intersections of half-open integer intervals. They
+sum to B, include X=t in carry-one, and exclude X=b from borrow-one.
+Multiply this row by each incoming signed weight and sum. Every block
+input is available for each lower word in a given incoming joint state,
+so aggregation commutes with extension. There is no local sign because
+both masks vanish throughout the block.
+
+At an active mask bit use the original C89 transition: for x in {0,1},
+y=(x+S_p+c) mod2, c'=floor((x+S_p+c)/2), v'=1[x-(L0)_p-v<0],
+with multiplier (-1)^(A_p*x+C_p*y). Induction preserves the joint-state
+invariant. At p=n retain v=1 if L<Q; if L=Q accept every state.
+Always sum over both final addition carries, since output is modulo Q.
+The case n=0 gives W=L with the required zero masks.
+
+Scan set bits of A|C in increasing order, retaining only the remaining
+packed mask and the current position. There are K signed single-bit
+steps and at most K+1 nonempty gaps. No list of positions, block
+matrices, prefixes or individual x values is required. Empty masks
+give W=L; dense masks reduce to the signed bit recurrence.
+
+## Charged arithmetic and space
+
+Let H_s be the bit length of the supplied signed shift, at least one.
+Its reduction modulo 2^n can use low-bit extraction with sign adjustment,
+costing O(H_s+n+1) bit work in a sequential representation. A generic
+division implementation must charge its actual cost instead. Input
+validation, scans and copies also count.
+
+Let M_mul(t)>=t bound multiplication of two t-bit integers and
+W_mul(t) its auxiliary workspace. At a free block beginning at p,
+products combine O(p+1)-bit weights with O(w+1)-bit counts; their
+results and destination sums have O(p+w+1) bits. A conservative bound,
+including O(n) bit work for each set-bit scan/extraction, is
+
+    O(H_s+1+(K+1)*(M_mul(n+1)+n+1)) bit time,
+    O(n+log(n+2)+W_mul(n+1)) auxiliary bits.
+
+The supplied long shift itself costs an additional O(H_s) input bits;
+an implementation copying it must charge that temporary too. Only two
+four-entry state arrays and constantly many word temporaries remain live.
+A linear-workspace schoolbook multiplier gives O(n+1) auxiliary bits.
+Using unbalanced schoolbook products, sum_(blocks) (p+1)(w+1)=O(n^2+1),
+since the gaps are disjoint. Thus an elementary implementation has
+O(H_s+(n+1)^2) bit time even for dense masks. The transfer refinement
+alone does not improve this worst-case bit exponent.
+
+An interval contributes W(hi)-W(lo). For J intervals and r specified
+mask pairs, contraction takes O(J*sum_j(K_j+1)) growing-integer
+operations. C94 has J=O(q+1), so its replay-plus-contraction bound becomes
+O(q^2+(q+1)*sum_j(K_j+1)), plus validation and schedule/input access.
+Its replay, schedule storage and full outside-variable average retain
+their existing charges. The same contraction is available to every
+interval representation, including the packed comparator.
+
+## Implementation scope
+
+The opt-in experimental module implements the prefix and explicit interval
+contraction, with integer-only parameters and 0<=n<=1048576. Its finite
+validation is recorded in SB. The prefix theorem does not lift the
+surrounding C89/C94 conditional evaluators' width<=4096 guards. Those
+sources and their historical benchmarks remain unchanged.
+
+This is an exact block summation of the existing range DP, with no
+priority, fastest-method, measured allocation/runtime/RSS, whole-state,
+post-QFT sampling or full outside-average claim. In particular, fewer
+transfers do not alone establish a practical CNOT-memory improvement.
+
+---
+
+## C97 — Synchronized native carry catalogs have polynomial signature bounds, but storing all stopped-prefix catalog carries requires exponentially many keys
+
+*status: proven · paper: A*
+
+# C97 — A shared slope does not compress the full carry catalog
+
+The common-prefix carry arrangement below is polynomial. Extending it
+to a materialized histogram of every native test's carry is obstructed
+by stopped dyadic prefixes, even among tests with one common slope.
+The histogram includes alternative correction-count labels. For the
+growing witness family they are not jointly selected by chronological
+native histories. This is a bound on the declared representation, not
+on C95's reachable sets, a reduced decision diagram, the signed scalar,
+or arbitrary rational generating functions. HC owns evidence/source
+provenance; TODO50 owns the remaining closure problem.
+
+Use C95's exact native ascending family: H=2^n, M=2H, N=H-1,
+q<=n, t=T+pH, delta=pH+h, and
+
+    Y=T_lowq XOR X, S=Y-T_lowq,
+    P_i=(Y mod 2^i)-(T mod 2^i).
+
+## Declared histogram normal form
+
+Scan b,T,Y from low to high. For every native E1/E2 catalog entry,
+retain its signed affine carry across the current cut. A prefix P_a
+stops accepting digits at a; its earlier residue remains in the carry.
+Keep parity classes separately and a nonnegative count per distinct
+full carry-vector key. Once all tests are known, apply C95's chronological
+state recurrence and terminal sign. This is exact, but its size matters.
+
+Formally the materialized layer is a monomial list
+
+    F_ell(v)=sum_c w_ell(c)*product_a v_a^(c_a+B_a),
+
+with O(q^2) catalog labels a and fixed exponent offsets B_a. It has
+denominator index zero. It is not a factored circuit or a short rational
+function in the three physical coordinates. Sharing common slopes
+does not discard distinct keys in this normal form.
+
+Coefficients need O(m+q) bits; each residual carry needs O(log q) bits
+after known constant quotients are removed. A direct R-key layer takes
+O(R*(q^2 log q+m+q)) bits plus polynomial setup. Materializing R
+distinct records requires at least Omega(R) bits, and emitting them
+requires at least R output operations. Streaming can reduce peak
+storage but does not supply polynomial construction/counting time.
+
+## Synchronized-prefix positive lemma
+
+At a cut ell, suppose A tests all use the same prefix P_ell. Their
+low-part carries, after fixed quotients are removed, have the form
+
+    floor((b_low+lambda_a*T_low+Y_low-T_low+d_a)/2^ell),
+
+where each low word and d_a lies in [0,2^ell), and |lambda_a|<=Cq.
+Normalize the low words to x,y,z in [0,1). Each carry is
+floor(x+(lambda_a-1)y+z+d_a/2^ell) and changes on O(q) planes.
+The A carries therefore change on L=O(Aq) planes. A three-dimensional
+plane arrangement has O((L+1)^3) faces of all dimensions; the floor
+vector is constant on each relative interior, including exact boundary
+faces. Integer inputs realize no more signatures than these faces.
+
+The face bound follows by adding planes: each new plane meets an
+O(L^2)-size line arrangement and creates O(L^2) faces. Sum over planes;
+degeneracies reduce the bound. Constant-size rational linear systems
+construct intersections with polynomial coefficient bit cost. For
+A=O(q^2), this gives O(q^9) candidate signatures. It is a signature
+bound, without a completed signed contraction. Replacing a stopped
+P_a by the current P_ell would invalidate the shared-variable premise.
+
+## Stopped-prefix witness at one common slope
+
+For any integer r>=1 choose q=n=8r, p=h=f0=0, and for a=0,...,r-1 set
+
+    l_a=4r+4a,
+    T=sum_a 2^(l_a+2),
+    b=(-q*T) mod H, in [0,H).
+
+Independently choose a sign sigma_a for each pair of positions
+(l_a,l_a+2). In Y set that pair to (1,1) for plus and (0,0) for
+minus; all other digits are zero. These are physical enabled inputs:
+T,Y<H, X=T XOR Y is a q-bit word, and S=Y-T belongs to C95's domain.
+
+Select the ascending E1 catalog entries
+
+    i_a=l_a+2, k_a=(q-i_a-2)/2, c_a=k_a+1=(q-i_a)/2.
+
+The labels are valid: i_a is even, 4r+2<=i_a<=8r-2, and 0<=k_a<=i_a.
+Every selected slope is i_a+2k_a+2=q. The test value is
+
+    E_a=b+q*T+P_(i_a+1)-c_a*N
+       =(J-c_a)H+D_a+c_a,
+    J=(b+q*T)/H, D_a=P_(i_a+1).
+
+The highest changed digit in pair a dominates all lower changes.
+For plus, the increment 2^l_a gives D_a>=2^(4r); for minus, the
+decrement -2^(l_a+2) gives D_a<=-2^(4r). Also
+|D_a|<2^(i_a+1)<=H/2 and 1<=c_a<=2r-1<2^(4r). Consequently
+
+    floor(E_a/H)=J-c_a       for plus,
+                 J-c_a-1     for minus.
+
+Thus these r carries, or just their parities, determine the independent
+sign word. At cut ell=q the physical histogram has at least
+2^r=2^(q/8) distinct keys. Removing constant quotients, sharing the
+common slope, or shearing b to b+qT does not remove those stopped-prefix
+comparisons. This proves an exponential term count for the declared
+materialized histogram.
+
+For r>1 the selected k_a decrease with i_a, whereas the actual ascending
+correction count cannot decrease. These selected tests are therefore
+not jointly visited by one chronological trajectory. The r=1 case
+has one label and gives the valid two-key base case; no multi-label
+incompatibility is asserted there. Every witness input still has its
+own unique physical trajectory under C95's recurrence.
+
+## Signed extraction and remaining scope
+
+On the witness all low input bits vanish, q is even, b<H and h=0.
+The known phase before K+F is therefore zero. Each witness contributes
+a positive physical count within the separate even-parity histogram
+class, before the terminal sign is attached. This does not prevent
+later signed cancellation or early contraction of compatible histories.
+Indeed, marking S by z gives the small factored physical expression
+
+    z^(-T)*product_a (1+z^(5*2^(l_a))).
+
+Its unsigned count is 2^r immediately. An exponential monomial list
+is consequently not a scalar hardness result or a lower bound for
+all factored/mixed-variable generating functions.
+
+C95 continues to own the exact enabled/disabled sector weights,
+terminal parity and normalization. This work changes none of them.
+The native chronological accumulator slope j+2k_j increases by 1 or 3
+at each ascending macro. A useful closure must exploit compatible
+count/flag paths and terminal signs before materializing the entire
+catalog. No polynomially constructible such representation is supplied.
+
+The coefficient-sensitive carry construction in
+[Bartzis and Bultan, Theorems 1 and 3](https://sites.cs.ucsb.edu/~bultan/publications/sttt-bar.pdf)
+is a relevant established baseline; its compound bound retains a
+product of atomic coefficient-sum bounds. The fixed-dimension/index
+conditions of [Barvinok and Woods, Theorems 1.7, 2.6, 3.6 and Corollary 3.7](https://arxiv.org/pdf/math/0211146)
+do not supply repeated native closure from individual atoms. Neither
+source is used to infer a new generic hardness or novelty claim.
+
+---
+
+## C98 — For fixed disjoint Walsh masks the C96 contraction keeps every state, row and prefix value within 2^(p0+K+2G), independent of width; the overlapping pair A=C=1 exceeds it exactly for n>=4
+
+*status: proven · paper: A*
+
+# C98 — Fixed disjoint masks keep sparse-contraction coefficients width-independent
+
+This bounds the integers inside C96's exact sparse-mask contraction. It is an
+analytical coefficient-size statement about the existing kernel, with no
+measured runtime, allocation or process-memory effect. DW records how it was
+found, its reviews and the withdrawn width experiment. The proof relies on
+C96's accepted state invariant and on the kernel's count rows equalling the
+interval counts; SB identifies the kernel source.
+
+## Object and notation
+
+The object is C96's prefix sum W(n,L,s,A,C) as evaluated by the opt-in
+`prefix_walsh` kernel of `experiments/experiment_sparse_walsh.py`, for
+1<=n<=2^20, 0<L<=2^n and any integer s. D is the four-entry joint
+carry/borrow state, T(D) its entry sum and ||D||_1 its l1 norm. Let
+K=popcount(A|C)>=1, p0 the lowest set bit of A|C, and G the number of
+nonempty mask-free blocks after p0 (including the terminal block), so G<=K.
+Put e'=p0+K+2G<=p0+3K.
+
+## Theorem (disjoint masks)
+
+If A&C=0, then every intermediate state, every row returned by a block or
+signed-bit transfer, and the returned W satisfy
+
+    |entry| <= ||D||_1 <= 2^min(n,e'),   |W| <= 2^min(n,e').
+
+After the first active bit every state has T(D)=0.
+
+Proof outline. Under disjointness every active bit has A_p XOR C_p=1, and
+its two x branches carry opposite signs for every incoming state, so T=0
+after it; a signed bit at most doubles the l1 norm. A mask-free block of
+width w multiplies T by 2^w, so a zero total stays zero. Changing the
+incoming carry or borrow moves at most the block words B-a-1 and ell to
+another destination, so each count row differs from the incoming-00 row by
+l1 at most 2(c+v)<=4. For a zero-total state D'=sum_s D[s](R_s-R_00), hence
+a block at most quadruples the norm. Before p0 the state is the nonnegative
+count row of norm 2^p0. Multiplying the factors gives 2^e'; C96's invariant
+gives 2^n. The terminal read-out does not increase the norm.
+
+**Corollary (full range).** If A&C=0 and A|C!=0, then W(n,2^n,s,A,C)=0 for
+every s: flipping the highest active bit of x changes exactly one of the two
+parities.
+
+## Overlapping masks
+
+For A=C=1 and every n>=1, W(n,2^n,s,1,1)=-2^n for odd s and +2^n for even s.
+Here e'=1 at n=1 (no terminal block) and e'=3 for n>=2, so the bound holds
+for n<=3 and fails exactly for n>=4; W(4,16,1,1,1)=-16 is the smallest
+violation. SB's fixture (2,4,-3,1,1)=-4 is an instance of this identity, not
+a violation. The same induction proves the bound whenever each overlapping
+position is immediately followed by an XOR active bit or is the top position.
+
+## Charged cost
+
+Only the products and partial sums in the unchanged kernel shrink. Per call,
+with n' the kernel's width argument (n above), H_s the shift length and e=min(n',e'), schoolbook
+arithmetic gives
+
+    O(H_s+(K+e+1)(n'+1)) bit time,  O(n'+log n') auxiliary bits.
+
+For e=Theta(n') this is C96's O(H_s+(n'+1)^2); it is linear in n' only for
+fixed p0 and K. Theta(n')-bit work remains for validation, shift reduction,
+the active-bit scan, bit extraction and block counts, and pre-cancellation
+partial sums reach e+w+2 bits. These transients are not bounded by the
+theorem, and the auxiliary-space order is unchanged.
+
+## Scope
+
+Not claimed: any measured runtime, allocation or RSS change; any change to
+the C89/C94 width<=4096 or q<=256 guards; a bound for arbitrary overlapping
+masks beyond the stated condition; novelty or optimality; any whole-state,
+PPS/CNOT peak-memory or post-QFT statement.
+
+---
+
+## F12 — At function level, β=1 gives selected-bit width independence; β>1 has no universal density claim because minimal scalar periods vary
+
+*status: narrowed · paper: B*
+
+# F12 — Function-level β=1 result and β>1 limitation
+
+**Status.** narrowed 2026-09-09: β=1 gives the low-bit dependence for every
+selected output bit; an odd factor does not force every selected bit to be
+Walsh-dense. For N=13, a=4, r=6, the least-significant bit is 1⊕e₀ and has
+sparsity 1. β>1 density claims in Paper B are circuit-level measurements.
 
 ## Evidence
 
-r=4: sparsity 4 constant to t=24; odd factor: density 1.000000
+r=4: sparsity 4 constant to t=24; selected odd-factor examples can be dense,
+but the N=13, a=4, r=6 least-significant-bit counterexample has sparsity 1
 
 ## Where established
 

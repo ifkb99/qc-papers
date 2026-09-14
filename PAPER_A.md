@@ -2,7 +2,14 @@
 
 **Ian Baker**
 
-*Draft v2, 2026-08-08. The limitations and retraction material in §10 is
+ifkb99@gmail.com
+
+*Working consolidation, 2026-09-10. This file is the Paper A manuscript and
+tracking document: representation cost, its arithmetic applications, and its
+operational limits. The new scratch-equivalence and tensor-rank results are
+integrated in §6.4–6.5; state-aware contraction and conditional sampling belong
+in Paper B. Detailed evidence and open tasks remain in the linked research
+ledger, not in a second manuscript copy. The limitations and withdrawn-claims material in §10 is
 load-bearing and should survive to submission. Claim identifiers have been moved
 out of the prose into Appendix A; the working ledger `CLAIMS.md` is supplementary
 material. Numbers here are post-bugfix (see §10.2).*
@@ -21,25 +28,28 @@ calibrated on brickwork and Trotterised circuits with generic rotation angles.
 We show that for circuits implementing a permutation of the computational basis
 — all reversible arithmetic, and hence the arithmetic core of Shor's algorithm
 and similar algorithms — this quantity is not merely predictable but
-*exactly computable in closed form*, with no extrapolation and no fitting. For a
+*exactly characterized by a Walsh transform*, with no extrapolation and no fitting. For a
 circuit implementing basis permutation π, the Heisenberg pullback π†Z_jπ is the
 diagonal operator (−1)^{g(y)} with g(y) = bit j of π(y); expanding a diagonal
 operator in the Pauli basis is precisely the Walsh–Hadamard transform of
-(−1)^g. The Pauli support PPS must carry is therefore *exactly* the Walsh
+(−1)^g. The Pauli support of the full pullback is therefore *exactly* the Walsh
 spectrum of g, and its size is the Walsh sparsity of that Boolean function.
 
 Four consequences follow. **(i)** PPS cost for reversible arithmetic is a
 property of the **full-space basis permutation implemented** — including its
-action on ancillas — and not of the gate set implementing it: we verify exact
+action on ancillas — and not of the gate set implementing it. We verify exact
 Z-closure for both Toffoli-compiled and Fourier-compiled (Beauregard) modular
-exponentiation, which implement the same permutation by very different means.
+exponentiation; the supplied implementations agree on the valid arithmetic
+subspace but have different scratch layouts and therefore are not a matched
+same-permutation comparison.
 **(ii)** The tractability of linear arithmetic is explained rather than observed
 — a ripple-carry adder's low output bit is XOR-affine, Walsh sparsity 1
 characterises affineness, and PPS collapses to a single term. **(iii)** Peak
-memory is a distinct and larger quantity than final support, and its excess is an
-artifact of Clifford+T decomposition; propagating X, CNOT and Toffoli as atomic
+memory is a distinct and larger quantity than final support; Clifford+T
+decomposition can enlarge the peak, but the gap is not entirely a compilation
+artifact. Propagating X, CNOT and Toffoli as atomic
 permutations keeps the expansion Z-type at every step and makes the peak itself a
-Walsh quantity. The saving is exact rather than approximate:
+Walsh quantity. For the tested arithmetic rows, the measured relation is:
 N_max^rot = 2·N_max^perm − |B|, where B is the set of peak-time Pauli strings
 missing the target qubit of the Toffoli gadget in which the peak falls. B is
 empty for ripple-carry adders, giving exactly 2; for modular exponentiation with
@@ -57,7 +67,11 @@ entirely.
 
 These results are diagnostic, not a simulation speedup. The Walsh transform is
 itself exponential, and nothing here bears on the classical hardness of
-factoring.
+factoring. Same-layout circuits that agree on the entire clean logical code
+can have different full Walsh support, while equal support counts can accompany
+different measured output distributions. Moreover, Walsh support is not tensor
+rank: local Walsh transforms preserve every fixed-cut singular spectrum. These
+distinctions delimit the representation cost being characterized.
 
 ---
 
@@ -102,28 +116,29 @@ run fits in memory.
 
 **Why that is the useful quantity.** Permutation circuits occur as subcircuits of
 larger circuits that are not permutations — Shor's algorithm surrounds its
-arithmetic with Hadamards and an inverse QFT — and a PPS run through the whole
-thing must carry the arithmetic block's representation whether or not the
-surrounding structure eventually collapses it. Memory is the binding constraint
-in practice, and it is set by the peak representation size, not by the difficulty
-of the final number. A companion result quantifies exactly this gap: for the
-genuine Shor initial state, a determinate fraction of the carried terms
-contribute nothing to the expectation value, yet cannot be discarded early
-because the property is not monotone under back-propagation.
+arithmetic with Hadamards and an inverse QFT. A full-operator PPS implementation
+carries intermediate expansions until they cancel or are contracted with the
+input. Their peak size is a memory cost of that implementation, not a lower
+bound on all contraction schedules. Paper B, §10.2, distinguishes terms that
+contribute to the pre-QFT work observable from terms eliminated by the actual
+exponent input. Naive within-block pruning is unsafe because exponent support
+is not monotone, but exact completed-control contraction is possible and changes
+the width scaling of that reduced task in both order branches. Non-diagonal
+observables introduced by an inverse QFT require a separate analysis.
 
 Readers who want a sharper "so what" should read §5 (peak memory, where the model
 changes what one should actually do), §7 (truncation, where it exposes a
 pathology), and §8 (a bound requiring no simulation at all).
 
-**Contribution.** The technical core is a single identity (§3) whose ingredients
-are individually standard and whose composition, as far as we can find, is not
-stated: for permutation circuits with computational-basis observables, the
-Pauli-spectrum/Boolean-Fourier analogy becomes an *exact identity*, and that
-identity is a cost model. What we claim is that composition and what follows
-from it — compilation invariance, the affine explanation of adder collapse,
-permutation-native propagation and the exact peak relation it yields, the
-cryptanalytic transfer, and the structural caps of §6. We are explicit in §9 about which
-ingredients are prior art.
+**Contribution.** The technical core (§3) applies the established identity
+between diagonal Pauli expansions and classical Boolean Fourier expansions
+(Montanaro and Osborne, Proposition 9) to circuit output functions. We do not
+claim that identity itself as new. Our contribution is its use as an arithmetic
+PPS representation-cost model and the resulting analysis: full-permutation
+compilation invariance, the affine explanation of adder collapse,
+permutation-native propagation with its exact suffix-Walsh characterization,
+the measured arithmetic peak relations, the cryptanalytic transfer, and the
+structural caps of §6. Section 9 separates these applications from prior art.
 
 ---
 
@@ -136,14 +151,14 @@ We write a Pauli string as a pair of bitmasks (x, z) with
 > P(x,z) = i^{|x ∧ z|} X^x Z^z,
 
 the phase chosen so that P is Hermitian; all coefficients in a Heisenberg
-expansion are then real. Every gate is a Pauli rotation U = exp(−iθσ/2), with a
-single conjugation rule:
+expansion are then real. Every gate is compiled to a product of Pauli rotations
+U = exp(−iθσ/2), σ a Pauli string, governed by a single conjugation rule:
 
 > U† P U = P                              if [P, σ] = 0
 > U† P U = cos θ · P + sin θ · (iσP)      if {P, σ} = 0.
 
-Clifford gates have θ = ±π/2, so cos θ = 0 and a Pauli maps to a *single* Pauli
-— no branching. T gates have θ = ±π/4, giving cos = sin = 1/√2, the maximum
+Clifford rotations have θ = ±π/2, so cos θ = 0 and a Pauli maps to a *single*
+Pauli — no branching. T gates have θ = ±π/4, giving cos = sin = 1/√2, the maximum
 branching weight. A circuit's PPS cost is driven by how much of that branching
 survives cancellation.
 
@@ -206,11 +221,15 @@ We therefore state compilation invariance in the only form that is true:
 > permutation π, and is not invariant among circuits that merely agree on the
 > valid subspace.**
 
-§4.1 exhibits the first case: two compilations of modular exponentiation, built
-from entirely different gate sets, implementing the same π and having the same
-cost. §6.3 exhibits the second: two circuits computing the same a^e mod N whose
-π's diverge off the valid subspace, with a ~51% cost difference. Both are
-predictions of Theorem 1.
+§4.1 states the first case abstractly: any two verified implementations of the
+same full-space π have the same cost. The supplied Fourier and Toffoli
+modular-exponentiation implementations instead agree only on the valid
+subspace and have different full-space actions (for N=5, a=2, n_exp=2 and the
+same measured bit, their final supports are 451 on 10 qubits and 15493 on 15
+qubits). §6.3 exhibits the same distinction deliberately: two circuits
+computing the same a^e mod N whose π's diverge off the valid subspace, with a
+~51% cost difference. All are predictions of Theorem 1 once the full-space π
+is specified.
 
 **Verification.** Confirmed to machine precision on 6/6 instances spanning
 modular exponentiation and ripple-carry addition, across both compilations, with
@@ -241,21 +260,24 @@ observable is diagonal.
 ### 4.1 Compilation invariance
 
 Because the identity depends only on π and j, PPS cost is a property of the
-full-space permutation implemented, not of the gates used to implement it (§3.2).
-This section is the invariance half; §6.3 is the non-invariance half, and they are
-the same statement applied to circuits that do and do not share a π.
+full-space permutation implemented, not of the gates used to implement it — the
+invariance half of §3.2's statement; §6.3 is the other half. The Fourier and
+Toffoli arithmetic examples below are independent applications of the identity,
+not two decompositions of one common full-space π.
 
 This contradicts a natural intuition — that Clifford+T compilation of reversible
 arithmetic is distinguished, because such a circuit is a permutation matrix
 *gate by gate* and so trivially preserves Z-type strings, whereas Fourier-space
 arithmetic (Draper addition, as in Beauregard's 2n+3 qubit construction) is
 built from controlled-phase and Z-rotation gates that are individually not
-permutations. We verify that **both** compilations exhibit exact closure of the
-Z-type Pauli subalgebra (0 non-Z terms in each), because both implement the same
-basis permutation.
+permutations. We verify that **both** supplied implementations exhibit exact
+closure of the Z-type Pauli subalgebra (0 non-Z terms in each), as follows from
+each complete unitary being a basis permutation; their different scratch
+layouts mean they need not implement the same full-space permutation.
 
 > An earlier version of this work claimed the opposite — that compilation
-> determines simulability. It is retracted in full; see §10.2 for what killed it.
+> determines simulability. It is withdrawn in full; see §10.2 for what killed
+> it.
 
 ### 4.2 Affine collapse is exactly sparsity one
 
@@ -263,17 +285,21 @@ It is folklore that adders are easy for Heisenberg-picture methods. The identity
 makes this exact: sparsity 1 characterises affine functions, so a PPS collapse
 to a single term is *equivalent* to the output bit being XOR-affine.
 
-For a 4-bit Cuccaro ripple-carry adder, the low output bit b₀ = a₀ ⊕ b₀ is
-affine and its Walsh sparsity is **exactly 1**. The control is the discriminating
-half: bit b₂ carries carries, is not affine, and has sparsity **10**. The
-collapse is therefore not about permutation-ness — an earlier explanation we
-retract — but about algebraic degree.
+For a 4-bit Cuccaro ripple-carry adder, the low output bit — the in-place update
+b₀ ↦ a₀ ⊕ b₀ — is affine and its Walsh sparsity is **exactly 1**. The control
+is the discriminating half: bit b₂ carries carries, is not affine, and has
+sparsity **10**. The collapse is therefore not about permutation-ness — an
+earlier explanation we retract — but about algebraic degree.
 
 ### 4.3 A cost model at O(2ⁿ n)
 
 Computing the Walsh spectrum requires one pass to extract π and one fast
-Walsh–Hadamard transform, i.e. **O(2ⁿ n)** time. This is exponential and no
-speedup; the point is that it is *cheaper than the run it predicts* — measured
+Walsh–Hadamard transform. Given an explicitly available permutation table, the
+FWHT itself costs **O(2ⁿ n)**; replaying a circuit with L constant-size logical
+gates to obtain that table adds **O(L·2ⁿ)**, so the end-to-end cost is
+**O((L+n)2ⁿ)**. Extracting a permutation from an arbitrary compiled unitary
+requires a separate representation or cost assumption. This is exponential and
+no speedup; the point is that it is *cheaper than the run it predicts* — measured
 **143× to 219×** on the modular-exponentiation instances of Table 1 — because it
 does no branching bookkeeping and no coefficient arithmetic. It answers "will
 this run fit in memory" before the run.
@@ -327,7 +353,7 @@ range of Hilbert-space dimension.
 The final Pauli support is what Theorem 1 computes. What bounds memory in
 practice is the *peak* over the propagation.
 
-The two differ for a reason that is entirely an artifact of compilation. The
+The two differ partly because of compilation. The
 standard Clifford+T decomposition of a Toffoli passes through Hadamard gates, so
 a Z-type string leaves the diagonal mid-circuit and returns to it only at the
 end of the gadget. The excursion is real, costs memory, and cancels exactly.
@@ -345,10 +371,11 @@ excursion. The expansion is then Z-type at *every* intermediate step, and:
 - propagation runs about **10× faster** than rotation-level propagation on the
   same circuits, since no branch is created only to be cancelled.
 
-**The ratio is exact, and the deficit is a countable set.** Let *c* be the
-target qubit of the Toffoli gadget in which the rotation-level peak falls, and
-let *S* be the permutation-native peak set. Two facts about the gadget decide
-everything.
+For the tested arithmetic rows, the peak relation is an exact measured
+regularity. Let *c* be the target qubit of the Toffoli gadget in which the
+rotation-level peak falls, and let *S* be the permutation-native peak set. The
+local gadget analysis explains why a doubling is possible, but it does not by
+itself determine the global peak after intervening CNOTs and interference.
 
 First, a Z-type string commutes with every Z-rotation, so it cannot branch until
 an H turns a Z into an X; the gadget's only H acts on *c*, so **only strings
@@ -358,26 +385,31 @@ spanned by {X_c, Y_c},
 
   X_c ↦ cos θ · X_c − sin θ · Y_c,   Y_c ↦ cos θ · Y_c + sin θ · X_c,
 
-which is closed — so the four T gates branch **once between them**, not
-2⁴ times. Every Z_c-carrying string therefore contributes exactly two Paulis and
-every other string exactly one, giving
+which is closed for a fixed rest-label component. But this target-local fact
+does not imply that the full strings branch only once: intervening CNOTs can
+change the other Pauli labels and subsequent terms can interfere. Indeed, the
+four-qubit circuit
+`CCX(3,1,0); CCX(1,0,2)` with observable `Z_2` has atomic peak 4 and
+rotation-level peak 10, whereas the former proposed formula predicts 6 (and its
+implied 2× upper bound predicts at most 8). A dense-matrix check confirms the
+rotation peak, and the final Walsh and atomic coefficients agree exactly.
 
-> **Proposition 2.** N_max^rot = 2·N_max^perm − |B|, where
-> B = { z ∈ S : z_c = 0 }.
-
-Verified exactly on 9 of 9 instances (six modular exponentiations, three
-ripple-carry adders): at the peak, every Pauli has X-support either empty or
-exactly {c}, and folding the X_c/Y_c partners back onto their parents recovers
-*S* with multiplicity 2 on z_c = 1 and 1 on z_c = 0, set for set.
+The arithmetic rows retain a useful empirical statement: in 9/9 tested cases
+(six modular exponentiations, three ripple-carry adders), folding the
+X_c/Y_c partners at the observed peak recovers the atomic peak set with the
+measured multiplicities, and `N_max^rot = 2·N_max^perm − |B|`. This is a
+family-specific observation, not a universal proposition. The exact general
+statement that survives is that the atomic peak equals the maximum Walsh
+sparsity over the corresponding circuit suffixes.
 
 So the ratio is 2 for the adders because B is empty there, and the unexplained
 "deficit of exactly 2" in modular exponentiation is the statement |B| = 2. **The
-two strings are the same in every instance: Z on the measured x-register bit
-alone, and that bit together with one exponent qubit — which are precisely the
-two Walsh coefficients of magnitude ½** identified independently in §6 as the
-dominant Fourier modes of the pulled-back function (6/6 against the full
-spectrum). They are supported off the scratch register, never acquire Z_c, and
-so never double.
+two strings are the same in every instance: Z on the measured
+multiplicand-register bit alone, and that bit together with one exponent qubit —
+which are precisely the two Walsh coefficients of magnitude ½** identified
+independently in §6 as the dominant Fourier modes of the pulled-back function
+(6/6 against the full spectrum). They are supported off the scratch register,
+never acquire Z_c, and so never double.
 
 **The constant belongs to the observable, not to the circuit family.** Holding
 the circuit fixed and moving the observable changes it: measuring the low
@@ -405,15 +437,21 @@ Theory*, **Proposition 29**): D_e f is null (resp. constant 1) iff supp(W_f) is
 contained in {0,e}^⊥ (resp. in its complement). A linear-structure space of
 dimension k therefore confines the Walsh support to a coset of codimension k,
 capping density at 2^{−k}. Functions whose Walsh support is an affine subspace
-are Carlet's **partially bent** functions.
+are not, by themselves, a definition of Carlet's **partially bent** functions:
+partial bentness also imposes the required flatness condition on the nonzero
+Walsh spectrum. For example, OR on three variables has full (hence affine)
+support but unequal coefficient magnitudes, so support geometry alone is
+insufficient.
 
 **We cite this rather than claim it.** Our contribution is locating it in
 modexp pullbacks and reading it as a cost cap. Modular exponentiation carries
-the linear structure w = b_msb ⊕ anc: GF(2) rank n−1 in every instance,
-g(y ⊕ w) = g(y) verified pointwise, present in *both* compilations, and absent
-from random f. Consequently density is capped at exactly ½ — which is why
-measured density converges to 0.498 *from below* and never crosses. A
-ripple-carry adder has a kernel of dimension 5, capping its density at 2⁻⁵.
+the linear structure w = e_msb ⊕ e_anc — the 0/1 mask supported on the
+accumulator's most significant bit and the comparison ancilla: GF(2) rank n−1
+in every instance, g(y ⊕ w) = g(y) verified pointwise, present in *both*
+compilations, and absent from random f. Consequently density is capped at
+exactly ½ — which is why measured density converges to 0.498 *from below* and
+never crosses. The ripple-carry adder's linear-structure space has dimension 5,
+capping its density at 2⁻⁵ (measured: 0.0098).
 
 **Mechanism.** The structure is forced by three ingredients acting
 together: flipping the accumulator's msb *is* adding 2^{m−1}, which commutes
@@ -427,7 +465,7 @@ The above has a natural extension we did not find stated, and which we present
 at corollary altitude: it follows from Proposition 29 plus the standard
 decomposition of the Walsh transform over a coset partition.
 
-**Proposition 3.** *Let a coset partition split F₂ⁿ into cells H_u, and
+**Proposition 2.** *Let a coset partition split F₂ⁿ into cells H_u, and
 suppose g restricted to H_u has linear structure w_u. Then the Walsh support
 avoids E = {z : w_u·z = 1 for every u}, and hence*
 
@@ -440,15 +478,17 @@ c_z = 2^{−n} Σ_u (−1)^{u·z_C} A_u(z′) with A_u the transform of the rest
 Proposition 29 kills A_u(z′) whenever w_u·z′ = 1. If every A_u vanishes, so does
 c_z. ∎
 
-**Proposition 4.** *That system is consistent iff every linear dependency
+**Proposition 3.** *That system is consistent iff every linear dependency
 among the w_u has even support. An odd dependency makes E empty and removes the
 cap entirely.*
 
 Verified on planted instances at d = 1, 1, 2, 3 with caps 0.5, 0.5, 0.75, 0.875
-and **zero violations**; shown invariant under a random GF(2) change of basis
-(tested, not asserted), so it covers arbitrary subspace partitions. The parity
-condition is sharp: at the same cell count, an odd dependency gives density
-0.9845 against 0.8671 for an even one.
+and **zero violations**. The statement is covariant under affine changes of
+variables (Lemma 5), so it covers arbitrary subspace partitions, not only
+coordinate-aligned ones — additionally confirmed by testing under a random
+GF(2) change of basis. Full proofs of both propositions are in Appendix B. The
+parity condition is sharp: at the same cell count, an odd dependency gives
+density 0.9845 against 0.8671 for an even one.
 
 **At scale.** The propositions are proved, so size demonstrates rather than
 establishes — but the check is cheap and forecloses the obvious objection.
@@ -518,6 +558,68 @@ off the valid subspace is invisible to correctness testing, two implementations
 that pass identical verification suites can differ by ~51% in PPS cost. Ancilla
 discipline is a cost parameter, not merely a hygiene concern.
 
+### 6.4 Same physical computation, different full-space support
+
+A same-layout construction removes the qubit-count confound entirely. Let J
+embed all legitimate logical inputs with clean scratch, and suppose U returns
+them to a clean-output code. Any extension W that is identity on that code
+satisfies WUJ=UJ, so the restricted observable and all subsequent measurement
+statistics are unchanged. This is an identity of logical isometries, not just
+agreement on one classical input. It need not imply U†W†OWU=U†OU off the code.
+
+For the fixed modular-exponentiation layout, append a variable number of
+Toffoli gates with both controls on clean scratch bits and target on the
+observed work bit. Each is identity on the entire legitimate output code.
+The experiment verifies every legitimate exponent/work basis input, coherent
+code states, and full order-finding output distributions. The full Walsh
+support nevertheless changes; the clean-restricted function does not. Exact
+rows and validation scope are recorded in the scratch-equivalence experiment
+and its ledger entry (Appendix A).
+
+The converse is equally important. An appended CNOT from an unchanged exponent
+bit to the observed work bit multiplies the sign function by that exponent's
+Walsh character. It therefore translates every Walsh mask and preserves both
+the support count and coefficient magnitudes. Yet it changes legitimate
+arithmetic, and in the tested odd-order example also changes order-finding
+output statistics. Equal counts do not certify physical equivalence; unequal
+counts do not certify different physical computations. Full-operator cost is
+exactly what Theorem 1 describes, and neither inference follows from it.
+
+### 6.5 Walsh sparsity is not tensor memory
+
+For any partition L|R of input bits, write the normalized truth tensor as a
+matrix F and the coefficient tensor as C. The Walsh transform factors locally:
+
+> C = H_L F H_Rᵀ,
+
+with orthogonal normalized Walsh matrices. Thus every cut rank and singular
+value is unchanged by this basis change. This is a standard local-basis fact,
+not a new tensor theorem. A coefficient vector can be dense yet have small
+tensor ranks.
+
+For an ideal scalar function of exponent e with period r, the tensor factors
+through the running residue modulo r, giving cut rank at most r. For the
+natural low-k/high-(t−k) cut, the high bits access at most r/gcd(r,2^k)
+residues, sharpening the bound to min(2^k, 2^(t−k), r/gcd(r,2^k)). The scalar
+period can be smaller than the multiplicative order. These are upper bounds,
+not claims of minimal realizations or efficient period discovery.
+
+The controlled measurements exhibit growing ideal-function Walsh support at
+constant small cut rank, but substantially larger ranks for the full
+scratch-space pullback. Selected intermediate suffixes also have larger ranks
+than the ideal scalar function. Detailed ranks, tolerances and controls live
+in the tensor-memory experiment and its ledger entry (Appendix A). Neither
+the ideal rank nor a small final rank bounds a full simulation's setup,
+intermediate memory, or conditional output-sampling cost. The relevant
+finite-state/tensor connection is already studied by Li, Precup and Rabusseau.
+
+Paper B makes the distinction concrete for actual output sampling. The coherent
+exponent/work Schmidt rank is min(r,2^t), even when a chosen scalar bit has rank
+one. Yet an order-informed latent-eigenphase sampler needs no work vector at
+all. Thus even joint-state rank is not by itself a memory lower bound for this
+restricted measurement task; obtaining the spectral information has a separate
+computational cost.
+
 ---
 
 ## 7. Truncation: what the model does and does not say
@@ -541,11 +643,11 @@ relationship to truncated runs is not the naive one.
   cutoff slices the cancellation; the dominant coefficients sit at weights 1, 2,
   8 and 9, not all low-degree. The deeper reason is that Hamming weight is *not
   an affine invariant* while the Walsh support and |c_z| are — so a weight-graded
-  truncation is basis-dependent by construction. (Independently, Gangopadhyay et
-  al., *J. Appl. Math. Comput.* 69:3337–3357, 2023, show the analogous
-  weight-graded spectrum is not invariant under extended affine equivalence.)
-- **Truncation error is non-monotonic in δ.** On one instance δ = 10⁻¹ is
-  *exact* with 34 terms while δ = 10⁻³ is off by 0.285 with 23482 terms. Small
+  truncation is basis-dependent by construction.
+- **Truncation error is non-monotonic in δ.** Under incremental (per-gate)
+  truncation — the truncation PPS actually performs — on a Toffoli-compiled
+  N = 5 modular exponentiation, δ = 10⁻¹ is *exact* while carrying a peak of 34
+  terms, whereas δ = 10⁻³ is off by 0.285 while carrying 23482. Small
   coefficients cancel as a set; removing some of them is worse than removing all.
 - **Truncated estimates can be inadmissible.** We observed |⟨O⟩| > 1 in
   4 of 18 runs, all at *mild* δ. We propose the operator-norm bound as a
@@ -562,7 +664,7 @@ rather than trusted.
 Walsh sparsity and nonlinearity are the central quantities of linear
 cryptanalysis. The identity turns that coincidence into a transfer.
 
-**Proposition 5.** *For any Boolean function g with nonlinearity NL,*
+**Proposition 4.** *For any Boolean function g with nonlinearity NL,*
 
 > S ≥ (1 − NL/2^{n−1})^{−2}.
 
@@ -621,9 +723,17 @@ the analogy becomes an identity, and its use as a cost model.
   function of **circuit parameters**, over an **ensemble**, approximately and on
   average. Ours is y ↦ bit_j(π(y)): a function of the **input state**, for a
   **single fixed** circuit, exactly.
-- **Vidal & Ballarin et al.** (NJP 2025) compute general Pauli decompositions via
-  the FWHT in O(N² log N). Adjacent tooling; no diagonal special case, no
-  propagation, no Boolean sparsity.
+- **Georges, Berntson, Sünderhauf & Ivanov**, *Pauli decomposition via the fast
+  Walsh–Hadamard transform*, New Journal of Physics **27**, 033004 (2025),
+  DOI [10.1088/1367-2630/adb44d](https://doi.org/10.1088/1367-2630/adb44d),
+  compute general Pauli decompositions via the FWHT in O(N² log N). Adjacent
+  tooling; no diagonal special case, propagation, or Boolean-sparsity result.
+- **Montanaro & Osborne**, *Quantum Boolean Functions*, Proposition 9
+  ([arXiv:0810.2435](https://arxiv.org/abs/0810.2435)), explicitly identifies
+  the Pauli expansion of a diagonal Boolean operator with its classical Fourier
+  expansion. Applying it to a permutation pullback gives the ingredient of
+  Theorem 1; our contribution is the circuit-function specialisation as a PPS
+  cost account and the arithmetic applications.
 - **"Characterizing Pauli Propagation via Operator Complexity"**
   (arXiv:2510.22311) is the closest competitor in intent — it is about PPS cost —
   but uses operator stabilizer Rényi entropy and gives approximate asymptotic
@@ -642,16 +752,16 @@ the analogy becomes an identity, and its use as a cost model.
   equally does not state the identity.
 - **Boolean-function side.** Work computing complete Walsh spectra for
   structured families (e.g. permutation-inverse families) is the right
-  neighbourhood for §6. We state Propositions 3 and 4 at corollary altitude for
+  neighbourhood for §6. We state Propositions 2 and 3 at corollary altitude for
   that reason: they follow from Carlet's Proposition 29 together with the
   standard coset decomposition of the Walsh transform, and we would not be
   surprised to find them folklore in that literature. We claim their application
   as a PPS cost cap, not the underlying combinatorics.
-- **Implementations.** No available implementation propagates permutation gates
-  natively. Qiskit `pauli-prop` accepts only Pauli rotation gates and rejects
-  Toffoli; PauliPropagation.jl's Clifford map contains no Toffoli; stim is
-  Clifford-only and cannot express one. (Checked at source; documentation was
-  misleading in two cases.) See also the framework paper arXiv:2505.21606.
+- **Implementations.** In the versions inspected for this draft, Qiskit
+  `pauli-prop` accepted only Pauli rotation gates and rejected Toffoli;
+  PauliPropagation.jl's Clifford map contained no Toffoli; and stim was
+  Clifford-only. This is a dated account of the inspected implementations, not
+  a universal absence claim. See also the framework paper arXiv:2505.21606.
 
 **On Z-closure.** That permutation circuits preserve the diagonal Pauli subalgebra
 is elementary, and its ingredients are folklore in the stabilizer literature. A
@@ -676,8 +786,10 @@ arithmetic constructions used.
 - **No implication for factoring.** Efficient classical simulation of Shor's
   algorithm on general inputs would be a classical factoring algorithm. Nothing
   here bears on that, and the standing constraint bounds the whole programme.
-- **Scope stops at the diagonal.** X/Y observables are not covered (§3.2). Real
-  Shor's measurement follows an inverse QFT and is outside this analysis.
+- **Scope stops at the diagonal.** X/Y observables are not covered (§3.3). Real
+  Shor's measurement follows an inverse QFT and is outside this exact diagonal
+  model. Paper B includes a separately validated conditional-sampling baseline;
+  it is not an extension of Theorem 1 to non-diagonal observables.
 - **Truncation is not covered by the exact statement** (§7), and behaves badly
   enough on this family to warrant the admissibility check we propose.
 - **Instance sizes are asymmetric, and we say so.** Circuit-level results reach
@@ -689,7 +801,7 @@ arithmetic constructions used.
   **n = 30 (10⁹ points)**. The remaining asymmetry is between the Walsh route
   and rotation-level propagation, not between circuit and function level.
 
-### 10.2 Retractions
+### 10.2 Claims withdrawn during this work
 
 Three substantial claims were made and withdrawn during this work; all are
 recorded because the reasons are instructive.
@@ -707,10 +819,11 @@ recorded because the reasons are instructive.
    is 2.000000 for adders but 1.9997 for modular exponentiation; the phrase was
    written from a table rounded to one decimal place. Corrected in §5. The
    `rot = 2·perm − 2` regularity in 3/3 modexp instances was recorded here as
-   unexplained through several revisions of this paper; it is now derived from
-   the Toffoli gadget as Proposition 2, and the deficit is a set rather than a
-   constant. What remains unproved is only that that set has exactly two
-   elements for the standard observable, which §5 states as a measurement.
+   unexplained through several revisions of this paper remains a measured,
+   family-specific regularity. The local Toffoli argument does not prove the
+   global peak relation; the four-qubit counterexample in §5 disproves that
+   universal derivation. The exact atomic-peak/Walsh-suffix characterization
+   remains valid.
 
 A further correction is methodological and worth stating: the collapse of adders
 was originally explained by permutation-ness. That conclusion was right and the
@@ -726,6 +839,8 @@ uv run python -m experiments.experiment_c17_deficit   # the peak relation of §5
 uv run python -m experiments.experiment_crypto        # the nonlinearity bound of §8
 uv run python -m experiments.experiment_gf2law        # the conditional-structure law of §6.2
 uv run python -m experiments.experiment_reduction2    # the compilation cost of §6.3
+LAB_GPU=1 uv run python -m experiments.experiment_scratch_equivalence
+OPENBLAS_NUM_THREADS=1 LAB_GPU=1 uv run python -m experiments.experiment_tensor_memory
 uv run python test_claims.py                          # headline rows, pinned, ~15 s
 ```
 
@@ -748,16 +863,56 @@ be extrapolated. It is the Walsh sparsity of the Boolean function the circuit
 computes — exactly, compilation-independently, and computable before the run.
 
 The identity is elementary. What it buys is not: an exact account of why adders
-collapse and general arithmetic does not, an exact peak-memory relation from
-propagating permutations natively, structural caps on achievable density with a
+collapse and general arithmetic does not, an exact suffix-Walsh characterization
+of permutation-native peaks (with decomposition gaps measured, not universally
+fixed), structural caps on achievable density with a
 parity condition governing when they apply, a transfer from published
 cryptanalytic constants to simulation cost with no simulation, and — developed
 separately — an arithmetic criterion for modular exponentiation that a fitted
 power law cannot see.
 
-The natural next question is the one the method itself asks and we do not
-answer: what happens through the inverse QFT, where the observable leaves the
-diagonal and the exact model stops.
+The clean-code and tensor comparisons sharpen the central limitation: full
+Walsh support is neither a physical-equivalence invariant nor a bound on every
+compressed representation. Paper B shows how input-aware contraction changes
+the consequences and validates a separate route through the inverse QFT.
+Characterizing useful compressed conditional simulation remains open.
+
+---
+
+## References
+
+- Beauregard, *Circuit for Shor's algorithm using 2n+3 qubits*,
+  quant-ph/0205095.
+- Begušić & Chan, *Fast classical simulation of evidence for the utility of
+  quantum computing before fault tolerance*, arXiv:2306.16372.
+- Bravyi & Gosset, *Improved classical simulation of quantum circuits
+  dominated by Clifford gates*, arXiv:1601.07601.
+- Carlet, *Boolean Functions for Cryptography and Coding Theory*, Cambridge
+  University Press, 2021.
+- Cîrstoiu, *A Fourier analysis framework for approximate classical simulations
+  of quantum circuits*, arXiv:2410.13856.
+- Cuccaro, Draper, Kutin & Moulton, *A new quantum ripple-carry addition
+  circuit*, quant-ph/0410184.
+- Draper, *Addition on a Quantum Computer*, quant-ph/0008033.
+- García & Markov, *Simulation of Quantum Circuits via Stabilizer Frames*,
+  arXiv:1712.03554.
+- Gharibyan, Hariprakash, Mullath & Su, *A Practical Guide to using Pauli Path
+  Simulators for Utility-Scale Quantum Experiments*, arXiv:2507.10771.
+- Nadimpalli, Parham, Vasconcelos & Yuen, *On the Pauli Spectrum of QAC0*,
+  arXiv:2311.09631.
+- Rudolph, Jones, Teng, Angrisani & Holmes, *Pauli Propagation: A Computational
+  Framework for Simulating Quantum Systems*, arXiv:2505.21606.
+- Shao, Cheng & Liu, *Characterizing Pauli Propagation via Operator
+  Complexity*, arXiv:2510.22311.
+- Georges, Berntson, Sünderhauf & Ivanov, *Pauli decomposition via the fast
+  Walsh–Hadamard transform*, New Journal of Physics 27, 033004 (2025),
+  DOI 10.1088/1367-2630/adb44d.
+- Montanaro & Osborne, *Quantum Boolean Functions*, arXiv:0810.2435.
+- Li, Precup & Rabusseau, *Connecting Weighted Automata, Tensor Networks and
+  Recurrent Neural Networks through Spectral Learning*,
+  [arXiv:2010.10029](https://arxiv.org/abs/2010.10029).
+- Welch et al., *Efficient Quantum Circuits for Diagonal Unitaries Without
+  Ancillas*, arXiv:1306.3991.
 
 ---
 
@@ -772,7 +927,7 @@ was withdrawn and not as support for anything.
 
 | section | claims |
 |---|---|
-| 1.1 What is being predicted, and for which task | Paper B: C42 |
+| 1.1 What is being predicted, and for which task | Paper B: C42, C45 |
 | 3.1 Statement and proof | C8 |
 | 3.2 Which Boolean function — a definition that must be stated precisely | C8 |
 | 3.3 Scope: exactly where this holds and where it stops | C6, C13 |
@@ -784,8 +939,65 @@ was withdrawn and not as support for anything.
 | 6.1 Linear structures cap the density | Paper B: C7, C30, C31 |
 | 6.2 A conditional generalisation | Paper B: C40, C41 |
 | 6.3 A compilation choice with a real cost | Paper B: C32 |
+| 6.4 Same physical computation, different full-space support | C50 |
+| 6.5 Walsh sparsity is not tensor memory | C48; Paper B: C52 |
 | 7. Truncation: what the model does and does not say | C5, C14, C16 |
 | 8. The cryptanalytic bridge | C12, C25, C26 |
 | 9. Related work, and what is prior art | C1, C6 |
 | 10.1 What this does not do | Paper B: C7, C40 |
-| 10.2 Retractions | C3, C4, C9, and the F- and H-rows of the ledger's retracted section |
+| 10.2 Claims withdrawn during this work | C3, C4, C9, and the F- and H-rows of the ledger's retracted section |
+
+---
+
+## Appendix B — proofs for §6.2
+
+Notation as in §2.2 and §6.2. Throughout, · is the GF(2) inner product, and a
+*linear structure* of a Boolean function f is a vector w with f(y ⊕ w) = f(y)
+for all y (the null-derivative case of Carlet's Proposition 29).
+
+**Lemma 5 (affine covariance of the Walsh spectrum).** *Let L be an invertible
+linear map on F₂ⁿ, t ∈ F₂ⁿ, and g′(y) = g(Ly ⊕ t). Then*
+
+> ĉ′_z = (−1)^{(L⁻¹t)·z} · ĉ_{(Lᵀ)⁻¹z}.
+
+*In particular the Walsh support of g′ is Lᵀ applied to the support of g, and
+sparsity, density, and the coefficient magnitude multiset are invariant under
+affine changes of variables.*
+
+*Proof.* Substitute x = Ly ⊕ t, so y = L⁻¹(x ⊕ t), in the transform:
+ĉ′_z = 2^{−n} Σ_x (−1)^{g(x)} (−1)^{(L⁻¹(x⊕t))·z}. The exponent splits as
+(L⁻¹x)·z ⊕ (L⁻¹t)·z, and (L⁻¹x)·z = x·(Lᵀ)⁻¹z. The constant factor
+(−1)^{(L⁻¹t)·z} comes out of the sum and what remains is ĉ evaluated at
+(Lᵀ)⁻¹z. ∎
+
+*Proof of Proposition 2.* By Lemma 5 we may assume the coset partition is
+coordinate-aligned: there is a set C of m coordinates such that the cells are
+H_u = {y : y_C = u}, indexed by u ∈ F₂^m, with the remaining n − m coordinates
+written y′; each w_u is supported off C, so w_u·z = w_u·z′. Write z = (z_C, z′)
+and let g_u(y′) be the restriction of g to H_u. Splitting the transform over
+the cells,
+
+> ĉ_{(z_C, z′)} = 2^{−n} Σ_u (−1)^{u·z_C} Σ_{y′} (−1)^{g_u(y′)} (−1)^{y′·z′}
+>              = 2^{−m} Σ_u (−1)^{u·z_C} Â_u(z′),
+
+where Â_u is the normalised Walsh transform of g_u on F₂^{n−m}. Each g_u has
+linear structure w_u, so by Carlet's Proposition 29 the support of Â_u is
+contained in {z′ : w_u·z′ = 0}. If z ∈ E — that is, w_u·z′ = 1 for *every*
+u — then every Â_u(z′) vanishes, hence ĉ_{(z_C, z′)} = 0 for every z_C. So the
+Walsh support of g avoids E.
+
+For the count: when the affine system {w_u·z′ = 1 for all u} is consistent, its
+solution set is a coset of the subspace {z′ : w_u·z′ = 0 for all u}, which has
+codimension d = dim span{w_u}. Hence |E| = 2^m · 2^{(n−m)−d} = 2^{n−d}, and
+
+> |supp(ĝ)| ≤ 2ⁿ − 2^{n−d},   i.e.   density ≤ 1 − 2^{−d}. ∎
+
+*Proof of Proposition 3.* Arrange the w_u as the rows of a matrix W over GF(2);
+the system in question is Wz′ = 1, with 1 the all-ones vector. A linear system
+over a field is solvable iff the right-hand side is orthogonal to every vector
+of the left kernel: Wz′ = 1 has a solution iff v·1 = 0 for every v with
+vᵀW = 0. A left-kernel vector v is exactly a linear dependency
+Σ_{u ∈ T} w_u = 0 with T = supp(v), and v·1 = |T| mod 2. So the system is
+consistent iff every dependency among the w_u has even support. If some
+dependency has odd support, the system is inconsistent, E is empty, and the
+argument above constrains nothing — the cap disappears. ∎

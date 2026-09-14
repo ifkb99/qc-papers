@@ -5,16 +5,20 @@
 One item per file. State is the directory it lives in: moving a file
 between `open/` and `done/` is how state changes.
 
-**6 open · 23 done**
+**10 open · 58 done**
 
 ## Open
 
 | id | item |
 |---|---|
-| [12c](todo/open/12c-can-the-dead-fraction-pruned-early.md) | Can the dead 2^−(α+1) fraction be pruned EARLY? |
 | [12f](todo/open/12f-two-gpu-split-fwht-only-single.md) | Two-GPU split FWHT |
 | [13](todo/open/13-third-simulation-method-the-invariant.md) | Third simulation method on the r = β·2^α invariant |
 | [14](todo/open/14-through-the-inverse-qft-the-frontier.md) | Through the inverse QFT |
+| [24](todo/open/24-prefix-sampler-numerical-certification.md) | Can prefix-amplitude sampling carry a usable numerical error certificate? |
+| [32](todo/open/32-fixed-route-alphabets.md) | Fixed route alphabets: tighten the global envelope before wider sampling comparisons |
+| [34](todo/open/34-runtime-and-host-stability.md) | Resolve recurring native crashes before trusting long sampling comparisons |
+| [42](todo/open/42-sampling-cost-cut-selection.md) | Can cut selection account for total expected sampling work without constructing every row? |
+| [50](todo/open/50-controlled-carry-signatures.md) | Do actual shared-state controlled additions retain a useful interaction beyond planar carry matchgates? |
 | [hk3](todo/open/hk3-experiment-experiment2-and-all-experiment3.md) | experiment.py §3, experiment2.py §§2–3 and all of experiment3.py |
 | [hk7](todo/open/hk7-six-more-dependencies-are-also-unused.md) | Six more dependencies are also unused |
 
@@ -35,9 +39,44 @@ between `open/` and `done/` is how state changes.
 | [11](todo/done/11-identify-the-residual-non-linear-structure.md) | Identify the residual non-linear structure | SOLVED (C33, C34, C35) |
 | [12](todo/done/12-windowed-table-lookup-arithmetic-done-and.md) | Windowed / table-lookup arithmetic | DONE, and it corrected C29 |
 | [12b](todo/done/12b-the-recurring-linear-nonlinear-pattern-one.md) | Is the recurring GF(2) linear/nonlinear pattern one theorem? | - |
+| [12c](todo/done/12c-can-the-dead-fraction-pruned-early.md) | Can dead exponent terms be pruned early? | Solved by exact last-reverse-use contraction in both order branches; repeated β=1 tails additionally compress to one block |
 | [12d](todo/done/12d-why-the-peak-ratio-exactly-for.md) | Why is the peak ratio exactly rot = 2·perm − 2 for modexp? | - |
 | [12e](todo/done/12e-run-the-reachable-sweeps-now-that.md) | Re-run the reachable sweeps now that the GPU makes them cheap | - |
 | [12g](todo/done/12g-does-the-hyperplane-deficit-fall-off.md) | Does the hyperplane deficit fall off a cliff between n_exp 2 and 3? | - |
+| [15a](todo/done/15a-balanced-control-channels.md) | 1/4: balanced control functions, reduced channels, and certified tail approximation | C47 derived; toy and arithmetic block checks pass; exact biased-tail error and support formula recorded in BC |
+| [15b](todo/done/15b-tensor-rank-and-automata.md) | 2/4: tensor-rank diagnostics and finite-state representations of dense Walsh spectra | C48 derived; 72-check rank/spectrum diagnostic and residue realization; full scratch ranks substantially exceed ideal-function ranks |
+| [15c](todo/done/15c-conditional-order-finding.md) | 3/4: conditional measurement branches for actual order-finding output | Conditional pilot validated against full quantum circuits and wide-output formulas; the noncommuting-reordering control fixes its scope |
+| [15d](todo/done/15d-scratch-extension-equivalence.md) | 4/4: vary invalid-scratch action while preserving the logical computation | Same-layout clean-equivalent guards change full support; a converse control preserves support count but changes odd-order output statistics |
+| [16](todo/done/16-reachable-order-finding-baselines.md) | Reachable compiled order-finding versus charged classical baselines | scratch tables removed; orbit-sized support, no advantage over tested classical baselines; latent-eigenphase sampler isolates order-discovery cost |
+| [17](todo/done/17-single-spectral-defect.md) | A single noncommuting defect and the surviving phase-transfer baseline | physical eigenphase dephasing fails; an input-specific exponent phase restores cheap sampling |
+| [18](todo/done/18-work-mixer-and-final-prefix.md) | A genuine work mixer and the final-eigenphase prefix baseline | weighted final-phase conditioning succeeds; known sparse orbit columns avoid an orbit table but retain an exponential early prefix |
+| [19](todo/done/19-localized-defect-without-prefix-vector.md) | Can a localized defect remove the early-prefix vector too? | finite-support geometric sums plus scalar progression marginals yield an actual sampler; averaged rejection removes the prefix array under the known-index contract |
+| [20](todo/done/20-periodic-defects-without-dilution.md) | Can a periodic work mixer retain strong output effects without large sampling cost? | a conserved coarse Fourier sector gives a rejection-free multi-defect sampler; single-defect harmonic formulas and two distinct cancellation mechanisms are verified |
+| [21](todo/done/21-one-symmetry-breaking-kick.md) | One localized symmetry-breaking kick amid periodic mixers | bounded probe complete: coarse dephasing fails, a low-rank complete-output formula still sums over sectors, and a co-moving support cover certifies omission; exact compressed sampling remains open |
+| [22](todo/done/22-physical-phase-versus-orbit-promises.md) | Does a physical work-local phase escape the orbit-index shortcuts? | bounded physical test complete: pi-sector routing and period-six regrouping preserve cheap shortcuts; generic coarse dephasing and naive exponent transfer fail on the fixed fixture |
+| [23](todo/done/23-few-coherent-sector-routes.md) | Can a few coherent route choices be sampled without enumerating sectors? | bounded coherent-history sampler implemented and audited; known gate-by-gate sampling gives a no-rejection alternative, with static regrouping and finite costs explicitly compared |
+| [25](todo/done/25-certified-odd-block-dynamics.md) | Can verified finite-work sampling retain its advantage with observable odd-block dynamics? | C61–C64 now cover the opt-in b=3 exact-input family; complete-law, replay, edge and same-accuracy comparison pass in §OB |
+| [26](todo/done/26-forward-memory-and-backward-effects.md) | Can forward mixing remove stored history without losing rare-output correlations? | C66 proves the shared-state output-law contract; full-law controls and bounded product-contraction tests completed, with quantitative uniform-phase usefulness deferred to TODO 27 |
+| [27](todo/done/27-uniform-sector-mixing-gap.md) | Can a uniform sector-phase gap make forward-history compression useful? | C66 certifies a uniform twelve-step gap; C67 implements exact checkpoint savings while mixing warm-up remains impractical; TODO28 pursues C68's reverse-instrument lead |
+| [28](todo/done/28-reverse-instrument-sampling.md) | Can reverse-instrument rejection beat checkpointing at certified accuracy? | C69 certifies an unnormalized reverse-vector sampler; complete finite laws and edge controls pass, working storage shrinks but matched five-seed timing loses to checkpointing; TODO29 owns local-error compression |
+| [29](todo/done/29-local-error-reverse-trajectories.md) | Can local instrument error certify bounded-bit reverse trajectories? | C70 proves and implements the local-error bound with bounded integer work states; full finite laws pass, but matched timings lose to existing methods |
+| [30](todo/done/30-coherent-route-merging.md) | Can two-reflection routing replace exponential history enumeration by a short coherent walk? | C71 proves the support and accepted-law identities; audited sparse float sampler passes full laws and improves higher-k implementation timings |
+| [31](todo/done/31-merged-prefix-oracle.md) | Can coherent merging supply every gate-by-gate prefix without rejection? | C72 proves and implements all merged prefixes with no-rejection sampling; complete tiny laws pass, with a runtime/storage tradeoff against C71 |
+| [33](todo/done/33-physical-orbit-coordinate-promises.md) | Which indexed reflection gates have an inexpensive physical-orbit realization? | C74/C75 prove coordinate promises and clean physical constructions; tiny complex-gate and complete-output tests pass against the small static baseline |
+| [35](todo/done/35-additive-physical-phases-and-gauss-sums.md) | Can additive physical phases expose a useful boundary through Gauss sums? | C76/GS prove full prime-sector coupling and validate physical kernels and output; alternative contraction remains open in TODO 36 |
+| [36](todo/done/36-state-aware-additive-phase-contraction.md) | Can a state-aware rewrite bypass dense additive-phase sector coupling? | C53/UT close early-register transfer; C77/UP prove and validate the uniform-prefix support certificate; conditional suffix work continues in TODO 37 |
+| [37](todo/done/37-conditioned-suffix-and-fourier-feedback.md) | Does Fourier feedback explain the conditional suffix, or is coherent history needed? | C77/FB validate the exact conditioned boundary; the feedback-aware approximation improves on omission but misses the frozen 1% TV target |
+| [38](todo/done/38-work-first-sparse-fourier-sampling.md) | Can measuring work first replace dense sectors by short compatible-history rows? | C78/WF implement opt-in work-first progression draws; independent tiny laws, actual decision paths, edge guards and same-output float comparisons pass; numerical certification is not implied |
+| [39](todo/done/39-earlier-phase-and-binary-residue-cycles.md) | One earlier phase: complementary progression covers and sampling | C79/ER implement and validate complementary earlier-phase covers; C80/CW add an opt-in root-mass proposal with independent law/RNG checks and charged bounded comparison |
+| [40](todo/done/40-nested-phase-prefix-cuts.md) | Multiple diagonal insertions: does a binary cut avoid multiplying phase periods? | C81 proves nested-prefix covers and exact finite-truncated construction counts; bounded amplitudes, edge controls and longer-row construction savings independently reproduced |
+| [41](todo/done/41-nested-phase-sampler.md) | Do nested-phase construction savings survive actual conditional sampling? | Opt-in C81 sampler integrated; tiny laws, actual weighted RNG paths and bounded returned-sample comparison validated, including exhaustion costs |
+| [43](todo/done/43-cnot-coordinate-frame-memory.md) | Can a lazy binary coordinate frame remove CNOT dictionary rewrites through nonlinear gates? | C82/CF establish bounded lazy-frame allocation savings; batching wins for materialized output and broad novelty is excluded |
+| [44](todo/done/44-structured-observable-memory.md) | Can exact Boolean-observable structure reduce CNOT-frame storage beyond sparse Walsh enumeration? | C83/QC prove and implement exact quadratic-cell closure; the stronger recognized formula wins and broad novelty is excluded |
+| [45](todo/done/45-quadratic-certificate-baselines.md) | Does the local Toffoli closure certificate provide an advantage over phase-sensitive stabilizer splitting and merging? | C84/PR close the recognition distinction: generic tableau rank has exactly the same one-cell boundary and eight exact Clifford replacements |
+| [46](todo/done/46-coherent-recombination-beyond-local-closure.md) | Can useful circuit structure control coherent recombination after a local stabilizer escape? | C85/CP implement actual-prefix carry correlations; known Wallen and tensor baselines close isolated-adder novelty, with the no-cut escape prediction refuted |
+| [47](todo/done/47-interacting-carry-contraction.md) | Can interacting carry chains retain cheap signed contraction after the single-adder baseline stops applying? | C86/MG validate exact planar matchgate contraction of two additions; growing nonvacuous arithmetic queries and practical advantage remain for TODO48 |
+| [48](todo/done/48-planar-carry-query-discriminator.md) | Does an explicit growing planar carry family retain nontrivial signed queries after the strongest arithmetic reductions? | C87/DM give an explicit nonzero growing family and stronger direct dimer baseline; further matching reductions and practical advantage remain for TODO49 |
+| [49](todo/done/49-carry-matching-reductions.md) | Do query-specific matching reductions or signed defects leave a useful carry-simulation advantage? | C88/ME prove essential-grid survival and a bounded-band exact recurrence; finite allocation savings are explained by known sparse methods; TODO50 redirects to actual shared-state controlled arithmetic |
 | [hk1](todo/done/hk1-yao-backend.md) | Yao.jl backend | - |
 | [hk2](todo/done/hk2-decide-whether-env-should-tracked.md) | Decide whether .env should be tracked | - |
 | [hk4](todo/done/hk4-organize-experiments-into-proper-file-structure.md) | Organize experiments into a proper file structure, with a general | - |

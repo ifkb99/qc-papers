@@ -1,10 +1,18 @@
 ---
 id: 12c
-state: open
-title: Can the dead 2^−(α+1) fraction be pruned EARLY?
-claims: [C18, C23, C24, C42]
+state: done
+title: Can dead exponent terms be pruned early?
+outcome: "Solved by exact last-reverse-use contraction in both order branches; repeated β=1 tails additionally compress to one block"
+claims: [C18, C23, C24, C42, C45, C46]
 ---
-# Can the dead 2^−(α+1) fraction be pruned EARLY?
+# Can dead exponent terms be pruned early?
+
+**Solved 2026-09-09.** See C45/C46 and `notes/CT-finished-control-contraction.md`
+for the safe contraction schedule, proof, implementation and measurements.
+The original anticipated useful fractions were approximate, not exact (C42).
+The proposed β>1 negative control below was also wrongly scoped: finished
+controls can be contracted in either branch. β>1 instead defeats the separate
+identity-tail compression. The original proposal follows as historical context.
 
 Opened by §BI/C42. For the real Shor input state a fraction 1 − 2^−(α+1) of the
 Walsh support contributes **exactly zero** to ⟨O⟩ — 75% at α=1, 87.5% at α=2,

@@ -168,4 +168,92 @@ want = exact_expectation(qc, obs)
 check("adder: PPS(delta=0) == dense", abs(got - want) < 1e-9,
       f"{got:.10f} vs {want:.10f}")
 
+print("\n[6] lazy CNOT frame preserves physical operators and filter boundaries")
+from perm_pps import propagate_perm, FramedTerms
+
+# Reverse propagation sees CNOT before Toffoli. Both the transformed target
+# predicate and one inverse-column offset differ from their internal key bits.
+qc = Circuit(3).toffoli(1, 2, 0).cnot(0, 1)
+framed = propagate_perm(qc, 6, affine_frame=True)
+expected = {7: .5, 5: .5, 3: .5, 1: -.5}
+check("nonlinear interleaving uses physical predicate and inverse offsets",
+      dict(framed.final_terms) == expected)
+unitary = qc.to_unitary()
+dense = unitary.conj().T @ to_matrix((0, 6), 3) @ unitary
+represented = sum(value * to_matrix((0, key), 3)
+                  for key, value in framed.final_terms.items())
+check("full framed observable equals independent dense conjugation",
+      np.max(np.abs(dense - represented)) < 1e-12)
+check("lazy output exposes physical-key lookup, streaming items and values",
+      isinstance(framed.final_terms, FramedTerms)
+      and framed.final_terms[5] == .5
+      and set(framed.final_terms) == set(expected)
+      and sum(framed.final_terms.values()) == framed.expectation)
+
+qc = Circuit(2).cnot(0, 1)
+check("first CNOT still applies coefficient threshold",
+      not propagate_perm(qc, 2, delta=1.1, affine_frame=True).final_terms)
+check("trace uses physical bit after CNOT",
+      not propagate_perm(qc, 2, trace_plus=[0], affine_frame=True).final_terms)
+qc.cnot(0, 1)
+check("physical weight truncation is not delayed across a CNOT cancellation",
+      not propagate_perm(qc, 2, max_weight=1, affine_frame=True).final_terms)
+check("reused |+> control contracts only at its final reverse use",
+      dict(propagate_perm(qc, 2, trace_plus=[0],
+                          affine_frame=True).final_terms) == {2: 1.})
+check("physical X sign after a deferred CNOT",
+      dict(propagate_perm(Circuit(2).x(0).cnot(0, 1), 2,
+                          affine_frame=True).final_terms) == {3: -1.})
+capped = propagate_perm(Circuit(3).toffoli(0, 1, 2), 4,
+                        trace_plus=[0], max_terms=2, affine_frame=True)
+check("term cap is checked before a shrinking trace",
+      capped.hit_cap and capped.n_max == 4 and not capped.trace_events)
+wide = propagate_perm(Circuit(65).cnot(64, 0), 1, affine_frame=True)
+check("frame and physical lookup retain bits beyond a machine word",
+      wide.final_terms[1 | (1 << 64)] == 1.)
+check("control: treating internal frame keys as physical keys gives wrong operator",
+      dict(propagate_perm(Circuit(2).cnot(0, 1), 2,
+                          affine_frame=True).final_terms) != {2: 1.})
+
+print("\n[7] exact quadratic-cell queries preserve signs and reject escaped cells")
+from fractions import Fraction
+from lab.quadratic_cells import quadratic_cell_walsh, QuadraticCellEscape
+
+qc = Circuit(5).toffoli(0, 1, 3).toffoli(3, 2, 4)
+check("signed branch cancellation is exact",
+      quadratic_cell_walsh(qc, 16, 17, cut_qubits=(0,)).coefficient == 0)
+for cut, reason in (((), "cubic sign on invariant cell"),
+                    ((3,), "non-affine cell image")):
+    escaped = False
+    try:
+        quadratic_cell_walsh(qc, 16, 17, cut_qubits=cut)
+    except QuadraticCellEscape as exc:
+        escaped = exc.reason == reason and exc.reverse_step == 2
+    check(f"unsupported intermediate cell rejects for cut={cut}", escaped)
+
+qc = Circuit(3).x(0).cnot(2, 0).toffoli(0, 1, 2)
+unitary = qc.to_unitary()
+dense = unitary.conj().T @ to_matrix((0, 4), 3) @ unitary
+cell_error = 0.0
+negative = False
+for query in range(8):
+    expected = np.trace(to_matrix((0, query), 3) @ dense).real / 8
+    for cut in ((), (1, 2), (0, 1, 2)):
+        value = quadratic_cell_walsh(qc, 4, query, cut_qubits=cut).coefficient
+        cell_error = max(cell_error, abs(float(value) - expected))
+        negative |= value < 0
+check("no-cut, nonparallel and singleton partitions equal dense coefficients",
+      cell_error < 1e-12 and negative, f"max err {cell_error:.2e}")
+wide = quadratic_cell_walsh(Circuit(65).x(64).cnot(64, 0),
+                            1, 1 | (1 << 64))
+check("exact query retains physical sign and masks beyond a machine word",
+      wide.coefficient == Fraction(-1))
+capped = False
+try:
+    quadratic_cell_walsh(Circuit(65), 1, 1, cut_qubits=range(65))
+except ValueError as exc:
+    capped = "branch budget exceeded" in str(exc)
+check("branch budget rejects before exponential cell construction", capped)
+
 print("\n" + ("ALL TESTS PASSED" if not FAILED else f"FAILURES: {FAILED}"))
+raise SystemExit(bool(FAILED))

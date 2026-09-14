@@ -38,8 +38,8 @@ estimate to input-state bias. Their δ = 0 is our maximally-mixed direction and
 Shor's initial state puts the exponent register in |+⟩, i.e. **δ = 0 on those
 qubits**, so *every* z with any exponent-register support contributes **exactly
 zero** to ⟨O⟩. Combined with C24 (`z_I ∈ {0, 1_I}` on the tail, exp bits below α
-free) this predicts a useful fraction of exactly **2^−(α+1)**. Derived, then
-measured:
+free) this gives an exact dead-term criterion, but not an exact fraction: the
+surviving sectors need not have equal cardinality. Measured:
 
 ```
   N=7 a=6  α=1   n_exp=2,3,4:  |S|=15549   dead 75.03%   useful 3883
@@ -48,17 +48,23 @@ measured:
   N=5 a=2  α=2   n_exp=3,4:    |S|=32143   dead 87.51%   useful 4014
 ```
 
-75% at α=1 and 87.5% at α=2 = 1 − 2^−(α+1), and the α=2 row **jumps exactly at
-n_exp = 3 = α+1**, reproducing C21's onset from an independent direction. The
-useful count is itself constant in n_exp, so C15 holds for useful work as well
-as for total cost.
+The observed dead fractions are near 75% at α=1 and 87.5% at α=2, but the
+useful ratios are 3883/15549 ≈ 0.24973 and 4014/32143 ≈ 0.12488, not exact
+quarters/eighths. The α=2 row changes at n_exp = 3 = α+1 in these instances;
+this is a measured onset, not an independent universal proof. The useful count
+is width-invariant in the reported rows.
 
-**Honest limit — this is not a free speedup.** PPS propagates the observable
-backwards and only meets the input state at the end, so a term is only known to
-be dead once propagation is finished. It does **not** reduce peak memory (C18)
-as stated. What it does is separate *cost* from *useful work*: at α=2 seven of
-every eight Pauli terms carried are irrelevant to the answer. Whether the dead
-set can be predicted early enough to prune is open and worth asking.
+**Honest limit — this observation alone is not a speedup.** The uncontracted
+implementation propagates the observable backwards and applies the input state
+at the end. Naive pruning inside an active block is
+not justified because exponent support can disappear later; this does **not**
+rule out a sound contraction after a completed block. The observation does not
+reduce peak memory (C18) by itself. It separates *cost* from *useful work*: at
+α=2 most of the carried terms are irrelevant to the final answer.
+
+**Follow-up, 2026-09-09.** C45 and §CT now provide the sound completed-control
+contraction schedule and measurements. It works in both order branches; C46
+adds the idempotent shortcut for the repeated identity tail.
 
 ### Reference for the p-biased machinery
 

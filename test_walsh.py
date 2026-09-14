@@ -46,6 +46,24 @@ fou = ModExp(5, 2, n_exp=2).build()
 check("Fourier modexp is_classical() == False", not fou.is_classical())
 
 print("\n[D] Walsh transform sanity")
+qc = Circuit(4).x(0).cnot(0, 2).toffoli(2, 1, 3)
+selected = np.array([7, 0, 7, 15, 2], dtype=np.int64)
+snapshot = selected.copy()
+check("selected replay agrees with full table, preserves order and duplicates",
+      np.array_equal(walsh.classical_images(qc, selected),
+                     walsh.classical_permutation(qc)[selected]))
+check("selected replay does not modify caller's labels", np.array_equal(selected, snapshot))
+wide = Circuit(60).x(59).toffoli(59, 0, 58)
+check("selected replay needs no 2^60 table",
+      walsh.classical_images(wide, np.array([1], dtype=np.int64)).tolist()
+      == [(1 << 59) | (1 << 58) | 1])
+for bad in (np.array([-1]), np.array([16]), np.array([.5]), np.array([[0]])):
+    try:
+        walsh.classical_images(qc, bad)
+        check("invalid selected labels rejected", False)
+    except ValueError:
+        check("invalid selected labels rejected", True)
+
 qc = Circuit(3); qc.cnot(0, 1)                    # bit1 -> b1 XOR b0 : linear
 c = walsh.pullback_coefficients(qc, 1)
 nz = np.nonzero(np.abs(c) > 1e-12)[0]
@@ -72,3 +90,5 @@ print("    higher bits: " + ", ".join(
     f" wt={walsh.walsh_degree(add, lay['b'][i])}" for i in range(3)))
 
 print("\n" + ("ALL TESTS PASSED" if not FAILED else f"FAILURES: {FAILED}"))
+if FAILED:
+    raise SystemExit(1)

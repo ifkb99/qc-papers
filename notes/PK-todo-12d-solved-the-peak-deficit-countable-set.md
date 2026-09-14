@@ -1,7 +1,7 @@
 ---
 code: PK
-title: "TODO 12d SOLVED: the peak deficit is a COUNTABLE SET, and it is the two dominant Fourier modes"
-outcome: solved
+title: "TODO 12d: measured peak deficit set and the two dominant Fourier modes (universal derivation withdrawn)"
+outcome: record
 claims: [C2, C17, C44]
 todo: [12d]
 ---
@@ -9,28 +9,41 @@ todo: [12d]
 
 ## two dominant Fourier modes
 
-`experiments/experiment_c17_deficit.py`. Claim **C44**; C17 regraded from
-"the factor is empirical" to derived. Paper A §5 rewritten around it.
+> **Review correction (2026-09-09).** The global peak formula below was
+> over-promoted. The local Toffoli observations explain possible doubling but do
+> not determine the global maxima after intervening CNOTs and interference. A
+> four-qubit counterexample has atomic peak 4 and rotation peak 10, disproving
+> the universal derivation. Retain the formula only as a measured regularity in
+> the nine arithmetic rows; C44 is narrowed accordingly. The atomic
+> peak/Walsh-suffix characterization remains valid.
+
+`experiments/experiment_c17_deficit.py`. Claim **C44**; the arithmetic
+regularity is retained, while the universal derivation is withdrawn. Paper A §5
+is rewritten around the narrower result.
 
 **The question.** Permutation-native propagation halves peak memory —
 2.000000 exactly for ripple-carry adders, but **1.9997** for modexp, where all
 three logged instances satisfied `rot = 2·perm − 2` exactly. A constant
 additive deficit of 2, independent of instance size, was unexplained.
 
-### The derivation (read off the gadget, no measurement needed)
+### The local gadget observation (not a universal peak derivation)
 
-Two facts about the standard Clifford+T Toffoli gadget settle it.
+Two target-local facts motivated the original, invalid global inference.
 
 1. A Z-type string commutes with every Z-rotation, so it **cannot branch until
    an H turns a Z into an X**. The gadget's only H acts on the target c, so
    only strings carrying Z_c ever leave the diagonal.
 2. Once a string is X_c-type, the gadget's four T gates on c are rotations
    about Z_c, and those act *within* span{X_c, Y_c}:
-   `X_c → cos·X_c − sin·Y_c`, `Y_c → cos·Y_c + sin·X_c`. **That space is
-   closed**, so the four T gates branch ONCE between them, not 2⁴ times.
+   `X_c → cos·X_c − sin·Y_c`, `Y_c → cos·Y_c + sin·X_c`. That target-local
+   space is closed only for a fixed rest-label component. Interleaved CNOTs
+   change other labels, so it does **not** follow that full strings branch once.
 
-Hence every Z_c-carrying string contributes exactly 2 Paulis and every other
-string exactly 1:
+Hence a Z_c-carrying string can contribute two Paulis within the gadget while
+other strings contribute one at that local step. Intervening CNOTs and
+interference prevent this local count from proving a relation between global
+maxima. The arithmetic rows nevertheless satisfy the following measured
+regularity:
 
 ```
     N_max^rot = 2·N_max^perm − |B|,     B = { z ∈ S : z_c = 0 }
@@ -91,8 +104,9 @@ observable**, not about modular exponentiation. Paper A now says so.
 
 ### Grading, and what is still open
 
-- `N_max^rot = 2·N_max^perm − |B|` — **derived + verified 9/9.** This is what
-  upgrades Paper A §5 from "upper bound of 2, empirical".
+- `N_max^rot = 2·N_max^perm − |B|` — **measured 9/9 in the arithmetic rows.**
+  It is not a universal derivation; the counterexample above disproves that
+  broader claim. The exact atomic-peak/Walsh-suffix characterization remains.
 - `|B| = 2` for the standard observable, with B the two |c| = ½ modes —
   **verified 6/6, mechanism identified, NOT proved.** Proving it needs a
   characterisation of which peak-time strings avoid the scratch register, which

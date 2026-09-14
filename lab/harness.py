@@ -25,6 +25,10 @@ Usage:
 """
 from __future__ import annotations
 import sys
+import json
+import platform
+from pathlib import Path
+import time
 
 
 class Experiment:
@@ -38,6 +42,7 @@ class Experiment:
         self._resolved: set[str] = set()
         self._measured = False
         self.warnings: list[str] = []
+        self._started = time.perf_counter()
         print(f"=== {name} ===")
         if doc:
             head = doc.strip().splitlines()[0]
@@ -83,7 +88,13 @@ class Experiment:
         return bool(failed)
 
     # -- verdict ------------------------------------------------------------
-    def finish(self) -> bool:
+    def finish(self, *, report_path=None, rows=None, metadata=None) -> bool:
+        """Resolve the run, optionally saving a JSON report even on failure.
+
+        Reports contain declarations, individual checks, warnings and measured
+        rows, not just a success flag. Existing callers retain their behavior.
+        Generated reports belong under ignored out/, not in the claim ledger.
+        """
         for pid in self._predictions:
             if pid not in self._resolved:
                 self.warnings.append(f"prediction {pid!r} was never checked")
@@ -102,6 +113,18 @@ class Experiment:
         for w in self.warnings:
             print(f"  WARNING: {w}")
         ok = not bad
+        if report_path is not None:
+            path = Path(report_path)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            report = dict(name=self.name, ok=ok, predictions=self._predictions,
+                          controls=self._controls, checks=[
+                              dict(id=pid, kind=kind, ok=passed, detail=detail)
+                              for pid, kind, passed, detail in self._results],
+                          warnings=self.warnings, rows=[] if rows is None else rows,
+                          metadata={} if metadata is None else metadata,
+                          python=sys.version, platform=platform.platform(),
+                          elapsed_seconds=time.perf_counter() - self._started)
+            path.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")
         if not ok and self.exit_on_fail:
             sys.exit(1)
         return ok

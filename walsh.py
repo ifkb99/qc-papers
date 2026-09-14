@@ -26,8 +26,32 @@ def classical_permutation(circuit) -> np.ndarray:
         bad = next(op[0] for op in circuit.logical if op[0] not in ("x", "cnot", "toffoli"))
         raise ValueError(f"circuit is not a permutation (found {bad!r})")
 
-    n = circuit.n
-    idx = np.arange(1 << n, dtype=np.int64)
+    # Reuse the just-allocated full table in place; the selected-input API
+    # copies caller-owned arrays, which would double this path's allocation.
+    return _classical_replay_inplace(circuit, np.arange(1 << circuit.n, dtype=np.int64))
+
+
+def classical_images(circuit, inputs) -> np.ndarray:
+    """Replay the SAME classical gate kernel on selected basis states only.
+
+    No full permutation table is allocated. Inputs may repeat and are not
+    modified. Signed int64 labels limit this helper to at most 63 qubits.
+    This is basis-state replay, not a second state/Pauli propagator.
+    """
+    if not circuit.is_classical():
+        raise ValueError("circuit is not a gate-by-gate classical permutation")
+    raw = np.asarray(inputs)
+    if (not 0 <= circuit.n <= 63 or raw.ndim != 1
+            or not np.issubdtype(raw.dtype, np.integer)):
+        raise ValueError("expected a one-dimensional integer basis list and n <= 63")
+    if raw.size and (int(raw.min()) < 0 or int(raw.max()) >= (1 << circuit.n)):
+        raise ValueError("basis label outside circuit register")
+    idx = raw.astype(np.int64, copy=True)
+    return _classical_replay_inplace(circuit, idx)
+
+
+def _classical_replay_inplace(circuit, idx):
+    """Single gate kernel shared by full-table and selected-input replay."""
     for op in circuit.logical:
         if op[0] == "x":
             idx ^= np.int64(1 << op[1])

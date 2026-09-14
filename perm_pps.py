@@ -9,9 +9,9 @@ a Walsh quantity.
 Treating X / CNOT / Toffoli as ATOMIC permutation gates fixes both problems.
 Conjugating a Z-string by a permutation gives a diagonal operator, so the
 expansion stays purely Z-type at every step, and the count after k gates is
-exactly the Walsh sparsity of the k-gate prefix. Peak memory is then
+exactly the Walsh sparsity of the k-gate suffix. Peak retained support is then
 
-    N_max = max over prefixes of (Walsh sparsity of that prefix)
+    N_max = max over suffixes of (Walsh sparsity of that suffix)
 
 which is exact and computable, closing the gap Fable identified.
 
@@ -26,21 +26,92 @@ Conjugation rules for Z^z (all derived from (-1)^{popcount(perm(y) & z)}):
                                         - (-1)^{y_a + y_b}))
 """
 from __future__ import annotations
-import numpy as np
+from collections.abc import Iterable, Mapping
+from operator import index
+
+
+class _BinaryFrame:
+    """Physical Walsh key z = F k; store F rows and F^-1 columns."""
+
+    def __init__(self, n: int):
+        self.rows = [1 << q for q in range(n)]
+        self.inverse_columns = self.rows.copy()
+
+    def cnot(self, control: int, target: int) -> None:
+        self.rows[control] ^= self.rows[target]
+        self.inverse_columns[target] ^= self.inverse_columns[control]
+
+    def physical(self, key: int) -> int:
+        return sum(((row & key).bit_count() & 1) << q
+                   for q, row in enumerate(self.rows))
+
+    def logical(self, physical: int) -> int:
+        key = 0
+        while physical:
+            bit = physical & -physical
+            key ^= self.inverse_columns[bit.bit_length() - 1]
+            physical ^= bit
+        return key
+
+    def constraints(self, mask: int) -> tuple[int, ...]:
+        return tuple(row for q, row in enumerate(self.rows) if (mask >> q) & 1)
+
+
+class FramedTerms(Mapping[int, float]):
+    """Read-only physical-key view of one dictionary in binary coordinates.
+
+    Iteration decodes one key at a time; lookup applies the inverse frame.
+    ``dict(view)`` explicitly allocates a second, physical-key dictionary.
+    Values/items stream without building an intermediate key collection.
+    The propagation owns the backing dictionary and stops mutating it before
+    exposing this view. This interface defers key conversion, not coefficients.
+    """
+
+    def __init__(self, terms: dict[int, float], frame: _BinaryFrame):
+        self._terms = terms
+        self._frame = frame
+
+    def __len__(self):
+        return len(self._terms)
+
+    def __iter__(self):
+        for key in self._terms:
+            yield self._frame.physical(key)
+
+    def __getitem__(self, key):
+        try:
+            physical = index(key)
+        except TypeError:
+            raise KeyError(key) from None
+        if physical < 0 or physical.bit_length() > len(self._frame.rows):
+            raise KeyError(key)
+        return self._terms[self._frame.logical(physical)]
+
+    def values(self):
+        return self._terms.values()
+
+    def items(self):
+        for key, value in self._terms.items():
+            yield self._frame.physical(key), value
 
 
 class PermPPSResult:
     def __init__(self):
         self.n_terms: list[int] = []
         self.n_max: int = 0
-        self.final_terms: dict[int, float] = {}
+        self.final_terms: Mapping[int, float] = {}
         self.expectation: float = 0.0
         self.hit_cap: bool = False
+        self.frame_cnot_updates: int = 0
+        # (reverse steps completed, qubit mask, terms before, terms after).
+        self.trace_events: list[tuple[int, int, int, int]] = []
 
 
 def propagate_perm(circuit, zmask: int, delta: float = 0.0,
                    max_terms: int = 4_000_000,
-                   max_weight: int | None = None) -> PermPPSResult:
+                   max_weight: int | None = None, *,
+                   trace_plus: Iterable[int] = (),
+                   affine_frame: bool = False) -> PermPPSResult:
     """Back-propagate the Z-type observable Z^zmask through a classical
     reversible circuit, keeping only Z-strings (keys are z bitmasks).
 
@@ -51,54 +122,135 @@ def propagate_perm(circuit, zmask: int, delta: float = 0.0,
                    DEGREE of that Walsh coefficient -- so weight truncation here
                    is literally low-degree Fourier truncation of the pulled-back
                    Boolean function.
+
+    `trace_plus`: qubits initially in an independent |+> product state.
+                  Contract each immediately after its final use in reverse
+                  propagation (its FIRST occurrence in forward order). All
+                  remaining gates then act on other qubits, so the contraction
+                  commutes with their propagation. Z-terms containing that
+                  qubit vanish; the result is a REDUCED observable, not the full
+                  Heisenberg expansion. Unspecified input qubits are |0> for
+                  `expectation`, as before. Exact at delta=0, max_weight=None
+                  up to the existing numerical floor; truncation need not
+                  commute with tracing.
+
+    `n_terms` and `n_max` count retained terms BEFORE each contraction so that
+    the temporary pre-contraction expansion is included in the reported peak.
+    They do not count simultaneous old/new dictionary allocations or bytes.
+
+    `affine_frame`: opt in to binary Walsh-key coordinates. Each CNOT updates
+                  two n-bit frame vectors instead of rebuilding the support
+                  dictionary. Toffoli branches and |+> contractions use that
+                  frame directly. The final_terms result is then a read-only
+                  FramedTerms Mapping of PHYSICAL keys; iteration converts keys
+                  on demand. Call dict(result.final_terms) only if a concrete
+                  dictionary is required and budget that additional allocation.
+                  The frame stores O(n^2) bits plus Python containers. It does
+                  not reduce support cardinality or nonlinear-gate allocations.
+                  max_weight still scans physical keys after each CNOT.
     """
     if not circuit.is_classical():
         bad = next(op[0] for op in circuit.logical
                    if op[0] not in ("x", "cnot", "toffoli"))
         raise ValueError(f"circuit is not a permutation (found {bad!r})")
 
+    frame = _BinaryFrame(circuit.n) if affine_frame else None
+    if frame is not None:
+        zmask = index(zmask)
+        if zmask < 0 or zmask.bit_length() > circuit.n:
+            raise ValueError("zmask contains a qubit outside the circuit")
+        for op in circuit.logical:
+            if len(set(op[1:])) != len(op) - 1 or any(
+                    q < 0 or q >= circuit.n for q in op[1:]):
+                raise ValueError("affine frame requires distinct in-range gate qubits")
+
     terms: dict[int, float] = {zmask: 1.0}
     res = PermPPSResult()
+    coefficients_filtered = False
 
-    for op in reversed(circuit.logical):
-        new: dict[int, float] = {}
+    trace_qubits = {index(q) for q in trace_plus}
+    if any(q < 0 or q >= circuit.n for q in trace_qubits):
+        raise ValueError("trace_plus contains a qubit outside the circuit")
+    trace_at: dict[int, int] = {}
+    unseen = set(trace_qubits)
+    if unseen:
+        for forward_step, op in enumerate(circuit.logical):
+            for q in op[1:]:
+                if q in unseen:
+                    trace_at[forward_step] = trace_at.get(forward_step, 0) | (1 << q)
+                    unseen.remove(q)
+            if not unseen:
+                break
+    unused_mask = sum(1 << q for q in unseen)
+    if unused_mask:
+        before = len(terms)
+        terms = {z: v for z, v in terms.items() if not (z & unused_mask)}
+        res.trace_events.append((0, unused_mask, before, len(terms)))
+
+    for forward_step in range(len(circuit.logical) - 1, -1, -1):
+        op = circuit.logical[forward_step]
+        deferred_cnot = frame is not None and op[0] == "cnot"
+        new: dict[int, float] = terms if deferred_cnot else {}
 
         if op[0] == "x":
             q = op[1]
+            predicate = frame.rows[q] if frame is not None else 1 << q
             for z, c in terms.items():
-                new[z] = new.get(z, 0.0) + (-c if (z >> q) & 1 else c)
+                new[z] = new.get(z, 0.0) + (
+                    -c if (z & predicate).bit_count() & 1 else c)
 
         elif op[0] == "cnot":
             cq, tq = op[1], op[2]
-            for z, c in terms.items():
-                zz = z ^ (((z >> tq) & 1) << cq)
-                new[zz] = new.get(zz, 0.0) + c
+            if frame is not None:
+                frame.cnot(cq, tq)
+                res.frame_cnot_updates += 1
+            else:
+                for z, c in terms.items():
+                    zz = z ^ (((z >> tq) & 1) << cq)
+                    new[zz] = new.get(zz, 0.0) + c
 
         else:                                   # toffoli(a, b, c)
             a, b, cq = op[1], op[2], op[3]
-            ba, bb = 1 << a, 1 << b
+            ba = frame.inverse_columns[a] if frame is not None else 1 << a
+            bb = frame.inverse_columns[b] if frame is not None else 1 << b
+            predicate = frame.rows[cq] if frame is not None else 1 << cq
             for z, c in terms.items():
-                if not ((z >> cq) & 1):
+                if not ((z & predicate).bit_count() & 1):
                     new[z] = new.get(z, 0.0) + c
                     continue
                 h = 0.5 * c
                 for zz, s in ((z, h), (z ^ ba, h), (z ^ bb, h), (z ^ ba ^ bb, -h)):
                     new[zz] = new.get(zz, 0.0) + s
 
-        if delta > 0:
-            new = {z: v for z, v in new.items() if abs(v) >= delta}
-        else:
-            new = {z: v for z, v in new.items() if abs(v) > 1e-13}
+        if not deferred_cnot or not coefficients_filtered:
+            if delta > 0:
+                new = {z: v for z, v in new.items() if abs(v) >= delta}
+            else:
+                new = {z: v for z, v in new.items() if abs(v) > 1e-13}
+            coefficients_filtered = True
         if max_weight is not None:
-            new = {z: v for z, v in new.items() if z.bit_count() <= max_weight}
+            new = {z: v for z, v in new.items()
+                   if (frame.physical(z) if frame is not None else z).bit_count()
+                   <= max_weight}
         terms = new
 
         res.n_terms.append(len(terms))
         if len(terms) > max_terms:
             res.hit_cap = True
             break
+        mask = trace_at.get(forward_step, 0)
+        if mask:
+            before = len(terms)
+            if frame is None:
+                terms = {z: v for z, v in terms.items() if not (z & mask)}
+            else:
+                constraints = frame.constraints(mask)
+                terms = {z: v for z, v in terms.items()
+                         if not any((z & row).bit_count() & 1 for row in constraints)}
+            res.trace_events.append((len(res.n_terms), mask, before, len(terms)))
 
     res.n_max = max(res.n_terms) if res.n_terms else 0
-    res.final_terms = terms
-    res.expectation = float(sum(terms.values()))   # <0|Z^z|0> = 1 for all z
+    res.final_terms = FramedTerms(terms, frame) if frame is not None else terms
+    # Traced |+> qubits have been eliminated; <0|Z^z|0> = 1 on the rest.
+    res.expectation = float(sum(terms.values()))
     return res

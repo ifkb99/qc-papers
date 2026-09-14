@@ -6,6 +6,12 @@
 > disagree on wording, `PAPER_A.md` is the live document; where either
 > disagrees with `CLAIMS.md` on a *status*, `CLAIMS.md` wins.
 
+> **Review update, 2026-09-09.** The diagonal Pauli/Fourier identity is prior
+> art; the applications and structural results carry the novelty claim. The
+> universal peak formula is withdrawn (C44), and supplied Fourier/Toffoli
+> circuits are not a matched full-permutation comparison. Counts below concern
+> uncontracted operators; C45/C46 treat the distinct state-aware reduced task.
+
 **Working title:** *Walsh–Hadamard Sparsity Exactly Determines Pauli-Path
 Simulation Cost for Reversible Quantum Arithmetic*
 
@@ -23,11 +29,44 @@ Baker, I.
 > title, *"Compilation, Not Algorithm, Determines Pauli-Path Simulability"*, is
 > **retracted**: the apparent compilation effect was an ancilla-count confound,
 > and both compilations tested have exact Z-closure. The current claim (Walsh
-> sparsity = PPS term count) is verified to machine precision on 6/6 instances
-> across both compilations, with supports identical rather than merely counts
-> matching. C7 (pre-asymptotic) is since **refuted** — the Walsh route reached
+> sparsity = PPS term count) is verified to machine precision on 6/6 Toffoli
+> modexp/adder observables, with support sets identical to their Walsh spectra.
+> This is not a six-case comparison across the two compilations.
+> C7 (pre-asymptotic) is since **refuted** — the Walsh route reached
 > 24 qubits and density converges to ½ with slope 1.008 bits/qubit. See
 > `NOTES.md` STATUS 2 and the honesty log.
+
+---
+
+## Abstract for the arXiv metadata field (revised 2026-09-09)
+
+The PDF keeps the long abstract in `PAPER_A.md`; this compressed version is for
+the submission form only. Plain ASCII because the field mangles math glyphs.
+
+> Pauli-path simulation (PPS, also sparse Pauli dynamics) is a leading method
+> for classically simulating utility-scale quantum circuits, and deploying it
+> depends on predicting how many Pauli terms a circuit will require -- a
+> question currently answered by empirical power-law extrapolation. We show
+> that for circuits implementing a permutation of the computational basis --
+> all reversible arithmetic, including the arithmetic core of Shor's algorithm
+> -- final full-operator support is exactly characterized by a Walsh transform. For a basis
+> permutation pi and computational-basis observable Z_j, the Heisenberg
+> pullback is diagonal, and its Pauli expansion is precisely the Walsh-Hadamard
+> spectrum of the Boolean function g(y) = bit j of pi(y); the support PPS must
+> carry without state contraction is the Walsh sparsity of g. Four consequences follow: (i) cost
+> is a property of the full-space permutation implemented, not of the gate set;
+> we verify Z-closure in Toffoli- and Fourier-compiled modular exponentiation,
+> whose supplied implementations agree on the valid subspace but differ in
+> full-space scratch action; (ii)
+> the folklore collapse of adders is exactly affineness, Walsh sparsity one;
+> (iii) propagating X, CNOT and Toffoli as atomic permutations keeps the
+> expansion diagonal, and the tested arithmetic rows obey the exact measured
+> relation N_rot = 2 N_perm - |B| with B a countable deficit set; (iv) any published
+> cryptanalytic nonlinearity lower-bounds PPS cost for every circuit computing
+> that function, with no simulation. Linear structures cap achievable Walsh
+> density, with a parity condition governing when the caps apply. These results
+> are diagnostic, not a simulation speedup: the Walsh transform is itself
+> exponential, and nothing here bears on the classical hardness of factoring.
 
 ---
 
@@ -43,7 +82,7 @@ Trotterised circuits with generic rotation angles.
 We show that for the class of circuits implementing a permutation of the
 computational basis — that is, all reversible arithmetic, and hence the bulk of
 Shor's algorithm and of quantum algorithms generally — this quantity is not
-merely predictable but *exactly computable in closed form*, with no
+merely predictable but *exactly characterized by a Walsh transform*, with no
 extrapolation and no fitting.
 
 For a circuit implementing basis permutation π, the Heisenberg-picture pullback
@@ -56,16 +95,17 @@ numerically to machine precision across modular exponentiation and ripple-carry
 addition, recovering not only the term count but the identical support set.
 
 Three consequences follow. First, PPS cost for reversible arithmetic is a
-property of the Boolean function being computed, not of the gate set used to
+property of the full-space permutation implemented, not of the gate set used to
 compute it: we verify that Toffoli-compiled and Fourier-compiled (Beauregard)
 modular exponentiation both exhibit exact closure of the Z-type Pauli
-subalgebra, contradicting the intuition that Clifford+T compilation is
-distinguished. Second, the special tractability of linear arithmetic is
+subalgebra, although the supplied implementations agree only on the valid
+subspace and differ in their full-space scratch action. Second, the special tractability of linear arithmetic is
 explained exactly rather than empirically — a ripple-carry adder's low output
 bit is XOR-affine, its Walsh spectrum is a single point, and PPS collapses to
-one term, since sparsity one characterises affineness. Third, the cost model is
-computable in O(2ⁿn) time, three orders of magnitude faster than the PPS run it
-predicts in our instances.
+one term, since sparsity one characterises affineness. Third, given a permutation
+table, the cost model's FWHT is computable in O(2ⁿn) time (circuit replay adds
+an O(L·2ⁿ) term), three orders of magnitude faster than the PPS run it predicts
+in our instances.
 
 We distinguish two cost measures that the identity treats differently. The Walsh
 sparsity gives the *final* Pauli support exactly; peak memory during propagation
@@ -73,8 +113,9 @@ is a separate, larger quantity, because the standard Clifford+T decomposition of
 a Toffoli passes through Hadamard gates and so leaves the diagonal mid-circuit
 even though the gate is a permutation. We show this is an artifact of
 compilation rather than of the method: propagating with X, CNOT and Toffoli as
-atomic permutation primitives keeps the expansion Z-type at every step, halves
-peak memory exactly, and makes the peak itself a Walsh quantity — the maximum
+atomic permutation primitives keeps the expansion Z-type at every step, gives a
+measured near-halving of peak memory in these rows, and makes the peak itself a
+Walsh quantity — the maximum
 over circuit suffixes of the corresponding sparsity — while running an order of
 magnitude faster than rotation-level propagation on the same circuits.
 
@@ -175,12 +216,16 @@ retired here — **C3, C4, C9**, and the F/H findings that preceded them — are
 
 Searched and read. Nothing found that states the claim. What exists nearby:
 
-- **Vidal & Ballarin et al., "Pauli decomposition via the fast Walsh–Hadamard
-  transform"** ([NJP 2025](https://iopscience.iop.org/article/10.1088/1367-2630/adb44d)).
-  General 2ⁿ×2ⁿ matrix → Pauli coefficients in O(N² log N) via FWHT. Explicitly
-  claims novelty for its formulas. But: **no diagonal special case, no Pauli
-  propagation, no reversible circuits, no Boolean sparsity.** Adjacent tooling,
-  different question.
+- **Georges, Berntson, Sünderhauf & Ivanov, "Pauli decomposition via the fast
+  Walsh–Hadamard transform"** ([NJP 2025](https://doi.org/10.1088/1367-2630/adb44d)).
+  General 2ⁿ×2ⁿ matrix → Pauli coefficients in O(N² log N) via FWHT. Adjacent
+  tooling, but no propagation, reversible-circuit, or Boolean-sparsity result.
+- **Montanaro & Osborne, "Quantum Boolean Functions," Proposition 9**
+  ([arXiv:0810.2435](https://arxiv.org/abs/0810.2435)) explicitly identifies
+  the Pauli expansion of a diagonal Boolean operator with its classical Fourier
+  expansion. The permutation-pullback application and arithmetic cost account
+  here should be positioned as the contribution, not the diagonal identity in
+  isolation.
 - **"Characterizing Pauli Propagation via Operator Complexity"**
   ([arXiv:2510.22311](https://arxiv.org/html/2510.22311)). The closest
   competitor — it *is* about PPS cost. But it uses **operator stabilizer Rényi

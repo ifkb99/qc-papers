@@ -7,13 +7,26 @@ they say what was believed at the time, so a note may contain a status
 later superseded. Where a note disagrees with a claim file, the claim
 file wins.
 
-**44 investigations**
+**100 investigations**
 
 | code | date | outcome | subject | claims |
 |---|---|---|---|---|
 | [AF](notes/AF-todo-affine-structures-and-the-function-level.md) | - | solved | TODO 11.1: AFFINE structures, and the function-level ½ rows EXPLAINED | C33 |
+| [BC](notes/BC-balanced-control-channels.md) | 2026-09-09 | established | Balanced nonlinear controls project exactly; biased controls have a certified geometric residual | C47 |
 | [BI](notes/BI-biased-inputs-gangopadhyay-kumar-nic.md) | - | record | BIASED INPUTS (Gangopadhyay–Kumar–Stănică–Gangopadhyay, JAMC 2023) | C8, C15, C18, C21, C24, C40, C42 |
+| [CF](notes/CF-cnot-coordinate-frame.md) | 2026-09-12 | bounded implementation improvement; no breakthrough established | Lazy CNOT coordinates save allocation, but a stronger physical-output baseline wins | C82 |
+| [CF](notes/CF-conditional-order-finding.md) | 2026-09-10 | established | Conditional measurement reproduces actual order-finding outputs; commutation and exponential work cost remain essential | C49 |
+| [CG](notes/CG-clean-physical-orbit-gates.md) | 2026-09-11 | confirmed | Clean physical orbit gates close the coordinate gap, without a sampling speedup | C56, C59, C74, C75 |
+| [CH](notes/CH-coherent-histories-and-gate-by-gate-sampling.md) | 2026-09-11 | mixed | Coherent routes: a prefix-amplitude connection removes rejection, but not all its costs | C59 |
+| [CM](notes/CM-coherent-merging-and-reverse-walks.md) | 2026-09-11 | confirmed | Coherent route merging replaces history enumeration with a short backward walk | C56, C58, C59, C63, C68, C70, C71 |
+| [CP](notes/CP-carry-prefix-correlation.md) | 2026-09-12 | exact restricted implementation and independent checks; isolated-adder novelty closed; no-cut escape prediction refuted | Actual Cuccaro prefixes reach the known carry-correlation baseline | C85 |
+| [CT](notes/CT-finished-control-contraction.md) | 2026-09-09 | established | Exact finished-control contraction: bounded reduced support in both order branches and an idempotent β=1 tail | C45, C46, C42, C18 |
+| [CW](notes/CW-component-masses-and-weighted-rejection.md) | 2026-09-11 | confirmed | Component masses refine the work-first rejection envelope | C59, C78, C79, C80 |
 | [DF](notes/DF-todo-12g-closed-negatively-there-cliff-and-os4.md) | - | retracted | TODO 12g CLOSED NEGATIVELY: there is no cliff, and §OS4's CLIFF OBSERVATION is RETRACTED | C1, C7, C21, C30 |
+| [DM](notes/DM-explicit-carry-dimers.md) | 2026-09-12 | nonzero exact arithmetic family and grid minor proved; direct dimer reduction removes generic gadgets; independent verifier defects retained and corrected | Explicit growing carry graphs expose a stronger dimer baseline | C87 |
+| [DS](notes/DS-dirty-prefix-symmetries.md) | 2026-09-12 | exact three-macro full-space discriminator found; growing disabled sector reduced; enabled closure remains open | Dirty-prefix reversal symmetry redirects the scalar; the disabled sector has a polynomial construction | C92 |
+| [DW](notes/DW-disjoint-mask-weights.md) | 2026-09-13 | width-independent coefficient bound proved for disjoint masks; the fixed-q word-width memory campaign was designed, found nondiscriminating and withdrawn without execution | Disjoint-mask coefficient sizes and the withdrawn width study | C98 |
+| [ER](notes/ER-earlier-phases-and-binary-residue-cycles.md) | 2026-09-11 | confirmed | Earlier-phase progression covers now support an opt-in sampler and long-row validation | C59, C77, C78, C79 |
 | [F10](notes/F10-scope-the-walsh-identity-exactly-where-stops.md) | - | record | scope of the Walsh identity (exactly where it stops) | - |
 | [F11](notes/F11-truncation-error-non-monotonic-aggressive.md) | - | record | truncation error is NON-MONOTONIC in δ (aggressive beats mild) | C5 |
 | [F12](notes/F12-the-adic-dichotomy-function-level-superseded.md) | - | superseded | the 2-adic dichotomy at function level (superseded by C15 above) | C15 |
@@ -22,19 +35,62 @@ file wins.
 | [F7](notes/F7-the-real-cost-driver-walsh-sparsity-which.md) | - | record | the real cost driver is Walsh sparsity, which is compilation-invariant | - |
 | [F8](notes/F8-truncation-destroys-the-structural-advantage.md) | - | record | truncation destroys the structural advantage | - |
 | [F9](notes/F9-the-result-pps-term-count-walsh-sparsity.md) | - | solved | THE RESULT: PPS term count = Walsh sparsity, exactly | - |
+| [FA](notes/FA-fixed-route-alphabets.md) | 2026-09-11 | confirmed | Fixed alphabets extend merged simulation beyond the history cap | C59, C60, C71, C72, C73 |
+| [FB](notes/FB-conditional-suffixes-and-fourier-feedback.md) | 2026-09-11 | confirmed | Keeping Fourier feedback improves the baseline, but coherent high histories remain detectable | C56, C77 |
+| [FM](notes/FM-forward-memory-and-backward-effects.md) | 2026-09-11 | confirmed | Forward-state approximation can preserve the output law without resetting measurement memory | C56, C64, C65, C66 |
+| [FW](notes/FW-verified-finite-work-and-scalar-tail.md) | 2026-09-11 | mixed | Verified finite-work proposals work, but a late-work invariance makes the binary benchmark simpler still | C56, C63, C64, C65 |
 | [G](notes/G-the-theorem-generalises-todo-step-the-whole.md) | 2026-08-08 | superseded | THE THEOREM GENERALISES (TODO step 9). V²=id is the whole condition. | C15, C29 |
 | [GF](notes/GF-the-recurring-pattern-one-fact-two-corollaries.md) | - | record | THE RECURRING GF(2) PATTERN: one fact, two corollaries, one folklore gap | C15, C24, C30, C32, C33, C34, C36, C40, C41 |
 | [GPU](notes/GPU-cuda-backend-capacity-and-measurements.md) | 2026-08-08 | record | CUDA backend: what it buys, where it caps, and why the replay binds | - |
+| [GS](notes/GS-additive-phases-and-gauss-sums.md) | 2026-09-11 | confirmed | A cheap physical phase couples every coarse sector, but this is not sampling hardness | C53, C56, C58, C74, C75, C76 |
+| [HC](notes/HC-history-carry-catalog.md) | 2026-09-12 | synchronized-prefix carry bound proved, but a complete stopped-prefix catalog histogram is exponential; reachable signed closure remains open | Shared carry slopes require chronology-sensitive reduction | C97 |
 | [HIST](notes/HIST-the-0716-residue-thread-as-it-stood.md) | - | solved | The 0.716-residue thread, as it stood at handoff (RESOLVED) | C30, C33, C34, C35 |
 | [I](notes/I-there-intermediate-adic-law-todo-step-answer.md) | - | negative | IS THERE AN INTERMEDIATE 2-ADIC LAW? (TODO step 6). No. Answer is negative. | C15 |
+| [IS](notes/IS-itinerary-streaming.md) | 2026-09-12 | exact all-mask conditional evaluator validated against blind native gates; frozen task-allocation thresholds passed against both current and packed C89, with no process-RSS saving established | Itinerary replay removes the conditional interval table with a measured allocation saving | C94 |
+| [IX](notes/IX-controlled-carry-intervals.md) | 2026-09-12 | exact conditional representation and Walsh contraction proved and independently checked; the shared-variable average remains open | Actual controlled-add prefixes collapse to conditional interval exchanges | C89 |
 | [L](notes/L-the-density-ceiling-explained-linear-structure.md) | - | solved | THE DENSITY-½ CEILING EXPLAINED: a linear structure from the reduction ancilla | C7, C12 |
 | [L2](notes/L2-step-resolved-the-standard-reduction.md) | - | solved | STEP 10 RESOLVED: the standard reduction is *accidentally* PPS-friendly | C7, C15 |
+| [LC](notes/LC-localized-kicks-and-orbit-light-cones.md) | 2026-09-10 | mixed | One symmetry-breaking kick: visible sector coherence, a finite boundary formula, and an orbit-displacement omission certificate | C57 |
+| [LF](notes/LF-localized-fourier-sampling.md) | 2026-09-10 | mixed | Finite-support defects: arithmetic-progression marginals and averaged interference rejection remove the prefix vector | C55 |
+| [ME](notes/ME-carry-matching-elimination.md) | 2026-09-12 | growing reduced grid proved; exact sparse implementation beats current dense allocations on bounded fixtures; known stronger baselines prevent a breakthrough claim | Essential matching support survives, but sparse Pfaffian methods explain the memory saving | C88 |
+| [MG](notes/MG-matchgate-carry-contraction.md) | 2026-09-12 | exact restricted Pfaffian implementation validated; explicit growing nonvacuous arithmetic family and practical advantage remain unresolved | Interacting carries reach planar matchgate contraction | C86 |
+| [MP](notes/MP-merged-prefixes-without-rejection.md) | 2026-09-11 | confirmed | Merged intermediate prefixes remove rejection without a clear runtime win | C59, C60, C71, C72 |
+| [NC](notes/NC-nested-phase-prefix-cuts.md) | 2026-09-11 | confirmed | Several diagonal insertions share a nested-prefix partition | C79, C80, C81 |
+| [NG](notes/NG-norm-geometry-and-working-precision.md) | 2026-09-11 | mixed | Norm geometry explains excess enclosure precision, but extra bookkeeping loses the timing comparison | C61, C62 |
+| [NS](notes/NS-nested-phase-sampling.md) | 2026-09-12 | confirmed | Nested-phase construction savings survive conditional rejection in a bounded fixture | C78, C79, C80, C81 |
+| [OB](notes/OB-certified-odd-block-dynamics.md) | 2026-09-11 | confirmed | Certified finite-work sampling extends beyond the binary scalar tail | C56, C60, C61, C62, C63, C64, C65 |
 | [OS](notes/OS-todo-12e-the-onset-measured-and-and-qubits.md) | 2026-08-08 | record | TODO 12e: THE ONSET MEASURED AT α = 3 AND 4 (and C7 to 30 qubits) | C2, C7, C21, C23, C24, C30, C37, C38, C43 |
-| [PK](notes/PK-todo-12d-solved-the-peak-deficit-countable-set.md) | - | solved | TODO 12d SOLVED: the peak deficit is a COUNTABLE SET, and it is the two dominant Fourier modes | C2, C17, C44 |
+| [PC](notes/PC-physical-coordinates-and-phase-oracles.md) | 2026-09-11 | confirmed | Cell reflection is easy to evaluate; a phase evaluator can hide discrete logs | C52, C58, C59, C73, C74 |
+| [PE](notes/PE-prefix-sampling-error-budgets.md) | 2026-09-11 | mixed | Prefix-sampling precision: a proved budget, with the numerical oracle still missing | C60 |
+| [PF](notes/PF-final-eigenphase-and-sparse-prefix.md) | 2026-09-10 | mixed | Final-eigenphase conditioning survives a genuine work mixer; sparse rejection removes the orbit table under an explicit input contract | C54 |
+| [PK](notes/PK-todo-12d-solved-the-peak-deficit-countable-set.md) | - | record | TODO 12d: measured peak deficit set and the two dominant Fourier modes (universal derivation withdrawn) | C2, C17, C44 |
+| [PR](notes/PR-projector-rank-toffoli.md) | 2026-09-12 | proved equivalent generic criterion and eight signed replacements; no breakthrough or end-to-end benchmark | Generic stabilizer measurement rank closes the proposed local Toffoli recognition advantage | C84 |
+| [PS](notes/PS-periodic-sectors-and-sequential-sampling.md) | 2026-09-10 | mixed | Periodic defects: coarse-sector symmetry handles several noncommuting mixers; odd blocks still have input-specific cancellations | C56 |
+| [QC](notes/QC-quadratic-cell-certificate.md) | 2026-09-12 | tested restricted evaluator and closure proof; known theory and stronger-baseline loss retained | Exact quadratic cells compress selected Walsh queries, but the recognized formula is cheaper | C83 |
+| [QD](notes/QD-quantized-reverse-trajectories.md) | 2026-09-11 | confirmed | Local trajectory error removes the tree precision factor, but exact integer compression loses on runtime | C60, C64, C65, C67, C68, C69, C70 |
+| [RA](notes/RA-certified-rejection-and-accepted-mass.md) | 2026-09-11 | confirmed | A same-accuracy rejection comparator works: certify the proposal and charge lost accepted mass | C59, C60, C61, C62, C63 |
+| [RI](notes/RI-reverse-instrument-and-boundary-rejection.md) | 2026-09-11 | confirmed | A backward measurement trajectory can replace forward-state storage in exact arithmetic | C56, C63, C64, C67, C68 |
+| [RO](notes/RO-reachable-orbits-and-spectral-sampling.md) | 2026-09-10 | mixed | Reachable compiled sampling removes scratch tables; charged classical spectral sampling is stronger | C51, C52 |
 | [RS](notes/RS-todo-resolved-the-716-residue-conditional.md) | 2026-08-08 | solved | TODO 11 RESOLVED: the 0.716 residue is a CONDITIONAL linear structure | C15, C29, C32, C34, C35, C40, C41 |
+| [RV](notes/RV-verified-reverse-vectors.md) | 2026-09-11 | confirmed | Certified reverse-vector rejection saves working state but loses the matched timing comparison | C63, C64, C65, C67, C68, C69 |
+| [SA](notes/SA-shared-arithmetic-reductions.md) | 2026-09-12 | two-macro full average implemented and checked; clean rotation and raw-lift limits proved; growing dirty prefixes remain open | Shared arithmetic has exact scalar reductions; the raw cubic certificate redirects before execution | C90, C91 |
+| [SB](notes/SB-sparse-mask-blocks.md) | 2026-09-12 | sparse-mask block contraction proved and implemented with independent finite checks; runtime and process-memory effects remain unmeasured | Mask-free blocks in the exact range-Walsh contraction | C96 |
+| [SC](notes/SC-shift-cofactor-contraction.md) | 2026-09-12 | exact growing-depth construction implemented for the selected target and checked against gates and direct cell arithmetic; no measured memory advantage | A final signed shift exposes a polynomial-storage contraction of enabled dirty prefixes | C93 |
+| [SD](notes/SD-spectral-defect-and-phase-transfer.md) | 2026-09-10 | mixed | A noncommuting work defect breaks physical eigenphase dephasing, but phase transfer restores scalar sampling | C53 |
+| [SE](notes/SE-scratch-extension-equivalence.md) | 2026-09-10 | established | Same physical computation with different Walsh cost; same Walsh cost with different physical computation | C50 |
+| [SG](notes/SG-shift-generating-functions.md) | 2026-09-12 | literal convex sign-cell compression is obstructed by reachable native witnesses; exact all-shift recurrence and fixed-dimensional atoms derived, with repeated closure unproved | Final-shift lifting isolates the missing generating-function closure | C95 |
+| [SK](notes/SK-qsim-research-skill-validation.md) | 2026-09-10 | validated | QSim research skill: task-specific workflow and isolated behavioral smoke tests | - |
+| [SR](notes/SR-sector-routing-and-physical-phases.md) | 2026-09-10 | mixed | Physical phases expose a broader shortcut: route a sector rather than conserve it | C58 |
 | [T](notes/T-does-c15-survive-truncation-todo-step-peak.md) | - | record | DOES C15 SURVIVE TRUNCATION? (TODO step 7). Peak cost: yes. Accuracy: to a point. | C5, C15, C24 |
+| [TR](notes/TR-walsh-tensor-memory.md) | 2026-09-09 | mixed | Walsh support versus tensor rank: tiny ideal functions, substantially larger scratch-space tensors | C48 |
+| [UG](notes/UG-uniform-gap-and-checkpoint-baseline.md) | 2026-09-11 | confirmed | A uniform mixing certificate and a more useful exact checkpoint baseline | C64, C65, C66, C67 |
+| [UP](notes/UP-uniform-prefixes-from-orbit-support.md) | 2026-09-11 | confirmed | Exactly uniform output bits survive dense sector mixing, but suffix conditioning remains | C53, C57, C76, C77 |
+| [UT](notes/UT-unitary-transfer-and-output-objectives.md) | 2026-09-11 | confirmed | The best joint-state transfer loses to omission on the measured output | C53, C76 |
+| [VP](notes/VP-verified-prefix-arithmetic.md) | 2026-09-11 | mixed | Verified exact-input prefix arithmetic and finite-bit sampling, with precision costs exposed | C60, C61 |
 | [W](notes/W-weight-truncation-todo-step-naive-identity.md) | - | record | WEIGHT TRUNCATION (TODO step 2). Naive identity fails; knob is unusable. | C14, C15 |
 | [WD](notes/WD-todo-windowed-arithmetic-the-criterion-was.md) | 2026-08-08 | record | TODO 12: WINDOWED ARITHMETIC. The criterion was incomplete. | C8, C24, C29, C30, C32, C36, C37, C38, C39 |
+| [WE](notes/WE-word-specific-support-envelopes.md) | 2026-09-11 | confirmed | A setup-only word envelope tightens merged sampling | C59, C60, C71, C72, C73 |
+| [WF](notes/WF-work-first-conditioning-and-progressions.md) | 2026-09-11 | confirmed | Work-first conditioning trades dense sectors for sparse rows or a few coherent progressions | C54, C55, C57, C76, C77, C78 |
 | [X](notes/X-cryptanalysis-import-todo-step-usable-bound.md) | - | record | CRYPTANALYSIS IMPORT (TODO step 5). A usable bound, tight at the extremes. | C12 |
 | [c12-validated-the-cryptanalysis-bridge](notes/c12-validated-the-cryptanalysis-bridge.md) | - | record | C12 VALIDATED — the cryptanalysis bridge is quantitative | C12 |
 | [c15-confirmed-circuit-level-and-the-sharpest](notes/c15-confirmed-circuit-level-and-the-sharpest.md) | - | solved | C15 CONFIRMED AT CIRCUIT LEVEL — and it is the sharpest result so far | C15 |

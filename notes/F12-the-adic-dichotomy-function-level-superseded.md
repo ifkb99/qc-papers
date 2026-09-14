@@ -21,12 +21,12 @@ which isolates the algorithm from ancilla layout:
   323   5  144  24   16777216   16777216  1.00000      no
 ```
 
-Sharp dichotomy, and the reason is elementary: if r | 2ᵏ then aᵉ mod N depends
-only on the low k bits of e, so g is a function of k variables and its Walsh
-support is ≤ 2ᵏ — **constant in t**. If r has any odd factor, the periodicity is
-incommensurate with the GF(2)ᵗ Walsh basis and the spectrum is **maximally
-spread**. N=323 (r=144=16·9) shows the intermediate case: the factor 16 buys
-partial sparsity at small t, washed out by t=24.
+The robust statement is one-sided: if r | 2ᵏ then aᵉ mod N depends only on the
+low k bits of e, so g is a function of k variables and its Walsh support is ≤
+2ᵏ — **constant in t**. If r has an odd factor, no universal density conclusion
+follows for every selected bit, because the scalar bit function may have a
+proper minimal period (for example N=13, a=4, r=6, LSB sparsity 1). N=323
+(r=144=16·9) shows aliasing/period effects at small t, washed out by t=24.
 
 Two consequences:
 
@@ -38,4 +38,5 @@ Two consequences:
 2. **The textbook demo is the degenerate case.** N=15, a=7 has r=4, a power of
    two — sparsity 4, constant forever. Every "we simulated Shor" result on N=15
    sits in the trivially-simulable corner. For cryptographic N, r is generically
-   not a power of two, so PPS is at the fully-dense worst case.
+   not a power of two, so dense circuit-level behaviour is common in the measured
+   family, but it is not forced for every selected output bit.

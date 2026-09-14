@@ -6,6 +6,13 @@ claims: [C17, C44]
 ---
 # Why is the peak ratio exactly `rot = 2·perm − 2` for modexp?
 
+**Review correction, 2026-09-09.** The universal derivation in the historical
+resolution below is false. C44 retains only the measured arithmetic relation;
+C17 retains the exact suffix-Walsh characterization, not a factor-two bound.
+See `experiments/experiment_independent_review.py` for the four-qubit
+counterexample and the corrected §PK note. The earlier Proposition 2 has
+been removed from Paper A and subsequent statements renumbered.
+
 **SOLVED 2026-08-08 — and it resolved in an afternoon, as the note below
 guessed.** See `NOTES.md` §PK; file `experiments/experiment_c17_deficit.py`;
 claim **C44**; C17 regraded from "the factor is empirical" to derived; Paper A

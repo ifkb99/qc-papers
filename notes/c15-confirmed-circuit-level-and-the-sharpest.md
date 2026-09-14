@@ -47,22 +47,25 @@ goes 1037322 → 4186980 and a=4 (r=3) goes 512784 → 4152181.
 
 **Mechanism.** aᵉ mod N depends only on e mod r. If r | 2ᵏ then only the low k
 bits of e matter, so every additional exponent qubit adds a variable the Walsh
-support cannot touch — the support is pinned to a fixed subspace. Any odd factor
-in r makes the period incommensurate with the GF(2) basis and the support
-spreads over everything.
+support cannot touch — the support is pinned to a fixed subspace. An odd factor
+does not force every selected scalar output bit to be dense: its relevant
+minimal period can be smaller than r. The circuit-level β>1 growth below is
+therefore an empirical result for the measured observables and constructions.
 
 **Statement of the result.**
 
-> For reversible modular exponentiation with computational-basis observables,
-> Pauli-path simulation cost is **independent of the exponent-register size when
-> the order r is a power of two**, and **Θ(2^q) as soon as r has an odd factor.**
+> For the measured reversible modular-exponentiation construction and
+> computational-basis observables, Pauli-path simulation cost is **independent
+> of the exponent-register size once the order r is a power of two and the
+> identity tail is present**. The observed **Θ(2^q)-type growth when r has an
+> odd factor** is empirical, not a universal function-level theorem.
 
 Consequences:
 
 1. **Period-finding precision is free, or fatal, depending on r.** The exponent
    register is what sets the accuracy of the continued-fractions step; here
-   enlarging it costs PPS *nothing* when r is a power of two and quadruples cost
-   per two qubits otherwise.
+   enlarging it costs PPS *nothing* when r is a power of two; the reported
+   β>1 controls quadruple cost per two qubits.
 2. **The textbook demo is the degenerate case, quantitatively.** N=15 a=7 has
    r=4. Every "we simulated Shor on N=15" result sits in the corner where PPS
    cost does not grow at all. Cryptographic N has r with odd factors

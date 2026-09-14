@@ -7,7 +7,7 @@ frontmatter; the claim file is the single source of truth for its own
 status. Retracted claims are in `claims/retracted/` and **may not be
 cited as support**.
 
-**44 live · 19 retracted**
+**98 live · 19 retracted**
 
 ## Live
 
@@ -24,19 +24,19 @@ cited as support**.
 | [C12](claims/C12.md) | A | established | PPS-hardness ≡ linear-cryptanalysis resistance |
 | [C13](claims/C13.md) | A | established | Identity covers all Z-type observables (multi-qubit too), fails for X/Y |
 | [C14](claims/C14.md) | A | established | Truncation error is non-monotonic in δ: δ=1e-1 exact w/ 34 terms, δ=1e-3 off by 0.285 w/ 23482 |
-| [C15](claims/C15.md) | B | established | Cost is set by the 2-adic structure of r, at circuit level |
+| [C15](claims/C15.md) | B | established | Full-operator support is width-invariant for the studied β=1 construction; β>1 growth is measured, not a bound on state-aware reduced propagation |
 | [C16](claims/C16.md) | A | established | Heavy-tailed spectrum explains the δ non-monotonicity (C14) |
-| [C17](claims/C17.md) | A | established | Peak ≠ final; permutation-native PPS reduces peak by a factor ≤ 2 and makes it a Walsh quantity |
-| [C18](claims/C18.md) | B | established | Holds for peak memory, not just final support |
-| [C19](claims/C19.md) | B | established | Same r = β·2^α invariant governs MPS simulation |
+| [C17](claims/C17.md) | A | established | Atomic permutation PPS peak equals maximum suffix Walsh sparsity; near-two peak reductions are measured arithmetic regularities, not a universal bound |
+| [C18](claims/C18.md) | B | established | The measured width dichotomy also holds for peak retained support in uncontracted atomic PPS, not just final support |
+| [C19](claims/C19.md) | B | established | MPS work uses the same r = β·2^α decomposition; its β² tensor-memory factor is a distinct resource statement |
 | [C20](claims/C20.md) | B | established | N=15 is a degenerate benchmark for every base, forced by the modulus |
-| [C21](claims/C21.md) | B | established | Invariance has a precise onset: support locks at n_exp = v₂(r)+1 |
+| [C21](claims/C21.md) | B | narrowed | The parity theorem guarantees invariance for n_exp ≥ v₂(r)+1; first locking at that width is measured in the reported rows |
 | [C22](claims/C22.md) | B | established | λ(N) a power of two ⟹ every base free; ⟺ N = 2^a × distinct Fermat primes |
 | [C23](claims/C23.md) | B | proven | Mechanism: identity blocks apply one involution V, so the circuit depends on the identity tail only through a parity bit |
 | [C24](claims/C24.md) | B | proven | Consequence: support confined to z_I ∈ {0, all-ones}, so size is independent of tail length |
 | [C25](claims/C25.md) | A | proven | S ≥ (1 − NL/2ⁿ⁻¹)⁻²: published nonlinearity ⟹ PPS cost lower bound, compilation-independent |
 | [C26](claims/C26.md) | A | established | The bound is weak away from the extremes |
-| [C27](claims/C27.md) | B | established | Invariance survives truncation: exact for terminal thresholding at every δ; peak cost unchanged under incremental |
+| [C27](claims/C27.md) | B | established | The β=1 coefficient invariant preserves terminal thresholded support at every δ; incremental peak equality is only measured at tested thresholds |
 | [C28](claims/C28.md) | B | established | Accuracy degrades first for the wider circuit at aggressive δ |
 | [C29](claims/C29.md) | B | narrowed | ~~The theorem needs only V²=id~~ → The theorem needs V²=id plus each block being controlled on its own qubit; it covers any construction with an … |
 | [C30](claims/C30.md) | B | established | The ½ ceiling is a linear structure w = b_msb ⊕ anc, not an algorithmic constant |
@@ -51,10 +51,64 @@ cited as support**.
 | [C39](claims/C39.md) | B | derived | The cause is emitting the multiply-by-1 branch, not windowing: at w = 1 (no window at all) the lookup form still has a dead tail, and skipping j = 0 … |
 | [C40](claims/C40.md) | B | derived | Conditional-structure law. If f restricted to each cell of a coset partition has linear structure w_u, then supp(f̂) avoids E = {z : w_u·z = 1 ∀u}, … |
 | [C41](claims/C41.md) | B | derived | Consistency of that system is a parity condition: any dependency among the w_u with odd support makes E empty and destroys the cap entirely |
-| [C42](claims/C42.md) | B | derived | For the real Shor input state (exponent register in |+⟩, so δ=0 there) every z with exponent support contributes exactly 0, giving a useful fraction … |
+| [C42](claims/C42.md) | B | narrowed | For the real Shor input state, every z with exponent support contributes exactly 0; useful-sector membership is exact, while the measured useful … |
 | [C43](claims/C43.md) | B | derived | C24 holds at set level, not merely in cardinality: encode each support element as (z_rest, tailflag) with tailflag saying whether z_I = 0 or 1_I; the … |
-| [C44](claims/C44.md) | A | derived | The peak ratio is exact, not empirical: N_max^rot = 2·N_max^perm − |B| with B = {z ∈ S : z_c = 0}, S the permutation-native peak set and c the target … |
-| [F12](claims/F12.md) | B | established | Function-level dichotomy is absolute |
+| [C44](claims/C44.md) | A | narrowed | In the tested arithmetic rows, N_max^rot = 2·N_max^perm − |B| with B = {z ∈ S : z_c = 0}; the local gadget argument does not establish this as a … |
+| [C45](claims/C45.md) | B | proven | Exact last-use contraction of independent |+> inputs bounds diagonal PPS support by 2^(m+1) for m work qubits and one fresh control per block, in … |
+| [C46](claims/C46.md) | B | proven | After contracting independent |+> controls, repeated identical involution blocks induce an idempotent map, so a nonempty identity tail can be … |
+| [C47](claims/C47.md) | B | proven | For independent windows controlling one involution, reduced action depends on control bias, not Walsh sparsity: E^K(O)=O+ +(1-2p)^K O- |
+| [C48](claims/C48.md) | A | proven | Normalized Walsh transforms preserve every fixed cut spectrum; a scalar period-r truth tensor has cut rank at most r, unlike the unrestricted … |
+| [C49](claims/C49.md) | B | established | Conditional work-state instruments reproduce tested order-finding distributions and sample wide outputs without an exponent state vector; setup and … |
+| [C50](claims/C50.md) | A | established | Same-layout clean-equivalent scratch extensions can change full Walsh support; conversely an invalid exponent-controlled output flip preserves … |
+| [C51](claims/C51.md) | B | proven | Descending-power conditional sampling reaches at most min(2^s, r/gcd(r,2^(t-s))) clean work labels after s steps; selected-input circuit replay … |
+| [C52](claims/C52.md) | B | proven | Ideal order-finding outputs are a uniform latent-eigenphase mixture: known r permits scalar conditional sampling without a work vector, despite … |
+| [C53](claims/C53.md) | B | proven | Single-defect output effects identify detectable spectral coherences; diagonal work phases can transfer to exponent phases, so noncommutation does … |
+| [C54](claims/C54.md) | B | proven | A single orbit-preserving defect admits final-eigenphase sampling with a coherent early prefix; known D-sparse orbit columns give uniform rejection … |
+| [C55](claims/C55.md) | B | proven | One defect with finite known orbit-basis support admits Fourier output sampling without orbit/prefix arrays; coherent-component rejection has mean at … |
+| [C56](claims/C56.md) | B | proven | Repeated b-site orbit blocks preserve a coarse Fourier sector: known-order output sampling with multiple noncommuting defects needs O(t*b^3) scalar … |
+| [C57](claims/C57.md) | B | proven | Bounded orbit displacement certifies omission of one localized kick after periodic mixers; its exact low-rank fixed-output correction still requires … |
+| [C58](claims/C58.md) | B | proven | Control-independent bijective sector routing preserves initial coarse dephasing and finite-work sampling; a physical pi phase realizes this beyond … |
+| [C59](claims/C59.md) | B | proven | Few coherent routing histories provide table-free prefix amplitudes and two conditional samplers, even when exact static sector regrouping joins the … |
+| [C60](claims/C60.md) | B | proven | Full-prefix amplitude error controls sparse-block sampling without a minimum block mass; a uniform scaled-coordinate bound yields an exact-rational … |
+| [C61](claims/C61.md) | B | proven | Exact rational-pi gates admit a verified finite-prefix oracle and finite-bit sparse-block sampler under explicit arithmetic/randomness assumptions; … |
+| [C62](claims/C62.md) | B | proven | Exact contractive step norms let verified local residuals add without repeated rectangular wrapping; lower working precision need not mean faster … |
+| [C63](claims/C63.md) | B | proven | Verified component proposals and one-sided absolute acceptance enclosures certify coherent-history rejection without a minimum proposal probability; … |
+| [C64](claims/C64.md) | B | proven | Unnormalized prefix-mass enclosures certify a sequential finite-work proposal with one forward/backward pass per working-precision level, including … |
+| [C65](claims/C65.md) | B | proven | For dyadic work blocks, all sufficiently late repeated work mixers factor into a final traced unitary even with coherent coarse routing; b=2 history … |
+| [C66](claims/C66.md) | B | proven | Shared forward-state errors control the output law with backward effects retained; a certified phase mesh bounds every twelve-step repeated … |
+| [C67](claims/C67.md) | B | proven | On-demand branches and block recomputation reduce verified finite-work matrix storage to O((t/k+k)b^2) without a state approximation, with all … |
+| [C68](claims/C68.md) | B | proven | A reverse quantum instrument plus initial-boundary rejection samples each unitary finite-work component with mean b attempts, without forward states; … |
+| [C69](claims/C69.md) | B | proven | Unnormalized reverse vectors and downward boundary acceptance certify streaming finite-work rejection without forward checkpoints or rare-vector … |
+| [C70](claims/C70.md) | B | proven | Local joint output/work error certifies dyadically compressed reverse trajectories with logarithmic requested work-coordinate bits, without a … |
+| [C71](claims/C71.md) | B | proven | Two fixed coherent reflection routes have only linear finite-time backward sector support; coherent merging and boundary rejection replace explicit … |
+| [C72](claims/C72.md) | B | proven | Coherently merged backward blocks supply every intermediate prefix amplitude for the existing gate-by-gate sampler, removing explicit history … |
+| [C73](claims/C73.md) | B | proven | A fixed alphabet of d coherent reflection routes has O(k^(d-1)) finite-time sector support, extending merged prefix sampling beyond two labels in the … |
+| [C74](claims/C74.md) | B | proven | With supplied order and small b, physical cell reflection needs only a small subgroup lookup, whereas uniformly accurate classical cell-phase … |
+| [C75](claims/C75.md) | B | proven | Supplied exact order and a small fine-coordinate table permit clean physical repeated mixers and cell-reflection rotations without recovering the … |
+| [C76](claims/C76.md) | B | proven | An additive residue phase uses only logarithmically many physical rotations but has exactly full coarse-sector coupling over a prime field; this is a … |
+| [C77](claims/C77.md) | B | proven | Finite orbit displacement can certify exactly uniform low inverse-QFT output bits despite dense sector mixing; two Euclidean floor sums check the … |
+| [C78](claims/C78.md) | B | proven | Work-first conditioning gives sparse-row Fourier sampling under charged column access; a single late repeated mixer and pointwise diagonal phase … |
+| [C79](claims/C79.md) | B | proven | One earlier diagonal phase admits complementary residue-cycle and remaining-history progression covers; choose the smaller construction factor, … |
+| [C80](claims/C80.md) | B | proven | Square-root component weights minimize the universal coherent-mixture rejection envelope for a fixed disjoint decomposition; the resulting cost is … |
+| [C81](claims/C81.md) | B | proven | Nested binary phases admit a hybrid progression cover and exact finite-truncated construction counts; largest-gap bounds alone can misrank cuts |
+| [C82](claims/C82.md) | A | proven | A lazy binary Walsh frame replaces per-term CNOT relabeling by two frame XORs through atomic Toffoli gates; it preserves support and defers … |
+| [C83](claims/C83.md) | A | proven | Affine-support quadratic signs admit exact local Toffoli closure tests and streamed signed Walsh queries with polynomial working memory and … |
+| [C84](claims/C84.md) | A | proven | Toffoli preserves a pure stabilizer exactly when three local commutator columns have rank at most two; accepted inputs admit eight exact Clifford … |
+| [C85](claims/C85.md) | A | proven | Every logical Cuccaro prefix reduces selected full-space signed Walsh queries to a known two-state carry contraction; a strict compiler avoids … |
+| [C86](claims/C86.md) | A | proven | Selected signed coefficients of two additions coupled by a planar bit permutation reduce to known matchgate/FKT contraction with polynomial resources |
+| [C87](claims/C87.md) | A | proven | An explicit growing planar two-adder family has nonzero all-bit correlations equal to direct dimer counts; its reduced graph retains a growing grid … |
+| [C88](claims/C88.md) | A | proven | The carry grid survives exact matching reductions, while positive matched prefixes give a bounded-band exact Pfaffian recurrence |
+| [C89](claims/C89.md) | A | proven | Conditioned actual modular-add prefixes have linearly many translated intervals and exact four-state Walsh contraction; the shared-variable average … |
+| [C90](claims/C90.md) | A | proven | The raw causal cubic lift has a factored control-plane degree-drop test; native carries fail it, while every one-parity success admits two affine … |
+| [C91](claims/C91.md) | A | proven | Two-macro low-bit Walsh coefficients admit a constant-state full shared-variable average; clean scratch has three commuting rotation domains, while … |
+| [C92](claims/C92.md) | A | proven | Dirty native macros share a reversing involution; growing disabled Mersenne prefixes admit polynomial signed contraction, while enabled prefixes … |
+| [C93](claims/C93.md) | A | proven | Growing enabled Mersenne endpoint coefficients admit an exact final-shift contraction in O(2^q poly(m,q)) time and polynomial memory for ascending or … |
+| [C94](claims/C94.md) | A | proven | Conditional modular-add Walsh queries admit exact itinerary replay in O(q²+qm) word operations and O(m+log(q+1)) auxiliary bits, avoiding the global … |
+| [C95](claims/C95.md) | A | proven | Native final-shift lifts require exponentially many convex sign cells; exact all-shift transitions have fixed-dimensional counting atoms, with … |
+| [C96](claims/C96.md) | A | proven | Exact thresholded Walsh sums skip mask-free bit blocks in at most 2K+1 joint carry/borrow transfers, with growing-integer costs retained |
+| [C97](claims/C97.md) | A | proven | Synchronized native carry catalogs have polynomial signature bounds, but storing all stopped-prefix catalog carries requires exponentially many keys |
+| [C98](claims/C98.md) | A | proven | For fixed disjoint Walsh masks the C96 contraction keeps every state, row and prefix value within 2^(p0+K+2G), independent of width; the overlapping … |
+| [F12](claims/F12.md) | B | narrowed | At function level, β=1 gives selected-bit width independence; β>1 has no universal density claim because minimal scalar periods vary |
 | [dictionary-biased-product-input-state-ma](claims/dictionary-biased-product-input-state-ma.md) | B | established | Dictionary: a biased product input state makes ⟨O⟩ = Σ_z c_z ∏_{i∈z} δ_i, i.e. exactly the p-biased WHT of Gangopadhyay et al. (JAMC 2023) with δ_i = … |
 | [superseded-the-residual-ladder-the](claims/superseded-the-residual-ladder-the.md) | B | established | Superseded (§RS): the residual ladder is 1 − 2^−(k+1) in the conditioning depth k |
 

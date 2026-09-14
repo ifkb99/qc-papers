@@ -6,6 +6,13 @@
 > disagree on wording, `PAPER_B.md` is live; where either disagrees with
 > `CLAIMS.md` on a *status*, `CLAIMS.md` wins.
 
+> **Review update, 2026-09-09.** The β=1 theorem concerns the full operator;
+> β>1 growth is empirical, scalar output periods can be smaller than r, and
+> the proved onset is sufficient, not a universal first-lock lower bound.
+> Useful fractions are approximate measurements (C42). C45/C46 now supply
+> exact finished-control contraction with bounded reduced support in both
+> order branches, so full-operator growth is not a lower bound on this task.
+
 **Working title:** *The 2-Adic Structure of the Order Determines Pauli-Path
 Simulation Cost for Modular Exponentiation*
 
@@ -23,9 +30,41 @@ Baker, I.
 > Post-bugfix (θ=π propagator bug, see `NOTES.md` STATUS 2) and post external
 > review. Confirmed for both final support and peak memory. The core dichotomy
 > is verified in a controlled design at **three** moduli (N = 5, 7, 21); the
-> onset rule n_exp = v₂(r)+1 is exact for α = 1, 2 and consistent for α = 3, 4.
+> onset rule n_exp = v₂(r)+1 is measured for α = 1, 2 and consistent for α = 3, 4.
 > **The circuit-level mechanism is now PROVED** (parity reduction via an
 > involution) — see the honesty note, which also records the scope limit.
+
+---
+
+## Abstract for the arXiv metadata field (revised 2026-09-09)
+
+The PDF keeps the long abstract in `PAPER_B.md`; this compressed version is for
+the submission form only. Plain ASCII because the field mangles math glyphs.
+
+> Shor's algorithm is the canonical target for classical simulation studies of
+> quantum advantage, its difficulty usually parameterised by qubit count and
+> depth. For full-operator Pauli-path simulation, a dominant cost parameter is
+> instead an arithmetic property of the instance: the 2-adic structure of the
+> multiplicative order r of the chosen base. Writing r = beta 2^alpha with beta
+> odd, we prove the Pauli support carried through the studied reversible
+> modular-exponentiation construction is independent of the exponent-register
+> width when beta = 1 once n_exp >= alpha + 1, and measure its first lock at
+> that width in the reported rows; we measure its
+> density bounded away from zero in sampled beta > 1 circuits -- consistent with
+> Theta(2^n). In a controlled design varying only the base, the support at
+> N = 7, a = 6 (r = 2) is exactly 15549 terms across a 256-fold growth in
+> Hilbert-space dimension. The mechanism is proved: every identity-tail block
+> applies the same involution, so the circuit depends on the whole tail through
+> a single parity bit. The criterion this yields is checkable: Gidney-style
+> windowed lookup arithmetic preserves the invariance in a strictly sharper
+> form, while an obvious optimisation (skipping the trivial multiply) destroys
+> it entirely. Since every order divides lambda(N), a modulus with lambda(N) a
+> power of two lies in the free branch for every base: N = 15 is the smallest
+> relevant odd semiprime, and all seven of its usable bases are free -- the
+> canonical demonstration instance is degenerate because of the modulus, not an
+> unlucky base. These are representation costs for a pre-QFT observable, not
+> Shor output-sampling costs. Exact input-state contraction bounds reduced
+> support independently of exponent width in both order branches.
 
 ---
 
@@ -46,10 +85,13 @@ because the Walsh basis is the character group of (Z/2)^t, the arithmetic of r
 relative to powers of two controls the spectrum directly. Writing r = β·2^α with
 β odd, the idealised bit function e ↦ bit_j(a^e mod N) is a function of the low α
 bits of the exponent alone when β = 1, giving a spectrum of *constant* size
-independent of exponent-register width; any odd factor β > 1 makes the period
-incommensurate with the Walsh basis and the spectrum is Θ(2^t) with density
-bounded away from zero. We measure exactly this: at t = 24 the spectrum has 4
-nonzero coefficients for N = 15, a = 7 (r = 4). Density for β > 1 need not be
+independent of exponent-register width. Any odd factor β > 1 does not by itself
+force every selected bit to be dense: the relevant period is the selected
+scalar function's minimal period (for N=13, a=4, r=6, the least-significant bit
+is 1⊕e₀ and has sparsity 1). The β > 1 circuit branch is therefore an
+empirical, observable-dependent result, with growth consistent with Θ(2^t) in
+the measured family. At t = 24 the β=1 spectrum has 4 nonzero coefficients for
+N = 15, a = 7 (r = 4). Density for β > 1 need not be
 1 — it oscillates with period ord₂(β) and can sit at exactly one half: N = 7,
 a = 3 (r = 6) gives exactly 0.500000 on even t, including t = 24, while N = 21,
 a = 2 gives 1.000000 at t = 24.
@@ -64,12 +106,15 @@ same quantities grow by a clean factor of 4.00 per two added qubits. The result
 reproduces at N = 21 and N = 5. Consequently the exponent register — which sets
 the precision of the continued-fractions post-processing, and which one would
 expect to be the expensive resource — is free for Pauli-path simulation when r
-is a power of two and quadruples cost per two qubits otherwise.
+is a power of two once the identity tail is present. In the reported β>1
+controls, cost quadruples per two qubits; that branch is an empirical circuit
+result rather than a universal odd-factor theorem.
 
-The invariance has a precise onset. Writing α = v₂(r), the controlled-multiplier
-block attached to exponent bit i multiplies by a^(2^i) mod N, which is the
-identity on the valid subspace exactly when i ≥ α; the support therefore locks as
-soon as the first such block appears, at **n_exp = α + 1**, and not before. We
+The invariance has a proved sufficient threshold. Writing α = v₂(r), the
+controlled-multiplier block attached to exponent bit i multiplies by a^(2^i)
+mod N, which is the identity on the valid subspace exactly when i ≥ α; the
+parity proof therefore guarantees locking for **n_exp ≥ α + 1**. Whether an
+earlier width has already stabilised is observable-dependent. We
 confirm this for α = 1 and α = 2 (where the support grows once, 15493 → 32143,
 before freezing) and find α = 3 and α = 4 still growing at the largest width we
 can reach, as predicted. The locked value is close to half the Hilbert-space
@@ -78,10 +123,11 @@ freezes in absolute terms while density falls fourfold per two added qubits.
 
 The invariance is not an artifact of exact arithmetic. Applying a coefficient
 threshold to the finished spectrum preserves it at *every* threshold, since the
-surviving magnitudes are identical across widths; and under the incremental
+surviving magnitudes are identical across widths. Under the incremental
 truncation that Pauli-path simulators actually perform, the peak term count —
-the quantity that bounds memory — is likewise unchanged at every threshold we
-test. Accuracy is independent of width up to moderate thresholds but degrades
+the quantity that bounds memory — was likewise unchanged at every threshold
+tested, an empirical result rather than a theorem for every threshold. Accuracy
+is independent of width up to moderate thresholds but degrades
 first for the wider circuit at aggressive ones, not because its exact spectrum
 differs (it is identical) but because incremental truncation has more gates to
 act upon. We therefore state the practical claim as: peak cost is free in the
@@ -122,7 +168,8 @@ order divides the Carmichael function λ(N), a modulus with λ(N) a power of two
 lies in the free branch for *every* base — and λ(N) is a power of two exactly
 when N is a power of two times a product of distinct Fermat primes. The odd
 semiprimes with this property are precisely p·q with p and q both Fermat primes:
-15 = 3×5, 51 = 3×17, 85 = 5×17, and so on. **N = 15 is the smallest, and all
+15 = 3×5, 51 = 3×17, 85 = 5×17, and so on. **N = 15 is the smallest relevant
+odd semiprime, and all
 seven of its usable bases lie in the free branch**, against 3 of 11 for N = 21.
 The canonical demonstration instance is therefore degenerate for classical
 simulation not because of an unlucky choice of base but because of the choice of

@@ -74,6 +74,55 @@ control isolates the inversion-symmetry ingredient). Claim C33.
 
 ---
 
+# BC — Balanced controls and the reduced channel
+
+First investigation in the user-requested four-part sequence. The small toy
+was initially checked interactively; the saved experiment then tested the
+derived full-support and reduced-error formulas on an actual arithmetic block.
+C47 is the authoritative theorem and scope statement.
+
+`experiments/experiment_balanced_controls.py` passed **54/54 checks**. It uses
+the existing Walsh replay to extract both branches of N=7's identity-tail
+block, verifies that the inactive branch is identity and the active branch an
+involution over all work states, and checks the one-control reduction against
+the existing gate-level PPS. Both O+ and O- are nonzero, so agreement is not
+an invariant-observable or zero-operator artifact.
+
+For each fixed work map, 3-bit parity, majority, OR and constant controls are
+compared at consecutive window counts: 1..4 for the CNOT toy, 1..3 for the
+arithmetic block. Every reduced entry matches the formula with error zero,
+and every complete Walsh support count matches the product-factorization
+formula. The arithmetic calculations include arbitrary scratch inputs, not
+only the legitimate initialization.
+
+At three windows the toy full supports are 4 (parity), 130 (majority), and
+1024 (OR); parity and majority contract to the same nonzero two-term operator.
+OR's exact projection error is (3/4)^K, with alternating residual sign;
+the constant-control negative case never decays. This supplies an explicit
+tail-approximation error guarantee in the stated block model, not a general
+incremental-PPS truncation guarantee.
+
+For the actual arithmetic block at three windows, parity and majority have
+full support 2606 and 84695 respectively, but the same 1303-term reduced
+operator. OR has full support 667136 and reduced support 1303, with a different
+reduced vector and exact projection error 0.421875. Equal reduced counts alone
+would therefore have missed the OR negative control.
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_balanced_controls
+```
+
+The complete rows, predictions, check results, interpreter and NumPy versions
+are saved in ignored `out/balanced_controls.json`. The harness now supports
+`finish(report_path=..., rows=..., metadata=...)` and writes failed runs before
+raising; the behavior is covered by `test_lab.py`.
+
+What remains beyond this completed first pass: synthesize matched low-level
+window-control circuits and measure their temporary peaks and construction
+cost. The present claim is about exact block maps and final/reduced spectra.
+
+---
+
 # BI — BIASED INPUTS (Gangopadhyay–Kumar–Stănică–Gangopadhyay, JAMC 2023)
 
 Paper dropped in the repo root:
@@ -107,8 +156,8 @@ estimate to input-state bias. Their δ = 0 is our maximally-mixed direction and
 Shor's initial state puts the exponent register in |+⟩, i.e. **δ = 0 on those
 qubits**, so *every* z with any exponent-register support contributes **exactly
 zero** to ⟨O⟩. Combined with C24 (`z_I ∈ {0, 1_I}` on the tail, exp bits below α
-free) this predicts a useful fraction of exactly **2^−(α+1)**. Derived, then
-measured:
+free) this gives an exact dead-term criterion, but not an exact fraction: the
+surviving sectors need not have equal cardinality. Measured:
 
 ```
   N=7 a=6  α=1   n_exp=2,3,4:  |S|=15549   dead 75.03%   useful 3883
@@ -117,17 +166,23 @@ measured:
   N=5 a=2  α=2   n_exp=3,4:    |S|=32143   dead 87.51%   useful 4014
 ```
 
-75% at α=1 and 87.5% at α=2 = 1 − 2^−(α+1), and the α=2 row **jumps exactly at
-n_exp = 3 = α+1**, reproducing C21's onset from an independent direction. The
-useful count is itself constant in n_exp, so C15 holds for useful work as well
-as for total cost.
+The observed dead fractions are near 75% at α=1 and 87.5% at α=2, but the
+useful ratios are 3883/15549 ≈ 0.24973 and 4014/32143 ≈ 0.12488, not exact
+quarters/eighths. The α=2 row changes at n_exp = 3 = α+1 in these instances;
+this is a measured onset, not an independent universal proof. The useful count
+is width-invariant in the reported rows.
 
-**Honest limit — this is not a free speedup.** PPS propagates the observable
-backwards and only meets the input state at the end, so a term is only known to
-be dead once propagation is finished. It does **not** reduce peak memory (C18)
-as stated. What it does is separate *cost* from *useful work*: at α=2 seven of
-every eight Pauli terms carried are irrelevant to the answer. Whether the dead
-set can be predicted early enough to prune is open and worth asking.
+**Honest limit — this observation alone is not a speedup.** The uncontracted
+implementation propagates the observable backwards and applies the input state
+at the end. Naive pruning inside an active block is
+not justified because exponent support can disappear later; this does **not**
+rule out a sound contraction after a completed block. The observation does not
+reduce peak memory (C18) by itself. It separates *cost* from *useful work*: at
+α=2 most of the carried terms are irrelevant to the final answer.
+
+**Follow-up, 2026-09-09.** C45 and §CT now provide the sound completed-control
+contraction schedule and measurements. It works in both order branches; C46
+adds the idempotent shortcut for the repeated identity tail.
 
 ### Reference for the p-biased machinery
 
@@ -159,6 +214,1129 @@ Their results are about bent and symmetric functions (Theorem 4's bound
 |S_f(u)| ≤ (n/2)2^{n/2}, Maiorana–McFarland stability, symmetric
 classifications) — none of which our pullbacks are. Cite it for the biased-input
 dictionary and for Theorem 10; do not lean on it for anything else.
+
+---
+
+# CF — Direct CNOT memory investigation
+
+The user requested continued research specifically on CNOT memory, using a
+model-selected swarm and the local message board. The coordinator implemented
+the opt-in frame in the existing permutation engine. Astra audited mathematics
+and primary literature; Sol supplied an allocation/baseline draft; Luna
+supplied independent small-law checks. Only the coordinator changed canonical
+source. C82 owns the mathematical/API/resource statement and prior-art limits.
+
+This goal turn is **progress**: it adds tested implementation, a precise adverse
+baseline comparison and new evidence. The previous scientific checkpoint was
+also progress (C81/NS); no running job was assumed from handoff text. The initial
+board resume had no active assignments. No breakthrough or completion of the
+broader goal is claimed.
+
+## Authoritative coordinator reproductions
+
+`experiments/experiment_cnot_frame.py` and
+`out/cnot_frame_laws_main.json` / `.log` record the full-coefficient comparison
+on 72 fixed-seed mixed circuits with n from 2 through 7, plus explicit boundary
+witnesses. This is a correctness corpus, not a scaling sweep. Both coordinate
+modes agree with independent classical-replay/Walsh coefficients. Tests cover
+arbitrary Z masks, positive thresholds, nonempty weight filtering, physical
+trace constraints, cap ordering and Mapping access. The deliberately broken
+internal-key view disagrees at physical keys 6 and 7. All three harness checks
+pass, with no warnings.
+
+The truncation reference filters the final Walsh vector only in a fixture
+where the first reverse CNOT leaves the observable unchanged, one Toffoli
+performs all branching, and the final reverse CNOT changes none of those keys.
+It is not a general reference for sequential truncation. The permanent core
+regression separately checks two CNOTs that cancel but lose a term at an
+intermediate physical weight cutoff; dense conjugation, inverse offsets,
+X signs, first-gate threshold, cap-before-trace and a 65-bit mask are included.
+
+`experiments/experiment_cnot_frame_memory.py` and
+`out/cnot_frame_memory_main.json` / `.log` own allocation evidence. Six fixed
+disjoint Toffolis build S=4096 terms before a CNOT prefix is encountered in
+reverse propagation. Only the prefix length changes: D=0,1,8,32,128 uses
+prefixes of one fixed deterministic schedule. Physical results agree between
+modes at each D; different D need not represent the same operator.
+
+At D=128 the complete-call **traced Python allocation peaks** are:
+
+| requested result / implementation | peak bytes |
+|---|---:|
+| unchanged engine, physical dictionary | 982232 |
+| framed engine, lazy physical-key Mapping | 662720 |
+| framed engine followed by dict(view), retaining the view | 773224 |
+| existing-engine nonlinear suffix plus one batched CNOT remap, physical dictionary | 690008 |
+
+The lazy frame reduces this measured peak by about 32.5% against the unchanged
+engine. The stronger batched comparator BEATS the frame when a physical
+dictionary is requested. That comparator uses the existing nonlinear engine;
+its one boundary remap is specialized to this fixture's CNOT prefix with no
+intermediate trace/weight filtering. It is not a second nonlinear simulator.
+At D=0 the frame is slightly more expensive, an expected adverse case.
+
+Streaming items has 1576 bytes of incremental traced peak after the view
+already exists; materialization adds 279064 retained traced bytes and peaks at
+385800 incremental bytes. These separate incremental measurements are not
+mistaken for the full-call rows above. Values are shared with the backing
+dictionary, while the physical table and decoded keys are allocated anew.
+
+Specialized CNOT-only boundary peaks (prebuilt coefficient dictionary outside
+the trace) are 587632 bytes for rebuild-per-gate, 802416 for an in-place
+key-snapshot/pair-swap candidate, 309760 for batched dictionary materialization,
+132120 for full-array packed relabeling, and 70968 with packed temporary arrays
+limited to 256 entries. Packed keys/values alone occupy 65536 bytes; they lack
+the dictionary lookup and nonlinear merge interfaces. In-place dictionary
+swaps were adverse because the table grew during singleton-key moves.
+
+The operation comparison, 2*D*S dictionary insertions versus 2*D frame XORs,
+is **derived from the current source**, not an instrumented work counter or a
+runtime measurement. The memory experiment includes a nonempty nonlinear
+weight/trace sentinel, with the trace reducing 9 terms to 5. Its seven checks
+pass, including the materialization control that defeats the one-dictionary
+storage claim. There are no harness warnings.
+
+All traces exclude prebuilt Circuit objects, preexisting reference results,
+interpreter/allocator arenas and RSS. Shallow layouts itemize tables, keys,
+values, frame vectors and instance dictionaries; they are not complete process
+memory. The run used Python 3.14.0 as recorded by the report. No timing result
+or stable-host inference follows from these short passes.
+
+## Review and failure provenance
+
+The mathematical audit is submission `Sea0a6a0afbd14e91`; it read the actual
+body of the relevant papers, including Clifft. The implementation matches its
+reviewed source SHA in the sealed artifact. Initial math and technical tasks
+were claimed before implementation changed; the board rejected stale-input
+submission, so stopped workers were requeued and rebound to the current
+source. Original artifacts were retained with explicit provenance.
+
+Luna's first draft had a vacuous all-zero truncation comparison and its board
+prediction reversed cap/trace order in prose. The coordinator required the
+nonempty, first-CNOT, weight and uncapped-trace witnesses before accepting
+`S7cb631e24a144e07`. Its initial script/report/log remain in attempt
+`Aa733df9202e84ee4`, including `report_initial.json` and `run_initial.log`.
+Main additionally stated why the fixture's final-filter reference is valid.
+
+Sol's first run failed before measurement with an import-path error; the
+retained attempt `A77fd9729df54409b` contains the raw log and structured
+`cnot_frame_memory_audit_import_failure.json`. The corrected draft passed and
+was submitted as `S82bbd87d633548f2` with limitations. Main added complete
+propagation-plus-materialization measurement, a full-call batched comparator,
+chunked packed scratch and instance-dictionary accounting before reproduction.
+The stronger comparator is the material adverse finding, not a failed law.
+
+Coordinator reproduction is `Se1bfa61adc22415e`, run `R42398b5a92454c18`,
+accepted after independent archived-evidence review `V541ffa9d559d4ade` by the
+Astra auditor. All four bounded board tasks are closed.
+
+## Validation and incomplete gate
+
+The core gate passed before science. After changes,
+`uv run python -u -X faulthandler test_core.py` passed including the new frame
+regressions; `out/cnot-frame-core.log` is the evidence. Core now also exits
+nonzero when its accumulated FAILED list is nonempty, making failures enforce
+the gate rather than only print a warning.
+
+The full legacy `test_perm_pps.py` run terminated with exit 139 and an empty
+buffered log. Session 17411 was confirmed terminal; the failure is preserved
+in `out/cnot-frame-perm-initial-status.json` and its named log. No cause was
+inferred, no full sweep was restarted, and this suite is **incomplete**. Its
+large rotation-level default comparisons did not contain the new opt-in tests.
+TODO34 remains the host-reliability record. The other seven science suites
+were not run for this scoped change.
+
+Documentation validation is recorded in `out/cnot_frame_docs.log` after index
+regeneration. No manuscripts/abstracts, host settings, commits or publication
+were changed. The original dirty worktree is preserved.
+
+---
+
+# CF — Conditional order-finding, beyond the averaged observable
+
+Third investigation in the requested sequence. C49 states the instrument,
+its commutation condition and resource scope. The helpers are in
+`lab/semiclassical.py`; `experiments/experiment_conditional_order_finding.py`
+extracts the branch permutations from the existing Toffoli arithmetic builder.
+
+The completed run passed **43/43 checks**, including four negative controls.
+For (N,a)=(7,6),(7,3),(15,7), all output probabilities at exponent widths
+3,4,6,8 agree with an independent FFT of the ideal order-finding state to
+within 2.23e-16. At width 3, the full existing Fourier-arithmetic quantum
+circuit (`ModExp.build_shor()` through `statevec.run`) independently agrees
+within 5.42e-14. This compares the same valid-input physical task across
+different arithmetic layouts, not their full-space Walsh spectra.
+
+At widths 4,8,16,32, sixteen paths per instance/width were sampled without
+enumerating the other outputs. Every sampled path probability agrees with
+the independent geometric-series formula to within 1.39e-16 in the saved run.
+The period is used only by this reference and the diagnostic metadata, never
+by the sampler or branch-map builder. The reference reduces phase arguments
+with integer arithmetic before evaluating trigonometric functions.
+
+| Instance | Stored complex amplitudes | Maximum occupied amplitudes at t=32 |
+|---|---:|---:|
+| N=7,a=6 | 8192 | 2 |
+| N=7,a=3 | 8192 | 6 |
+| N=15,a=7 | 65536 | 4 |
+
+The allocated work-vector size is unchanged as exponent width increases.
+Occupied support is counted at tolerance 1e-10 for diagnostics only; the
+algorithm does not truncate amplitudes. These counts are not peak allocated
+bytes: temporary child vectors, permutation maps and classical histories also
+consume memory. The dense transition-table construction is exponential, and
+no large-modulus scalability claim follows from these small moduli.
+
+## Controls and the important audit finding
+
+Omitting feedback fails on the odd-order case. Reversing output-bit order
+fails. Replacing the measured instrument with fair bits fails. All are checked
+against full distributions, not one expectation.
+
+The fourth control was added during implementation review: measuring controls
+in inverse-QFT order and moving their arithmetic interactions into that order
+requires a commutation argument. It is available on the valid modular-
+multiplication subspace, not for arbitrary full-scratch maps. Two differently
+controlled, noncommuting CNOT work gates give a maximum output-probability
+error of **0.125** under the naive reordering. This is now documented in both
+the helper and C49; the prototype is not advertised as a general noncommuting
+circuit simulator.
+
+## Reproduction and prior art
+
+```bash
+OPENBLAS_NUM_THREADS=1 LAB_GPU=1 uv run python -m experiments.experiment_conditional_order_finding
+```
+
+The complete distributions, sampled paths, profile rows and provenance are in
+ignored `out/conditional_order_finding.json`.
+
+The terminating semiclassical QFT is established by
+[Griffiths and Niu](https://arxiv.org/abs/quant-ph/9511007); its simulation
+implications, including appropriate structured input states, are discussed by
+[Browne](https://arxiv.org/abs/quant-ph/0612021). The contribution here is a
+matched, tested reference in this repository, not the general method.
+
+TODO 15c's pilot is complete. TODO 14 remains open for a useful compressed
+representation/cost characterization through the inverse QFT. The immediate
+engineering opportunity is to avoid dense full-work transition tables while
+retaining the exact conditional interference and auditing setup cost.
+
+---
+
+# CG — Test coherent cleanup, not only basis labels
+
+C75 owns the clean-conjugation construction, full-domain reversible extension,
+arithmetic existence bound and static-baseline caveat. Main derived that
+construction; lower-cost agents audited it and supplied initial gate tests
+and an independent output reference. This investigation used the existing
+Circuit/statevec engine and finite-work sequential_path, not a new propagator.
+
+The physical work register holds a modular residue, not its discrete-log
+index. The finite compiler deliberately enumerates tiny truth tables; it
+does not implement the polynomial reversible arithmetic whose existence
+follows from C75. The user-supplied exact order, orbit promise and small W
+implementation remain part of the contract. Neither papers nor abstract
+workshops nor production samplers were changed.
+
+## Main gate validation
+
+`out/clean_orbit_gates_20260911T090928946014Z.json` passes 29/29 checks.
+The frozen (N,a,b,r) fixtures are (7,3,3,6), (13,2,3,12), (15,2,2,4), with
+angles 0, pi/7 and -pi/3. Each compute/strip permutation is checked on its
+ENTIRE small binary domain using complex amplitudes. Every promised orbit
+column of the clean mixer and reflection rotation is compared to a separately
+assembled indexed matrix, including zero scratch rows and relative phases.
+Checking the full columns also tests their action on arbitrary coherent
+superpositions, not merely basis transition probabilities.
+
+Maximum positive complex-amplitude error is 1.069e-13; maximum scratch
+leakage probability is 3.55e-30. The recorded cumulative propagation count is
+46,758,400 Pauli-gate-times-complex-entry updates under a 100,000,000 cap.
+Maximum simultaneous numerical payload estimate is 794,624 bytes under
+16 MiB; largest tested individual circuit has 3,933 Pauli rotations under
+30,000. These are not FLOP counts, bit runtime, total Python-object memory
+or RSS. Gate-list construction, table scans and modular-power setup counters
+are reported separately; the compiler's exponential dependence is explicit.
+
+Controls are operational failures: omitting coordinate erasure leaves scratch
+probability at least .75 on a witness; plain inversion differs on orbit
+labels; changing controlled V to controlled (-V) gives the wrong coherent
+rotation. For the nontrivial N=13 reflection the latter has a .937
+phase-invariant matrix discrepancy while agreeing with the independently
+predicted opposite-sign rotation. M=2 makes R identity, so those fixtures
+are NOT counted as meaningful wrong-sign controls: there the difference is
+only a global phase. This restriction was written before the initial run.
+
+## Full physical output and stronger baseline
+
+`out/clean_orbit_output_20260911T090820589417Z.json` passes 3/3 checks.
+It keeps N=13,a=2,b=3,r=12,t=3 fixed and varies only the second reflection
+angle over 0, pi/7, pi/2. There is an initial fine mixer, a fine mixer after
+each ascending arithmetic control, and reflections after the first and
+second controls. The ten-qubit physical circuit ends with the exponent
+inverse QFT. Its complete eight-output law agrees with both an independent
+12-dimensional instrument contraction and the exact static-sector grouping.
+
+Maximum compiled probability error is 1.086e-13; maximum grouped-reference
+error is 1.111e-16. Groups are {0}, {1,3}, {2}, so the strongest baseline
+uses coherent dimension at most six. Cross-group branch leakage is below
+5.66e-16. Physical scratch probability is below 7.11e-30 and total-mass
+error below 4.59e-13. An additional compiled omitted-reflection row matches
+its own independent reference; at pi/7 omission changes the compiled law
+by TV .0232048832787. This guards against validating only an invisible gate.
+
+The three main physical circuits have 16,086 rotations; the omitted row
+has 15,647. All four together charge 65,438,720 gate-entry updates. Each
+physical run's numerical payload bound is 327,680 bytes; the reference
+bound is separately 185,856 bytes. The reference actually makes 136
+sequential_path calls, with sum(t*d^3)=351,216 as an explicitly named work
+unit, NOT an exact operation count. Setup enumeration and finite projections
+are diagnostic costs, not evidence of an orbit-free compiler or a timing win.
+The grouping experiment enumerates all tiny groups to obtain the FULL law;
+C59's large-instance baseline samples a group without that enumeration.
+
+## Preserved failures and audit corrections
+
+The initial unfactored primitive test passed in
+`out/clean_orbit_gates_20260911T090247197366Z.json`, with log
+`out/clean_orbit_gates_initial.log`. The factored lower-cost repeat passed in
+`out/clean_orbit_gates_20260911T090734089131Z.json`. Its separate read-only
+all-pair primitive diagnostic also checked the corrected phase convention;
+that diagnostic is not a standalone harness artifact.
+
+Two complete-output attempts failed the unchanged 30,000-gate construction
+cap: `out/clean_orbit_output_20260911T090345546010Z.json` (lower-cost initial)
+and `out/clean_orbit_output_20260911T090611719348Z.json` (main). Their first
+finite reference calculations HAD run; no physical state propagation or
+complete output verdict had occurred. They were budget failures, not native
+crashes. Main retained both reports and their logs, then made two exact
+compiler simplifications without changing inputs, tolerances or caps:
+
+- Adjacent U^-1/U pairs between a mixer and reflection cancel, so that post-
+  arithmetic block enters/exits coordinates once. No arithmetic is reordered.
+- The two endpoint projectors giving a true transposition have exactly
+  cancelling diagonal Pauli coefficients. Their sum is emitted directly.
+
+The first simplification alone still exceeded the cap; the second fit it.
+New primitive checks preceded the successful full-output test. The old
+two-level helper's named-CNOT global phase was corrected locally, and
+controlled Rx(pi) was explicitly converted to a true endpoint swap. Existing
+shared Circuit/propagator behavior was not altered.
+
+Before/following the first failed output run, main audits also caught an
+unsupported Fixture keyword, a shape predicate comparing a tuple to an
+integer (which would reject every probability law), missing internal
+reference payload, and an unsupported scalar-work accounting statement.
+These were verifier defects. Final reports retain raw probability vectors,
+normalization/leakage checks and instrumented calls. A proof audit's initial
+suggestion to combine all q=0 rotations was corrected: intervening arithmetic
+prevents that simplification, despite commutation with the fine W blocks.
+
+## Scoped gates and handoff
+
+Core passed first in `out/clean_orbit_core.log`. The affected claim suite,
+including the new independent C75 algebra/flag regression, passes in
+`out/clean_orbit_claims.log`. The two final main experiments pass as above.
+No production helper was changed; the other seven science suites were not
+rerun. System Python 3.12.3, NumPy 2.4.6 and single-threaded BLAS were used;
+the claim gate additionally used python-flint 0.9.0. These passing small runs
+do not settle TODO 34's host/runtime problem. No firmware/settings changes or
+new long timing benchmark were attempted.
+
+The documentation gate passes all 10 checks in `out/clean_orbit_docs.log`;
+indexes were regenerated with the repository tool. No commits were made.
+
+Reproduce from research/:
+
+```bash
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_clean_orbit_gates
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_clean_orbit_output
+```
+
+The useful outcome is closure of the clean physical input-model gap, not a
+breakthrough in sampling. TODO 35 selects a different cheaply implemented
+physical phase, motivated by its additive/multiplicative Gauss-sum structure.
+The next question and its pilot limits live there rather than extending this
+completed experiment or rewriting the manuscripts.
+
+---
+
+# CH — Static sector closure is not finite-time sampling cost
+
+TODO 23 began with coherent-component rejection. Main's primary-literature
+check found a stronger alternative: Bravyi–Gosset–Liu gate-by-gate sampling
+uses prefix amplitudes rather than output marginals. The route-history
+contraction can provide those amplitudes without orbit or output tables.
+C59 owns the proof, input promises, costs and citations. The result is a
+useful specialized implementation, not a new sampling principle or a general
+quantum-simulation breakthrough.
+
+Three existing lower-cost `gpt-5.6-luna` agents independently tested formulas,
+static regrouping, actual circuits and the induced sampling law. Main
+implemented the production helper, read and corrected their verifiers,
+reran all four final experiments, and added lab/claims regressions. The
+qsim-research skill's prior-art and strongest-baseline requirements changed
+the plan materially: both regrouping and the known gate-by-gate algorithm
+were evaluated before interpreting the proposed rejection scheme.
+
+## Finite formula and regrouping evidence
+
+The formula fixture has r=10,b=2,t=5 and repeated Rx(pi/2) at insertions
+1,3,4. Reflections q=0@s2 and q=1@s3 share one swept strength theta in
+{-pi/4,0,pi/8,pi/4,pi/2}. A separate k=0..3 test takes prefixes of the fixed
+schedule ((2,0),(3,1),(4,0)) at theta=pi/4. These are separate controlled
+series, not a claimed scaling law. Initial/end insertions are also checked.
+
+The verifier explicitly enumerates the tiny initial sectors and exponent
+strings, using full-r matrices and existing `sequential_path`; it is NOT the
+compressed production algorithm. Production target/proposal errors are below
+6.9e-16, and its unnormalized accepted-law identity is within 7e-18.
+The independent full-r comparisons and normalization checks also pass.
+Deleting cross terms changes normalized output TV by up to 0.198133.
+The wrong-inverse-route control has raw mass 0.2, so its raw half-L1
+discrepancy 0.452169 is NOT TV; after explicitly normalizing, TV reaches
+0.810436. Uniform final gamma differs from its target marginal by TV 0.148445.
+
+The regrouping verifier checks one- and two-reflection groups for r=10,14
+against full-r contraction. Maximum two-reflection discrepancy is below
+5.9e-16. Dropping coherence inside a group changes TV by 0.099915; the other
+negative control is a uniform OUTPUT law, not a uniform final-sector law.
+The gcd orbit-size formula agrees with finite BFS in 468 cases, including
+composite M, and is evaluated on supplied huge M using integers only.
+One reflection label closes groups of at most two sectors; q=0,1 joins all
+sectors. This only defeats that static-grouping baseline, not every possible
+classical representation.
+
+## Independent prefixes, sampling transitions and actual gates
+
+For r=10,14,b=2,t=4, the sampling audit applies full-r coherent gates to
+|orbit 0> and then projects the sector. It does NOT reuse the production
+history expansion for this reference. Prefixes cover every arithmetic/work
+boundary, all partial Fourier-output prefixes, all sectors and selected
+fixed exponent strings (0,1,2^t-1). Maximum prefix error is below 1.7e-16.
+Complete joint laws enumerate every exponent string and output.
+
+A separate deterministic enumeration of every classical sampling transition
+uses the production prefix oracle. Its final joint law matches the independent
+reference below 1e-16, and its output marginal matches `sequential_path`.
+This verifies the update rule's full tiny law, not just a sample histogram.
+k=0, W0, K0, end-only and self-loop fixtures receive the same prefix/joint/
+transition/mass checks. All reference/transition masses are within 5e-16 of
+one. Normalized negative controls change TV by 0.757395 (frozen sector) and
+0.0968264 (coarse dephasing or deleting history interference in this fixture).
+
+The physical-circuit audit uses the indexed r=8,b=2 orbit with work bits
+(p,m_LSB,m_MSB), a clean increment ancilla and four exponent bits. Existing
+X/CNOT/Toffoli implement ascending controlled addition mod 8; every clean
+work/control basis input is checked for powers 1,2,4,8,16. Basis-probability
+and normalization errors are below 4.3e-15. This does not test arbitrary
+dirty-ancilla semantics.
+
+Two distinct coherent reflections are compiled using existing Pauli rotations:
+q=0@s1 and q=1@s2, with alternating fixed Rx/Rz p mixers. Although J_1's
+individual Pauli terms need not all commute, they split into two orthogonal
+projector groups. Both the product-zero/group-commutator identities and the
+complete compiled unitary are checked. Holding theta0=pi/5 fixed, vary theta1
+over {-pi/3,-pi/7,0,pi/8,pi/3}. Circuit/reference output error is below
+8.1e-16; production/reference is below 1.7e-16. Omitting or moving the second
+reflection changes a probability by 0.0541266. The r=8 construction is not
+a constant-size physical realization for general M.
+
+## Supplied-wide draws and the cost tradeoff
+
+Both samplers draw two outputs for each k=2,3, using supplied
+r=2,000,000,014,b=2,t=63. All reflection angles are pi/4; the background has
+three fixed repeated blocks. No orbit, sector or output table is constructed.
+The gate-by-gate draws use respectively 133 and 135 prefix-vector queries,
+each with up to four/eight histories. Rejection uses 4,4 and 5,5 proposals
+in the fixed seeded diagnostic. These counts are not estimates of its mean.
+
+Main's two-draw totals were approximately 0.242/0.476 seconds gate-by-gate
+versus 0.031/0.050 seconds rejection. Setup is excluded and the sample is
+deliberately tiny: this is a smoke test and a counterexample to an assumed
+universal practical speedup, not a performance benchmark or crossover study.
+The 256-byte reported owned matrix payload is ONLY stored background and
+identity arrays; temporary matrices, instrument effects, Python objects and
+process memory are additional. C59 gives the broader scalar storage bound.
+
+Finite dense references are capped before allocation: r<=14,t<=4 for the
+sampling-law audit, r<=14 for regrouping, fixed r=10,t=5 for the formula
+fixture, and at most nine qubits for the indexed physical circuit (t<=5).
+Individual array guards are 16 MiB, not a process-memory guarantee. No
+amplitude cutoff is used. Integer phase reduction avoids unreduced huge
+angles but does not certify rounding, cancellation or sampling accuracy.
+
+## Failures and audit corrections retained
+
+- Early formula reports `out/coherent_routes_formula_20260911T024614583753Z.json`
+  and `...024640189545Z.json` fail routing and/or Fourier normalization checks.
+  Their corrected successors retain the same derived target identity.
+- `...025551835418Z.json` fails an overstrong normalization requirement on
+  the intentionally wrong-sector control and a comparison of acceptance
+  RATIOS at numerical null events. Final reports retain those raw diagnostics
+  but gate normalized control TV and accepted probability mass instead.
+  Tiny absolute law error does not make a roundoff-null ratio meaningful.
+- The first physical fixture used q=0,2 at later insertions and its visibility
+  controls were vacuous: `out/coherent_route_circuit_20260911T024715274549Z.json`.
+  The final fixture explicitly changes to q=0,1 and earlier insertions.
+  Main derived the orthogonal-projector compilation after an initial concern
+  about noncommuting Pauli terms. This was a construction issue, not a no-go.
+- The first sampling report `out/coherent_route_sampling_20260911T025539026613Z.json`
+  fails its independent joint-law reference by about 0.0934. Later early PASS
+  reports, including `...025712217303Z.json` and `...025755381441Z.json`, are
+  ALSO superseded: the verifier discarded weights below 1e-15 and called an
+  unnormalized |c_h|-weighted control TV. Final code uses exact-positive
+  branches, |c_h|^2 for the dephased-history control, and checks all masses.
+- Main further replaced a history-based prefix reference by direct coherent
+  full-r gates, fixed a supposed k=0 fixture that still had a rotation,
+  required full edge transition-law checks, and added preallocation caps and
+  harness predictions. Reports preceding these audits are historical, even
+  where labeled PASS.
+- Regrouping's early large-M checks were too weak and its character matrix
+  was guarded as a vector. Main fixed the actual allocation guards and added
+  finite composite-M gcd/BFS checks. The uniform-output control was relabeled
+  correctly. The historical 15-check report is not the final audit.
+- Main's initial lab regression failed because existing Circuit H/CNOT
+  conventions carry a global phase (`out/coherent_routes_test_lab.log`).
+  The corrected test aligns ONE phase over the entire prefix state, never
+  separately by history or sector. Main also corrected a physical norm check
+  that double-counted ancilla leakage already included in the marginal.
+
+## Reproduction and handoff
+
+Run from research/ with bounded Python/NumPy:
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_coherent_routes
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_route_regrouping
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_coherent_route_circuit
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_coherent_route_sampling
+```
+
+Main-reviewed and rerun reports:
+
+| experiment | checks | report |
+|---|---:|---|
+| history formula/rejection | 69/69 | `out/coherent_routes_formula_20260911T025959598748Z.json` |
+| exact regrouping | 17/17 | `out/route_regrouping_20260911T025952835224Z.json` |
+| compiled indexed circuit | 21/21 | `out/coherent_route_circuit_20260911T030447193969Z.json` |
+| prefixes and sampling law | 6/6 aggregate | `out/coherent_route_sampling_20260911T030634804485Z.json` |
+
+Logs: `out/coherent_routes_formula_main.log`,
+`out/route_regrouping_main_audited.log`,
+`out/coherent_route_circuit_main_audited.log`,
+`out/coherent_route_sampling_main_audited.log`.
+Core, lab and claims pass in `out/coherent_routes_core.log`,
+`out/coherent_routes_test_lab_audited.log` and
+`out/coherent_routes_test_claims.log`. The other six science suites were not
+rerun for these helper additions. The documentation gate passes all ten checks
+in `out/coherent_routes_docs.log`; indexes were regenerated and
+`git diff --check` is clean. No manuscript, abstract workshop, commit or
+publication changes. TODO 23 is closed at bounded scope; TODO 24 owns numerical
+certification. The broader user goal remains active.
+
+---
+
+# CM — Count reached states, not paths to those states
+
+C71 owns the mathematical support, accepted-law and resource statements.
+Main implemented `lab/coherent_reverse.py`; lower-cost agents independently
+audited the algebra and built support, full-law and cost probes. Main read
+their code, strengthened predicates and reran the experiments. The result
+is an opt-in FLOAT diagnostic, not a finite-TV certificate or a default change.
+
+The useful connection is between a finite-time walk generated by two
+reflections and a reverse quantum instrument. Static invariant grouping can
+be huge while one backward boundary vector reaches few labels. Adding the
+complex fine-work vectors at collisions preserves interference. Sparse
+storage itself is established prior art, not the new claim here.
+
+## Exact support and complete tiny laws
+
+Authoritative main support report:
+`out/coherent_route_support_20260911T070912683957Z.json` (5/5 checks).
+Every ordered binary route word through k=8 is checked at M=7,16 with every
+starting sector, and M=101,1009 at sectors 0,1,17. The noninvertible pair
+q=2,6 modulo 16, coincident routes and fixed points are included. At M=1009
+the maximal supports for k=0..8 are 1,2,4,6,8,10,12,14,16. This is evidence
+for the already derived support bound, not a fitted asymptotic law.
+
+The generic chronological word (0,1,0,3,0,9,0,27) has backward support 108
+at M=1009,gamma=17; the proposed two-label bound would be 17. Applying the
+list in forward order instead gives 88. Both deliberately fail the bound,
+but only the reversed list is the stated backward test. There are five
+distinct labels in this eight-insertion control.
+
+Authoritative main full-law report:
+`out/coherent_reverse_merge_20260911T072033774949Z.json` (7/7 checks).
+The primary fixture is r=9,b=3,t=4 with initial W0, noncommuting W1/W3 and
+four q=0/1 reflections including both endpoints. Every gamma, fine boundary
+j and output is enumerated. Separate t=0/1 and b=2 modular-wrap fixtures
+cover endpoint order; the b=2 fixture also exercises the generic-label bound.
+
+The complex terminal amplitude is compared against the existing coherent
+prefix oracle, not only its magnitude. The accepted joint law is normalized
+GLOBALLY over fresh gamma,j and checked against both that oracle and the
+existing independent full-r `direct_joint`. Across these cases the largest
+amplitude error is below 3e-16 and law TV diagnostics are below 3e-16.
+These floating residuals are not rigorous error enclosures.
+
+Each per-boundary proposal normalizes. The total accepted mass matches the
+C71 envelope, and exact set recurrences verify work/reflection/QFT counters
+for every forced path and every attempt of the sampled return. A separate
+lab regression forbids `_histories` to catch hidden enumeration. The controls
+change the primary target law by:
+
+| Deliberate error | TV diagnostic |
+|---|---:|
+| Omit terminal acceptance | 0.224748 |
+| Freeze gamma through retries, then mix sectors uniformly | 0.0803074 |
+| Discard cross-sector terminal interference | 0.129119 |
+
+A distinct local collision control starts two fine vectors at sectors 0/1
+of a q=4 two-cycle modulo 5. Coherent addition cancels one output and doubles
+the other's norm, whereas probability-only addition predicts equal weights:
+TV=0.5. This tests the merge itself, not just the terminal coherent sum.
+Exact zero forced prefixes, invalid inputs and explicit cap exhaustion are
+covered in `test_lab.py`; no fallback output is substituted.
+
+## Matched instrumented float costs
+
+Authoritative SERIAL main adjacent-route report:
+`out/coherent_merge_comparison_20260911T072104925547Z.json` (5/5 checks).
+The supplied indexed fixture fixes r=3*(2^40-1), b=3,t=15, initial W0 and
+alternating embedded Rx/Rz mixers at every insertion. Only reflection count
+k varies; insertions are prefixes of (0,2,4,6,8,10,12,15), angles pi/4,
+route labels alternating 0/1. Seeds are 7130,7131,7132; proposal cap is 2048.
+The table reports medians of SETUP PLUS ONE RETURNED SAMPLE, in seconds:
+
+| k | Sparse reverse | History rejection | Existing gate-by-gate |
+|---:|---:|---:|---:|
+| 0 | 0.00119 | 0.00105 | 0.00302 |
+| 2 | 0.00516 | 0.00242 | 0.0103 |
+| 4 | 0.00896 | 0.0188 | 0.0387 |
+| 6 | 0.0147 | 0.145 | 0.150 |
+| 8 | 0.0229 | 1.47 | 0.576 |
+
+Three seeded returns are a bounded implementation diagnostic, not a runtime
+confidence interval or a universal crossover. Raw ranges and attempts are in
+the report. At k=8, sparse attempts are 42/21/8, history rejection attempts
+101/27/66, and the gate-by-gate sampler makes 62 prefix queries with 9,337
+actual history components. Sparse reverse enumerates none. All rejected work,
+input construction/validation and adapter construction are charged. The
+counters instrument Python calls and so contribute some timing overhead.
+
+The full-r `sequential_path` comparison is a tiny output-marginal correctness
+reference, NOT a timed returned-sample competitor. Its combined diagnostic
+time includes both references. Static regrouping is cheap with one route
+label; insertion-0 reflection also acts as a global phase on the specified
+initial coarse state. Thus k=0/2 are not evidence against the best grouped
+or input-simplified baseline. For the larger-k exact route group, C59 applies,
+but it is not a lower bound against approximate or dynamic alternatives.
+
+Every row is table-free in the production paths. Sparse complex-coordinate
+and supplied-gate payload allowances are separately reported and guarded;
+they are not Python/native RSS measurements. Order/index discovery is NOT
+charged because it is supplied by this experiment's explicit task contract.
+No comparison with the differently certified C63 timing is made.
+
+### Main's neighboring-route objection and separated control
+
+The identical sparse attempt counts at k=4/6/8 prompted a stronger-baseline
+audit. A lower-cost agent derived a smooth-state comparison, initially for
+b=2; main corrected it to the actual b=3 fixture and the agent independently
+audited that formula. C71 now proves why replacing all q=1 routes by q=0
+can be a good mathematical approximation here. This is NOT operator-norm
+closeness of the two permutations. The default adjacent-label timings alone
+are therefore weak evidence against simple approximate grouping.
+
+Main then noticed that the cyclic graph Laplacian commutes with every route
+reflection, hence with its coherent unitary rotation. The roughness seminorm
+is conserved exactly, improving the initial triangle-inequality growth bound.
+The agent independently verified the algebra and tiny complex matrices; main
+added exact integer Laplacian and sector-dependent-phase negative controls.
+C71 owns the sharper bound, not the earlier coefficient-growth estimate.
+
+The comparison accepts an explicit `--second-route` for a separately frozen
+control. Main's authoritative SERIAL report is
+`out/coherent_merge_comparison_20260911T072458548675Z.json` (5/5 checks),
+with q1=679535556937, M=1099511627775 and gcd(q1,M)=1. It is the prescribed
+floor of 0.6180339887*M adjusted upward minimally to coprime, not a label
+chosen by searching for favorable timings. All other inputs, k values and
+seeds remain unchanged within the new sweep.
+
+| k | Sparse reverse | History rejection | Existing gate-by-gate |
+|---:|---:|---:|---:|
+| 0 | 0.00126 | 0.00111 | 0.00318 |
+| 2 | 0.00282 | 0.00253 | 0.0110 |
+| 4 | 0.00908 | 0.0147 | 0.0391 |
+| 6 | 0.0145 | 0.0985 | 0.153 |
+| 8 | 0.0231 | 1.05 | 0.581 |
+
+These are again three-seed medians of setup plus a returned sample, seconds.
+At k=8 the sparse method's range is 0.00908–0.0456 s versus 0.574–0.597 s
+for existing gate-by-gate: about 25 times faster by these medians. This
+survives the separated-label check, but remains a bounded float comparison
+against the implemented history baselines, not a claim that this family is
+classically hard. The smooth adjacent-label sufficient bound is no longer
+small here; that alone does not exclude another approximation or basis.
+
+## Failures and audit corrections
+
+- Initial support guard counted discarded work as retained storage and
+  rejected the budget: `out/coherent_route_support_failure_20260911T070616369424Z.json`.
+  Main later budgeted the retained prefix-set list and simultaneous unions.
+- The first support predicate checked only k=0..3 while describing k<=8.
+  Main corrected it to every row and strengthened coincident/fixed-point
+  checks. The earlier passing `...070634618282Z.json` report is weaker evidence.
+- The full-law probe initially lacked reference-mass, phase-sensitive
+  amplitude and exact work-counter checks. Final main predicates include
+  them and the separate local-collision control. The agent's intermediate
+  `out/coherent_reverse_merge_failure_20260911T071404569712Z.json` is a numpy
+  Boolean JSON serialization failure; it is retained, not a law violation.
+- Initial comparison assigned attempts*2^k history work to sparse reverse
+  and to gate-by-gate, and pooled medians over different k. Actual streamed
+  history/prefix/component calls now replace those counters; per-k summaries
+  replace the pooled medians. Sparse constructor setup was also separated
+  correctly. `out/coherent_merge_comparison_20260911T071234115854Z.json`
+  remains a historical report with incorrect accounting.
+- Proof audit corrected two omissions: R0 is a coherent unitary, not a
+  permutation, and dense endpoint W0 costs O(S*b^2), not O(S*b).
+- The first separated-label extension confused orbit period r with sector
+  modulus M=r/b. It validated/reported a label which the circuit silently
+  reduced modulo M. Main corrected the guard/gcd metadata, added a realized-
+  versus-reported route assertion, and reran the prescribed selection from
+  actual M. `out/coherent_merge_comparison_20260911T072256444462Z.json`
+  is retained with that incorrect parameter interpretation.
+- The final claims rerun exited 132 with an empty buffered log
+  (`out/coherent_merge_claims_final.log`); no assertion or traceback identified
+  its cause. An unbuffered rerun in the same Python 3.12/dependency environment
+  passed (`out/coherent_merge_claims_retry.log`). Do not attribute this
+  unexplained process failure to the known, different Python 3.14 issue.
+
+## Prior work, validation and next boundary
+
+Main read qblaze Sections 3.3, 4.1 and the complete sequential transform/cost
+analysis in Section 4.2.1, and Van den Nest's Section 3, CT/ECS definitions,
+Lemma 3 and Theorem 3 with its complete proof. C71 links the primary papers
+and states the target distinctions. No priority or superiority over those
+implementations is claimed; their whole benchmark/application sections were
+not audited in this investigation.
+
+Core ran first: `out/coherent_merge_core.log`. Affected lab/claims gates pass:
+`out/coherent_merge_lab.log`, `out/coherent_merge_claims.log`; the final added
+smooth-state bound regression passes in `out/coherent_merge_claims_retry.log`;
+the sharper Laplacian follow-up is covered by
+`out/coherent_merge_claims_laplacian.log`.
+Lab also passes
+without the optional verified backend in `out/coherent_merge_lab_no_flint.log`.
+The other six science suites were not rerun. Documentation validation is
+recorded in `out/coherent_merge_docs.log`. No manuscript/abstract edit,
+default change, commit or publication was made.
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_coherent_route_support
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_coherent_reverse_merge
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_coherent_merge_comparison
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_coherent_merge_comparison --second-route 679535556937
+```
+
+TODO 30 is complete at mathematical/float scope. TODO 31 owns the stronger
+merged-prefix oracle question: can the same backward support bound feed the
+existing no-rejection sampler? Numerical certification of this changing
+sparse state is separate from C70 and is not automatically inherited.
+TODO 24 remains deferred; the user's open-ended research goal is active.
+
+---
+
+# CP — Carry structure beyond a local cell
+
+C85 owns the mathematical contract, prefix invariant, tensor ranks, exact
+carry-in reduction, conditioned escape and resource limits. This turn turns
+the strongest known baseline into a reusable exact query implementation,
+and closes the isolated-adder candidate at bounded scope. It does not
+establish the user's requested simulation breakthrough. TODO47 owns the
+next discriminator; TODO42 remains separate.
+
+## Main exact implementation evidence
+
+`experiments/experiment_carry_prefix.py` follows the existing harness and
+uses `lab/carry_prefix.py`. At fixed width three it visits all 20 logical
+prefix lengths, with the same 12 output masks and all 256 query masks.
+The output masks are zero, each single physical bit and three fixed
+multi-bit masks; this is **not** exhaustive over output masks.
+
+The Wallén automaton and direct signed two-state integer transfer both
+equal the existing gate-replay/FWHT reference on all 61,440 coefficient
+triples. No mismatch occurs, the maximum symbolic wire support is three,
+and 380 reference entries are negative. All six harness checks pass.
+The three must-fail controls reject a clean-carry substitution, a
+magnitude-only coefficient, and a modified first logical gate.
+
+The reference WHT uses float64, but all butterfly values here are integers
+of magnitude at most 256, represented exactly. Conversion to `Fraction`
+therefore gives exact equality, with no fitting tolerance. The scalable
+query implementations use integer/Fraction arithmetic. One tiny reference
+vector is processed at a time. No large-width run, comparative timing,
+allocation peak or speedup against an optimized carry automaton was measured.
+Incidental harness elapsed time is not a performance benchmark.
+
+Authoritative artifacts are `out/carry_prefix_report.json` and
+`out/carry_prefix_main.log`. Board prediction M832062abae924dae preceded
+run Rbcb099dfa7b04c8f. Submission S11b9cd6daff340cc archives the actual
+module, experiment, report and logs; independent Astra review
+Vc26fd393af1a4166 inspected the archived contents and verified their hashes.
+
+## Independent fixtures and a retained failed prediction
+
+Luna's final accepted evidence is submission Sb702c78972f14f94 under
+`out/agent-board/workers/Af78ad0485338463f/`. Its authoritative current
+outcome is `carry_tests_report.json` and `carry_tests_refutation.log`,
+not the earlier log mentioned in the opening of `findings.md`.
+
+Independent logical replay checks every basis input for widths one through
+three, including arbitrary c0 and z, against direct integer addition.
+All 16, 64 and 256 inputs match respectively. Forty-two exact integer
+Walsh fixtures agree with the existing transform, including 32 zeros and
+three negative carry coefficients. The clean-carry shortcut disagrees at
+each width. These are small correctness fixtures, not an asymptotic sweep.
+
+The original prediction asserted that `quadratic_cell_walsh(qc.inverse(),
+B0, B0+A0+c0)` would escape with no output cut. It does not: all three
+widths finish without escape and have exact coefficient +1. With the
+explicit c0 partition, the walk instead rejects a non-affine cell image at
+reverse step three. That is a separately conditioned witness; C85 explains
+the normalized states and correct local rank. Endpoint simplicity alone
+would not prove that an intermediate state remains a stabilizer.
+
+The final independent run intentionally exits **1**: P1/P2/P4/C1 pass,
+while original P3 is explicitly false. Fresh prediction M10bd376bb8cb4bbd
+and run R7c827ffb74a246a0 preceded that execution. The harness resolves all
+predictions and emits no protocol warnings. An accepted refutation is not
+an all-passing science suite.
+
+Failed provenance was retained before correction:
+
+- `carry_tests_initial.log` records the launch import failure. The original
+  run Rfc76756fbf604e68 grouped several attempts instead of recording each
+  separately; its metadata is not a one-execution provenance record.
+- `carry_tests_failed_v1.py` and `carry_tests_final.log` retain the incorrect
+  reference z toggle and the unsupported escape assertion.
+- `carry_tests_failed_v2.py` / `.log` retain a verifier that omitted
+  `exp.finish`, printed success unconditionally and left P3 unresolved.
+  Coordinator review requested changes; the final nonzero run corrects
+  that reporting defect without relabeling the prediction as true.
+- Astra's original `audit.md` in
+  `out/agent-board/workers/A65c8f07394814fec/` incorrectly assigned rank
+  three to the unrestricted X-eigenstate input. Its unchanged contents
+  remain archived in Sca96812e0d6a4221. `witness-correction.md` and accepted
+  Sc9d7d6a17df5440d explicitly retract that witness and retain the separate
+  prefix proof. The deterministic negative target-X eigenvalue was
+  incorrectly treated as a random measurement condition.
+
+The corrected proof is algebraic. The worker's local escape check uses the
+existing C83 implementation and is not a second independent all-Pauli
+stabilizer detector. The logical permutation checks retain exact relative
+signs; they do not measure the compiled circuit's common ket global phase.
+
+## Strongest baselines and audit limits
+
+Sol's source audit Sc9b749597a984524 is under
+`out/agent-board/workers/Aa5937e7dcc9b4ee7/`, with actual primary-body text
+for Wallén, Quipu/stabilizer frames and Markov–Shi. Wallén's Chapter 3 is
+the direct signed linear-correlation source; a differential-addition result
+would be a weaker, mismatched citation. The decisive point is that the
+arbitrary carry-mask method already covers the intermediate-prefix query,
+not merely the finished sum. C85 cites the stable primary sources.
+
+Quipu's phase-aware cofactoring/coalescing already demonstrates arithmetic
+recombination, though its clean-ancilla input and reported output differ.
+The tensor-network algorithm permits contraction by bit position instead
+of chronological gate order. A large chronological branch count therefore
+cannot establish a memory lower bound for the present scalar task.
+
+The math audit also explains why a fixed two-Toffoli window is too small
+as an asymptotic discriminator: its six Pauli conditions leave a common
+stabilizer subgroup of rank at least N-6, allowing a standard Clifford
+decoding to at most six active qubits. Decoding and final extraction are
+additional polynomial work. This is an audit deduction using known
+stabilizer compression, not a new simulator or an executed comparison.
+
+## Validation and disposition
+
+Core passed before scientific edits and after implementation, recorded in
+`out/carry_recombination_core_initial.log` and
+`out/carry_recombination_core_final.log`. The main experiment passes;
+the independent witness experiment exits one for the retained refutation.
+Other science suites were not rerun. TODO34 still owns the previously
+recorded legacy native crash; no host reliability conclusion follows here.
+
+Documentation is regenerated and checked at integration, with output in
+`out/carry_prefix_docs.log`. All four bounded board tasks are reviewed and
+closed. TODO46 is complete at this scope; the broader goal remains active.
+No manuscripts were changed and nothing was committed or published.
+
+---
+
+# CT — Exact finished-control contraction
+
+The independent review reopened TODO 12c. Naive pruning whenever a term
+acquires exponent support is wrong, but a qubit's **last reverse use** is a
+safe certificate. C45 contains the proof and scope; C46 gives the separate
+idempotent-tail simplification. Both were derived before the sweep.
+
+## Predictions and controls
+
+The new experiment declared that the final reduced coefficient vector would
+equal terminal projection of the full vector, that peak retained support
+would be bounded by 2^(m+1) in both order branches, that β=1 tail compression
+would preserve the entire reduced vector, and that expectations would match
+classical enumeration of the actual input. Improved sizes/times were a
+measured hypothesis, not part of the proof.
+
+Two controls distinguish this from an accidental or zero-expectation match:
+
+- `CNOT(0,1); CNOT(0,1)` is the identity. For observable Z₁ and |+⟩ on
+  control 0, premature pruning after just one reverse gate gives zero,
+  whereas correctly delayed contraction returns Z₁.
+- Keeping only α+1 blocks in the β>1 arithmetic control must change the
+  reduced operator at some width. It does, even when the scalar expectation
+  is unchanged.
+
+## Baseline sweep
+
+`experiment_control_trace` passed **67/67 checks**, with no capped runs.
+For each of (N,a)=(7,6), (7,3), (5,2), widths t=2,3,4,5,6 were run with
+and without contraction. Every reduced coefficient agreed exactly (maximum
+error 0) in all 15 rows. The nine rows with t≤4 additionally agreed exactly
+with independent Walsh transforms. Width is the only varied parameter within
+each series. Across bases, loaded constants and gate counts can also change.
+
+All these instances have m=13 work qubits, so the predicted peak bound is
+16,384 terms. The table reports retained terms before each contraction,
+including temporary within-block support. It is not a measurement of bytes.
+
+| N | a | β | t | Full peak | Reduced peak | Full seconds | Reduced seconds |
+|---|---|---|---|---:|---:|---:|---:|
+| 7 | 6 | 1 | 2 | 24,369 | 12,186 | 1.456 | 0.751 |
+| 7 | 6 | 1 | 6 | 24,369 | 12,186 | 5.228 | 2.568 |
+| 7 | 3 | 3 | 2 | 24,412 | 12,203 | 1.510 | 0.808 |
+| 7 | 3 | 3 | 3 | 48,855 | 12,217 | 3.937 | 1.254 |
+| 7 | 3 | 3 | 4 | 98,018 | 12,264 | 12.009 | 2.220 |
+| 7 | 3 | 3 | 5 | 196,060 | 12,275 | 29.788 | 3.203 |
+| 7 | 3 | 3 | 6 | 392,458 | 12,284 | 70.036 | 4.224 |
+| 5 | 2 | 1 | 2 | 24,386 | 12,193 | 1.427 | 0.740 |
+| 5 | 2 | 1 | 3 | 48,972 | 12,255 | 5.180 | 1.656 |
+| 5 | 2 | 1 | 6 | 48,972 | 12,255 | 8.056 | 3.110 |
+
+The largest odd-order baseline has about **31.95× fewer peak retained terms**
+and a **16.58× shorter measured propagation time** with contraction. These
+are single CPU wall-time measurements on this machine (CPython 3.12.10,
+NumPy 2.4.6), not repeated performance benchmarks. Timing excludes circuit
+construction but includes the contraction-schedule scan.
+
+The β=1 compressed prefixes matched every reduced coefficient at all tested
+widths. At t=6 they took about 0.77 s for N=7,a=6 and 1.72 s for N=5,a=2.
+Applying this compression to N=7,a=3 at t=6 gave maximum coefficient error
+0.0856475830078125, as the negative control required.
+
+## Extended check, separate from the baseline
+
+At t=16 (29 total qubits), the saved extended experiment passed **6/6 checks**:
+
+| N | a | Reduced peak | Reduced final | Seconds | Two-block compression error |
+|---|---|---:|---:|---:|---:|
+| 7 | 6 | 12,186 | 3,883 | 6.954 | 0 |
+| 7 | 3 | 12,286 | 4,064 | 13.981 | 0.14261846244335175 |
+
+Expectations matched enumeration of all 65,536 legitimate exponent inputs.
+The β=1 row also matched its compressed prefix coefficient-for-coefficient;
+the β>1 compression still failed. No full uncontracted operator or Walsh
+vector was constructed at t=16, so this is not an additional full-vector
+baseline comparison.
+
+## Regression checks and reproducibility
+
+The implementation is the opt-in `trace_plus` path in the existing
+`perm_pps.py`, not a second propagator. `test_perm_pps.py` includes reused and
+unused controls, invalid-qubit validation, 24 seeded random classical circuits
+with independent Walsh-vector checks (maximum error 0), and independent
+state-vector expectations (maximum error 5.33×10^−15). Thirteen random cases
+had nonzero, non-full reduced support, guarding against vacuous agreement.
+
+```bash
+uv run --no-project --python 3.12 --with 'numpy<2.5' python -u -m experiments.experiment_control_trace --max-width 6
+uv run --no-project --python 3.12 --with 'numpy<2.5' python -u -m experiments.experiment_control_trace --extended-width 16
+uv run --no-project --python 3.12 --with 'numpy<2.5' python test_perm_pps.py
+```
+
+Generated raw rows live in ignored `out/control_trace.json` and
+`out/control_trace_extended.json`. The extended command does not rerun the
+expensive full baseline. The Python 3.12 invocation avoids the documented
+intermittent long-job failure in the project's pinned Python 3.14 environment.
+
+## Interpretation
+
+This resolves 12c in a way its original framing missed: early contraction
+works in the odd-order branch too. The relevant constraint is the number of
+simultaneously live variables in this contraction order, not whether β=1.
+The β=1 involution structure gives the additional idempotent-tail shortcut.
+
+Variable elimination is standard, and the broader relationship between
+contraction order and simulation complexity is established in
+[Markov and Shi, *Simulating quantum computation by contracting tensor networks*](https://arxiv.org/abs/quant-ph/0511069).
+That is context, not a claim that our specialization is a new general method.
+
+The measured task is **pre-inverse-QFT work-register Z**, with independent
+|+⟩ exponent inputs. Full Shor output sampling introduces different observables
+and dependencies. Nor is this competitive evidence against direct classical
+sampling for an expectation already expressed as an average of a classical
+function. Its impact is on the interpretation and implementation of PPS's
+chosen operator representation; it motivates carrying this distinction into
+the inverse-QFT investigation.
+
+---
+
+# CW — Count components, then account for their masses
+
+After the C79 long-row checkpoint, main froze a square-root weighting pilot
+in TODO39 before implementation. C80 owns the weighted-envelope proof and
+its limits. It applies the existing C59 Cauchy-Schwarz argument to the disjoint
+progressions; there is no new sampling principle or novelty claim.
+
+An independent read-only audit confirmed both the raw-mass formulas and the
+optimal-envelope/cost-model identities. The auditor initially reversed the
+fixed-work retry rule, claiming unequal row envelopes would bias work even
+when work was held fixed. Main rejected that warning using the conditional
+geometric series; the auditor corrected it. A later response also confused
+the older r3 work fixture with the new unequal-length Q8 row. Neither error
+was incorporated into the proof or production loop.
+
+The tiny pilot fixes one singleton at e0 with mass9/10 and one progression
+e2,e4 with mass1/10. Their different Fourier laws make the mismatched-proposal
+control meaningful: use the new component weights with the old acceptance.
+Main reproduced the initial formula/progression-primitive pilot in
+`out/component_weighting_main_pilot.log`. This stage alone was not a test of
+the actual component-selection/acceptance loop. Its first failed report,
+`out/component_weighting_20260911T124838531641Z.json`, compared an unweighted
+union of component paths with a mass-weighted proposal; the corrected report
+`...124909168989Z.json` retained component probabilities. Subsequent tests
+exercise the shared production loop separately.
+
+Main added the opt-in proposal mode and extracted the SAME conditional loop
+into a private row method for isolated RNG tests. The full physical work draw
+is validated separately. Existing defaults, manuscripts and host settings
+remain unchanged. The evidence and final scoped gates are recorded below.
+
+## Tiny conditional-loop audit
+
+Main's final strengthened reproduction is
+`out/component_weighting_20260911T130608099555Z.json`, with log
+`out/component_weighting_main_audited.log`: all five predicates pass. It
+compares all four fixture FFT laws coordinatewise to the normalized accepted
+laws, and the independently weighted actual progression paths to the formula
+proposal. The unequal fixture gives mean attempts 2 versus 1.6. Splitting
+its two-point progression preserves the target but raises the new envelope
+to 1.948528; the proposal TV changes by 0.0625. Exact-zero and equal-mass
+controls behave as derived. The normalized deliberately mismatched law has
+TV 0.0508644, so this is not a normalization-only control.
+
+The actual shared conditional loop executes 58 calls / 60 attempts: both
+proposal modes, component selection, interval bits, both gcd lifts,
+accept/reject branches, two-attempt retries and finite-cap failures. Actual
+counts are 240 real RNG draws, 60 integer lifts and 240 marginal queries.
+Weighted proposal path error is at most 2.78e-17. The aggregate preflight
+numeric reserve is 92,672 bytes against a 1 MiB cap; it includes retained
+arrays, path records and conversion copies, not process RSS.
+
+The preserved intermediate report
+`out/component_weighting_20260911T125619406574Z.json` failed P4: its verifier
+only forced acceptance on this strictly positive target, yet required a cap
+failure. Main required explicit rejection branches whenever acceptance is
+below one and a retry in BOTH modes. These are verifier corrections, not
+evidence against the weighted-envelope identity. Main also replaced a
+tolerance-based zero-path shortcut with the exact geometric-zero condition,
+required observed rather than planned RNG counters, and strengthened the
+all-fixture accepted-law and independent-mixture predicates.
+
+## Physical same-law / actual-RNG comparison
+
+Main's final reproduction is
+`out/component_weighting_physical_20260911T1318763050Z.json`, with log
+`out/component_weighting_physical_main_final.log`: all four predicates pass.
+It retains r60,b3,t8,s7, the original two work blocks and phase oracles, varying
+only insertion v0..7. Every work row for cycle/dual/auto agrees with the live
+independent direct-column FFT reference (maximum conditional TV 2.96e-16).
+Complete AUTO queries check both proposal modes at every output, including
+q*A*E coordinatewise and EACH row's normalization, not just averages. Maximum
+accepted-coordinate error is 4.17e-17. Explicit cycle/dual weighted formulas
+check selected outputs; their full amplitude/FFT checks are separate.
+
+The new envelope reduces work-marginal-averaged expected attempts in every
+frozen insertion. For example v3 gives 18.6478 versus 7.9737. This is a
+mathematical row-mass expectation, not a measured runtime. Both modes reset
+seed 624+v and execute 32 draws per insertion, cap 512. All 512 calls finish;
+default-mode work/output/attempt/component-count streams exactly match
+`out/earlier_phase_sampler_20260911T123806945928Z.json`.
+
+| Observed category, 256 draws per mode | mass | root_mass |
+|---|---:|---:|
+| attempts | 3,569 | 1,558 |
+| Fourier component terms | 59,584 | 26,284 |
+| progression marginal queries | 34,662 | 15,174 |
+| component-weight preparation terms | 3,709 | 3,686 |
+| additional square roots | 0 | 3,686 |
+| additional weighted divisions | 0 | 26,284 |
+
+Local/phase/setup work is retained separately in the report. These categories
+are NOT interchangeable operation costs and must not be added into a fake
+runtime total. Different RNG consumption changes later sampled work rows,
+so even the same seeds do not give paired work-label trajectories. The
+observed win is not a guaranteed seedwise comparison. The original mass-mode
+sampler of the SAME conditional state is the direct strong baseline here;
+this experiment does not rank every classical simulator.
+
+The normalized wrong new-proposal/old-acceptance physical law has TV 0.0212528.
+Main rejected the earlier passing verifier as insufficient: it compared the
+unchanged conditional_probability field, rather than the new q*A*E law, and
+averaged normalizations across work rows. Other corrections cached and charged
+analytical roots/divisions, reconciled observed helper counters, retained
+failed-call counters, fixed cover-specific phase bounds and reset both modes
+to the frozen seed rule. Reports using seed 1624+v for the new mode are retained
+but are not the final frozen comparison.
+
+Preserved failures include `...1248303087Z.json` (accepted-submass compared
+without its normalization), `...1258737994Z.json` and `...1259977937Z.json`
+(full-query budgets omitted work/call factors), `...1309776595Z.json` and
+`...1310302276Z.json` (sample phase reservation), and `...1311029046Z.json`
+(incorrectly inflated phase preflight). All use the prefix
+`out/component_weighting_physical_20260911T`. None is silently replaced by a
+PASS artifact or interpreted as refuting C80.
+
+Main's final aggregate numeric/verification reserve is 3,090,112 bytes against
+16 MiB, including direct FFT/law temporaries, retained row/scalar records and
+bounded prior-sample extraction. The large prior report is streamed; only its
+bounded sample field is decoded, and prior reference-array views are freed
+before the next insertion. This is a preflight reserve, not measured process
+RSS. Production sampling receives no precomputed law or orbit table. Reserved
+and observed counters are distinguished; total phase counts include the
+early/late subcounts and must not be added to them again.
+
+## Scoped regression gates
+
+Core ran first and passed (`out/component_weighting_core.log`). The affected
+lab suite passes with the optional backend
+(`out/component_weighting_lab_backend_final.log`) and without it
+(`out/component_weighting_lab_no_backend_final.log`). Both final lab runs
+include the isolated-row actual RNG regression and eight independently
+expanded full-joint cases across the two helper classes and proposal modes.
+The claims suite passes (`out/component_weighting_claims_final.log`), including
+exact-rational envelope/cost checks and the fixed-work retry distinction.
+The other six science suites were not rerun. These are scoped float/proof
+regressions, not a finite-bit sampling certificate or all-nine-suite claim.
+After the C80/CW and TODO40/NC records were updated, reindexing and all ten
+documentation checks passed (`out/component_weighting_docs_final.log`).
 
 ---
 
@@ -259,6 +1437,882 @@ route is a function-level calculation of the n_exp → ∞ limit, not more width
 
 ---
 
+# DM — From an existence argument to an explicit arithmetic family
+
+C87 owns the explicit permutation, surviving grid minor, all-bit dimer
+formula, autocorrelation/complement identities and local rank obstruction.
+This investigation completes TODO48 at bounded construction and exact-query
+scope. The remaining reduction and cost discriminator belongs to TODO49.
+The user's general simulation goal remains active: no practical memory
+advantage or breakthrough is established.
+
+## Discovery and stronger baseline
+
+Astra found a direct rotated-zigzag construction, avoiding extraction of
+the earlier published helix family. Its two nested paths have an explicit
+planar embedding and a grid-minor certificate. Root then noticed that the
+certificate avoids the four endpoint vertices removed by the all-bit
+query, for the nondegenerate growing family. Astra independently confirmed
+that stronger statement in a separate preserved supplement.
+
+In parallel, root and Sol independently derived the all-bit specialization.
+The three allowed transformed entries select exactly two incident edges.
+Complementing them turns the problem into a perfect-matching count on the
+architecture itself. Its sign is global and its residual edge weights can
+be positive integers. This supplies both a nonzero lower bound and a
+stronger baseline than C86's universal local gadgets. It does not test
+internal sign cancellation, even though odd-width coefficients are negative.
+
+Sol also audited affine/product alternatives. The equal-mask local factors
+are W tensors, obstructing those invertible local basis reductions. Root
+read the primary definitions, W product-decomposition argument and graph-
+state theorem, and checked a direct matrix-slice rank proof. Local rank
+does not exclude scalar simplification. No publication of this exact
+arithmetic application was identified in the bounded audit, and no
+priority or restricted nonplanar hardness claim follows.
+
+## Main exact experiment
+
+Source: `experiments/experiment_planar_query.py`. Reproduce with:
+
+```bash
+uv run --with networkx==3.5 python -m experiments.experiment_planar_query
+```
+
+Prediction M441d631a358748fe precedes run R71164a27988746b5. Raw report and
+log are `out/planar_query_report.json` and `out/planar_query_main.log`.
+The experiment fixes the permutation rule, all four all-bit masks and
+uniform incoming carries, varying only k. The direct weighted graph has
+the following exact results:
+
+| k | Word width | Direct graph vertices | Exact coefficient |
+|---|---|---|---|
+| 1 | 8 | 12 | 5/1024 |
+| 2 | 32 | 60 | 833389/140737488355328 |
+| 3 | 72 | 140 | 2110472116271192473/5316911983139663491615228241121378304 |
+
+The first row agrees with independent integer cyclic-autocorrelation
+enumeration and the generic C86 implementation, which uses 72 gadget
+vertices on that row. This is a graph-size observation, not an allocated-
+byte or speed comparison. Larger scalar rows use the proved direct
+reduction and existing exact FKT helper; they are not independent full
+basis replays. No large physical circuit or statevector was simulated.
+
+The odd-width identity control gives -1/16 and catches removal of the
+global sign. The same first-row architecture with zero masks gives one,
+while its all-bit query is nontrivial. All four harness checks pass with
+exit zero and no protocol warnings. Integer/Fraction arithmetic is used
+throughout. No performance pilot, timing comparison or peak-memory claim
+was made; further matching-polynomial simplifications remain possible.
+
+## Independent geometry evidence
+
+Submission Sf39713394d7747fd is under
+`out/agent-board/workers/A3469c04194384bc8/`, including
+`explicit_family.md`, `geometry_check.py`, `geometry_report.json` and
+`geometry_check.log`. Prediction M3ccbf05179e7463d preceded run
+R5ec96218161949ae. The proposed larger fixture cap was narrowed before
+execution, with its original prediction retained on the board.
+
+All three k fixtures pass graph-structure, planarity and explicit branch-
+set checks. Identity matching fails the same frozen certificate, as
+required. All three harness checks pass, exit zero. These checks concern
+the architecture, not weighted scalar cost. The endpoint-deletion result
+is an algebraic supplement, not an extra all-fixture execution: its k=1
+exception is explicit. `endpoint_deletion_supplement.md` is archived in
+the main submission, preserving the original geometry submission.
+
+## Independent scalar verification and retained defects
+
+Luna's evidence is under `out/agent-board/workers/A0b16f9656409416d/`.
+Final accepted submission S6bc0372b42094e72 was reviewed in
+Vc84e1f7ff96c4df1 after source, report, logs and all archived hashes were
+inspected. The authoritative corrected scalar source is
+`experiment_planar_carry_verified.py`, with
+`planar_carry_verified_report.json`, `planar_carry_verified.log` and
+`findings_carry_placement.md`. Run R52e9e348a02d46fe follows prediction
+M6f1ccdbed5a94eed and exits zero with all four checks resolved.
+
+At fixed width three, corrected direct sums include both initial carries
+and all 2048 word/carry assignments per query. All 48 equal-mask cases
+(eight masks, six permutations) agree with the autocorrelation identity.
+Nonuniform highest-bit mismatch fixtures vanish; the matched identity
+case with all masks four is nonzero, -5/16. The least-significant-bit
+identity query with both carry characters gives +1, while the old
+omitted-carry reference gives zero. That last must-fail control directly
+exposes the reference defect rather than merely checking a final sign.
+
+The complete correction history remains available:
+
+- R82bfa3fd1a704164 failed before measurement because the base environment
+  lacked optional NetworkX. `planar_local.log` preserves that exit-one
+  failure; the dependency-pinned run R20f316f154e34b44 then passed.
+- Its original highest-bit zeros were nondiscriminating because uniform
+  characters independently forced them. Review V015a5b93a3bf4814 requested
+  stronger fixtures. `experiment_planar_strengthened.py` and run
+  Rb60205d99b1242d7 preserve that first passing correction.
+- Root's actual source inspection then found both independent direct
+  helpers computed S=A+B outside the incoming-carry loop. Their stated
+  full-space contract was false, despite all selected rows passing.
+  Review Vcf5473ab24f945ad required a corrected reference and explicit
+  carry-sensitive witness. The old files and reports remain unchanged;
+  C87 explains the complement symmetry that hid the omission.
+- `experiment_planar_carry_corrected.py` included the carry but introduced
+  a second verifier defect: it compared every permutation with g(s)^2.
+  Run Rcc555d6466a74080 exits one, preserving 26 autocorrelation mismatches
+  and the separately successful carry witness. The final verified source
+  uses g(s)g(P(s)) and corrects both defects.
+
+The initial local tensor enumeration is unaffected by those word-reference
+defects. It independently checks all eight K/R mask patterns and their
+Hadamard entries. Its scalar rows are historical until confirmed by the
+final corrected reference. Neither worker source is used by the main
+experiment, whose independent autocorrelation and generic FKT comparison
+were reviewed separately. Passing tests alone would have missed both the
+nondiscriminating fixtures and the omitted carry.
+
+## Review and validation scope
+
+Root accepted the geometry submission in Vcf91b8941e7340a7 after inspecting
+proof, source, logs and frozen hashes. Sol's source submission
+S002aade93c324049, including `scalar_reduction_audit.md` under
+`out/agent-board/workers/A697ac92a69164a93/`, was accepted in
+Vdca4ab059eec4cc6. The rank and dimer deductions were independently checked;
+the audit's general hafnian and Thue--Morse references are background leads,
+not implemented algorithms or closed-form exclusions for this family.
+
+Main submission S35efe49a35c84678 archives the experiment, report, logs
+and endpoint supplement. Independent Astra review V312376d8993d4c92
+inspected the contents and hashes and accepted the restricted result.
+Core passes before execution and after implementation, with logs
+`out/planar_query_core_initial.log` and `out/planar_query_core_final.log`.
+Other science suites were not rerun; TODO34 retains the prior native crash.
+The failed worker executions above are not relabeled passing suites.
+
+Documentation regeneration and validation are recorded in
+`out/planar_query_docs.log`. All four bounded board tasks are accepted and
+closed. No manuscript was changed and nothing was committed or published.
+The canonical worktree remains uncommitted.
+
+---
+
+# DS — A full-space discriminator after a symmetry exclusion
+
+C92 owns the exact symmetries, all-width three-macro map witness, Mersenne
+prefix identities and constructive symbolic bounds. TODO50 owns the next
+enabled-sector question. This investigation makes progress, without a general
+simulation or CNOT-memory breakthrough; the broad user goal remains active.
+
+## Derivation and changes of direction
+
+The authorized board swarm retained Astra for algebra and Sol for source
+and independent test work. Root remained the only canonical writer. Starting
+from C91, root and Astra derived a small correction count for Mersenne
+prefixes. That count leaves correlations with the scratch, enable word and
+flag history, so it was not treated as a compact scalar state.
+
+Astra derived a common reversing involution. Root gave a shorter direct
+proof and the workers independently checked it. This rules out complete
+reversal as a discriminator for equal low-bit/flag endpoints at any depth,
+even before scratch averaging. It does not rule out adjacent swaps. An
+intermediate suggestion that odd scratch/carry parity might make such a
+full coefficient reversal-sensitive was eliminated by the independent
+global-complement symmetry; no experiment was run on that suggestion.
+
+Root and Astra then constructed a polynomial affine partition for the
+disabled common-control sector, with full dirty-scratch averaging. Root's
+canonical transfer uses open vertical strips plus separate integer critical
+slices to make threshold boundaries explicit. This stronger growing-depth
+baseline remains unimplemented and intentionally unoptimized. It does not
+remove the enabled sector's nested dyadic prefix terms.
+
+Sol's source audit constructed a native bit-column carry baseline and checked
+the strongest applicable published constructions. Root inspected the five
+actual add/subtract calls and the cited primary theorem/algorithm bodies.
+C92 charges state construction, coefficient bits and extraction, and compares
+with C89's polynomial-memory interval enumeration. Minimal automata or compact
+word expressions are not assumed to be freely supplied representations.
+
+The other Sol worker supplied an explicit dirty input at every Mersenne
+width n>=3 whose three-macro output character changes under reversal and
+omitted incoming carry. Walsh invertibility and Parseval prove that separate
+nonzero chronological coefficients distinguish the two references. This
+justified a bounded MASK DISCOVERY before a separate frozen-mask verification;
+it did not predict the discovered mask or coefficient magnitudes.
+
+## Bounded discovery and exact values
+
+Source: `experiments/experiment_dirty_prefix_walsh.py`. Reproduce with:
+
+```bash
+timeout 60s uv run python -u -X faulthandler -m experiments.experiment_dirty_prefix_walsh
+```
+
+Task `T6f4e677c084545a9`, attempt `A2119f77916944163`, prediction
+`Mb738ced3a45741a1` preceded run `Rb2dceaef08e04fe9`. It exited zero;
+all eight checks passed without warnings. The complete report is
+`out/dirty_prefix_walsh_report.json`, with raw log
+`out/dirty_prefix_walsh_main.log`.
+
+The fixture is N=7,a=1,n_exp=1,q=3, constants (1,2,4), with fourteen
+physical wires and 16,384 uniformly averaged input labels. Both chronological
+and reversed circuits have 426 logical operations. Reversal retains each
+constant's own multiplicand control. C89's independent word map agrees with
+both gate maps on all 32,768 compared labels. Both maps satisfy every P/J
+orbit check; the two selection rules leave 4,096 candidate input masks.
+
+For the output character C=b0+f, the ascending-mask search found:
+
+| input character | physical mask | chronological | reversed | incoming h omitted |
+|---|---:|---:|---:|---:|
+| b1+b3 | 10 | -19/512 | -15/512 | -19/512 |
+| b3+h | 2056 | -15/512 | -13/512 | 0 |
+
+The output physical mask is 4097. There are 3,138 chronological-nonzero
+order witnesses, 1,804 carry witnesses and 1,570 common witnesses within
+the allowed set. The second row is the first carry and first common mask.
+A common mask was an open discovery branch, not guaranteed by the proof.
+Message `M35a79c5f21434060` froze both rows before independent verification.
+
+The full average includes every b,t,x,h,f,u assignment. Omitting h changes
+only the arithmetic, while retaining its physical wire and input phase.
+The chosen common mask has no x character. In u=0 all macros are the same
+map, so its forward/reverse difference comes entirely from u=1; its scalar
+value can still contain a disabled-sector contribution.
+
+The reference uses existing `walsh.classical_permutation` on logical
+X/CNOT/Toffoli operations. Existing `walsh.wht` stores float64 butterflies,
+but this use is exact: all inputs are integer signs and each intermediate
+is an integer of magnitude at most 16,384, below 2^53. Integer-conversion,
+Parseval and balance checks passed, and the selected sums agree with direct
+integer character sums. This is not a floating-point tolerance result or an
+independent unitary verification of the stored Clifford+T decomposition.
+No statevector, dense unitary, size sweep or comparative memory/timing
+measurement was made. Harness elapsed times are descriptive only.
+
+## Independent interval contraction and retained verifier correction
+
+Task `T0596b7520d904530`, attempt `Af53b117e11f341f5`, uses only the
+existing C89 `compile_intervals` and `interval_coefficient` helpers. It
+contracts all 32 b,f states through exact range-character sums for each of
+512 outside fibers. It uses no gate replay or WHT and retains every fiber
+in its JSON report. It is an independent contraction route, not an independent
+derivation of the already-reviewed C89 helpers.
+
+The initial prediction `Me2a13c1257eb4e1c` preceded run
+`R610eb83d46024315`, terminal exit zero, six checks passed. Its submission
+`S52fc7675ddec4ca6` reported both frozen triples exactly. Root then found a
+latent verifier helper error: `outside_sign` added bit counts and took the
+bit parity of that COUNT rather than the count modulo two. For these frozen
+masks the count is only zero or h, so both reported triples remain correct.
+Counts two and three would have been wrong. Review `V87ef380ebaa34da8`
+requested preservation, repair and an independent physical-mask sign check
+before a same-fixture rerun. This is a verifier-generalization defect, not
+a failed scientific prediction or a reason to discard the initial evidence.
+
+Revision 1 source/report/log/review are preserved in the attempt's
+`revision1/` directory. The corrected prediction `M84586123f81d4148`
+preceded run `Rc59d17f61025445c`, terminal exit zero, seven checks passed
+without warnings. New count-two/count-three cases reject the old helper;
+the unchanged frozen triples and both wrong-reference controls pass.
+All three variants have a maximum of 26 interval pieces in this fixture.
+The accepted revision is `S282ecdab7d9f42d0`. Its authoritative files are
+`verify_dirty_prefix_intervals.py`, `verify_dirty_prefix_intervals_report.json`,
+and `verify_dirty_prefix_intervals.log` in
+`out/agent-board/workers/Af53b117e11f341f5/`.
+
+Root read the full original source, exact correction and full logs, checked
+the archived hashes, then parsed every final fiber row. The fiber set is
+complete without duplication, all enabled controls are correctly paired,
+disabled-fiber forward/reverse results agree, and root's re-summed Fraction
+totals match both the report and the independently constructed gate sums.
+No additional size experiment was needed after these checks.
+
+## Proof and source evidence
+
+| board task | accepted submission | accepting review |
+|---|---|---|
+| T5157b49f7df64a4c, Astra algebra | Sc7d13ba772164ac6 | Vc0be156ce73743b5 |
+| Td13dad1c7f324a9d, Sol symbolic baseline | Seeeac35b283e4023 | V0ebb930df3ef462d |
+| Tf4de407e93bd44f0, Sol map discriminator | S73b4832414f14243 | V977c7261e1ac4566 |
+
+Proof: `out/agent-board/workers/Ad4bfaca3d7054c0f/mersenne_prefix_audit.md`.
+Source audit: `out/agent-board/workers/A045d055712424a18/dirty_mersenne_symbolic_baseline_audit.md`.
+Discriminator: `out/agent-board/workers/A693bffaa51a7437b/q3_dirty_prefix_symmetry_proposal.md`.
+Root read each complete artifact, inspected its mathematical and native-code
+reasoning, and checked current files against the archived SHA256 identities.
+The proposal's redundant old two-macro fixture was not repeated: the new
+experiment has its own exact normalization, direct-sum and wrong-reference
+checks. None of these proof tasks executed scientific code.
+
+Astra and Sol independently reviewed the complete canonical C92 transfer
+after integration, recorded as `Mcd4e617b366b4c99` and `Ma067f4ca2cc54058`.
+Neither requested a correction. The direct reversor proof and more explicit
+integer-boundary partition retain the submitted proof's scope. Root's write
+task includes the new experiment and final claim/note/backlog/handoff records
+for a separate source-and-evidence acceptance review.
+
+## Validation scope
+
+Root ran core first, observed terminal exit zero, and inspected the full log
+`out/mersenne_core_initial.log`. The independent worker also ran core before
+its verifier, with its separate log in the attempt directory. The new
+bounded experiment is the affected scientific check; production helpers
+were unchanged. Other eight science suites were not rerun. No timeout or
+native crash occurred in these bounded runs; TODO34 retains the prior issue.
+No manuscript, abstract, dependency, default or host setting changed; nothing
+was committed or published.
+
+Index generation and all ten documentation checks pass, recorded in
+`out/dirty_prefix_reindex.log` and `out/dirty_prefix_docs_check.log`.
+New experiment syntax and scoped whitespace checks pass. The board correctly
+rejected initial closure of three proof tasks after root updated their
+snapshotted TODO50 input. Those tasks were reopened for fresh input snapshots
+and read-only revalidation of their unchanged evidence; no scientific rerun
+or retraction was required. The independent verification task is accepted
+and closed. Final proof/write-task acceptance and closure remain in the board
+history rather than duplicating version identifiers here.
+
+---
+
+# DW — Bounding sparse-contraction integers before a width study
+
+C98 owns the theorem, overlap failure range and charged cost. TODO50 owns
+what follows. Nothing in this note was executed as an experiment.
+
+## How it was found
+
+A coordinator board proposal (Mf8d61a8ffca94c08) observed that the four
+IS query mask pairs are disjoint and suggested a zero-total argument with a
+conservative 2^(p0+3K+2) bound. Board task T083e119b28fe40eb asked a Claude
+deriver to prove or refute it and to freeze a matched word-width experiment
+comparing C94 replay with the packed comparator, both using the C96 kernel.
+
+The deriver proved the sharper exponent p0+K+2G and found the overlap
+identity. A fresh Claude referee accepted the proof in substance but requested
+six corrections (review V0269acf7cd364806): five design gaps and one
+Proposition 2 small-n statement. Coordinator shadow review had independently
+confirmed the proof by brute force from the C96 definition but missed all six
+corrections, as recorded on topic:swarm-calibration (Mc6fde685e7034ce5).
+The v2 revision (Se1fc9751bce240bc, accepted in Va1739130498e4338) corrected
+the overlap statement at n<=3 and a family exponent constant, and withdrew
+the design. Reviewer and author checks were small inline enumerations of
+states, rows and the overlap boundary at small n (see the v2 submission and
+review for exact coverage); they are not archived experiments.
+
+## Why the width study was withdrawn
+
+The TODO50 checkpoint had asked whether a word-width study would reveal
+process-memory savings for C94 replay over packed intervals. Inside the
+existing guards it is not expected to answer that [estimate, below]:
+
+- At fixed q both representations use space linear in m [proved from C94
+  and the packed count check], so a width sweep cannot separate their
+  asymptotic memory.
+- At q=127 the packed composition payload is at most 3,911,112 bytes at
+  width 4096 [proved from the `compile_packed` count check; payload, not allocated
+  bytes]. The packed IS campaign measured 242,688 KiB absolute maximum RSS
+  for both methods and every noop at width 129 [measured, one host,
+  uncalibrated]. The payload is about 1.6% of that peak.
+- A >=10% process-RSS saving is therefore not expected [estimate: it assumes
+  memory retained only by the packed method stays below about 6.35 times the
+  payload bound, and that the width-129 baseline carries over].
+
+Open issues any future width contract must fix include the conflict between
+an unresolved-RSS outcome and "retire otherwise", a must-fail control for the
+traced-allocation criterion, and derived rather than assumed child-time
+projections; `design_disposition_v2.md` holds the complete list.
+
+The frozen worker files are `derivation_v2.md`, `design_disposition_v2.md`
+and the superseded v1 files in attempt A31e305c5e8c44063.
+
+---
+
+# ER — Test the gate-schedule boundary of work-first conditioning
+
+After implementing C78, main chose a changed-schedule experiment instead of
+another known-order size record or rejection-envelope micro-optimization.
+An earlier diagonal phase is evaluated before the remaining low controls:
+its argument is no longer fixed directly by the final work outcome. The
+binary prefix of the exponent, however, walks through a finite modular cycle
+along each orbit progression. C79 owns the elementary proof and its limits.
+This is a useful connection to the project's 2-adic theme, not a claim that
+the original arithmetic-support theorems automatically transfer to sampling.
+
+Main froze the derivation and one-parameter test in TODO 39 before the
+lower-cost pilot. A separate lower-cost algebra audit confirmed the cycle
+and the two constant-coefficient cases. Main caught an important caveat in
+the first informal count: the new phase can revive an old canceled
+coefficient, so one must rebuild from geometric candidate residues rather
+than the old nonzero components. The auditor independently confirmed a
+Hadamard/parity-phase counterexample; C79 and exact claim regressions retain it.
+
+## Bounded coefficient experiment
+
+The frozen circuit is N61,a2,r60,b3,t8,s7,H2 with the former W0/W1 and late
+G_1. Add one identical earlier G_1 after v=0,...,7 low controls. Only its
+insertion position changes. The reference uses literal cyclic vector shifts,
+pointwise diagonals and block-matrix multiplication in indexed work space;
+the separately contracted formula constructs local columns and refined rows.
+Neither formula reads a supplied orbit table. This is not a compiled physical
+arithmetic reference or an additional generic propagator.
+
+Main's final report is
+`out/earlier_phase_cycles_20260911T112847299154Z.json`, **5/5 PASS**, with log
+`out/earlier_phase_cycles_main_final.log`. It records system Python **3.12.3**,
+NumPy **2.4.6**, with one BLAS thread. All **2,048** literal columns and
+**480** refined rows agree across the eight insertion positions. Maximum
+column/row errors are **2.29e-16 / 2.78e-16**, column normalization error
+**6.67e-16**, and row norm-sum error **3.56e-15**.
+
+| insertion v | generic cycle bound P | cycle used | maximum nonzero components |
+|---|---|---|---|
+| 0,1,2 | 1 | 1 | 10 |
+| 3 | 2 | 2 | 20 |
+| 4 | 4 | 4 | 25 |
+| 5 | 8 | 8 | 25 |
+| 6 | 16 | 16 | 25 |
+| 7 | 32 | 1, by the endpoint identity | 10 |
+
+The interior maxima are finite-row observations, not tight asymptotic lower
+bounds. These rows contain only two or three terms per original progression,
+so refinement can saturate at the available exponent labels before the period
+bound is reached. No claim of large-P efficiency follows from this fixture.
+The report retains explicit coefficient-pair witnesses for each interior
+position, not just a Boolean variation flag. For example, at v=3,j=0,h=0,
+the coefficients at exponents 0 and 60 differ in absolute value of their
+complex difference by **1.32734**. They cannot be represented by one constant
+coefficient on that original progression. Removing the earlier phase also
+fails the amplitude comparison; that alone would NOT prove an output-law
+difference, since some work-only phases are unobservable after tracing work.
+
+## Audit, failures and resource limits
+
+The initial failed reports are retained:
+
+- `earlier_phase_cycles_20260911T112045001326Z.json`: an over-budget initial
+  work estimate rejected before allocation; the bounded implementation and
+  named categories were corrected, not silently exempted from the cap.
+- `...112056701952Z.json`: missing local-term counter key.
+- `...112105096375Z.json`: list-versus-scalar verifier comparison.
+- `...112120213933Z.json`: both direct and column routes reversed the outputs
+  of divmod(e,L), and thus AGREED on the wrong schedule. The independently
+  reconstructed row caught the error. Its row error was not float noise.
+
+The first corrected passing report `...112338829103Z.json` and stronger agent
+report `...112554277299Z.json` remain available. Main subsequently removed a
+redundant row recomputation, replaced a nested coefficient-label recovery by
+direct quotient/remainder arithmetic, recorded explicit variation witnesses,
+and increased the aggregate storage reserve for retained scalar lists and
+old/new matrix views. The scientific fixture was not changed.
+
+Final numeric preflight is **1,844,288 bytes**, below 16 MiB; Python container
+headers and process RSS are not equated to numeric payload. Named actual
+scalar/query terms total **505,824**, below the **804,096** preflight and
+one-million cap. They include **18,432** column-local terms, **17,280**
+row-local terms, **368,640** direct block-product terms, **19,104** reference
+expansion entries and **55,584** pointwise modular powers. The **6,144** direct
+vector shifts are counted separately; these are named arithmetic categories,
+not a native instruction/bit-runtime total. Closed counts partition each
+progression; the formula does not scan Q/r entries to determine class lengths.
+
+`out/earlier_phase_cycles_claims.log` passes after adding exact residue-period,
+truncated-partition and cancellation-revival regressions. The existing sampler
+core/lab gates in WF cover the unchanged C78 helper. No further production
+sampler change was made for C79. Documentation validation is
+`out/earlier_phase_cycles_docs.log`. No manuscripts, abstracts, defaults,
+host settings, firmware or commits changed.
+
+```bash
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_earlier_phase_cycles
+```
+
+The skill's independent-reference and cancellation-control requirements
+materially changed this audit. At this coefficient checkpoint, TODO 39's next
+step was a complete-output comparison before sampler integration. That
+comparison follows below; the coefficient result alone was not interpreted
+as an observable advantage or hardness result.
+
+## Complete-output checkpoint
+
+Main retained the same eight-position fixture and froze complete-law
+predictions before delegating three bounded tests. The cycle Fourier formula
+uses closed geometric sums, the reference FFT uses literal columns, and the
+selected Circuit/statevec check independently assembles those columns using
+dense repeated blocks and pointwise phases. The latter embeds indexed labels
+0..59 into a 64-state work register. It validates the QFT/output convention,
+not a physical modular-arithmetic compiler.
+
+Main's audited, reproduced reports all pass **4/4**:
+
+- `out/earlier_phase_output_20260911T114909011094Z.json`, log
+  `out/earlier_phase_output_main_final.log`: all eight complete laws from
+  literal FFT and refined geometric components.
+- `out/earlier_phase_feedback_20260911T115103487134Z.json`, log
+  `out/earlier_phase_feedback_main_final.log`: dephase only the single high
+  input history while retaining the early phase and exact Fourier feedback.
+- `out/earlier_phase_qft_20260911T114642972207Z.json`, log
+  `out/earlier_phase_qft_main_final.log`: existing Circuit/statevec references
+  at v=0,2,3,7.
+
+All use system Python **3.12.3**, NumPy **2.4.6**, one BLAS thread. The
+geometric/literal FFT laws agree within **8.68e-18** per cell and
+**1.28e-16** TV. The separately assembled Circuit-QFT laws agree with the
+geometric route within **5.40e-16** TV. Literal columns normalize within
+**6.67e-16**; target first-bit masses differ from one half by at most
+**1.12e-16** in the all-position reference. C79/C77 own the exact support
+argument; this is not an empirical claim of exactness from tiny errors.
+
+The omission baseline removes ONLY the added early phase, yielding C78's
+original schedule. It is computed once and reused. The feedback-aware
+candidate retains the early phase and drops only coherence between the two
+high input histories. Its zero-padded transform agrees with two feedback-aware
+length-L conditional transforms within **3.47e-18** per output cell.
+
+| earlier insertion v | omit early phase: full-law TV | dephase high history with feedback: TV |
+|---|---:|---:|
+| 0 | .02678914 | .01068526 |
+| 1 | .04044824 | .01092837 |
+| 2 | .08803871 | .01279596 |
+| 3 | .25411263 | .03789582 |
+| 4 | .28888720 | .02268610 |
+| 5 | .32945628 | .02788206 |
+| 6 | .31204759 | .01919770 |
+| 7 | .00840446 | .00900860 |
+
+Neither candidate reaches the frozen **1e-3** tolerance anywhere. Both reach
+**1e-2** only at the final pre-mixer insertion. Retaining feedback and the
+early phase improves seven of the eight comparisons, not all eight. This
+stronger approximation explains much of the output variation, but leaves a
+measurable coherent remainder. It does not establish that the remainder is
+hard to compute, nor that constructing this candidate is generally cheap.
+
+Main's closing baseline audit also identified the exact v=0 simplification
+now stated in C79: absorb the early phase into the initial small unitary.
+The existing C78 helper supports that transformed input without a new
+schedule implementation. Thus the table compares TWO APPROXIMATIONS, not
+the strongest exact baseline at every position. Their failure at v=0 is
+not evidence that a new sampler is needed there. This endpoint reduction
+is algebraic; no separate timing or new finite-RNG experiment is claimed.
+
+Dropping coherent Fourier cross terms changes the full law by up to
+**.239461** TV. Omitting the QFT or dephasing every exponent history gives
+uniform-output controls that fail on the selected circuit laws; these are
+closely related controls, not two independent algorithms. A synthetic flat
+low-input state exercises the SAME feedback and missing-feedback functions
+as the candidate. At nonzero prefix its conditional law is independently
+checked by the geometric sum; missing feedback instead gives a delta, with
+**.594695** TV. This replaced an initial control that merely duplicated the
+standalone FFT expression.
+
+## Full-output audit and interpretation
+
+The initial output run's NumPy-Boolean serialization failure remains in
+`out/earlier_phase_output_initial.log`. Intermediate output passing reports
+are retained; their original threshold predicates and resource accounting
+were weaker. Main/agent revisions added actual threshold classification,
+cumulative counters, before-call bounds, two-sided marginal checks and
+explicit storage for old/new views and converted scalar lists.
+
+The feedback preflight failure is
+`out/earlier_phase_feedback_20260911T114207329027Z.json`; subsequent intermediate
+passes remain available. The final ledger removes fictitious FFT FLOP totals
+and counts actual transform calls/input entries, local block products, shifts,
+pointwise modular powers and chi entries. Main strengthened the synthetic
+control and reconciled exact call/entry counts before the authoritative run.
+
+Two aborted QFT reports, `...113905072355Z.json` and
+`...113923793762Z.json`, retain failed check flags but no exception payload:
+the first serializer saved summary rows instead of the full report. Their
+causes cannot be reconstructed from those artifacts alone. The first passing
+`...113933320015Z.json` likewise omitted the full-law evidence. The corrected
+agent report `...114001016872Z.json` and main's final report retain all raw
+probability vectors, counters and exceptions when present. A passing summary
+was not accepted as a complete reference.
+
+Final numeric payload reserves are **1,567,648**, **2,146,592**, and
+**5,455,872 bytes** for output, feedback and QFT respectively, each below
+16 MiB. These include conservative numeric temporaries, not measured RSS.
+The output route performs **1,920,512** geometric-component terms against a
+**4,147,200** preflight below the five-million cap; it also records **368,640**
+block products, **9,720** row-local terms, **30,168** modular powers and
+eight FFT calls. Feedback records **892,710** actual named units against
+**895,788** preflight, including **44** FFT calls/**445,824** input entries
+and **19,962** modular powers (the latter are also phase-query subcounts,
+not double-added). QFT records **3,690,000** dense matvec terms and
+**9,437,184** gate-entry updates, under separate five-/twelve-million caps.
+These are diagnostic arithmetic categories, not end-to-end bit-runtime costs.
+
+While examining the surviving two-history interference, main derived the
+factor-two envelope now in C79; an independent audit checked ordering, Fourier
+sign and the zero-mass case. This is the existing C59 Cauchy-Schwarz mechanism,
+not a new sampling principle. It suggests another possible correction route,
+but cheap proposal sampling and cheap coherence evaluation are still missing
+premises. Do not turn a complete tiny probability table into a free sampler
+oracle. Likewise, a uniform first output bit does not imply an independent
+suffix or justify the dephasing approximation.
+
+## A complementary cover, not a universally better representation
+
+While the output comparison ran, main noticed that fixing the REMAINING low
+history also makes the early phase constant. Main froze the dual construction
+in TODO 39 before the pilot. Two independent proof audits checked aliases,
+short intervals, cancellation handling and the balanced worst-position bound;
+C79 owns the proof and its exponential-width limitation. This explains the
+previous endpoint simplification as part of a broader two-sided partition.
+
+Main's final dual report is
+`out/earlier_phase_dual_20260911T120009418111Z.json`, **4/4 PASS**, with log
+`out/earlier_phase_dual_main_final.log`. It reconstructs all literal amplitudes
+and evaluates the dual FULL output law directly with existing geometric sums,
+separately from FFTs of the expanded rows. Maximum dual amplitude error is
+**2.78e-16**, row norm error **2.67e-15**, geometric/FFT TV **1.08e-16**, and
+complete-law normalization error **1.12e-16**.
+
+| insertion v | largest cycle-cover count | largest dual-cover count |
+|---|---:|---:|
+| 0,1,2 | 10 | 25 |
+| 3 | 20 | 25 |
+| 4,5 | 25 | 25 |
+| 6 | 25 | 20 |
+| 7 | 10 | 10 |
+
+Neither cover dominates. The late interior insertion exhibits the predicted
+benefit, while the early insertions favor the cycle cover. Most progressions
+in this tiny fixture are short, so these counts do not demonstrate the full
+potential gap or an implementation speedup. Dropping the remaining-history
+shift from the phase fails at the fixed interior test v=3,j=0: the first
+measured witness has h=0,k=7,a=2,e=58 and amplitude error **.102931**.
+It was not the initially guessed k=1; the report retains the actual label.
+
+Important retained failures:
+
+- `earlier_phase_dual_20260911T115116525719Z.json`: a missing wrong-control
+  expansion-counter key.
+- `...115125183901Z.json`: a **misleading 4/4 PASS**, which main rejected.
+  All three FFT routes used FFT/sqrt(Q) on unit-norm literal columns, so the
+  reported laws summed to Q instead of one. Agreement alone missed the shared
+  normalization defect. The first pilot also expanded every row and lacked
+  the requested direct geometric-law check; it was not a sparse-formula test.
+- `...115651670394Z.json`: after strengthening the verifier, it summed work
+  rows rather than exponent columns for the column-norm audit. It also mixed
+  overlapping geometric subcounts into a misleading aggregate cost check.
+
+Corrected intermediate reports `...115824724024Z.json` and
+`...115852379070Z.json` remain retained. Main's final reproduction adds explicit
+structural component-bound checks, pointwise-query budgets and exact
+reconciliation of local, storage, transform and geometric subcounts. All
+laws are now explicitly finite, nonnegative and normalized. No probability
+tolerance or circuit parameter was changed to make a check pass.
+
+The final conservative numeric payload reserve is **7,951,360 bytes**, below
+16 MiB; it deliberately includes oversized bounded scalar/container payload
+reserves and is not measured RSS. The run uses **2,264,064** geometric terms
+against a **3,686,400** preflight/five-million category cap, **24** FFT calls
+with **368,640** input entries, **275,688** dual-local terms including the
+wrong-phase control, and **18,068** dual phase/modular-power queries.
+Geometric sum/phase calls are subcounts of the same component loop, not
+three independent estimates of its runtime. Order/index discovery, precision
+and efficient sampler oracles are not provided by this diagnostic.
+
+## Final cross-check and scoped validation
+
+`out/earlier_phase_output_cross_reference_final.log` compares all four final
+reports directly: normalized output vectors, independent omission baselines,
+parity interleaving, cycle/dual geometric laws and the proved factor-two
+envelope. It checks complete finite laws, not Monte Carlo histograms or a few
+selected probabilities. Sampled-grid ratio extrema are not promoted to a
+general tighter rejection envelope.
+
+Core passed first in `out/earlier_phase_output_core.log`. The affected
+claims gate passes in `out/earlier_phase_output_claims_final.log`, including
+exact support-separation, dual-partition and balanced-factor regressions.
+Documentation is reindexed and checked in `out/earlier_phase_output_docs_final.log`.
+No shared production helper changed; this turn does not claim a fresh lab
+suite, full nine-suite run, numerical certificate or host-stability diagnosis.
+No manuscripts, abstracts, defaults, host settings, firmware or commits changed.
+
+Reproduce the new bounded experiments from research/:
+
+```bash
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_earlier_phase_output
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_earlier_phase_feedback
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_earlier_phase_qft
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_earlier_phase_dual
+```
+
+The skill materially shaped the outcome: a stronger same-output baseline
+reduced the apparent difficulty, and independent normalization/geometric
+checks rejected a misleading consensus. The positive result is a proved
+choice of representations with initial output validation, not a breakthrough
+in factoring or a demonstrated broad simulation advantage. TODO 39 remains
+OPEN for a costed sampler prototype and an untruncated comparison; the user's
+open-ended research goal remains active.
+
+## Sampler implementation and long-progression checkpoint
+
+The preceding open implementation items are now complete at bounded FLOAT
+scope. Main added EarlierPhaseProgressions to `lab/work_first.py`, sharing
+the existing work draw, conditional rejection and progression kernel. C79
+owns its schedule, choice-of-cover rule, counters and input/precision limits.
+No default sampler or manuscript was changed. Three lower-cost initial testers
+provided the independent experiments; main audited and reproduced them.
+
+Final main reports, all **4/4 PASS**:
+
+- Joint law: `out/earlier_phase_sampler_20260911T123806945928Z.json`,
+  log `out/earlier_phase_sampler_main_final.log`.
+- RNG/edges: `out/earlier_phase_sampler_edges_20260911T123729565062Z.json`,
+  log `out/earlier_phase_sampler_edges_main_final.log`.
+- Long rows: `out/earlier_phase_sampler_scaling_20260911T1234284124Z.json`,
+  log `out/earlier_phase_sampler_scaling_main_final.log`. The historical
+  scaling filename formatter omits seconds; use the exact path, not a guessed
+  reconstruction of its timestamp.
+
+The joint test retains the complete normalized work/output arrays for every
+v=0..7 in the frozen r60,b3,t8,s7 fixture. Auto-law maximum entry error versus
+literal-column FFT is **5.43e-19**. Explicit cycle/dual checks evaluate four
+selected outputs for EVERY work row, with errors below **3.80e-19**; they
+are not mislabeled complete explicit-cover laws. The exact v=0 folded-W0
+C78 baseline agrees within **5.43e-19**. Archived omission/dephasing vectors
+retain the earlier output-comparison provenance and are not supplied as free
+proposal samplers. Dropping coherent acceptance gives per-insertion joint TV
+between **.3737 and .4899**; the equal-mixture TV is **.287616**. Each law
+is normalized separately before interpreting TV.
+
+The **256** bounded seeded draws use **3,569** attempts, **59,584** coherent
+Fourier-component terms and **34,662** interval-marginal queries. Every draw
+keeps exactly one work selection. This is a path/counter check, not a histogram
+accuracy estimate. This particular verifier aborts on sample exhaustion and
+does not credit a failed call; the separate edge experiment captures failed
+calls explicitly. Its complete-law and baseline work are separately charged:
+the cover ledger records **321,144** row-local pair visits and **1,822,736**
+Fourier-component terms, with the folded baseline charged separately.
+
+### Actual RNG law and adversarial edges
+
+For r3,b1,Q8,s2,v1 with an early parity phase, an independent literal reference
+is phi_e=(-1)^e|e mod3>. Cycle rows have component counts (3,3,2), stride6,
+two fair interval bits and two gcd lifts. The experiment enumerates all
+**176** seed/component/reduced-output/lift combinations and executes the
+positive accept/reject branches. Their path weights, not sample frequencies,
+give accepted/rejected masses **.375/.625**. Restoring the original work
+marginal after conditional rejection matches the independent full joint law
+within **8.68e-19**. The actual scripted execution uses **332 sampler calls**,
+**333 attempts**, **159 failed calls**, **1,664 real draws** and **665 integer
+draws**. The extra attempt is a real partial-acceptance retry, not a second
+work draw. An explicit finite-cap path raises without replacement.
+
+The final edge verifier captures sampler counters even on exceptions,
+including queried-invalid phases. Noncallable phases and structural caps are
+tested with a matrix-copy trap. Zero rows, aliased cells and cancellation
+revival are independently checked. A genuine count>1 stride control first
+reconstructs the correct law (TV below **6.64e-16**), then substitutes stride3
+for stride6. Spurious collisions change the wrong state's norm to **.5**;
+after explicitly normalizing that DIFFERENT state, its TV is **.424228**.
+The report also retains the unnormalized half-L1 difference, without calling
+it a probability-law TV. The permanent lab regression separately checks the
+weighted actual transition and detects the work-marginal bias from restarting
+work after rejection.
+
+### Long rows: a real cover gap, not a general simulator comparison
+
+Only split s varies, in unit steps, under the frozen schedule t=s+1,v=s-1;
+H=K=2 and both phases/matrices remain fixed. The reference calls the existing
+literal column engine only on the union of nine support residue classes for
+work0,1,59. The proven offset cone excludes every omitted entry. It uses a
+Q-by-3 array, never Q-by-r. Both covers reconstruct amplitudes and work norms;
+complete selected conditional FFT laws and four geometric output queries
+are compared independently. Largest amplitude error is **2.49e-16**,
+conditional-law TV **1.87e-15**, and selected geometric probability error
+**6.60e-17**.
+
+| split s | largest tested cycle component count | largest tested dual count | longest tested dual progression |
+|---|---:|---:|---:|
+| 7 | 23 | 20 | 2 |
+| 8 | 40 | 20 | 3 |
+| 9 | 88 | 20 | 5 |
+| 10 | 170 | 20 | 9 |
+| 11 | 343 | 20 | 18 |
+| 12 | 680 | 20 | 35 |
+
+These are maxima over three selected work labels, not all-work maxima.
+Auto selects dual throughout. The independently proved all-row dual bound
+is the one stated in C79, not inferred from this table. The reference performs
+**2,427** column calls, **436,860** dense block-product terms and **18,597**
+pointwise modular powers. All helper rows, including folded/omission controls
+and sample rebuilds, charge **16,893** row-pair visits and **12,418** inclusive
+phase queries. The **192** actual auto samples use **3,367** attempts and
+**62,896** coherent-component terms. Fixed-r sequential simulation is ALSO
+width-linear: this experiment establishes a choice-of-cover advantage, not
+an end-to-end win over that strongest simple baseline. No timing comparison
+or whole-large-joint-law test was performed.
+
+### Verifier corrections retained, including misleading passes
+
+Main did not accept the initial unanimous checks as sufficient evidence:
+
+- Joint `...122053149462Z.json` failed from an output/work-axis reversal.
+  The following `...122112525970Z.json` passed but used concatenated laws
+  for a misleading TV; subsequent reports normalize the comparison per law
+  or as an explicitly equal mixture. `...122824506835Z.json` then rejected
+  an underestimated cumulative explicit-dual row budget. Both diagnostic
+  covers, selected public calls, setup and marginal queries are now charged.
+- Edge `...122006951089Z.json` expected arbitrary callable values to fail at
+  construction, contradicting the documented query-time contract. A later
+  `...122814529039Z.json` passed despite an extra row-norm divisor in its
+  wrong-stride control and incomplete failed-call accounting. Even
+  `...123339273177Z.json` computed totals before the final controls and called
+  a nonnormalized mass difference TV. Final main reports correct these
+  predicates, include zero-acceptance failures, and retain reference work.
+- Scaling `...1224744346Z.json` rejected an overestimated component-times-Q
+  expansion budget. `...1225185158Z.json` failed law/baseline checks; the
+  source audit separately identified inconsistent split/width meanings and
+  a reference phase inserted at the endpoint instead of one control earlier.
+  `...1225801610Z.json` attempted a sampled-work lookup in a cache containing
+  only three selected labels. Later passing agent reports still omitted
+  baseline/control row work; main added cumulative reservations and retained
+  actual per-call counters before the final reproduction.
+
+These filenames use their respective full experiment prefixes above. The
+failed/intermediate JSONs and logs remain in out/. Additional import/invocation
+failures are retained as logs, not invented as numeric reports. Neither the
+science fixture nor tolerance was retuned to turn a failure into a pass.
+
+Final aggregate numeric reserves are **13,427,896 / 280,832 / 4,698,624 bytes**
+for joint/edge/scaling, each below16MiB. They include bounded retained arrays,
+numeric tuples/lists and live temporaries; the joint reserve also accounts
+for parsed archived sources. These are not Python/RSS measurements, nor
+end-to-end precision costs. Caps precede the relevant calls/loops. Inclusive
+phase totals and early/late subcounts are not added as independent costs;
+geometric component counts likewise are not native FLOP totals.
+
+Core passed first in `out/earlier_sampler_core.log`. The affected lab suite
+passes with optional python-flint in `out/earlier_sampler_lab_final.log` and
+without it in `out/earlier_sampler_lab_no_backend_final.log` (optional checks
+explicitly skipped there). Claims pass in `out/earlier_sampler_claims_final.log`.
+The other six science suites were not rerun. Reindex/documentation validation
+is recorded in `out/earlier_sampler_docs_final.log`. The small runs do not
+resolve TODO34's host-instability issue.
+
+Reproduce the new bounded experiments from research/:
+
+```bash
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_earlier_phase_sampler
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_earlier_phase_sampler_edges
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_earlier_phase_sampler_scaling
+```
+
+The skill's actual-output, nonvacuous-control and strongest-baseline rules
+materially shaped this checkpoint. A follow-up independent read-only algebra
+audit checked C59's mass-weighted envelope for these components; TODO39 owns
+its frozen next pilot. It has not changed the implemented proposal. The
+current result is a restricted, costed float sampler plus a genuine long-row
+representation gap, not a generic breakthrough. The broader user goal remains
+active; no manuscripts, abstracts, host settings, firmware or commits changed.
+
+---
+
 # F10 — scope of the Walsh identity (exactly where it stops)
 
 `experiment_scope.py` Q1, Toffoli modexp N=5, 14 qubits:
@@ -335,12 +2389,12 @@ which isolates the algorithm from ancilla layout:
   323   5  144  24   16777216   16777216  1.00000      no
 ```
 
-Sharp dichotomy, and the reason is elementary: if r | 2ᵏ then aᵉ mod N depends
-only on the low k bits of e, so g is a function of k variables and its Walsh
-support is ≤ 2ᵏ — **constant in t**. If r has any odd factor, the periodicity is
-incommensurate with the GF(2)ᵗ Walsh basis and the spectrum is **maximally
-spread**. N=323 (r=144=16·9) shows the intermediate case: the factor 16 buys
-partial sparsity at small t, washed out by t=24.
+The robust statement is one-sided: if r | 2ᵏ then aᵉ mod N depends only on the
+low k bits of e, so g is a function of k variables and its Walsh support is ≤
+2ᵏ — **constant in t**. If r has an odd factor, no universal density conclusion
+follows for every selected bit, because the scalar bit function may have a
+proper minimal period (for example N=13, a=4, r=6, LSB sparsity 1). N=323
+(r=144=16·9) shows aliasing/period effects at small t, washed out by t=24.
 
 Two consequences:
 
@@ -352,7 +2406,8 @@ Two consequences:
 2. **The textbook demo is the degenerate case.** N=15, a=7 has r=4, a power of
    two — sparsity 4, constant forever. Every "we simulated Shor" result on N=15
    sits in the trivially-simulable corner. For cryptographic N, r is generically
-   not a power of two, so PPS is at the fully-dense worst case.
+   not a power of two, so dense circuit-level behaviour is common in the measured
+   family, but it is not forced for every selected output bit.
 
 ---
 
@@ -485,6 +2540,667 @@ Consequences:
 
 **Caveat:** Walsh is itself O(2ⁿ), so this predicts cost rather than beating it.
 Its value is as an *exact* cost model and an explanation, not a faster simulator.
+
+---
+
+# FA — Alphabet size is a useful structural parameter
+
+C73 owns the mathematical normal form, uniform support bound, input contract
+and word-specific refinement. Main implemented the input-only structural class
+and extended the shared support helper; lower-cost agents supplied initial
+set, complex-prefix and full-law checks. Main audited the code/predicates and
+reran them. TODO 32 remains open for the stronger-envelope integration and
+wider task-matched comparison; those are NOT completed experiments here.
+
+## Exact support audit
+
+Main's final `out/fixed_alphabet_support_20260911T081239115867Z.json` passes
+8/8 checks. It freezes M=1,000,003 and alphabet (0,1,101), cycles its labels,
+and varies k by one from 0 through 32. At every reverse intermediate prefix
+the direct reached set lies in the independently enumerated coefficient
+cover, and production's tighter L1 count agrees with an independent integer
+formula. Exhaustive selected histories are used only at k<=8.
+
+Across the four tested target sectors, peak support at k=8,16,32 is 39,113,415;
+the respective global production bounds are 256,1090,4226. Those peaks are
+NOT maximized over all M sectors. Odd/even moduli, coincident labels, fixed
+points and noninvertible differences include genuine three-label cases.
+Growing alphabets give supports 3^m for m=1,...,8 in the frozen pair-word
+control, refuting both an alphabet-independent linear and quadratic bound.
+This is a counterexample about this support representation, not classical
+simulation hardness.
+
+The original support budget uses 1,922,770 of 2,000,000 declared candidate/
+update operations. A separately frozen word probe uses 66,877 of 100,000.
+Neither counter is a CPU-instruction or bit-operation count. Integer-set
+and cumulative-prefix guards precede construction; no large-k path expansion
+or modulus-sized scan is needed by these final tests.
+
+## Genuine nine-insertion amplitudes and laws
+
+Main's `out/fixed_alphabet_prefixes_20260911T081039922607Z.json` passes 6/6;
+the crash-traced repeat `out/fixed_alphabet_prefixes_20260911T081154846518Z.json`
+also passes. Fixtures have t=8, k=9, cyclic labels (0,1,2), pi/4 coherent
+rotations, W0 and alternating noncommuting work blocks at all insertions.
+They use r=6,b=2 and r=9,b=3, so the tiny full-r baseline is inexpensive.
+Small M allows full reached support; these rows test correctness beyond the
+old cap, not a storage or timing advantage over dense simulation.
+
+Each fixture checks 10,743 distinct canonical complex prefixes against the
+EXISTING independent full-r contraction. High unused exponent bits do not
+affect a queried prefix; 87 additional noncanonical requests per fixture
+check this aliasing explicitly, with zero observed discrepancy. This is not
+enumeration of every redundant API spelling. Largest complex error is
+2.17e-16 (binary) and 1.31e-16 (three-state).
+
+The existing transition enumerator checks the entire joint sector/output law,
+not a sampled histogram. TV against the independently calculated full-r law
+is 6.77e-16 or smaller; all masses agree with one within 4.5e-16. Its test-only
+canonical cache retains 8,699 vectors per fixture, not a production lookup
+table. Separately returned UNMEMOIZED samples use 37 and 35 prefix queries
+for binary and three-state fixtures, with zero rejection/history calls.
+Independent reached-set bookkeeping verifies all prefix and uncached sample
+operation counters. Legacy comparison uses the actual history sampler/law,
+not two copies of the merged implementation.
+
+The full three-state law changes by maximum cell difference .03475 when
+intermediate/end work mixers are removed. Controls on the bounded t=4 fixture
+give TV .06878 for wrong internal QFT phase and .09384 for wrong reflection
+boundary. Default reference-width, excessive opt-in width and legacy k>8
+calls are rejected. No claim of finite-TV certification follows from these
+floating-point agreement diagnostics.
+
+The reference helpers retain their default t<=4 guard and only accept t<=8
+through an explicit keyword, with preallocation and work guards. Conservative
+matrix-entry-touch estimates for the wider binary/three-state references are
+94,379,616 and 212,362,884, under the declared 2^28 cap. Transition bookkeeping
+has a separate bound; it does not include the oracle's contraction work.
+The prefix cache allowance is 11,000,832 bytes, with ndarray payload 687,552
+or 1,031,328 bytes. The law cache allowance is 8,907,776 bytes; simultaneous
+frontiers and dense references are charged separately in the raw report.
+These declared allowances are not native RSS measurements. Test-only caching
+and dense references are never reported as production table-free storage.
+
+## Stronger baseline found before wider timing
+
+C73's E/O offset recurrence tracks the PARTICULAR chronological word. The
+separated-label set probe uses M=2^40-1 and cyclic labels
+(0,679535556937,314159265359). Its global envelope at k=4,8,12,16 is
+14,48,104,182, versus the generic L1 bounds 16,256,626,1090. Main added actual
+reached-set checks at the predicted disjointness witness, including an even
+modulus, instead of accepting a witness-exists flag alone. All 19 product-
+condition rows attain their envelopes at a checked sector.
+
+The small control M=101, word (0,1,2) cycled through k=8, has ten even and
+ten odd offsets. Sector zero reaches only 11 labels, while sector five reaches
+20. Thus using the initial-sector count as a global rejection envelope is
+unsafe. The additional even-M=1000 check also attains the larger count.
+
+The connection is to additive difference sets: they determine where the two
+affine orientation classes collide. The proof belongs in C73. The numerical
+pattern is independently checked, but no production sampler uses this tighter
+envelope yet. Following the skill's strongest-baseline rule, wider timing is
+deferred until this inexpensive improvement can be included and charged.
+
+## Audit trail and limits
+
+- The original support report `out/fixed_alphabet_support_20260911T075625075106Z.json`
+  passed while an edge check scanned every sector for fixed points outside its
+  reported budget. Main caught the hidden O(M) work. It was replaced by solving
+  the two-times-sector congruence directly, with at most two roots. Subsequent
+  reports preserve each guard/bound refinement; no earlier report was deleted.
+- The first prefix implementation had no memoizer in its expensive transition
+  loop, a late cache guard, incomplete work accounting, and a legacy comparison
+  between identical reference inputs. These were corrected before the agent's
+  passing report `out/fixed_alphabet_prefixes_20260911T080631320535Z.json`.
+  Main then added exact counter predicates, unused-bit alias checks, real legacy
+  history comparison, uncached sample checks and stronger resource allowances.
+- `out/fixed_alphabet_prefixes_main.log` records a main run that exited 139
+  without a traceback or JSON report. Python 3.12.10 and NumPy 2.4.6 were
+  independently confirmed. The next two runs passed, the latter with
+  PYTHONFAULTHANDLER=1; the crash cause remains UNRESOLVED. This is not evidence
+  that the documented Python 3.14 issue explains it. The agent's earlier empty
+  aborted log is retained separately. The agent reports manually stopping that
+  uncached run, after which its wrapper also reported 139 with a zero-byte log.
+  That termination does not distinguish a crash from signal handling and is
+  not an independently established second spontaneous failure.
+- `out/fixed_alphabet_claims.log` preserves a missing-math-import NameError in
+  main's new regression, corrected in subsequent runs. It was a test error,
+  not a refuted scientific prediction.
+
+The legacy eight-insertion constructor still rejects large history inputs.
+Structural tests include snapshot ownership, both merged samplers, memory
+rejection, endpoint/invalid requests and 64 identity rotations at the width
+cap. Only the nine-insertion fixtures above have new full-law coverage; the
+64-insertion identity check is NOT a generic deep-circuit validation.
+
+Validation logs: `out/fixed_alphabet_core.log` (ran first),
+`out/fixed_alphabet_lab.log`, `out/fixed_alphabet_lab_no_flint.log`,
+`out/fixed_alphabet_claims_final.log`, `out/fixed_alphabet_claims_word.log`,
+and `out/fixed_alphabet_legacy_law.log`. The backend-absent lab run explicitly
+skips verified-arithmetic checks. The other six science suites were NOT rerun.
+Documentation checks are recorded in `out/fixed_alphabet_docs.log`.
+
+Reproduce the bounded experiments from research/:
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -u -m experiments.experiment_fixed_alphabet_support
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -u -m experiments.experiment_fixed_alphabet_prefixes
+```
+
+Main read Evetts's integer-coordinate word construction in Section 2.1, not
+the proofs of all growth-series theorems. C73 records that prior-art scope;
+the mathematics here is not positioned as new group theory. No paper,
+abstract workshop or sampler default was changed. The open-ended research
+goal remains active; TODO 32 owns the remaining experiment.
+
+---
+
+# FB — Uniform prefix is not a license to forget the conditional state
+
+C77 owns the normalized conditional-boundary formula. TODO 37 froze the
+comparison before measurement. This note owns its discovery and evidence.
+The fixture is unchanged from UP; only the additive phase k=0,1 changes in
+this experiment. No angles, insertion, width, base or modulus were retuned.
+
+The prior product-of-marginals control discarded ordinary QFT feedback as
+well as harder coherences. Main derived a stronger comparator: condition on
+the uniform two-bit prefix, retain the product low-input feedback phase, and
+dephase only the high INPUT histories. In each diagonal history term the late
+work unitary is common and cancels under the work trace. The comparator then
+reduces to the four-control periodic-sector background, irrespective of the
+late physical phase. This is an approximation, not a uniformity corollary.
+
+A lower-cost independent audit checked the bit convention, normalization and
+work-unitary cancellation before the tests. The displayed conditional state
+is normalized only because the sharper C77 certificate proves uniform prefix;
+an arbitrary circuit would need its actual prefix probability divided out.
+
+## Two independent numerical routes
+
+Main's final reports are:
+
+- `out/conditional_feedback_boundary_20260911T104152447926Z.json`, 5/5 PASS;
+- `out/conditional_feedback_sectors_20260911T104127516005Z.json`, 3/3 PASS.
+
+The boundary route uses the literal frozen work formula and existing
+Circuit/statevec inverse QFT, both for the complete six-bit state and the
+exact four-bit conditioned boundary. This is QFT-only validation of supplied
+states, not a compiled physical arithmetic circuit. The second route uses
+existing full-r branch matrices and sequential_path. It independently
+reproduces the comparator by averaging existing three-state sector shifts.
+
+The cross-reference record `out/conditional_feedback_cross_reference.log`
+compares all complete target/omission probabilities and every candidate
+conditional probability: agreement is within 1.3e-16 per entry. Exact
+conditioned-boundary laws agree with complete-QFT conditionals within 5.1e-16
+TV. Prefix masses are uniform at floating precision. Full-law comparisons
+also equal the average conditional TV, checking y=z+4w interleaving.
+
+The feedback-aware candidate's full-law TV is **.01252648884**, versus
+**.03459335156** for omission of G_1. Its four conditional TVs range from
+.0121187 to .0127832. It is better than the previous UP independence
+comparison, but misses BOTH frozen requested tolerances 1e-3 and 1e-2.
+These were open classifications, not predicates rewritten after failure.
+Feedback explains some of the discrepancy, not all surviving interference.
+
+The normalized synthetic flat low-input state exercises the SAME Q=64
+feedback denominator at z=1. Its measured finite Fourier law matches the
+independent geometric formula; omitting feedback gives a delta at w=0 and
+TV .1887792. The sector route also tests the opposite sign, whose TV from
+the correct law is .0674581. These are genuine convention/implementation
+controls, not claims about physical circuit complexity.
+
+## Verifier corrections and resources
+
+The initial sector run failed JSON serialization of a NumPy boolean after
+its checks. The raw traceback remains in
+`out/conditional_feedback_sectors_initial.log`; it records an agent run on
+the default Python 3.14 environment. Main's authoritative runs use explicit
+system Python 3.12.3 and NumPy 2.4.6, as below. An initial (z,w)/contiguous-y
+reshape mistake was also corrected; intermediate reports remain retained.
+
+Main rejected the first synthetic control because it evaluated an independent
+integer-shift formula without exercising the candidate's feedback code.
+The replacement uses phase_pair and sequential_path, with the same fractional
+feedback as the physical comparator. The first corrected-control report
+`out/conditional_feedback_sectors_20260911T103554342088Z.json` retains its
+failed control predicate. Subsequent checks compare the actual geometric laws,
+not an inappropriate peak-location assumption. Main further instrumented
+geometric terms, checked setup-count equality and required two-sided norms.
+Joint arrays now explicitly distinguish (z,w) tables from actual y ordering.
+
+The boundary route preserves initial failures in
+`out/conditional_feedback_boundary_20260911T103342147537Z.json` (orbit vector
+versus padded work dimension) and
+`out/conditional_feedback_boundary_20260911T103400470467Z.json` (missing
+1/sqrt(Q) in the full reference). Its first passing report is
+`out/conditional_feedback_boundary_20260911T103420067157Z.json`.
+Main then strengthened finite-TV/key-presence predicates into law, interleaving
+and actual-cost checks, increased the underestimated statevec buffer reserve,
+required the omitted synthetic delta, and removed a wrong-shaped zero-prefix
+fallback. Intermediate audit failures are also retained in the output folder.
+Specifically, report `out/conditional_feedback_boundary_20260911T104021936177Z.json`
+exposes a suffix-shape expectation of four instead of sixteen, a missing 1/H
+in the interleaving verifier and an overcounted feedback-phase counter. Report
+`out/conditional_feedback_boundary_20260911T104048504516Z.json` retains the
+remaining wrong-shape audit after the other two repairs. The final predicates
+check the corrected observable dimensions, not relaxed tolerances.
+No scientific input or target accuracy changed during these verifier repairs.
+
+The final sector route charges **1,520** forced instrument calls and
+**221,322,432** named width*dimension^3 units. It explicitly enumerates all
+twenty sectors for the tiny law; a sampled sector is not confused with a
+free complete mixture. Setup separately records full-r constructors, initial
+matrix-vector work, sector shifts, phase-pair entries, omission products and
+768 independent geometric terms. Its conservative aggregate numeric preflight
+is **6,917,024 bytes**, under 16 MiB. Calls and work are capped before execution.
+
+The boundary route charges **128** work columns, **921,600** dense matvec
+terms, **16** QFT calls and **1,425,408** gate-entry updates. Conditional
+transforms, feedback phases, shifts and setup are separately instrumented
+and reconciled. The numeric preflight is **1,771,520 bytes**, including
+statevec's copied input, rotation/Pauli temporaries and retained boundaries.
+These are named arithmetic/entry counts and numeric allocation reserves,
+not native FLOPs, measured peak RSS or an end-to-end timing benchmark.
+
+## Validation and next connection
+
+Core passed before this science work at the C77 checkpoint. The affected
+claims gate passes in `out/work_first_claims.log`, including C77 and the
+neighboring C78 follow-up. Lab/backend checks from UP remain the scoped
+production-helper validation; no shared production helper changed in FB.
+The other six science suites were not rerun. Documentation is reindexed and
+checked in `out/work_first_docs.log` at the combined handoff. No host setting,
+firmware, manuscript, abstract, default or commit changed.
+
+Reproduce from research/:
+
+```bash
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_conditional_feedback_boundary
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_conditional_feedback_sectors
+```
+
+The skill's strongest-baseline and actual-output rules motivated the feedback
+comparison and exposed its remaining error. While analyzing those coherences,
+main noticed that WORK-first conditioning can leave short exponent rows or
+few arithmetic progressions. C78/WF own that distinct positive result;
+TODO 38 owns its still-unfinished scalable implementation/comparison.
+
+---
+
+# FM — Forgetting one side of the contraction is not forgetting both
+
+C66 owns the mathematical approximation contract, its proof, the finite
+arithmetic budget and the conditional mixing consequence. This note records
+the experiment and its limits. No production sampler or manuscript changed.
+
+The qsim-research skill required an observable odd-block fixture, full output
+laws, a stronger binary null and false shortcuts that genuinely fail. That
+kept a fixed-point observation from being mistaken for decoupling. Lower-cost
+agents audited the algebra and tested channel products; main implemented the
+full-law diagnostic, repaired verifier issues, and reran the evidence.
+
+## Complete-law experiment
+
+`experiment_forward_memory.py` fixes §OB's r9,b3,t4 input and varies only
+epsilon in rho_tilde_i=(1-epsilon)rho_i+epsilon I/3. It checks all four route
+histories and three initial sectors at P192 and P256. There are 96 complete
+laws across the four epsilon values, not sampled histograms. Their finite
+CDF probabilities are exact Fractions, with p=L=80. The tiny experiment
+retains its whole diagnostic tree; it does not claim to save memory itself.
+
+Every branch comes from the existing verified finite-work builder. Every
+backward child comes from the shared QFT branch helper. At each depth, summing
+all child effects contains the identity, including feedback phases. Forward
+states remain normalized PSD by construction, not by clipping eigenvalues.
+The nonzero-epsilon rows separately check aggregate effect-weighted mass
+errors against outward Frobenius-to-trace bounds. Ideal conditional output
+intervals come from the distinct shared prefix contraction; bijective routes
+allow multiplying a joint final-sector cell by the number of sectors.
+
+The complete finite laws normalize exactly and obey the state-plus-numerical
+budget. The independent full-r floating reference agrees within about
+4.2e-17; this diagnostic is not the interval certificate. At epsilon=1/16,
+maximum outward output TV is about 0.00836 against a maximum bound about
+0.166. At epsilon=0, the integer kernels match the production cursor with
+matched p,L, and maximum outward TV is about 2.5e-24. No precision/gap scaling
+claim follows from these two tested precisions.
+
+Controls matter here:
+
+- Resetting E on the original pure-input fixture changes its full law by
+  outward TV at least about 0.562. Both compared chains normalize; this is
+  not a mass-loss artifact or a different-depth comparison.
+- A separately specified mixed initial I/3 is exactly preserved by its
+  unital work channels. The resulting t=2 law nevertheless has correlations:
+  the analytic reference and finite calculation agree exactly, while resetting
+  E gives TV 1/8. This mixed-input diagnostic tests C56's general identity,
+  not a new initial-state option in the production exact-input API.
+- A five-dimensional diagonal POVM demonstrates why unrelated per-prefix
+  states cannot use one maximum state-error budget. Its exact arithmetic is
+  regressed in `test_claims.py`. This is explicitly not claimed to be a
+  realization of our three-state QFT circuit.
+- The binary late-gate null gives zero change under the same PSD mixture,
+  confirming that it would hide sensitivity in the main experiment.
+
+Authoritative report:
+`out/forward_memory_20260911T053532681815Z.json`, 7/7 checks;
+log `out/forward_memory_audited.log`.
+
+## Initial mixing probe and its scope
+
+The separate repeated-gate fixture uses r9,b3, no routes and the same embedded
+Rx(pi/7) after each of sixteen controls. Only the channel-product length
+varies. All three initial sectors are checked. The SVD is explicitly an
+uncertified diagnostic of the eight-dimensional traceless Hermitian channel
+representation, not an interval trace-norm certificate.
+
+Each one-step Hilbert–Schmidt norm is numerically one; the length-sixteen
+products have norms about 0.599 in sector zero and 0.595 in the other sectors.
+The no-background control retains an explicit nonzero conserved mode and
+norm one. The implication from no single-step contraction to no product
+contraction fails. This is a familiar channel-product mechanism, not a newly
+discovered general principle; C66 gives the primary-source positioning.
+
+Main reused `_density_forward_step`, added branch-unitarity checks, rebuilt
+branches at P192, corrected a minimum-versus-maximum eigenvalue check in the
+null, preflighted aggregate live storage and retained the harness schema.
+Authoritative report: `out/forward_mixing_probe_20260911T053605193970Z.json`,
+3/3 checks; log `out/forward_mixing_probe_audited.log`.
+
+## A certified finite-order rate, with a poor worst-case warm-up
+
+`experiment_forward_mixing_certificate.py` evaluates an exact orthonormal
+traceless Hermitian basis with Acb enclosures. For each of three r9 sectors
+and six starting offsets, it forms a twelve-channel product. All eighteen
+outward Frobenius bounds are below 4/5 at both P192 and P256; the reported
+bounds range from about 0.7643 to 0.7659. This is an induced
+Hilbert–Schmidt upper bound, NOT the trace-norm coefficient. The phase
+identity and periodicity turn the finite certificate into a repeated-block
+rate for that supplied r9 family; they do not extend the numerical constant
+to untested sector phases.
+
+Main audited the complete code, added invariant-subspace predicates and
+zero-containment of the preserved mode, and corrected the phase identity's
+denominator to M rather than b (equal only on this fixture). No-background
+spectral projector differences supply an explicit conserved nonzero mode.
+All branch-unitarity and basis checks pass. The conserved null mode refutes
+inferring contraction merely from a maximally mixed fixed point.
+
+Authoritative report:
+`out/forward_mixing_certificate_20260911T054348729950Z.json`, 4/4 checks;
+log `out/forward_mixing_certificate_audited.log`. The initial successful agent
+report is `out/forward_mixing_certificate_20260911T054211166701Z.json`.
+
+The sufficient bound is not yet practical. Using 3/2 as a rational upper
+bound on the pure-state factor sqrt(2), the rate 4/5 per twelve controls
+gives sufficient warm-ups of 624 and 996 checkpoints for approximation error
+targets 1e-3 and 1e-6 respectively. These are conservative sufficient counts,
+not observed mixing times or lower bounds. Both exceed the production API's
+width limit. There is no measured memory saving, and raising that limit just
+to display one is not the next priority.
+
+## Why the next step is no longer an exceptional-sector search
+
+While auditing the bounded product probe, main noticed that scalar arithmetic
+phases cancel in FORWARD conjugation. Its schedule has period two at every
+sector phase, even when raw branch matrices have a longer period. Main then
+derived a norm-equality/eigendirection argument excluding a preserved
+traceless Hermitian mode for either two-step product. A lower-cost agent
+independently audited it. C66 owns the resulting qualitative uniform-gap
+proof. Compactness gives a gap for every sector, not its numerical size.
+
+This is the strongest structural outcome of this investigation, but it is
+still an application of established channel-contraction geometry. It concerns
+one fixed mixer, not arbitrary perturbations or a factoring algorithm.
+The exact-input production sampler and its width limit remain unchanged.
+
+## Preserved failures and audit corrections
+
+The first main full-law run failed in its new Frobenius bound, before accepting
+any laws: squaring an interval containing zero and taking its square root
+could straddle the domain. The repair uses nonnegative outward upper endpoints
+before the root, preserving an upper bound. The failed report remains at
+`out/forward_memory_20260911T053147246115Z.json` and log at
+`out/forward_memory_initial.log`. The intermediate six-check successful report
+`out/forward_memory_20260911T053227154844Z.json` precedes the additional binary
+null and aggregate-error predicates; it is not the final coverage record.
+
+The initial lower-cost mixing probe had TWO scientific predicate failures
+before a JSON serialization failure, not only a reporting problem. It
+incorrectly demanded real entries in Hermitian matrices, which may have
+imaginary off-diagonals. Correct tests check Hermiticity and real coefficients
+in a Hermitian basis. NumPy boolean serialization was also fixed. The initial
+log is `out/forward_mixing_probe_test_20260911T053119Z.log`; the agent's repaired
+report is `out/forward_mixing_probe_20260911T053201074130Z.json`. Its repaired
+log was accidentally placed outside `out/`, at
+`/home/djneko/Workspace/qsim-test/20260911T053200Z.log`; it is left untouched.
+
+The algebra auditor initially omitted the QFT feedback phase in a proposed
+two-control reset example. Main corrected it before implementation: the full
+law is the four-entry one in C66, not two identical conditional pairs. The
+independently checked complete-law test uses the corrected feedback phases.
+
+The first certificate attempts had harness/API failures, retained as
+`out/forward_mixing_certificate_failure_20260911T053745712825Z.json`,
+`out/forward_mixing_certificate_failure_20260911T053755595992Z.json`,
+`out/forward_mixing_certificate_failure_20260911T053804355324Z.json`, and
+`out/forward_mixing_certificate_failure_20260911T054103623359Z.json`.
+They respectively used a complex value as a real endpoint, missed a helper
+argument, passed a branch pair where the all-branch audit expected a list,
+and called an unsupported inverse method. Main also required shared density
+updates, an aggregate allocation allowance and preservation of complete
+per-window evidence in the report. No failed contraction prediction was
+hidden by changing its window length or threshold.
+
+## Validation and remaining scope
+
+Core passed before science (`out/forward_memory_core.log`). Affected lab and
+claims suites pass (`out/forward_memory_lab.log`,
+`out/forward_memory_claims.log`), with the optional verified backend present.
+The other six science suites were not rerun. No production helper, either
+paper or either abstract workshop was changed; no commit was made.
+The documentation gate is `out/forward_memory_docs.log`; `git diff --check`
+is clean. Enclosure and row-storage allowances are conservative preflight
+counts, not measured native memory or RSS.
+
+Reproduce any of the experiments with this environment:
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' --with 'python-flint==0.9.0' python -m experiments.experiment_forward_memory
+```
+
+The current next question belongs only in TODO 27. A law bound is useful
+progress, not a simulation breakthrough: current APIs still store their full
+forward history, and general numerical bit costs remain in TODO 24.
+
+---
+
+# FW — Certification survives; the benchmark needs a stronger baseline
+
+C64 owns the unnormalized-mass error argument and verified forward/backward
+implementation. C65 owns the collective late-work invariance and stronger
+binary scalar proposal. Neither result establishes general simulation hardness,
+a new sampling principle, or a factoring breakthrough.
+
+The qsim-research skill materially changed this investigation: checking the
+strongest simple baseline exposed that the fixed binary benchmark's late
+background rotations are invisible to its requested output. Their presence
+still exercises the numerical implementation, but cannot demonstrate persistent
+observable fine-work mixing. We retained that fixture and added an observable
+initial rotation instead of treating a successful certification as the end of
+the investigation. The established finite-work identity is reused; no second
+generic propagator was written.
+
+## Implementation and evidence
+
+Three lower-cost agents supplied an exact-rational tree test, complete-law
+verifiers and a read-only proof/code audit. Main implemented and audited the
+verified density/effect and scalar helpers, corrected verifier weaknesses,
+and reran the affected checks. All code remains uncommitted. Both new proposal
+methods are opt-in in `VerifiedRejectionSampler`; the default prefix component
+and the uncertified floating sampler retain their contracts.
+
+The mass-tree experiment fixes depth 5 and finite-bit resolution 12, varying
+only requested weight bits through 0..12. Exact Fractions cover tiny masses,
+genuine zero internal prefixes and uniform fallbacks. Its rare deterministic
+node has local conditional TV 1/2 but tiny true-weighted error; a separate
+untracked-rescaling control violates the claimed absolute-mass budget.
+
+The component experiment enumerates every conditional and joint law for
+r=10, b=2, t=4, all four route histories and five initial sectors, at requested
+TV 1e-3 and 1e-6. It tests both the original fixture and the same fixture with
+W0=Rx(pi/4), using both verified implementations. Every actual finite-bit law
+normalizes exactly. Outward ball bounds against the ideal component law obey
+the respective plans. Independent full-r complex128 calculations agree with
+ideal midpoints within 5.6e-17; those are independent numerical diagnostics,
+not interval certificates. Forced paths also exercise exact-zero fallbacks;
+their count is not a claim that those prefixes occur in actual ideal samples.
+
+The full-r late-background experiment finds a joint-output difference at
+roundoff when removing W1 and W3 together. In contrast, adding W0 changes
+that joint law by TV about 0.2067. Keeping the fine work-basis label reveals a
+maximum joint-cell difference about 0.02151 under removal of the late gates.
+These controls distinguish the specified traced output from the full state.
+
+End-to-end rejection tests enumerate the complete accepted laws for both
+fixtures and requested accuracies with both new component methods. All eight
+rows normalize exactly and satisfy the proposal, success and final-law plans.
+At target 1e-6, their outward accepted-law TV upper bounds are between
+1.777e-8 and 1.959e-8. The acceptance computation still includes all coherent
+histories; using scalar component proposals does not replace interference by
+an incoherent mixture.
+
+A valid deliberately loosened backward effect forces refinement after a bit
+has already been selected. Rebuilding at higher precision and replaying that
+bit reproduces the fresh high-precision weights exactly. Resetting the effect
+instead gives wrong UNNORMALIZED weights. In this binary scalar-tail family,
+resetting may leave conditional ratios unchanged; the control establishes
+violation of the mass-oracle promise, not necessarily a changed conditional
+ratio on this particular fixture.
+
+Authoritative main-reviewed reports and logs:
+
+| Experiment | Checks | Report | Log |
+|---|---:|---|---|
+| `experiment_prefix_mass_budget` | 3/3 | `out/prefix_mass_budget_20260911T044405797995Z.json` | `out/prefix_mass_budget_audited.log` |
+| `experiment_verified_finite_work` | 3/3 | `out/verified_finite_work_20260911T045224738535Z.json` | `out/verified_finite_work_audited.log` |
+| `experiment_late_backgrounds` | 3/3 | `out/late_backgrounds_20260911T045224840527Z.json` | `out/late_backgrounds_audited.log` |
+| `experiment_finite_work_comparison` | 12/12 | `out/finite_work_comparison_20260911T045058422401Z.json` | `out/finite_work_comparison.log` |
+| `experiment_odd_block_tail` | 4/4 | `out/odd_block_tail_20260911T050316685319Z.json` | `out/odd_block_tail_audited.log` |
+
+These reports store complete tiny-law evidence, exact bounds, resource
+categories, precision/refinement counters and controls, not just histograms.
+
+## Initial odd-block boundary test
+
+After the binary comparison, a lower-cost agent tested a fixed M=3,t=4
+coherent fixture with W1=embedded Rx(pi/7), W3=embedded Rz(pi/5), and
+reflections K2(q=0,pi/5), K3(q=1,pi/5). Within each fixture only the joint
+removal of W1/W3 changes. The paired b=2,r=6 and b=3,r=9 cases also change
+the period when changing block size: this is a boundary comparison, not a
+one-parameter scaling law.
+
+For b=2 the complete joint law stays unchanged to roundoff. For b=3 the
+removal changes it by TV about 0.05095, with maximum cell difference about
+0.00801. Existing route contractions agree with independent full-r products
+within 1.39e-16; all laws normalize. A final-only work rotation is invisible
+in both cases, as required by the trace. These are complex128 diagnostics,
+not a verified odd-block sampler. C56 already has visible odd-block examples;
+this probe supplies a coherent-route fixture beyond C65's scalar tail, not
+an independent claim of novelty or universal odd-block visibility.
+
+Main read and reran the experiment, removed a vacuous nonnegative-error clause
+from the binary predicate, separated the odd-block hypothesis into its actual
+counterexample check, corrected the distinction between production tables and
+allocated diagnostic full-r matrices, and used the standard harness report.
+The original agent report
+`out/odd_block_tail_20260911T050055095625Z.json` is retained. TODO 25 owns the
+remaining exact-input extension and same-accuracy comparison.
+
+## Matched timing and its limits
+
+The comparison fixes supplied r=2^61-2, b=2, t=63 and target TV 1e-6. It
+rotates the ordering of three certified rejection implementations: the C63
+PREFIX-COMPONENT baseline, the verified finite-work proposal, and the scalar
+proposal. Median whole-construction-and-sampling times are respectively about
+0.1440, 0.06286 and 0.05117 seconds. The scalar implementation is about 2.81x
+faster than that particular prefix-component rejection baseline, not than all
+classical simulators or the whole-coherent C61 sampler.
+
+Only three seeded random traces are used, each repeated twice; there are not
+six independent rejection traces. The baseline's attempt counts are 3,2,4;
+the two new methods' counts are 13,8,2. Different kernels consume different
+random words, so equal seeds do not imply equal sampled attempts. An observed
+attempt count exceeding an expected-count bound does not falsify that bound.
+All rejected attempts and refinements are charged. An earlier single finite-
+work smoke timing was already known when this timing hypothesis was declared;
+the experiment header discloses it, and no timing order was predicted.
+
+This is a bounded implementation comparison on the now-simplified fixture.
+Counts of retained matrices/scalars are not peak process memory, nor are
+linear-depth arithmetic counts backend bit-runtime theorems. No orbit,
+output-probability or random-word table is allocated by these samplers. The
+optional backend's uniform primitive-error constant remains unproved.
+
+## Preserved verifier corrections
+
+1. The first tree control reported large relative error in one tiny mass,
+   which did not itself establish large CONDITIONAL-law error. Main replaced
+   it with the rare deterministic node described above, and added an actual
+   zero internal prefix. The earlier report
+   `out/prefix_mass_budget_20260911T044138447156Z.json` is retained.
+2. The tree preflight initially charged an exponentially enumerated random-
+   word space as though it were a retained array. Main replaced that fictitious
+   allocation with a conservative allowance for the actually retained entries;
+   it is still not a measured RSS bound.
+3. The initial late-background report labeled squared scaled coordinates as
+   actual joint fine-work probabilities. `direct_prefix` returns a sqrt(M)-
+   scaled vector, so the probability difference requires division by M. The
+   corrected report labels both quantities. The earlier
+   `out/late_backgrounds_20260911T044808775803Z.json` remains available.
+4. A lower-only normalization check was replaced with an absolute deviation
+   check for both distributions. Main also converted final successful reports
+   to the standard harness schema. Earlier component reports
+   `out/verified_finite_work_20260911T044538130343Z.json` and
+   `out/verified_finite_work_20260911T045010973947Z.json`, and the corrected
+   agent late-background report
+   `out/late_backgrounds_20260911T045033866463Z.json`, are not overwritten.
+5. The read-only auditor initially suspected extracting `arb.rad()` could
+   round an uncertain radius inward. That was NOT a certification bug:
+   the backend documents `rad()` as exact, and `binary_fraction` rejects an
+   uncertain Arb value. The auditor corrected the claim after checking the
+   contract and examples. Explicit `.upper()` is retained for consistency,
+   not described as repair of a real containment failure.
+
+## Validation and reproduction
+
+Fresh core passed before scientific changes: `out/finite_work_core.log`.
+Affected suites pass in `out/finite_work_test_lab.log` and
+`out/finite_work_test_claims.log`. The lab suite also passes without the
+optional backend, explicitly skipping verified arithmetic rather than claiming
+it ran: `out/finite_work_no_flint_lab.log`. The other six science suites were
+not rerun for these helper changes.
+
+Existing full-law regressions also pass:
+`out/finite_work_verified_sampling.log`,
+`out/finite_work_coherent_sampling.log`, and
+`out/finite_work_rejection_regression.log`. Shared branch construction and
+exact-input trigonometric helpers preserve their prior mathematics. Run the
+new experiments from research/ with, for example:
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' --with 'python-flint==0.9.0' python -m experiments.experiment_finite_work_comparison
+```
+
+The other experiment names in the table use the same invocation. The backend
+is an optional environment dependency, not a new mandatory project dependency.
+The documentation gate is recorded in `out/finite_work_docs.log`. Neither
+manuscript nor either abstract workshop was edited in this follow-up.
+TODO 24 owns the deferred backend-bit-complexity boundary; TODO 25 owns the
+next discriminating research question. Larger binary size records would not
+resolve the benchmark limitation identified here.
 
 ---
 
@@ -755,6 +3471,216 @@ LAB_GPU=1 uv run python -m experiments.<name>     # that is the whole interface
 
 ---
 
+# GS — Additive characters test the representation, not just gate complexity
+
+C76 owns the physical rotation identity, exact prime-field nonzero proof,
+one-initial-sector truncation bound and their scope. This note records the
+discovery and finite evidence. The prime-field Gauss magnitudes are known
+mathematics, not a numerical discovery or a new phase-estimation algorithm.
+Main derived the subgroup and cyclotomic arguments; lower-cost agents supplied
+initial kernel/output tests and independent proof audits. Main strengthened
+the verifier and reran all three experiments using existing Circuit/statevec
+and sequential_path. No shared production helper or manuscript changed.
+
+## Frozen physical and algebraic checks
+
+The elementary kernel report is
+`out/gauss_kernels_20260911T093101284276Z.json` (4/4 PASS). It checks the
+previously frozen primes/bases (7,3), (13,2), (17,3), zero/nonzero phases,
+and every complex column of the binary phase gate, including its global
+phase. Physical compositions G_1 G_-1 and G_1 squared agree with identity
+and G_2 respectively. Removing the kernel phases fails the inverse identity
+with error .952855. Simple coefficient magnitudes are not classical transition
+probabilities for a coherent circuit. The separately projected N13,b3 subgroup
+matrix agrees with the direct formula; the full-orbit flat-magnitude law was
+not silently applied to a subgroup.
+
+All 1,496 direct summands reconcile with the preflight. The physical column
+checks charge 19,200 gate-entry updates, distinct from gate-column applications.
+The simultaneous numerical payload bound is 409,600 bytes under 16 MiB.
+These counters are neither native FLOPs nor bit complexity nor total RSS;
+the tiny diagnostic still enumerates the orbit and reference matrices.
+
+The exact structure report is
+`out/additive_phase_structure_20260911T093102955518Z.json` (6/6 PASS).
+For those same primes, k=1,2 and all divisors b<=6, all 264 subgroup
+coefficients are nonzero by integer cyclotomic-polynomial reduction. This
+is independent of the floating cutoff used to display magnitudes. The
+Gauss decomposition agrees within 6.8e-16; one-sector mass and every tested
+best-L truncation bound pass for individual p inputs and two fine-coordinate
+weightings. Different fine amplitudes are orthogonal, so their phases cannot
+cancel sector probabilities for a one-sector input.
+
+The composite N9,a2,b2,r6,k1 control has exact zeros: p=0 retains frequency
+2, p=1 frequency 1. This is one frequency PER p, not a single block-wide
+route for a superposition of fine labels. The report's shorter control
+description should be read with that qualification. Polynomial input slots
+(24,718), reductions (270) and floating summands (10,744) reconcile exactly;
+the maximum root order is 272. The numeric payload bound is again 409,600
+bytes. Integer polynomial coefficient storage is separately capped by input
+slots/root degree; these are not a bound on backend bit-runtime or RSS.
+
+## Actual exponent output and strongest tested shortcuts
+
+`out/additive_phase_output_20260911T093102634931Z.json` passes 4/4 checks.
+It freezes C75's N13,a2,b3,r12,t3 initial/post-control mixer schedule, removes
+the earlier cell reflections, and inserts G_k after the second post-control
+mixer. Only k varies over 0,1,2. A fourth row places G_1 at the end as a
+trace-out null. The physical register contains residues, with the same ten
+qubits and clean unused flag as the earlier fixture; this is not an indexed
+gate being described as a physical implementation.
+
+The complete eight-output compiled law agrees with independently assembled
+full-r branch matrices and sequential_path to at most 7.683e-14 per outcome.
+Maximum scratch leakage is below 3.73e-30 and norm error below 3.75e-13.
+Omitting the interior phase changes the law by TV .0220140067 (k1) and
+.0355523339 (k2). Initial coarse dephasing incurs TV .0176795970 and
+.0195881265 respectively. Zero kick and terminal insertion are nulls, and
+coarse dephasing works for the no-kick background. These are meaningful
+failures of two particular exact shortcuts, not of every approximation.
+Indeed, an allowed TV of .05 would already tolerate omission on these rows.
+The ideal-order-finding law is a DIFFERENT baseline: its TV from the no-kick
+mixed-work background is .2086007086. Neither is assumed to equal the other.
+
+Each physical circuit uses 15,213 Pauli rotations; the four runs jointly
+charge 62,312,448 gate-entry updates under the original 100,000,000 cap.
+The independent reference makes 144 sequential_path calls and charges
+746,496 units of t*d^3, with reference payload bound 185,856 bytes. It uses
+finite full-r arrays, not an orbit-free algorithm. Some final diagnostic runs
+overlapped briefly; no matched timing or host-health conclusion is drawn.
+
+The structure report also directly tests C53's scalar phase-transfer premise
+on the four actual low-control histories. The best complex scalar leaves
+relative work-vector residuals between .243 and .921 for the eight nonzero
+kick/history pairs. The k0 cases are identity NULLS, not evidence for a
+nontrivial transferable phase. This excludes diagonal scalar replacement at
+that insertion on these histories, not a general early-exponent unitary or
+an output-specific rewriting. TODO 36 explicitly tests that stronger baseline.
+
+## Proof audit and primary context
+
+After the direct projection, main noticed a sharper exact fact than dense
+floating support: a vanished coefficient would contradict the minimal
+polynomial of a prime root of unity over the coprime cyclotomic field.
+Independent lower-cost audits checked the proof, signs, subgroup decomposition
+and one-sector-only probability bound. C76 states the proof and primary
+sources; it does not claim novelty for this elementary application.
+
+Main read van Dam/Seroussi's finite-field definitions and Gauss norm facts
+with their proof in [quant-ph/0207131](https://arxiv.org/pdf/quant-ph/0207131),
+and Evans's irreducibility theorem/proof and coprime compositum argument in
+[the cyclotomic notes](https://maths.dur.ac.uk/users/daniel.evans/GaloisTheory/Notes/cyclotomic-extensions.html).
+The paper's Gauss-phase/discrete-log oracle reduction is not a lower bound
+for this fixed-output task. C74 separately records the earlier reading of
+its powering reduction. No assertion relies on the unread quantum-algorithm
+or finite-ring sections.
+
+## Preserved failures and verifier corrections
+
+The first Gauss attempt failed an API guard on k=N-1, outside the physical
+builder's frozen signed range, after earlier b1/b3 measurements had run:
+`out/gauss_kernels_20260911T092044205720Z.json`. Using the equivalent k=-1
+within the documented gate contract fixed the call; the failure JSON remains.
+The initial log was subsequently reused, so it is not the failed-run log.
+The corrected lower-cost report is
+`out/gauss_kernels_20260911T092201282162Z.json`. Main then distinguished
+gate-column applications from gate-entry updates and checked their exact
+total rather than accepting a nonnegative cost counter.
+
+The lower-cost output and structure reports are
+`out/additive_phase_output_20260911T092353002435Z.json` and
+`out/additive_phase_structure_20260911T092840301919Z.json`. Before the first
+output execution, the builder signature and reference-counter reset were
+repaired; no failed-run artifact exists for those pre-run defects. Main then
+removed import-time experiment logging, corrected a false orbit-free-storage
+description, and added physical gate/layout/cumulative-cost predicates.
+The main reports above include those fixes. Tolerances, fixtures and controls
+were not changed to select a favorable scientific outcome.
+
+## Validation and continuation
+
+Core passed first in `out/additive_phase_core.log`. The affected claims suite
+passes in `out/additive_phase_claims.log`, including independent tiny monic
+division regressions over Gaussian integers and integers for C76's prime and
+composite controls, plus a one-sector Gauss mass check. The other seven science
+suites were not rerun; shared production helpers are unchanged. System Python
+3.12.3, NumPy 2.4.6 and single-threaded BLAS were used; the exact structure and
+claim checks also use python-flint 0.9.0. These small passes do not settle
+TODO 34's runtime/host problem. No host configuration, firmware or long timing
+benchmark was changed or launched. Documentation validation is recorded in
+`out/additive_phase_docs.log` after index regeneration.
+
+Reproduce from research/:
+
+```bash
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_gauss_kernels
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_additive_phase_output
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' --with 'python-flint==0.9.0' python -u -m experiments.experiment_additive_phase_structure
+```
+
+The skill's stronger-baseline rule prompted exact support and actual-output
+checks before interpreting dense sectors. C57's fixed-history support cone
+does not by itself remove the coherent history sum, and its localized-kick
+omission bound is trivial for an extensive additive phase. The next bounded
+question, including the stronger exponent-unitary transfer test, lives only
+in TODO 36. Neither a hardness claim nor a new efficient sampler follows;
+the open-ended research goal remains active.
+
+---
+
+# HC — Testing a concrete shared-carry closure argument
+
+C97 owns the two lemmas and the exact catalog-histogram normal form.
+C95 retains the reachable recurrence, physical weights and normalization.
+TODO50 owns the remaining chronological closure question. No experiment
+or faster full-average evaluator was produced by this proof attempt.
+
+An Astra author tested whether shared dyadic quotients and few native
+slopes suffice for polynomial simultaneous carry storage. The synchronized
+prefix argument survives, but stopped prefixes encode independent carry
+choices even at one slope. The counterexample concerns the complete test
+catalog, whose alternative count labels need not be selected together.
+The initially considered coordinate-separable fraction obstruction was
+abandoned as incidental and is not supporting evidence.
+
+The frozen proof/source submission is Sfa8c9fc19de5450e, digest
+ab5fa519c8547b441874f2fbdca8acdfae0520ccda9a5828f3806e7ae0f0ebdd,
+task T0b33b8c14c7343ee, attempt A05bf36589f4d453c. That directory
+owns `derivation_v1.md`, `sourceaudit_v1.md`, `provenance_v1.md` and
+the mechanical-check logs. The sealed C92/C93/C95 and prototype hashes
+are listed in provenance; they remained unchanged.
+
+Fresh Astra referee V29ecf68e5e5c42b3 accepted the exact submission;
+closure Cded3c10155704413. Root's shadow audit concurred. Review notes
+are in `out/agent-board/reviews/native-closure-referee-15/review_v1.md`.
+Integration incorporates two nonblocking precisions: incompatibility of
+the selected label sequence is asserted for r>1, and the external source
+scope is cited by theorem IDs rather than the draft's shifted page list.
+The single-label r=1 base case is retained.
+
+The source audit checked the carry/BDD coefficient bounds of
+[Bartzis and Bultan, Theorems 1 and 3](https://sites.cs.ucsb.edu/~bultan/publications/sttt-bar.pdf)
+and the dimension/index/specialization conditions of
+[Barvinok and Woods, Theorems 1.7, 2.6, 3.6 and Corollary 3.7](https://arxiv.org/pdf/math/0211146).
+Those are baseline hypothesis checks, not a priority survey. The two new
+lemmas are elementary and do not invoke a generic counting theorem.
+
+Mechanical submission lint has zero errors. Its four informational entries
+are lint logs rather than science logs. The preserved
+`lint_package_v1.log` is empty because a CLI usage error went to stderr:
+`--exit-code 0` was supplied with multiple files and rejected with exit two.
+The corrected package check is separate; this was not a failed science
+run. No native gate evaluation, parameter sweep or science suite was run.
+
+The accepted result narrows one construction route. Exponential catalog
+keys do not establish exponential reachable-state size, a minimal automaton
+bound or scalar hardness; the witness itself has a small factored unsigned
+count. The stronger signed and chronology-sensitive closure is still open.
+Documentation checks and final independent integration review are attached
+to task T4f60b8fc8ebd4c18, attempt A7a996e99e6f044dc.
+
+---
+
 # HISTORICAL — the former live thread (RESOLVED; kept for context)
 
 > **RESOLVED 2026-08-08 (post-handoff).** The residue is a **conditional
@@ -962,6 +3888,445 @@ structures with a checkable three-ingredient criterion.
 
 ---
 
+# IS — Streaming exact conditional Walsh queries
+
+C94 owns the proof, normalization, charged bounds and scope. TODO50 owns
+the remaining mathematical and engineering questions. This is progress
+toward the user's broader simulation objective, not its completion.
+
+## Derivation, takeover and independent review
+
+The user explicitly transferred coordination after Claude exhausted its
+tokens. Root preserved the dirty workspace and used the authorized board
+swarm, with Sol for bounded reference/provenance work and fresh Astra
+contexts for substantive reviews. Root alone edited canonical sources.
+
+The all-mask replay and local cap formula had already been derived and
+independently audited. Sol archived their immutable messages and corrected
+the benchmark contract into `Saba4c3b08a6841d5`, task `Tf47390e292054b28`,
+attempt `A050923a6a5524fc3`. The authoritative frozen contract is
+`out/agent-board/workers/A050923a6a5524fc3/reconciled_contract.md`.
+Before candidate execution, root added online coalescing of adjacent equal
+final shifts, recorded as `M28b9da97c6e94d02`. It changes the contraction
+work without introducing a global table or assuming fixed output flags.
+
+The implementation is `experiments/experiment_interval_stream.py`, SHA256
+`b5e33f4d4406a24cdc4da24c1f534d8783403ce631bcb3dfeb6548853ff9d52a`.
+It reuses C89's actual `macro_image` and four-state `prefix_walsh`; no
+second propagator was written. Draft implementation task `T966e4c2e5b6143d6`,
+submission `S68b1a640104e4253`, received independent code review
+`V8f303ea2448a4369` before candidate execution.
+
+The completed scientific submission is `S126923357c974d5a`, digest
+`ae53c249790590350a1fa59affb7b206847bbfb720f7e86176894c7a2f59d72e`,
+under task `T67102e9799a6441b`, attempt `A401ea237ec804a96`. A fresh Astra
+scientific referee accepted it as `Ve80ccfd3cb5a43c8`; root's shadow audit
+concurred. Its full derivation is the frozen attempt's `derivation_v1.md`.
+The measured source is unchanged from the reviewed implementation.
+
+## Native correctness and meaningful faults
+
+Core ran first and exited zero; the full log is
+`out/stream_replay_core_initial.log`. A fresh Sol worker received only the
+actual native circuit contract and permitted gate/reference sources,
+without the candidate derivation, expected witnesses or implementation.
+Its accepted submission `Sd3de4ca7b85e451b`, task `Tf6fb639605854835`, was
+frozen before candidate execution. Reference source/report/log live in
+`out/agent-board/workers/A29335e4e20864fc8/` as `reference_v2.py`,
+`report_v2.json` and `run_v2.log`.
+
+This reference uses the actual native builder and existing logical gate
+interpreter. It exercises X, CNOT and Toffoli, retains all outside wires
+and verifies unchanged spectators. It independently constructs conditional
+maps and Python-integer signs; it does not use C89's word identity or DP.
+A shared builder/logical-interpreter bug remains a limitation. Three
+fixed-family mutations detect omitted incoming carry, reversed complete
+macro chronology and omission of an actual flag-setting CNOT.
+
+Candidate evidence is in `out/agent-board/workers/A401ea237ec804a96/`:
+`correctness_v1.py`, `correctness_report_v1.json`, `correctness_run_v1.log`.
+Prediction `M500ba3cc1cdb4a16` preceded run `R73e88559734448c8`, whose actual
+exit was zero. All six checks passed without harness warnings. They cover
+864 conditional maps, 65,536 exhaustive n=2 all-mask numerators and 768
+fixed n=3 mask numerators. Every emitted piece matches C89's maximal table,
+and every raw itinerary count obeys the proved bound. Zero-depth identity,
+ascending and completely reversed native orders are included.
+
+Both pre-derived candidate boundary mutants were detected locally:
+
+| Fault | Fixed native witness | Reference versus mutant |
+|---|---|---|
+| Replace the retained minimum by the latest cap | n=2, t=6, h=u=1, x=3, q=2, lo=5 | Correct [5,6), wrong [5,7), shift -2; gate images 3,12 give local flag sum 0 versus 2 |
+| Omit local output-wrap cuts | Same outside values, second constant c=2, local z=1 | Correct cap 1, wrong cap 2; gate images 15,8 versus extrapolated image 16 outside the domain |
+
+The second native macro is recovered from two gate-prefix maps as
+F2 composed with inverse(F1). A full-domain zero coefficient was not
+substituted for these local sensitivity checks.
+
+## Matched task-allocation and runtime campaign
+
+The frozen contract fixes n=128,m=129, odd Mersenne modulus, a=1, packed
+scratch/control words and four arbitrary input/output mask pairs. Only
+the nested prefix length q varies. The baseline is the unchanged current
+C89 compiler, compiled once for four queries. Both methods receive the
+same immutable lazy constant/control views; neither expands a q-word
+list. Both return four unnormalized integers, with coefficient denominator
+2^130. At q=127 the returned tuple is (-4,-268,-324,36).
+
+`benchmark_v1.py`, `benchmark_report_v1.json`, `benchmark_children_v1.jsonl`
+and `benchmark_run_v1.log` are in the candidate attempt directory. Prediction
+`Md0f36f855c2c4816` preceded run `Rb9a531d7b58d42ce`, which exited zero.
+All 49 child processes completed, all seven checks passed, and all four
+numerators agree between methods and across metric processes.
+
+Allocation, RSS and timing use separate fresh children. Allocation tracing
+starts after common imports, before constructing packed task inputs,
+masks, views, method workspace and retained outputs. Reference data and
+JSON serialization are outside measured children. The table includes its
+current construction, merging and validation costs. Timing is untraced,
+warmed, and includes full input setup and four-output evaluation in each
+of three batches, with alternating method order across q. All batches used
+one invocation and exceeded clock resolution by ample margins.
+
+| q | Table peak traced bytes | Stream peak traced bytes | Table median seconds | Stream median seconds | Final pieces | Raw stream pieces |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 7,636 | 3,632 | 0.011171 | 0.011049 | 11 | 16 |
+| 3 | 15,016 | 3,712 | 0.025591 | 0.026020 | 23 | 34 |
+| 7 | 30,540 | 3,712 | 0.061443 | 0.063643 | 53 | 82 |
+| 15 | 59,664 | 3,596 | 0.133995 | 0.138942 | 109 | 170 |
+| 31 | 116,780 | 3,876 | 0.272334 | 0.284707 | 221 | 346 |
+| 63 | 233,460 | 3,928 | 0.548083 | 0.606645 | 445 | 698 |
+| 127 | 472,828 | 3,884 | 1.127865 | 1.334633 | 893 | 1,402 |
+
+Derived directly from the fixed packed input, enabled/disabled counts are
+(1,0), (1,2), (4,3), (8,7), (16,15), (32,31), (64,63) in this q order.
+Both kinds are present from q=3. The script checks that fact; the explicit
+counts here are input bookkeeping, not an additional experimental sweep.
+
+All four preregistered engineering thresholds passed: stream/table traced
+peak at q=127 is 0.0082144 (about 122-fold smaller); stream growth from
+q=31 to 127 is 1.002064 while table growth is 4.048878; the median runtime
+ratio is 1.183327. Thus the observed task-allocation reduction costs about
+18% runtime at the largest fixture. Tracer bookkeeping is separate:
+228,112 bytes for the table and 8,016 for streaming at that fixture.
+Timing ranges are 1.123398–1.138057 and 1.323584–1.373223 seconds,
+respectively; this is one bounded campaign, not repeated host calibration.
+
+Absolute maximum RSS was 242,432 KiB for both methods and the noop at
+q=127. A few other table children reported 242,688 KiB. No repeatable
+process-memory reduction is established, and no high-water subtraction is
+reported as auxiliary storage. These process values include the common
+runtime/import footprint; traced task allocation is a separate measurement.
+
+The campaign used 75.425 seconds wall time and 78.207 seconds aggregate
+reported CPU time; the longest child wall time was 11.913 seconds. The
+hard caps were 600 seconds aggregate CPU/wall and 60 seconds per child,
+with conservative reserves. The host was Linux x86_64, CPython 3.14.0;
+BLAS thread counts were fixed at one. No GPU, dense state or long native
+permutation job was used.
+
+The Q0 congruence B=4q mod8 from the archived boundary audit guarantees
+nonzero results for these odd prefixes; all 42 non-noop results reject a
+zero-output shortcut. That congruence is not the mutation-sensitivity
+evidence. The native local controls above supply that evidence.
+
+## Interpretation and provenance limits
+
+The result is a measured allocation improvement for exact conditional
+scalar queries over both current shared-lazy C89 and the packed comparator
+recorded below. The proof also removes the stored global interval table.
+Other packed/in-place algorithms remain possible, so neither numerical
+factor is an optimality or literature-wide comparison. C93 remains the
+stronger special fully averaged time comparator. No full outside-average
+improvement, m-scaling experiment, process-RSS saving or general CNOT/PPS
+memory breakthrough follows. TODO50 alone owns the next discriminator.
+
+The reference worker retained its original v1 source/report/log; v2 only
+replaced dynamic harness control IDs by literal resolutions, with unchanged
+science. Root's first linter invocation used an invalid combined-file
+`--exit-code` command and exited 2 before evidence inspection. Its usage
+log `correctness_lint_v1.log` is preserved; new separate source/report and
+terminal-log commands passed. No science was rerun for that CLI correction.
+Initial frozen submission lint has zero errors and four expected information
+messages for the linter logs' lack of scientific harness verdicts.
+
+The old unsubmitted Claude residual-rank attempt was cancelled after the
+user's takeover instruction and a process check; its artifacts remain.
+The earlier Claude survey/reference submissions remain separate historical
+work, not accepted support for this checkpoint. The new accepted blind
+reference avoids their unresolved evidence issues.
+
+Canonical integration task `T7e33f41f1e3246f7` owns the final documentation
+checks and review. Core plus the bounded candidate/reference experiments
+were the proportional science validation; the other suites were not
+rerun. Production helpers, manuscripts, host settings, commits and
+publication were outside this change. Frozen evidence files must not be
+overwritten when reproducing; use new attempt/report paths.
+
+## Packed comparator follow-up
+
+B1 is now implemented as `experiments/experiment_packed_intervals.py`, SHA256
+`b9f697b224189eb64132e3aa845d15e073ecb38fef57d181791cd15bc7a05f50`.
+Each flat record stores its unsigned high endpoint and signed shift; the low
+endpoint is the preceding high. Fields occupy ceil((m+2)/8) bytes so the
+flag displacement and terminal endpoint fit exactly. Composition retains
+current and next byte buffers, using the same local C89 macro pieces and
+equal-shift merging. A separate packed image buffer, heapsorted in place,
+validates image coverage. All buffers, conversion and validation are charged;
+there is no global Python tuple/int table in this comparator.
+
+Core passed before new scientific code (`out/packed_interval_core_initial.log`).
+The frozen proof/contract and complete evidence are in
+`out/agent-board/workers/A67a3a4f35d384855/`: `contract_v1.md`,
+`correctness_v1.py`, `correctness_report_v1.json`, `correctness_run_v1.log`,
+`benchmark_v1.py`, `benchmark_report_v1.json`, `benchmark_children_v1.jsonl`
+and `benchmark_run_v1.log`.
+
+Prediction `M0a111a377da848e0` preceded run `Rd59b270f69844f77`. The accepted
+blind reference was reused without execution. All 864 maps, 66,304 supplied
+numerators and C89 maximal pieces match. Both new faults are detected on
+the fixed n=2,q=1,ascending,t=h=u=x=0 all-mask table: truncating shifts modulo
+M gives -6 instead of 0 at masks (0,8); merging unequal shifts gives 16
+instead of 0 at (1,1). All six checks passed. Unchanged streaming-native
+and boundary checks were not repeated.
+
+Prediction `M24973b77036344a4` preceded benchmark run `Rc9aafb6261ce469d`.
+All 49 fresh metric children and seven checks passed, using the same fixed
+inputs, q values, four outputs and metric separation as before. The same
+four engineering thresholds were frozen with packed B1 as the comparator.
+The streaming source is unchanged; a common measurement wrapper serves both
+methods. These are paired fresh results, not cross-campaign differences.
+
+| q | Packed peak traced bytes | Stream peak traced bytes | Packed median seconds | Stream median seconds |
+|---:|---:|---:|---:|---:|
+| 1 | 7,748 | 3,664 | 0.011493 | 0.011311 |
+| 3 | 10,158 | 3,744 | 0.026660 | 0.026745 |
+| 7 | 12,566 | 3,744 | 0.065243 | 0.065316 |
+| 15 | 16,036 | 3,820 | 0.138557 | 0.138594 |
+| 31 | 23,876 | 3,908 | 0.286189 | 0.296642 |
+| 63 | 39,906 | 3,960 | 0.581285 | 0.620559 |
+| 127 | 72,096 | 3,916 | 1.187158 | 1.363179 |
+
+At q=127, stream/packed peak is 0.0543165, about 18.4-fold smaller. Stream
+growth from q=31 is 1.002047, packed growth is 3.019601, and the median
+runtime ratio is 1.148271. Thus the saving survives this stronger comparator
+at about 15% additional runtime. Timing ranges are 1.183667–1.201958 seconds
+for packed and 1.359189–1.369010 for stream. The four integer results match
+the initial campaign exactly.
+
+The final packed payload is 30,362 bytes at that fixture; the largest combined
+composition payload is 60,452 bytes. The validator adds a 30,362-byte payload
+after composition. These encoded-data diagnostics are separate from measured
+peak allocation, which also includes bytearray spare capacity and Python
+objects. Tracer bookkeeping is 15,088 bytes for packed and 8,080 for stream.
+Absolute RSS is 242,688 KiB for both methods and every noop in this campaign;
+no process-memory saving is established.
+
+The campaign used 77.013 seconds wall and 79.801 aggregate reported CPU;
+the longest child took 12.175 seconds wall (rounded upward). All CPU/wall
+caps held; there were no timeouts or stderr diagnostics. Write experiment
+task `T8db9c5b8e42349a9` froze submission `Sae731de7c5364537`, digest
+`3cc2a397e6622b4cebe2e0e09637f2c6b98c8caf29d254f937d65ed96fe509c9`.
+Fresh Astra code/science/evidence review `Vb55fcb06b9364e25` accepted it;
+root's shadow audit concurred. Lint has zero errors, four information entries
+for actual lint logs and one novelty advisory on explicitly negative scope
+wording. The comparison validates one two-buffer packed implementation,
+not every in-place representation. Integration task `Tb9fac3a1ea8e4eac`
+owns this follow-up's canonical review and documentation checks. TODO50
+alone owns further work; the general simulation objective remains open.
+
+---
+
+# IX — Conditional interval contraction of actual controlled arithmetic
+
+C89 owns the mathematical statements, input contract, source citations and
+algorithmic limits. This is progress within TODO50, which remains open.
+The full-space scalar includes dirty scratch, incoming carry and flag;
+the clean logical arithmetic is a separate baseline. No general simulation
+breakthrough or measured memory advantage is established. The user's goal
+remains active, and TODO42 remains separate.
+
+## Discovery and proof review
+
+The initial question was whether shared-state controlled arithmetic leaves
+the known planar carry contraction. Reading the actual `cc_add_mod` schedule
+first exposed a stronger global baseline. Root and Astra independently
+derived the fixed-scratch accumulator/flag interval representation, its
+additive composition bound and exact range-Walsh contraction. The flag's
+chronological dependence survives, but does not require retaining a tree of
+its possible histories after the outside inputs are fixed.
+
+Sol audited primary interval-exchange, weighted-automaton and decision-diagram
+sources. Root read Novak's definition and preimage argument, Kiefer's
+minimization theorem, and Bryant's composition/counting algorithm bodies.
+These supply known frameworks, not a cheap construction for our remaining
+outer average. The local shared-control matchgate tensor was not classified:
+the conditional global reduction was established first. C89 records exactly
+where it stops, including the controlled swaps that change register roles.
+
+Root and Astra independently derived the nonzero single-macro probes before
+the main run. A separate worker's clean active two-macro fixture then became
+identity on every accumulator and flag input. Root proposed the complementary-
+shift inverse rule and Astra checked its algebra independently. That proof
+was added after observing the identity; it is an explanation, not a prior
+prediction. It also identifies a second, fully dirty scratch sector.
+
+## Main exact experiment
+
+Source: `experiments/experiment_controlled_intervals.py`. Reproduce with:
+
+```bash
+timeout 60s uv run python -u -X faulthandler -m experiments.experiment_controlled_intervals
+```
+
+Prediction `M4f273739d7b74f42` preceded run `R65537c4b5abc4af9` and execution.
+The fixed fixture is N=5, a=2, one exponent control, four accumulator bits
+and fourteen total qubits. Only the native prefix length changes. Each
+row reuses the same accumulator, scratch, carry, exponent control and flag.
+Report: `out/controlled_intervals_report.json`; raw log:
+`out/controlled_intervals_main.log`. The process terminated with exit zero;
+all eight harness checks pass without warnings.
+
+| prefix length | native constants | logical gates | maximum conditional pieces | two full-space coefficients |
+|---:|---|---:|---:|---|
+| 1 | 2 | 138 | 11 | 1/4, -1/8 |
+| 2 | 2, 4 | 276 | 18 | 0, 0 |
+| 3 | 2, 4, 3 | 420 | 24 | 1/512, -1/512 |
+
+Each prefix matches actual `walsh.classical_permutation` gate replay on all
+16,384 full-space labels: 49,152 map comparisons with no errors. Every one
+of its 512 outside-input assignments is explicitly visited, and the full
+output label comparison includes all restored wires. The finite counts do
+not prove C89's general interval bound; the separate construction proof does.
+
+The four-state digit routine also matches 69,632 independent direct signed
+prefix sums, exhausting four-bit translations, input/output masks and range
+thresholds. Both selected full-space coefficients agree between conditional
+interval averaging and actual gate replay in every row. Only the first row's
+specific nonzero values were derived in advance; the other rows test exact
+agreement, not a prediction of those particular values. A selected coefficient
+vanishing at one prefix can revive later, as this fixture illustrates.
+
+Omitting the incoming carry annihilates both nonzero first-row probes.
+Forcing the enable conjunction to zero annihilates the negative probe.
+Reordering the shared-state pair changes the packed output from 11011 to
+15107 at input 11008, exactly as derived before execution. All three wrong
+references therefore fail equality as required. C89 owns the corresponding
+symbolic mask definitions and chronological witness.
+
+The reported 0.476-second harness time is descriptive, not a repeated
+performance estimate. Allocated bytes and native RSS were not measured.
+The truth tables are independent correctness references, not a claimed
+memory-efficient implementation of the remaining outside average. The new
+helper is experimental and accepts supplied macro parameters; it does not
+recognize arbitrary circuits or implement a quantum output sampler.
+
+## Independent actual-gate verification
+
+The accepted verifier remains in its worker directory. Reproduce with:
+
+```bash
+PYTHONPATH=. timeout 60s uv run python -u -X faulthandler out/agent-board/workers/Aaab2d7d440a84f76/experiment_cmult_prefix_map.py
+```
+
+Its frozen N=3, a=2 fixture has one exponent control, three accumulator bits
+and eleven total qubits. The native prefixes have constants [2] and [2,1],
+with 108 and 216 logical operations. Actual gate replay agrees with the
+worker's separately implemented C86 dirty word recurrence on all 4,096
+labels, including restored outside wires. The following wrong-reference
+witnesses were calculated before execution:
+
+| defect | input | actual output | wrong output |
+|---|---:|---:|---:|
+| omit incoming carry | 1344 | 1347 | 1346 |
+| fix input flag to zero | 1600 | 1095 | 1090 |
+| make disabled dirty macro identity | 8 | 9 | 8 |
+| reset shared flag before macro two | 1728 | 1728 | 1221 |
+
+For six frozen outside-input assignments, direct sums over the actual gate
+images agree with the root interval helper on all 256 input/output Walsh
+mask pairs: 1,536 exact rational coefficient comparisons, no errors.
+
+| prefix | fixed (t,h,u,x) assignments | interval counts |
+|---:|---|---|
+| 1 | (0,0,1,1), (0,1,1,1), (1,0,0,0) | 10, 9, 8 |
+| 2 | (0,0,1,3), (0,1,1,3), (1,0,0,0) | 1, 15, 9 |
+
+The direct side uses actual logical X/CNOT/Toffoli gate images; it does not
+independently test the stored Clifford+T decompositions as unitaries. The
+conditional side imports the root helper, so independence is supplied by
+the direct gate sums and separate word recurrence, not two interval codes.
+
+Prediction `M6dbbbf160ed04d58` preceded the original successful run
+`Rcbdcae9f6fc44205`. After the resource-reporting correction below,
+prediction `M6ac68b963d234b84` preceded revised run `R5e5d3166db3f473e`.
+Both terminal exits were zero; the identical frozen science again passes
+all eight checks without warnings. No larger fixture was added. The worker
+directory contains `cmult_prefix_map_report.json`, `cmult_prefix_map.log`,
+`findings.md` and `frozen_pilot_proposal.md` beside the source.
+
+## Preserved review corrections and provenance
+
+The source audit's first submission `S0dad4fe26afe4bd0` had an incorrect
+chronological label for an N=3 witness. Review `V883d1e091807411d` requested
+a correction. The revised artifact explicitly distinguishes constants
+1 then 2, which end at (2,0), from 2 then 1, which end at (2,1), starting
+at t=0,h=1,u=1,x=3,b=f=0. The original artifact remains archived. This is
+a correction to the audit prose, not a scientific run failure.
+
+The verifier's initial submission `S923dc2e00ba247db` claimed a four-array,
+64 KiB cap without accounting for live arrays during replacement or NumPy
+comparison temporaries. Review `Vcd5a6356215c47aa` rejected that resource
+statement while accepting the exact calculations as sound on inspection.
+The revision releases per-row arrays and reports only the two explicitly
+retained actual maps. Total allocated bytes remain unmeasured. Original
+source, report, log, proposal and findings are retained with `revision1`
+suffixes. No peak-memory claim follows from the corrected evidence.
+
+The first mathematical submission `S68a5a9c9d7e94e4c` was sound. Review
+`Vcdd894f21077469e` returned it to active solely to add the post-observation
+inverse supplement to frozen evidence. The final submission preserves both
+proofs. Root inspected the full actual artifacts, logs and reports and
+verified archived hashes/current identities. Astra independently reviewed
+the root implementation's full archived source, report and validation logs.
+
+| board task | accepted submission | accepting review |
+|---|---|---|
+| T65b4e1e9ecc04d56, Astra proof | Saee62f29bbce4278 | V589c6192b2c2491a |
+| T9f85a1eeb33247dd, Sol sources | S46df079055c0400c | Vf7e6868811cd47ca |
+| T5ac4d70bcca54dd2, Sol verifier | S522e9400faa84f64 | V5b71bb55aa1c42ef |
+| T37668231982f4bc3, root implementation | S861d0324f3ae47f4 | Vb592d38789414f45 |
+
+Astra's artifacts are `shared_macro_reduction.md` and
+`complementary_shift_supplement.md` under
+`out/agent-board/workers/A6d2daa401a4c4014/`. The corrected source audit is
+`out/agent-board/workers/A223202275ce943ab/controlled_macro_source_audit.md`.
+Workers made no canonical edits; root remains the sole source writer.
+
+## Validation scope
+
+Core ran first and after the new experiment. Both observed terminal exits
+were zero, and both logs end in ALL TESTS PASSED:
+`out/controlled_carry_core_initial.log` and
+`out/controlled_carry_core_final.log`. The main and independent bounded
+experiments supply the affected science checks. Production helpers were
+unchanged; the other eight science suites were not rerun. These runs had
+no timeout or native crash. TODO34's prior native failure is unresolved.
+
+Documentation indexing exits zero (`out/controlled_intervals_reindex.log`),
+and all ten documentation checks pass
+(`out/controlled_intervals_docs_check.log`). All four bounded board tasks
+are accepted and closed. The root task's first closure request listed the
+coordinator's claim/note integration outside its declared source write path;
+the board rejected that file list. The corrected closure records only the
+authorized experimental source. This bookkeeping correction did not change
+the accepted source or execute science again.
+
+No manuscript, dependency, default or host setting was changed, and nothing
+was committed or published. Preserve the dirty worktree.
+
+---
+
 # L — THE DENSITY-½ CEILING EXPLAINED: a linear structure from the reduction ancilla
 
 Two observations had gone unexplained across the whole project:
@@ -1099,6 +4464,1462 @@ structure is destroyed. Unidentified.
 
 **→ RESOLVED (TODO 11): see §RS.** It is a conditional linear structure with an
 exact ¾ density cap; the quadrant {z_msb=1, z_anc=0} is exactly empty.
+
+---
+
+# LC — Exact symmetry fails, but its approximation survives in a bounded regime
+
+TODO 21 challenged C56 with a localized kick inside its periodic background.
+The first test confirms that the shared-sector shortcut genuinely fails at
+the measured-output level. Main then derived two different follow-ups: a
+low-rank complete-output boundary formula, and a co-moving support cover that
+can certify omission of the kick without evaluating its exact hit probability.
+C57 owns the mathematics and limits; exact compressed sampling of the
+symmetry-broken law remains unresolved.
+
+The user's standing request for lower-cost initial testers was followed with
+three `gpt-5.6-luna` agents. They handled the physical kick, actual-state
+distance bounds, and independent support-cone tests. The physical tester also
+checked the derived boundary formula. Main derived/implemented the integer
+cover helper, reviewed the scripts, repaired controls/resource claims, reran
+everything and added regressions. No existing propagator was replaced or
+extended. The research skill's strongest-baseline rule made the omission bound
+a required comparator; its audit rules caught the misleading initial claim
+that the boundary verifier used constant sector storage.
+
+## Fixed physical experiment
+
+Use N=7,a=3, orbit [1,3,2,6,4,5], b=3,t=5. Background W01@s1,W12@s3,W01@s4
+is held fixed, with each block an Rx(pi/2). Insert an Rx(theta) mixing ONLY
+orbit labels 0 and 1 (physical labels 1 and 3) after s=2. It is a rotation on
+work bit 1 conditioned on work bit 0=1 and work bit 2=0. Four commuting Pauli
+rotations implement that projector using the existing Circuit engine.
+All work inputs are checked, including unchanged invalid labels 0 and 7.
+
+The one-parameter sweep is theta=0,pi/8,pi/4,pi/2,pi. The actual original-order
+compiled Circuit/statevec output agrees with full-r `sequential_path` to
+below 2.3e-14 throughout. The physical norm error stays below 2e-13.
+This full-r baseline is NOT a scalable small-sector sampler.
+
+Wrong initial coarse dephasing means changing only the initial orbit density
+from |0><0| to (|0><0|+|3><3|)/2, then applying the SAME full-r branches.
+It is valid at zero kick, but its output TV rises to about 0.160 at theta=pi.
+Repeating the kick in both blocks restores C56's symmetry and its correct
+coarse mixture. Treating the one-block kick as that repeated gate instead
+changes outputs by TV about 0.164. These are changes of the observable law,
+not merely nonzero matrix commutators.
+
+The separate bounds agent constructed the actual pre-kick Circuit/statevec
+state. Its support probability is F=1/2 within roundoff and its X_S coherence
+is numerically zero. F happens to equal the bare count in THIS fixture; this
+does not validate that shortcut after arbitrary mixers. The independent
+support-cone control below disproves the general shortcut.
+
+| theta | TV from unperturbed periodic sampler | vector-distance upper bound | pure-state overlap upper bound |
+|---|---:|---:|---:|
+| pi/8 | 0.0372 | 0.1386 | 0.1383 |
+| pi/4 | 0.0834 | 0.2759 | 0.2733 |
+| pi/2 | 0.1989 | 0.5412 | 0.5210 |
+| pi | 0.4578 | 1 | 0.8660 |
+
+The exact zero-angle distance is zero; the computed output TV there is about
+8.5e-14 from reference roundoff. The overlap and squared-distance identities
+agree with direct states within 7.4e-14 and 2.3e-16, respectively. These bounds
+are informative for small angles, but loose. The generic support cover is
+trivial on this tiny fixture because its expanded neighborhood covers all
+six orbit labels.
+
+## A support-only certificate that does not need the pre-kick state
+
+The light-cone tester held one dense three-point Fourier block fixed across
+r=6,9,12,15,18, s=1,...,6 and bounded mixer-count/support combinations. Each
+conditional early branch was evaluated by small finite matrix products, not
+by another full joint-state propagator. In 342 cases, no support appeared
+outside the predicted radius; brute-residue and quotient/remainder counts
+agreed exactly; actual F never exceeded the expanded cover. Norm checks are
+included in the main-reviewed run. This covers L<r and L>r, zero mixers,
+wrapped supports and full coverage. There is NO L=r row in this b=3 series:
+a power of two cannot equal one of these periods. An initial agent summary
+overstated that coverage; the raw rows are authoritative.
+
+The decisive control uses r=6,s=2,m=1,S={4,5,0}: actual F=1/3, whereas the
+unexpanded bare count is 1/4. Thus earlier periodic mixing matters even though
+the early exponent labels remain uniform. This is the reason for expanding
+the support rather than importing C55's old hit-mass formula unchanged.
+
+Main's `lightcone_cover` helper merges circular intervals and returns exact
+integer fractions, including the mathematical squared-TV omission bound.
+Its separate counter audit checks 3,912 finite cases against brute force,
+including empty support, overlaps, full coverage, wrapping and truncated
+traversals. `PeriodicOrbitCircuit.localized_kick_bound` derives the radius
+from preceding background blocks, with an explicit same-insertion order.
+
+A wide execution check uses supplied r=3,000,000,021,t=63 and b=3 blocks at
+0,16,48. For a kick on S={0,1} after s=32, there are two preceding mixers.
+The exact cover has 16 eligible early labels, represented by two intervals;
+the squared-TV bound is 64/2^32, hence the mathematical TV bound is 2^-13.
+A seeded background draw was also executed. This is an omission certificate
+for an EXACT background sampler, not an exact sample of the perturbed law and
+not certification of the complex128 implementation's numerical error. The
+large r is supplied; no orbit search, indexing or factoring was performed.
+
+## Low rank helps a complete probability, not yet a sampling path
+
+The boundary experiment tests C57's two-pass formula at theta=0,pi/4,pi/2,pi
+for every complete output in the fixed physical fixture. The rank-two
+correction matches full-r sequential probabilities within 8.4e-17 and physical
+statevec within 2.3e-14. Formula normalization error is below 4.5e-16.
+Deleting interference and retaining only a same-sector boundary contribution
+both fail even after normalizing their incorrect nonnegative weights: the
+maximum TVs are about 0.304 and 0.274.
+
+The corrected verifier streams sectors, recomputing each early factor in its
+second pass. It still enumerates all M sectors for each requested complete
+output; the small diagnostic additionally stores the tiny output law for
+comparison. Neither this formula nor a low matrix rank establishes an
+efficient LOW-bit marginal oracle or an orbit-independent exact sampler.
+
+## Reports and retained failures
+
+Authoritative main-reviewed runs:
+
+| Experiment | Checks | Report | Log |
+|---|---:|---|---|
+| `experiment_symmetry_kick` | 16/16 | `out/symmetry_kick_20260911T021039609927Z.json` | `out/symmetry_kick_main.log` |
+| `experiment_symmetry_kick_bounds` | 9/9 | `out/symmetry_kick_bounds_20260911T021210209038Z.json` | `out/symmetry_kick_bounds_main.log` |
+| `experiment_orbit_lightcone` | 869/869 | `out/orbit_lightcone_20260911T021425398513Z.json` | `out/orbit_lightcone_main.log` |
+| `experiment_orbit_cover` | 5/5 | `out/orbit_cover_20260911T021206991470Z.json` | `out/orbit_cover_main.log` |
+| `experiment_symmetry_boundary` | 11/11 | `out/symmetry_boundary_20260911T021426080464Z.json` | `out/symmetry_boundary_main.log` |
+
+The following earlier problems were preserved, not silently removed:
+
+- The physical tester initially supplied a dimension-mismatched full-r branch,
+  then a wrong-sized sector block. Production guards rejected them. Failure
+  reports are `out/symmetry_kick_failure_20260911T020659595899Z.json` and
+  `out/symmetry_kick_failure_20260911T020717148057Z.json`.
+- The bounds tester initially omitted an angle argument to `work_mixer`;
+  `out/symmetry_kick_bounds_failure_20260911T020831840906Z.json` records the
+  resulting TypeError. Main subsequently replaced one-sided norm predicates
+  with absolute norm-error checks and added the production cover comparison.
+- The first light-cone must-fail choice r=9,s=3,m=1,S={0} decreased mass
+  relative to the bare count, so the chosen underbound predicate did not fail.
+  The 868/869 report `out/orbit_lightcone_20260911T020959257262Z.json` and
+  `out/orbit_lightcone_run.log` remain. The wrapped control above instead
+  demonstrates the false general shortcut. There is no claim that mixing
+  must always increase mass on every chosen support.
+- The first boundary verifier retained a list of every early sector factor
+  while reporting streamed storage. Main removed that list and recomputed
+  factors in the second pass. The original report
+  `out/symmetry_boundary_20260911T021132196792Z.json` therefore does not
+  establish the claimed storage behavior. It also labeled half-L1 differences
+  of unnormalized control weights as TV. The reviewed report retains those
+  raw discrepancies under explicit names and adds normalized probability-law
+  comparisons. Neither repair changes the correct formula's probabilities.
+
+Core passed before science in `out/symmetry_kick_core.log`. Full affected
+lab/claims suites pass in `out/symmetry_kick_test_lab.log` and
+`out/symmetry_kick_test_claims.log`. The other six science suites were not
+rerun for this scalar-bound addition. Dense experiments have small dimension
+caps and 16 MiB reference limits; the interval counter allocates no dense
+orbit/prefix arrays. Generated records were refreshed and the documentation
+gate run. No manuscript/abstract edits or commits in this follow-up.
+
+Reproduce each script from research/ with, for example:
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_symmetry_kick
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_orbit_cover
+```
+
+The other names in the table use the same module command and timestamped
+reports. Primary-source bodies on causal quantum walks and unitary error
+composition were read; C57 records the relevant sections and the limited
+connection. No priority claim was established. The main useful lesson is that
+breaking a conserved quantity and defeating an accurate approximation are
+different questions. TODO 22 asks a physically natural follow-up that does
+not inherit the fixed-support omission guarantee.
+
+---
+
+# LF — A finite probability formula becomes an actual sampler
+
+The active user goal asks for continued research and lower-cost initial tests
+of promising directions. TODO 19 asked whether C54's exponential early-prefix
+array was avoidable for a defect with finite known orbit-basis support. The
+qsim-research workflow made the actual sampling step, normalized rejection
+cost, and independent circuit comparison necessary gates. C55 owns the proof
+and limits; this note records the investigation and caught failures.
+
+## Division of work and validation
+
+Two `gpt-5.6-luna` agents received independent finite-formula and progression
+tests; a `gpt-5.6-terra` agent received implementation. All eventually hit a
+usage limit. Only the progression agent left a completed initial report:
+`out/progression_prefix.json` and `out/progression_prefix_run.log`, with its
+finite-sum/FFT/circuit and must-fail checks. The main agent inspected the actual
+files, finished implementation, ran and corrected the unfinished formula test,
+and added production-helper checks. No implementation was recovered from the
+third agent. Failed agent turns are not counted as completed verification.
+
+After the reported usage-reset time, both lower-cost initial testers resumed
+successfully. One independently audited the production helpers without editing
+them; see `out/localized_independent_audit.md` and its raw checks log. It found
+no bounded counterexample in signs, gcd lifting, component normalization or
+the averaged cost. Main reconciled inconsistent near-cancellation numbers and
+an ambiguous displayed amplitude in its first prose summary against the
+preserved log; the final audit removes those unsupported statements. The other
+agent ran the separate impact probe discussed below.
+
+The reusable additions are `lab/fourier_sampling.py` (scalar low-bit Fourier
+marginals and progression sampling) and `lab/localized.py` (one finite-support
+defect). They are specialized distribution algorithms, not another generic
+propagator. Small independent references use the existing FFT, statevec,
+SparseOrbitPrefix and original-order spectral effects.
+
+Final main-reviewed runs:
+
+| Experiment | Checks | What it checks |
+|---|---:|---|
+| `experiment_progression_prefix` | 3208/3208 | interval low-bit marginals, all forced production paths, statevec/FFT, progression gcd lifts and five must-fail controls |
+| `experiment_localized_formulas` | 65/65 | finite amplitudes/norms, spectral/prefix references, actual original-order coherent arithmetic, zero/sign/complex cases |
+| `experiment_localized_sampler` | 26/26 | full tiny joint distributions, normalized rejection, enumerated progression sampling branches, wide actual samples and three must-fail controls |
+
+The progression run contains 210 interval rows and 1533 progression rows;
+these are bounded coverage, not separate scaling claims. Its production-vs-FFT
+error is below 2.6e-15. The direct geometric reference's maximum prefix error
+is below 4.7e-14. Preserved final report:
+`out/progression_prefix_production_v2.json`.
+
+The localized formula series fixes r=6, t=8, theta=pi/2 and varies insertion
+s=1..7 by one. All seven original-order physical circuit comparisons pass,
+with output error below 4.6e-14. Separate abstract cases cover periods three
+and five, L<r and L>r, seeded complex blocks and an actually zero-weight phase.
+Final report: `out/localized_formulas_20260911T011830224671Z.json`.
+
+The sampler's full-joint error versus the older prefix sampler is below
+5.6e-17; its marginal error versus spectral effects is below 3.7e-15. The
+normalized proposal/rejection error is below 5.6e-16. This includes enumeration
+of positive-probability progression sampler paths, not just evaluating their
+claimed output probabilities. Finite seeded sampled outputs alone would not
+establish a sampling distribution.
+
+At total width 63, the sampler draws 16 outputs each for r=6 and s=2,16,32,62,
+plus a separately labeled abstract r=1,000,000,007, s=32 row. The supplied/copied
+two-by-two block is 64 bytes; that is **matrix payload, not process peak RAM**.
+There are no orbit-, prefix- or output-sized arrays. These wide paths do not
+validate every rare output, provide a bit-complexity theorem, or simulate a
+compiled billion-period modular circuit. Known order and known orbit indices
+are inputs. Final report: `out/localized_sampler_20260911T012045676548Z.json`.
+
+The must-fail controls detect deleted interference, wrong progression counts,
+missing feedback, wrong bit order/gcd reduction and uniform final eigenphase
+weights. A near-cancelled final phase needs about 3e8 early proposals
+conditionally, explicitly refuting a tempting POINTWISE constant bound. C55's
+mean bound survives because it averages using the correct phase weights.
+
+Core, lab and claims regression suites pass under Python 3.12 / NumPy 2.4.6:
+`out/localized_resume_core.log`, `out/localized_test_lab_initial.log`, and
+`out/localized_test_claims_initial.log`. Other science suites were not rerun
+for these isolated helpers. No existing generic circuit engine was modified.
+
+## Preserved failures and audit fixes
+
+The unfinished formula verifier divided probabilities by Q*r instead of
+Q^2*r in BOTH its formula and direct reference. Those two routes agreed but
+their total mass was Q. Independent normalized spectral/prefix/circuit routes
+caught the error. Its first run passed only 21/64 checks. Preserved artifacts:
+
+- `out/localized_formulas_initial_run.log`;
+- `out/localized_formulas_20260911T011542786207Z.json` (all checks);
+- `out/localized_formulas_failure_20260911T011542793795Z.json` (terminal failure).
+
+Main corrected both denominators, made the direct row use actual unitary
+columns rather than the same delta decomposition, fixed a tuple-unpacking
+error in the reference sparsity bound, removed amplitude/support cutoffs, and
+changed the incorrectly constructed "zero-weight" block to one whose first
+column really sums to zero. The zero phase now has an explicit assertion.
+Omitting zero-weight phases from the averaged cost also requires omitting
+their T_k terms from the equality audit, while retaining the stated inequality.
+
+A separate main-added allocation guard caught an unused G_(T+1) direct sum
+when its prefactor e was zero. The failed production-verifier log is preserved
+as `out/progression_prefix_production_run.log`; there is no complete JSON for
+that interrupted run. The corrected verifier skips that zero-weight term and
+keeps the original cap. It did not enlarge the reference allocation budget.
+
+These are verifier/hygiene defects, not counterexamples to the now separately
+derived normalized formula. Preserve their record: unanimous agreement between
+two related implementations would have been misleading here.
+
+## Interpretation
+
+### Impact probe: retain the negative result
+
+The lower-cost impact agent compared the endpoint mixer against the ideal
+sampler at fixed t=8, s=5, theta=pi/2 for abstract orders r=3..16. It derived
+the hit-fraction trace-distance bound now recorded in C55. Main reviewed the
+code and reran it after removing support cutoffs, making the byte guard use
+non-overflowing Python integers, and moving the zero-angle/endpoint controls
+from a resonantly invisible order to r=6, whose interior effect is visible.
+
+The initial report `out/localized_impact_20260911T012439735167Z.json` left P2
+unresolved despite passing its other checks. The agent's second report,
+`out/localized_impact_20260911T012506599599Z.json`, added a passing comparison
+of just the sweep's endpoints. That does NOT establish a decreasing trend:
+the last point is a binary resonance. Main replaced the predicate with every
+adjacent comparison and explicitly labeled the monotone-dilution intuition
+as exploratory and refuted. The corrected experiment intentionally exits 1:
+**17/18 checks pass; P2 fails**. The normalized reference/bound checks and
+nontrivial endpoint/zero-angle controls still pass. Preserve this as evidence,
+not a reason to weaken the test until it turns green.
+
+The observed TV is about 0.214 at r=3, below numerical resolution at r=4,8,16,
+then rises again after the first two resonances. There are also increases from
+r=12 to 13 and 13 to 14. Its maximum reference discrepancy is below 3.7e-15;
+the bound is never violated. A small hit fraction can justify the simple ideal
+approximation, but these finite rows do not establish an asymptotic rate, and
+at fixed prefix length the hit fraction need not vanish as r increases.
+
+Audited artifacts: `out/localized_impact_audited_run.log`,
+`out/localized_impact_20260911T012918979096Z.json`, and the terminal
+`out/localized_impact_failure_20260911T012918984381Z.json`. The failure is the
+scientific monotonicity prediction, not the localized sampler identity.
+
+### Positioning and reproduction
+
+This is a promising structured extension: the actual sampler now removes the
+remaining exponential prefix vector under an explicit stronger promise. It is
+not a factoring breakthrough, and priority has not been established. The
+terminating-QFT context in C55 is established prior art. The next impact and
+generalization question is tracked only in TODO 20, not duplicated here.
+
+From the research root, use the following prefix for each module:
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_localized_formulas
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_progression_prefix
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_localized_sampler
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_localized_impact
+```
+
+The last command is expected to exit 1 for the recorded P2 falsification.
+The others should pass. Timestamped reports preserve prior runs; the progression
+script has a fixed final report path, so preserve that file before rerunning
+if investigating a changed prediction or implementation.
+
+---
+
+# ME — Matching reductions and a charged sparse comparison
+
+C88 owns the proof, input contract and algorithmic limits. This completes
+TODO49's bounded reduction discriminator. The closed-form question is not
+settled, but no identified new algorithmic advantage survives the audit.
+TODO50 owns the redirection; TODO42 remains separate. The broad user goal
+remains active.
+
+## Discovery and independent review
+
+Astra derived a two-interface matching criterion and explicit witnesses
+showing that the C87 grid survives complete forced/forbidden-edge reduction.
+A Sol verifier independently classified matching edges on the fixed tiny
+family. The smallest instance collapses to a cycle, but the larger fixtures
+retain a connected nonbipartite graph. This refutes a growing forced-edge
+explanation of those rows; the all-k proof is separately in C88.
+
+Root proposed using complete all-carry matching pairs as elimination pivots.
+Extending every prefix matching by the fixed complement gives a short
+nonvanishing proof. Astra checked it independently and derived exact band
+and bit bounds. Root implemented ordinary sparse skew Schur elimination,
+including a generic pair-min-fill comparison, and Astra reviewed the actual
+archived source/report/log. This applies known algebra to the arithmetic
+specialization; it is not a new general simulation method.
+
+Sol's source audit identified stronger nested-dissection baselines and
+showed why a signed mixture of the same planar matchgate alphabet cannot
+escape FKT. Root read the cited primary theorem/algorithm bodies and made
+the whole-pair block transfer explicit. C88 owns those citations and their
+scope. Standard bipartite tiling formulas do not directly identify the
+nonbipartite fixtures, but no absence of a more indirect formula is proved.
+
+## Main exact comparison
+
+Source: `experiments/experiment_carry_matching.py`. Reproduce with:
+
+```bash
+uv run --with networkx==3.5 python -u -X faulthandler -m experiments.experiment_carry_matching
+```
+
+Prediction `Mad313a64381c4e8f` preceded run `Re05af483a5244dcf` and source
+execution. The parent runs nine fresh subprocess cases, each capped at
+60 seconds, varying only k=1,2,3 in the fixed C87 query. Report:
+`out/carry_matching_report.json`; log: `out/carry_matching_main.log`.
+The observed process exit was zero; all six checks pass without warnings.
+
+| k | word width | dense peak bytes | banded peak bytes | pair-min-fill peak bytes |
+|---:|---:|---:|---:|---:|
+| 1 | 8 | 151357 | 97996 | 100476 |
+| 2 | 32 | 632205 | 397980 | 401156 |
+| 3 | 72 | 3221237 | 905094 | 908270 |
+
+All three methods give identical exact rational coefficients in every row,
+matching the C87/DM values. At the largest fixture, the banded evaluator
+uses about 28.1% of the dense evaluator's traced peak. Generic min-fill
+comes very close; its small difference is not evidence of general ordering
+superiority. Single measured elapsed times at that fixture are 0.6452,
+0.0227 and 0.0311 seconds respectively. These are descriptive timings under
+allocation tracing, not repeated native performance estimates.
+
+The trace starts before graph construction and includes ordering,
+planarity/orientation, exact arithmetic and coefficient extraction.
+Imports/process startup and native/process-wide RSS are excluded. The
+implementation stores the original sparse tail as well as the active
+frontier. Its entry counter rescans rows at each pivot, and is charged in
+the measurements. The report's `max_updated_fraction_bits` covers only
+nonzero updated matrix entries; it is not a maximum over pivots, products,
+initial entries or transient allocations. C88's bit bound is a proof,
+not an inference from that statistic.
+
+Natural bandwidths are 6,10,14. Independent endpoint-gap enumeration
+confirms the predicted quadratic polynomial coefficients 1,66,435.
+The wrong matching-pair certificate is rejected. Deleting the allowed
+interface edge (1,11) changes the tiny partition from 80 to 64, so the
+second must-fail control is nonvacuous. No main prediction was refuted.
+
+Dense and sparse routes share the graph constructor and orientation helper.
+This experiment checks elimination and cost on the accepted C87 scalar;
+it is not a fresh independent quantum-word reference. DM owns the prior
+carry-sensitive and permutation-sensitive arithmetic checks. Optimized
+nested dissection was audited theoretically, not benchmarked. Neither a
+best-known memory advantage nor a general CNOT-memory breakthrough follows.
+
+## Independent essential-edge experiment
+
+The accepted source remains in the Sol attempt directory:
+
+```bash
+PYTHONPATH=. uv run --with networkx==3.5 python out/agent-board/workers/Ab4b526cf94734ba8/experiment_matching_reduction.py
+```
+
+The source header omits the required `PYTHONPATH=.` prefix; use the command
+above. Prediction `Ma924bd63523c4f6b` preceded both recorded attempts.
+The first launch, `Rc79b1f728245401c`, exited one before measurement because
+`experiments` was absent from its import path. Its preserved log is
+`out/agent-board/workers/Ab4b526cf94734ba8/matching_reduction_attempt1_import_failure.log`.
+No source repair was needed. Correcting the launch environment produced
+run `R399b6012f65a4ab4`, exit zero, five passing checks and no warnings.
+The same directory owns `matching_reduction_report.json` and
+`matching_reduction.log`.
+
+| k | allowed / forbidden / forced edges | residual after extracting forced pairs |
+|---:|---|---|
+| 1 | 10 / 4 / 2 | 8 vertices, 8 edges, one cycle, prefactor 4 |
+| 2 | 84 / 2 / 0 | 60 vertices, 84 edges, connected and nonbipartite |
+| 3 | 206 / 0 / 0 | 140 vertices, 206 edges, connected and nonbipartite |
+
+An edge is allowed iff deleting its endpoints leaves a perfect matching;
+it is forced iff deleting the edge destroys every perfect matching.
+Feasibility uses NetworkX 3.5 maximum-cardinality matching with weights
+ignored. Tiny independent recursive enumeration yields two matchings of
+weights 64 and 16. The extracted residual has partition 20. Original,
+allowed-only, and prefactor-times-residual FKT values agree in every row.
+Only the tiny row has independent partition enumeration; the larger rows
+reuse the existing FKT helper on different graph forms.
+
+The false deletion of allowed carry edge (1,2) lowers the tiny sum to 16.
+Keeping forced endpoints after extracting their prefactor incorrectly
+produces 320. Both wrong calculations therefore fail equality as required.
+Root inspected the full actual source, reports and both logs, and verified
+archived SHA-256 identities. The finite checks are not used as an all-k
+classification or a substitute for the proof.
+
+## Preserved review corrections and board provenance
+
+The initial source audit `Sc2eb3390c035421a` was returned for changes in
+review `V56ce46a9d3d54c6c`. It understated the bandwidth coefficient,
+reversed the endpoint permutation convention, and left the prefix proof
+conditional. The revision also distinguishes LRT's scalar algebra
+assumptions, the whole-pair transfer, and the signed-weight scope of the
+modern generic lower bound. The original artifact remains archived; the
+accepted revision is `Saa31447e54da42ed`.
+
+| task | evidence submission | review |
+|---|---|---|
+| Tb7fbe773e0e84d65, Astra derivation | S6b95d87e1e054aea | V27e3c95b6a944269 |
+| T73dcfa9d657440de, Sol primary audit | Saa31447e54da42ed | V38184b9512ca406c |
+| T808e358d27c54dd0, Sol independent check | S6256c3db366a44cc | V8f2c2aa3ad4348c7 |
+| T9b545ea306594ff5, root implementation | Se0060b9ac0b0464f | V698bae7d1f3c461c |
+
+Astra's derivation is
+`out/agent-board/workers/A23cd3ca781c347c5/reductions_and_recurrence.md`;
+Sol's revised audit is
+`out/agent-board/workers/A6698903e570c43eb/rotated_zigzag_dimer_audit.md`.
+Workers made no canonical edits. Root remains the single source writer.
+
+## Validation and checkpoint scope
+
+Core ran first and after the new experiment; both terminal exits were zero
+and both logs end in ALL TESTS PASSED:
+`out/carry_matching_core_initial.log` and
+`out/carry_matching_core_final.log`. The two bounded experiment reports
+supply the affected science checks. Production helpers were unchanged and
+the other eight science suites were not rerun. No native crash occurred in
+these bounded runs; TODO34's previous interpreter failure is unresolved.
+Documentation indexing exits zero (`out/carry_matching_reindex.log`), and
+all ten documentation checks pass (`out/carry_matching_docs_check.log`).
+Scoped diff whitespace, new-file whitespace and source syntax checks pass.
+All four board tasks are accepted and closed, with no experiment process
+remaining at this checkpoint.
+No manuscript, dependency file, default, host setting or firmware changed,
+and nothing was committed or published. Preserve the dirty worktree.
+
+---
+
+# MG — A planar algebraic route beyond one carry chain
+
+C86 owns the full-space coefficient contract, complement-parity proof,
+explicit matchgate construction, resource accounting, geometry deduction
+and arithmetic baselines. This investigation completes TODO47 at bounded
+audit and implementation scope. TODO48 owns the next discriminator. The
+general research goal remains active; no breakthrough or practical memory
+advantage is established.
+
+## How the direction changed
+
+The initial audit followed the actual `toffoli_arith` repeated-addition
+macros. Read-only constant additions group even with arbitrary scratch,
+provided their actual dirty translation is retained. The modular flag
+schedule obstructs replacing the full-space circuit by its clean-code
+identity. The independent fixture below checks that distinction.
+
+The coordinator then fixed a different explicit family: two independent-
+operand additions with a bit permutation between them. This is arithmetic
+connected by SWAP/CNOT gates, not the dirty-scratch controlled multiplier.
+Its two carry paths expose ternary factors. Complement symmetry suggested
+a local Hadamard basis change; the resulting pure-parity factors led to
+the known matchgate/FKT algorithm. The source and mathematical audits
+reviewed this mechanism before the main scientific run.
+
+The geometry audit ruled out assuming every planar matching of the two
+paths has bounded treewidth. Its source is the published Eppstein article,
+whose final construction is absent from the older arXiv HTML. The root
+independently read the relevant definition and construction and checked
+the bounded-edge cleanup argument. No growing adjacency lists or actual
+mask family were extracted. C86 states exactly what the deduction proves.
+
+## Main bounded exact experiment
+
+Source: `lab/planar_carry.py` and
+`experiments/experiment_planar_carry.py`. Reproduce with:
+
+```bash
+uv run --with networkx==3.5 python -m experiments.experiment_planar_carry
+```
+
+The registered prediction is M291997fc0e8d494d and run is
+Ree5cbd1efac84eb5. Raw evidence is `out/planar_carry_report.json` and
+`out/planar_carry_main.log`. The run exits zero with all seven harness
+checks resolved and no protocol warnings.
+
+- Thirteen local carry/degenerate parity fixtures give 104 external-deletion
+  signatures, each checked against independent tiny weighted-matching
+  enumeration. This includes zero tensors and the forced-edge case.
+- Four signed K4 edge-weight fixtures agree with FKT. An unoriented
+  Pfaffian gives one where the perfect-matching sum is three. Replacing
+  a negative edge by its magnitude changes exact cancellation from zero
+  to four. Nonplanar K3,3 is rejected. These are the three must-fail controls.
+- At fixed width three, every one of six intermediate bit permutations
+  is compiled from actual Cuccaro logical gates and SWAPs. Existing
+  `walsh.classical_permutation` replay matches independent integer word
+  arithmetic, including both output-carry XORs, on all 8192 basis inputs
+  per 13-qubit circuit.
+- The same twenty predetermined mask fixtures are used for every
+  permutation. All 120 signed coefficients agree exactly; 41 are nonzero
+  and 18 are negative. These are selected masks, not exhaustive coverage
+  of all mask tuples. The fixed arithmetic layout and masks leave the
+  permutation as the only varying experimental parameter.
+
+All coefficient and matching calculations use integers or `Fraction`.
+There is no tensor SVD, floating-point cutoff, large unitary or performance
+pilot. Tiny recursive matching enumeration is confined to local gadgets
+and four-vertex controls. The six small architecture graphs are planar;
+this experiment does not observe unbounded width or a memory separation.
+
+## Independent actual-macro fixtures
+
+Luna's accepted submission S5a46bedfeb2846e6 is under
+`out/agent-board/workers/A019b54646717444b/`, including
+`experiment_interaction_tests.py`, `interaction_tests_report.json`,
+`interaction_tests.log` and `findings.md`. Prediction M962ffe53b92d4a57
+preceded run Rc0d5402c8edf4a38, which exits zero. All four checks resolve
+without protocol warnings.
+
+The fixed ToffoliModExp layout uses N=3, a=2 and one exponent bit: eleven
+qubits and 2048 basis labels. Twelve constant-add variants cover constants
+zero through two and four unchanged control choices. Three modular-add
+variants use those constants with fixed two-bit controls. Every full output
+label agrees with the independent formulas, including restored wires.
+The same-control pair of constant additions commutes on every label.
+The deliberately incorrect clean-code shortcut for an uncontrolled add-one
+disagrees on 1792 labels; t=2, c0=0 provides an explicit increment-three
+witness. No dense full-space macro spectrum was built.
+
+The math audit also gives signed coefficients for a single CNOT interposed
+between repeated additions and a dirty modular noncommutation witness.
+Those are algebraic deductions in the audit, not separately executed
+experiments. The single-bridge coefficients reduce to one majority carry,
+so they do not supply a new memory opportunity.
+
+## Source scope and board review
+
+Astra's arithmetic audit is submission S96436d34be3a4187 under
+`out/agent-board/workers/A6e16adbdedcf43c2/audit.md`, accepted by review
+Vb2e9d8ac09a4494f. Its later `planar_geometry_followup.md` is archived in
+the main submission rather than retroactively inserted into that archive.
+
+Sol's primary-source audit is Sa25e89af4a7f42a7 under
+`out/agent-board/workers/A78a9281646b640fe/audit.md`, accepted by
+V4088979f401b4412. A correction to TODO47's opening premise matters:
+Wallén Section 3.4/Theorem 3.5 concerns parallel output concatenation and
+its tensor-product rational representation, not a bounded representation
+for arbitrary serial ARX/CNOT composition. Serial correlations require
+summing signed intermediate masks. Trail selection and squared or
+averaged linear potentials do not replace that exact signed hull.
+Weighted-automaton minimization also charges construction of its explicit
+input representation; small minimal dimension is not a free oracle.
+
+The matchgate audit reads the parity/identity and planar realization
+results of Cai–Gorenstein and the holographic contraction framework of
+Cai–Lu. C86 cites the published primary body and gives the explicit gadgets
+actually implemented. Genus-dependent Pfaffian sums appear as an
+unimplemented literature lead in the source audit; no such extension was
+built or benchmarked. The exact arithmetic specialization is our deduction
+from known machinery, with no priority conclusion.
+
+Root inspected the actual independent source, report and log before
+accepting it in V4f621f7e07574ac1. Main submission S62f1bf0bfc8a48cb
+archives the implementation, experiment, report, logs and geometry
+supplement. Astra's independent review Ve6e62715c0fd4dd4 inspected the
+archived contents and verified version hashes, sign calibration,
+normalization, degenerate gadgets, controls and scope. All four bounded
+board tasks are accepted and closed. Acceptance validates the recorded
+restricted result; it does not establish novelty or a broad simulator claim.
+
+## Validation and disposition
+
+Core passes before scientific edits and after implementation, with logs
+`out/interacting_carry_core_initial.log` and
+`out/interacting_carry_core_final.log`. Both bounded experiments pass;
+no failed scientific execution required correction in this investigation.
+Other science suites were not rerun. TODO34 retains the prior native-crash
+result; these small runs make no host reliability claim.
+
+Documentation regeneration and validation are recorded in
+`out/planar_carry_docs.log`. No manuscript was changed, and nothing was
+committed or published. The next question belongs only in TODO48; this
+checkpoint must not be relabeled a demonstrated CNOT memory breakthrough.
+
+---
+
+# MP — The intermediate oracle is enough
+
+C72 owns the proof, input promise and charged resource bounds. Main implemented
+`lab/merged_prefix.py`, reusing the sparse adjoint helpers and the UNCHANGED
+gate-by-gate sampling loop. Lower-cost agents supplied initial formula,
+complete-law and comparison experiments; main audited and strengthened their
+predicates before the authoritative reruns below. This is an opt-in float
+diagnostic, not numerical certification or a new general sampling principle.
+
+## Complex prefixes and complete laws
+
+`out/merged_prefix_formulas_20260911T073945582622Z.json` passes 6/6 checks.
+The 2,745 valid API requests include every tiny arithmetic/background/reflection
+boundary and partial-QFT request, endpoints t=0/1, odd/binary blocks, generic
+three-label routes, a pi-limit fixture and genuinely exact zero amplitudes.
+Largest merged/history complex residual is 2.84e-16; the existing independent
+full-r prefix reference agrees within 2.80e-16. Full joint laws also agree.
+History enumeration was patched to raise during merged calls. Wrong boundary,
+missing prepared-control tail factor and wrong internal QFT phase produce
+large complex discrepancies. Guard checks precede dense allocations.
+
+`out/merged_prefix_sampling_20260911T074213009424Z.json` passes 7/7 checks.
+The existing transition enumerator gives complete joint sector/output laws,
+not sampled histograms, for five tiny fixtures. All agree with the independent
+full-r circuit law, with TV at most 1.67e-16; merged joint evaluation gives
+TV at most 2.01e-16. An independent reached-SET recurrence verifies every
+reported prefix/block/QFT/reflection counter. Removing intermediate work
+mixers changes the main law. Wrong magnitudes, boundary inclusion and INTERNAL
+QFT phase change the complete law by TV approximately .0161, .0920 and .0600.
+
+An initially failed negative control was instructive: taking componentwise
+absolute values of the COMPLETED oracle output preserves all Born weights.
+It therefore cannot detect a sampling error, although it breaks the complex
+amplitude API. An agent temporarily replaced it with a constant-coordinate
+corruption to force failure; main removed that contrived replacement and
+retained the original transformation as a positive invariance check. Internal
+phase corruption remains a meaningful must-fail control. C72 states the
+distinction; the skill's nonvacuous-control rule materially changed this test.
+
+## Frozen serial comparison
+
+Main's authoritative serial report is
+`out/merged_prefix_comparison_20260911T074906529943Z.json` (4/4 checks).
+It includes 120 timed rows, eight preflights and a tiny static full-r law
+check. The latter is a correctness baseline, NOT a sampler timing result.
+All scientific test jobs had finished before this timing run.
+
+Inputs are the separately frozen adjacent and separated fixtures inherited
+from CM: supplied r=3*(2^40-1), b=3, t=15, noncommuting work blocks, fixed
+insertion positions and pi/4 coherent angles. Only k varies within each
+fixture. Three seeds are retained individually; proposal caps are 2,048.
+Medians below are seconds for setup, adapter construction and ONE returned
+sample, with counters/stat extraction included. These are matched FLOAT tasks,
+not algorithms certified to the same requested TV.
+
+Separated labels q0=0, q1=679535556937:
+
+| k | Merged prefix | Sparse reverse | History gate-by-gate | History rejection |
+|---|---:|---:|---:|---:|
+| 0 | .00423 | .00125 | .00318 | .00111 |
+| 2 | .00502 | .00283 | .01093 | .00259 |
+| 4 | .00795 | .00983 | .04095 | .01506 |
+| 6 | .01361 | .01464 | .15250 | .09772 |
+| 8 | .02321 | .02405 | .60058 | 1.08407 |
+
+For adjacent q1=1 at k=8 the respective medians are .02188, .02268, .57401
+and 1.48938 seconds. Do not pool the alphabets or interpret three seeds as a
+runtime theorem. Sparse rejection varies materially with the random retry
+count; the separated k=8 range is .01052–.04618 seconds versus merged
+.02259–.02554. The result supports rough parity with the strongest tested
+exact-arithmetic-method float implementation, not a clear new speedup.
+
+At separated k=8 both merged methods retain at most 16 reached labels, below
+the global bound 17. The declared working allowances are 1,134 complex slots
+for batched prefixes versus 624 for reverse vectors, each with 153 supplied
+gate slots. These include arithmetic temporaries but not Python overhead,
+integer storage or native RSS. All merged calls enumerate zero histories;
+prefix sampling also has zero rejection proposals. Counters instrument the
+OWNED input snapshot and every actual query/retry. Charging one prefix or
+ignoring retries is independently demonstrated to understate total work.
+
+C71's neighboring-route approximation remains a stronger simple alternative
+when its error is acceptable. The low-k input/static simplifications recorded
+in CM also remain relevant. Large supplied r alone is not evidence of hardness;
+neither construction includes order/index discovery or arbitrary physical
+gate compilation. Defaults and manuscripts are unchanged.
+
+## Preserved audit failures
+
+- The first formula report `out/merged_prefix_formulas_20260911T073711825148Z.json`
+  miscounted a diagnostic extra query. A subsequent agent pass still called a
+  history joint calculation "direct" and classified tolerance-small entries
+  as exact zero. Main added the existing independent direct joint reference,
+  strict zero counts, a genuine zero fixture and pre-allocation guards.
+- The sampling reports preceding the authoritative main run retain the false
+  phase-control prediction and subsequent verifier revisions. In particular,
+  `out/merged_prefix_sampling_20260911T074023086104Z.json` is the agent pass
+  with the replacement control, not the final audited evidence above.
+- `out/merged_prefix_comparison_20260911T074456055776Z.json` preserves an
+  unexplained preflight history-rejection TypeError involving None and complex.
+  Its 120 full rows passed, as did an agent repeat and main's serial rerun.
+  No per-row traceback was recorded then; the cause is NOT established as an
+  instrumentation error. Main added per-row traceback capture for recurrence.
+- `out/merged_prefix_lab.log` retains a test failure from trying to modify a
+  read-only gate array. The intended input-snapshot test now replaces the
+  dictionary entry and verifies that the adapter's owned copy is unchanged.
+
+No failed raw report was deleted or silently relabeled as a passing run.
+
+## Validation and next question
+
+Core ran first. Main's passing logs are `out/merged_prefix_core.log`,
+`out/merged_prefix_lab_final.log`, `out/merged_prefix_lab_no_flint.log` and
+`out/merged_prefix_claims.log`. The backend-absent run explicitly skips verified
+arithmetic checks. Lab includes all tiny prefixes, exact operation counts,
+history-forbidden sampling, snapshot ownership and invalid requests. Claims
+includes an exact integer-complex batched-adjoint identity and phase controls.
+The other six science suites were NOT rerun. Documentation validation is
+recorded separately in `out/merged_prefix_docs.log`.
+
+Reproduce from research/ with Python 3.12 and one BLAS thread:
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -u -m experiments.experiment_merged_prefix_formulas
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -u -m experiments.experiment_merged_prefix_sampling
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -u -m experiments.experiment_merged_prefix_comparison
+```
+
+Main read the primary BGL Algorithm 2 induction, adaptive extension and complete
+Lemma 1 robustness proof linked in C72; not every application in that paper
+was audited. Observed float residuals do not establish that robustness contract.
+Prior sparse-simulation positioning remains in C71.
+
+TODO 31 is complete at this bounded scope. TODO 32 owns the next discriminating
+test: fixed-alphabet support growth and a safely separated larger-k input API.
+Its initial algebra is a lead, not an implemented result at this checkpoint.
+The open-ended research goal remains active.
+
+---
+
+# NC — A phase-free binary interval suggests a useful cut
+
+While completing C80's weighted-envelope audit, main noticed that the
+phase-argument residues in C79 are nested binary prefixes, not independent
+periodic variables. Main derived a hybrid remaining-history / residue-cycle
+construction, then its largest-effective-gap identity. A lower-cost read-only
+auditor independently confirmed both, including strict-left versus at-cut
+phases, duplicate positions and the final endpoint. TODO40 retains the frozen
+pilot record; C81 now owns the proof. No new production class or claim
+of novelty has been made.
+
+The lower-cost integer tester's first report,
+`out/nested_phase_cuts_20260911T131221029090Z.json`, passes word/stride tests
+but constructs its partition only by grouping the reference scan. Main
+required an independent k/rho/N/z/start/count construction and comparison of
+ALL keys and labels. The largest-gap prediction was frozen after that first
+run, so it is a follow-up test, not retroactive evidence from the initial one.
+The preserved `...131603348822Z.json` fails after the expanded construction's
+preflight was undercounted; `...131626245476Z.json` corrects that reserve.
+Main subsequently charged argument calls inside the independent construction,
+all factor calls and the actual control work, instead of calling a fixed
+reserved witness allowance an observed count.
+
+Main's final report is
+`out/nested_phase_cuts_20260911T131801918073Z.json`, with log
+`out/nested_phase_cuts_main_final.log`: four predicates pass. All 7,200 frozen
+cases have exact original/cut phase words and identical independently
+constructed progression partitions. For positions (3,6), the cut-6 structural
+factor is 4 versus 16 at cuts 3 and 7. The minimum factors for second insertion
+3,4,5,6,7 are respectively 2,4,8,4,2, agreeing with the prederived largest-gap
+formula. The explicit unrefined control has phase words (0,0) and (4,0), which
+its wrong period-one construction collapses to the same word.
+
+The integer-visit preflight is 3,037,884 against a 5,000,000 cap; actual named
+relation, argument, construction and comparison counts are separate in the
+report. Numeric payload is conservatively reserved at 65,536 bytes against
+1 MiB, including one live case, summaries and conversion copies. There is
+no amplitude array, quantum-law comparison, sampler or timing experiment.
+This validates a structural mechanism, not actual construction savings:
+the tiny fixture's finite-support cap can hide the untruncated bound's gain.
+That checkpoint did not yet test phase-weighted coherent amplitudes; the
+follow-up below does.
+
+## Coherent-amplitude checkpoint
+
+C81 now owns the independently audited coefficient construction, disjointness,
+largest-gap identity and finite-truncation counterexample. Its mathematical
+status comes from the local-path proof, not the finite measurements. The
+permanent `test_claims.py` regression covers the integer identity, the exact
+local-pair-cost counterexample and the Gaussian-integer revival numerator.
+
+Main extended the existing ER `direct_column` reference with a sequence of
+same-oracle insertion positions, preserving the single-insertion default.
+The lower-cost tester implemented an experiment-local `cut_row`; no new
+generic vector propagator or production sampler was added. All phase factors
+are applied before summing candidate pairs, including candidates that would
+have canceled without those factors.
+
+The initial amplitude reports passed some useful predicates but were not
+accepted as the final audit. Main found a global-period-60 reduction in a
+constructor accepting an arbitrary period; divisor-period edge cases would
+hide it. This was replaced by supplied-period reduction with finite unit-phase
+checks, and the edge test was required to include a non-divisor period.
+A failed preflight was initially explained by a false claim that complex work
+blocks invalidated the geometric residue bound; main restored the proved
+R/F bound. Setup/FFT work, pre-call row reservations, failed-call counters,
+literal column/work normalization and the explicit C79 duplicate-phase
+baseline were subsequently added. The baseline originally reserved the larger
+of two covers while the workload preflight assumed its selected cover; main
+made these agree and checks actual reference work against its reservations.
+All historical failed and superseded JSON reports remain in `out/`.
+
+Main's authoritative amplitude report is
+`out/nested_phase_amplitudes_20260911T134901909125Z.json`, log
+`out/nested_phase_amplitudes_main_final.log`: four predicates pass. This
+compares all work labels for the frozen two-phase family and all selected
+cuts against literal columns. Maximum amplitude error is 3.14e-16; selected
+geometric Fourier error is 2.09e-15. Column norms and the complete work marginal
+normalize, and the duplicate-phase C79 baseline agrees within 2.49e-16.
+The wrong-left-coefficient control fails at work0, exponent60 with error
+greater than 1.31. This is a named coordinate witness, not just unequal bounds.
+
+The aggregate numeric-payload preflight is 1,744,384 bytes against 16 MiB.
+The reserved named-counter checksum is 2,570,586 against 15,000,000, with each
+category capped at 5,000,000. Reference, formula, setup, expansion, FFT and
+baseline counters are reported separately. Overlapping counter totals are
+diagnostic ledger checksums, not additive native FLOPs, timings or RSS.
+Short rows confirm C81's warning: the largest-gap structural factor does not
+by itself choose the cheapest actual construction.
+
+Core ran first and passed (`out/nested_phase_amplitudes_core.log`). The new
+claim regression passes (`out/nested_phase_amplitudes_claims.log`), and the
+unchanged-default ER experiment passes after its reference extension
+(`out/nested_phase_amplitudes_legacy_reference.log`, report
+`out/earlier_phase_cycles_20260911T132833197145Z.json`). The other seven science
+suites were not rerun; shared production helpers are unchanged at this stage.
+No manuscript, abstract, default sampler, firmware or host setting changed.
+
+## Edge coverage and a retained precision failure
+
+The initial broad edge prototype exceeded its assigned scope, wrote a second
+vector propagator, and did not exercise the actual cut constructor on the
+canceled-candidate fixture. It was replaced by a small audit using only the
+existing indexed literal-column reference. Main subsequently corrected the
+per-row reservations, activated cumulative reference counters, reconciled
+reservations with the whole preflight, and added column/work normalization.
+Small positive rows are no longer classified as zero using a tolerance.
+
+The positive fixtures cover empty, initial, duplicate and final insertions,
+r=b aliases, and a non-divisor period with an oracle range assertion. The
+complex three-cell matrices are Fourier blocks, with a column-phased middle
+block; these are separate edge fixtures, not another point in the r60 sweep.
+Actual cut-row amplitudes, disjoint norms and complete normalized conditional
+FFT laws are checked at every cut and work label of those fixtures.
+
+The retained failure `out/nested_phase_edges_20260911T134816675520Z.json`
+used a ROW-phased Fourier middle block instead. Its r=b=3 work0 row is nearly
+canceled. Changing to column phasing produced nondegenerate positive cases,
+but main retained the original case as an explicit negative precision control
+rather than deleting the failure. Small absolute amplitude error does not
+ensure stable conditional normalization there; this is not appreciable error
+in the overall joint law because that work event has tiny computed mass.
+
+Main's final report is
+`out/nested_phase_edges_20260911T135924003166Z.json`, log
+`out/nested_phase_edges_main_roundoff.log`: five predicates pass. Positive
+amplitude error is at most 1.25e-16 and conditional-law TV at most 1.60e-16.
+Deleting the actual revived candidate changes its amplitude by about 0.7071.
+The separate near-canceled control has amplitude error 7.86e-17, row norms
+around 2–3e-31, yet conditional TV about 0.0896. These finite observations
+are now in the reproducible report; they are not an exact-zero decision or
+a numerical certificate. Preflight reserves 86,033 named units and 269,056
+numeric bytes against the original 1,000,000-unit / 4 MiB caps. Actual named
+units are 23,657; no native timing inference is made.
+
+## Longer progressions: actual construction savings
+
+After the tiny/edge audit, main froze the selected-row s12,t13 discriminator.
+An independent integer audit predicted the exact grouping/coefficient counts
+and geometric candidates before any amplitudes were measured. The independent
+reference uses the initial/late-mixer displacement cone, not the cut formula,
+to prove every unqueried column is zero for the selected work label.
+
+The lower-cost tester built the experiment using the same cut constructor and
+ER literal reference. Before execution, main required explicit-Q geometric
+queries, own-normalized laws and TV, correction of doubled FFT reservations,
+complete reservation reconciliation, and a work0-only control. Main further
+added finite checks, charged scatter/comparison entries, checked observed
+construction counts against the prederived integers, and reported actual
+same-row comparisons rather than ratios to loose upper bounds.
+
+The authoritative report is
+`out/nested_phase_long_rows_20260911T140226518143Z.json`, log
+`out/nested_phase_long_rows_main_final.log`: four predicates pass. All 8,192
+amplitudes on each selected row agree within 3.52e-16; full normalized-law TV
+is at most 1.74e-16. Selected geometric amplitudes agree within 1.61e-13.
+The wrong-left control has a work0, exponent60 witness exceeding 1.25.
+
+For work0, cut11 has 144 nonzero progressions of length 4–5, versus 614
+singletons at cuts5 and12. Its grouping/coefficient visits are 36+288,
+compared with 2304+1230 and 18+1230, respectively. Across work0,1,59 the
+all-left-to-hybrid local-pair ratio is 3.83–3.86 and its phase-call ratio
+4.23–4.26. The earliest-cut local-pair ratio is 10.88–10.91. These are the
+named counts of the same naive constructor, not runtime ratios or superiority
+over specialized caching, an orbit table, or a full-r sequential simulator.
+The measured number of nonzero components is not an exact symbolic-zero
+certificate; the independently proved/precounted geometric counts are separate.
+
+Only 2,865 support-compatible literal columns were queried; three selected
+Q-entry rows and their FFTs were retained, never a full Q-by-r table. The
+aggregate numeric-payload reserve is 3,261,640 bytes against 4 MiB, including
+rebindings, scalar records and conversion copies. The overlapping named-work
+preflight is 2,546,732 against 15,000,000; category caps remain 5,000,000.
+Actual reference block products are 515,700, distinct from row construction.
+
+## An exact selector, not just a largest-gap heuristic
+
+The independent geometry counts suggested a simplification to main: slice
+occupancies differ by at most one, so an integer refinement period either
+clips all residue classes or clips none. Main derived C81's exact T/S minima;
+an independent lower-cost proof audit confirmed them, including aliases and
+short slices. This removes the need to enumerate period cycles just to choose
+a cut. C81 owns the proof, cost-model restrictions and complexity statement.
+
+The initial selector pilot was reduced before measurement after its preflight
+exceeded the frozen 100,000-visit cap. A subsequent verifier KeyError and
+preliminary pass with incomplete accounting are retained. Main corrected a
+monotonicity boundary, replaced a symbolic grouping charge by actual pair
+enumeration, charged selector comparisons and retained counters on failure.
+
+Main's final report is
+`out/nested_phase_selector_20260911T140027539754Z.json`, log
+`out/nested_phase_selector_main_final.log`: three predicates pass. All 20
+fixture/phase families (110 cuts) match both integer closed forms, exercise
+both clipping branches and retain a minimum among the phase-position/end
+cuts. The known largest-gap misranking remains the must-fail control.
+Preflight is 90,306 named visits and 196,608 numeric bytes; actual visits are
+50,136. These are integer checks, not amplitude or phase-oracle evaluations.
+
+The permanent claim regression adds another 270 small all-cut cases and
+passes in `out/nested_phase_selector_claims_final.log`. Its first run failed
+only the hard-coded expected case total (276 instead of 270); all preceding
+identity assertions passed. That failed log remains
+`out/nested_phase_selector_claims.log`. Core-first and legacy-reference gates
+are recorded above. The other seven science suites were not rerun because
+production helpers are unchanged. TODO40 is complete at this mathematical /
+bounded amplitude scope; TODO41 owns actual sampler integration and its
+stronger end-to-end comparison. No generic breakthrough or novelty is claimed.
+
+Final documentation indexes were regenerated and all ten documentation checks
+pass (`out/nested_phase_docs_check.log`); `git diff --check` is clean. The
+qsim-research workflow kept the actual-count comparison and ill-conditioned
+negative control in scope while deferring sampler and certification claims.
+
+---
+
+# NG — Working precision includes wrapping and retry-policy overhead
+
+C62 owns the norm-error theorem and conditional precision model. This follows
+§VP's requested-accuracy/working-mantissa discrepancy. The qsim-research skill
+required independent controls, matched accuracy and explicit resource/input
+semantics. Three lower-cost agents tested precision growth, isolated wrapping
+and norm prefixes. Main implemented/audited the opt-in mode, corrected the
+verifiers, and ran the complete-law/timing comparison and regressions.
+
+## The original wide case did not intrinsically require 154 bits
+
+The previous maximum was an ADAPTIVE DOUBLING ENDPOINT, not the minimum
+sufficient mantissa. The initial value was P=77 for p=61 coordinate bits.
+Main's earlier conversational shorthand that queries “needed 154 bits”
+overstated what had been measured. §VP's report correctly records execution;
+it must not be read as a minimum-precision result.
+
+The first retried query was selected diagnostically from fixed seed 624,
+then frozen while P varies by one from 64 through 160: sector
+1038651310644072125, exponent 2246884356896903187, stop 63, reflection
+boundary, measured 45, output 16994140961528. This is not unbiased label
+sampling or a worst-case search.
+
+`out/precision_growth_20260911T040055026245Z.json` passes 3/3 checks. This
+query's P=77 radius is about 2.32550e-19, just above target 2^-62, while
+its midpoint discrepancy against P=512 is about 9.49546e-27. P=78 passes.
+Scanning all 38 retried queries on this fixed trace, first passing precisions
+from P=77 upwards lie between 78 and 89. The doubling policy overshoots those
+thresholds. No bound on unqueried labels follows.
+
+The experiment also checks 1,520 distinct tiny labels at P=64,128 against
+P=512 midpoints, as precision diagnostics. It uses no amplitude denominator.
+Main removed a float-square-root/Fraction detour, strengthened a count-only
+convergence predicate, and added the retry-threshold scan. The earlier agent
+report `out/precision_growth_20260911T035545724644Z.json` is retained.
+
+## A known numerical-analysis connection
+
+Main read FLINT's complete enclosure-quality/precision guide and Acb's
+rectangular definition, linked in C62. A rotation enlarges an axis-aligned
+error rectangle even though Euclidean distance is preserved. Alternating
+a rotation and its inverse isolates representation overestimation from
+physical amplification or difficult normalization.
+
+With initial axis radii eps=2^-20, P=256 and alternating rational-pi
+45-degree phases, sequential radii grow approximately as 2^(n/2)*eps through
+64 steps; the final inflation is about 4.29497e9. Applying the combined phase
+once gives eps on even identity steps and sqrt(2)*eps on odd steps.
+`out/interval_wrapping_20260911T040054469855Z.json` passes 5/5 checks, using
+exact squared-radius comparisons and a declared small allowance for the
+backend's fixed-precision radius rounding. Floats only display ratios.
+
+Main strengthened loose upper-bound/symmetry predicates to test the stated
+growth and removed a fictitious 64-byte scalar-memory guard. Scalar-object
+counts are not bytes or RSS. The initial report
+`out/interval_wrapping_20260911T035738698435Z.json` and earlier failure
+artifacts remain. An initial agent derivation also treated complex phases
+as nonexpansive in coordinate-radius norm; main's pi/4 counterexample fixed
+that mistake before the derivation entered C62.
+
+## Opt-in norm transport
+
+`VerifiedReflectionCircuit(..., enclosure_mode="norm")` uses the shared
+finite contraction's new arithmetic-step callback. It neither reorders gates
+nor introduces another propagator. Each exact contraction acts on an exact
+dyadic midpoint, adding its local Euclidean error bound to a separately
+retained prior radius. Reinsert that radius as a coordinate box only once per
+history, before verified coefficient multiplication and coherent summation.
+
+The first prototype used the square root of summed squared radii. Main
+replaced it by twice the maximum coordinate radius, conservative for four
+real coordinates and cheaper to compute. All rounding/error terms remain
+charged. Rectangular mode stays default; lower precision does not guarantee
+faster execution or tighter bounds on every input.
+
+`out/norm_prefix_20260911T040237278315Z.json` passes 3/3 aggregate checks:
+both modes, all 1,520 tiny labels, p=4,12,24; independent full-r FLOAT
+diagnostics; exact Fraction outward comparisons to higher-precision boxes;
+analytic zero/Bell-H cases; and a midpoint-only control excluded by the
+higher-precision enclosure. The high-precision rerun is not an independent
+algorithm; the full-r product is the independent algorithmic reference.
+Main corrected the probe's float-to-Fraction detour, added an outward error
+predicate, and replaced hypothetical NumPy label-payload accounting by a
+conservative bounded-cache allowance. The prior report
+`out/norm_prefix_20260911T040013602667Z.json` remains historical.
+
+## Same accuracy, fewer bits, slower code
+
+Main reused the EXACT Fraction transition enumerator and outward final-ball
+TV calculation. At target TV 10^-3,10^-6,10^-12, both modes' complete tiny
+laws normalize exactly and obey the SAME planned budgets. Their exact
+finite-bit laws coincide in these fixtures, not necessarily for arbitrary
+inputs/rounding ties. The finest outward TV bound is about 6.65523e-14.
+
+`out/norm_sampling_20260911T040240521257Z.json` passes 9/9 checks, including
+descriptive timing-accounting checks, not nine independent discoveries.
+The fixed wide circuit uses seeds 624,625,626, two repeats and alternating
+mode order. Rectangular mode reaches P=154; norm mode P=77 and avoids the
+recorded retries. Inputs, requested TV, seeds and integer kernels match.
+
+Median times are approximately 0.26066 s rectangular and 0.34938 s norm:
+norm mode is about 1.34 times SLOWER here. Extra local radius bookkeeping
+outweighs saved precision/retries. These are bounded timings, not universal
+performance laws or memory measurements. Keep the strategy opt-in; do not
+sell this precision reduction as a general simulation speedup.
+
+## Validation and reproduction
+
+Use the command below, substituting `experiment_interval_wrapping`,
+`experiment_norm_prefix`, or `experiment_norm_sampling` for the other probes:
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' --with 'python-flint==0.9.0' python -m experiments.experiment_precision_growth
+```
+
+Core passed first (`out/precision_growth_core.log`). Full lab and claims pass
+with the backend (`out/precision_growth_test_lab.log`,
+`out/precision_growth_test_claims.log`). Existing verified and float coherent
+complete-law experiments pass after the callback refactor
+(`out/precision_growth_verified_sampling.log`,
+`out/precision_growth_coherent_sampling.log`). Other six science suites were
+not rerun. The lab suite also passes without the optional backend, explicitly
+skipping verified/norm oracle tests (`out/precision_growth_no_flint_lab.log`);
+those skips are not additional verified tests. Documentation regeneration/checks are in
+`out/precision_growth_docs.log`. No paper/abstract edits or commits. TODO 24
+alone specifies next work; the open-ended research goal remains active.
+
+---
+
+# NS — From progression rows to returned samples
+
+The user resumed research from the paused TODO40 checkpoint using the original
+qsim-research workflow. Main implemented `NestedPhaseProgressions`, preserving
+the existing sample, conditional rejection and forced-joint methods. Lower-cost
+initial testers audited bounds and supplied law/RNG/comparison drafts; main
+reviewed, corrected and reproduced the evidence. C81 owns the implementation
+contract and algebraic resource bounds. Current research artifacts and the
+pre-edit backup are inside research/ (`out/` for temporary material); the
+installed skill was only read externally.
+
+## Corrections before accepting evidence
+
+The independent bounds audit confirmed the selected-row reserve and stride,
+but identified missing distinct-residue/candidate work in the total local cap.
+Main included this, charged phase partitioning and precomputed cut geometry.
+Right caching still does not make the selector a phase-cost optimizer; it can
+increase calls in highly truncated rows.
+
+The first law report had inadequate row-work allowances and calculated some
+acceptance discrepancies without asserting them. The corrected audit verifies
+public columns, independent conditional normalization, both normalized proposals
+and accepted masses, and reconciles observed counters with pre-call bounds.
+Main separated reservations from observed checksums and recorded the near-zero
+row's work-weighted joint error. Earlier `out/nested_phase_sampler_*.json`
+reports are preliminary unless identified below.
+
+The RNG tester edited the law tester's file despite assignment to another
+file, causing an intermediate missing-function failure. Reports remain. Its
+recovered draft checked only selected paths, misaligned a retry RNG script,
+and used a counter predicate as a negative control. Main replaced it with
+complete independent weighted decision enumeration. The discarded draft is
+`out/nested_phase_sampler_rng_agent_draft.py`.
+
+Before executing the comparison, main corrected a reference that applied the
+late mixer twice, missing counter subcategories and forced-query weighted
+divisions, normalization/failure predicates and dense product accounting.
+It strengthened the cached fixed-cut baselines and used common seed exponents
+and work draws. The unexecuted initial draft is preserved as
+`out/nested_phase_sampler_comparison_agent_draft.py`. These are verifier
+corrections, not failed predictions about the physical circuit.
+
+## Tiny laws and precision
+
+Authoritative report: `out/nested_phase_sampler_20260912T154859442775Z.json`;
+log: `out/nested_phase_sampler_laws_main_final.log` (five checks pass).
+Fourteen fixture/construction cases include empty, initial, duplicate, endpoint
+and distinct phases, r=b aliases, a non-divisor period with checked oracle
+indices, revived cancellations, exact-zero rows and cached alternatives.
+References use existing column engines. Public columns and streamed rows are
+checked; auto rows exercise both proposals against complete tiny FFT laws.
+
+Maximum amplitude error is below 2.23e-16, joint-coordinate error below
+6.94e-18, and accepted conditional discrepancy below 1.12e-16 in positive
+fixtures. NC's near-cancellation control retains positive computed norms and
+conditional TV about 0.0896 despite amplitude error below 7.86e-17. Its
+work-weighted joint half-L1 error is below 4.34e-33. This preserves the
+conditional instability rather than declaring a tiny positive row zero.
+
+Per-call reservations total 673,527 named units; reconciled observed counter
+checksum is 183,254. These are distinct, overlapping diagnostic ledgers, not
+native FLOPs. Additional reference/setup/FFT allowances are identified in the
+report. Numeric payload reserve is 409,088 bytes, excluding Python headers,
+RSS and arbitrary oracle internals. No finite-bit accuracy claim follows.
+
+## Actual RNG paths
+
+Authoritative report: `out/nested_phase_sampler_rng_20260912T154900507052Z.json`;
+log: `out/nested_phase_sampler_rng_main_final.log` (four checks pass).
+Main enumerates actual work/component/bit/lift/accept-or-reject transitions for
+the exact-root literal columns in the source. Each of two cuts and two modes
+traverses 176 weighted paths. Both gcd-lift regimes occur. The full sample
+call performs a forced rejection followed by success with one work draw;
+exhausted calls retain counters. Fixed-work retries recover the independent
+joint FFT law within 8.68e-19. Restarting work instead changes its marginal
+by TV 1/12.
+
+The physical fixture has equal component masses, so a separately identified
+unequal-mass conditional-row hook exercises different weights through the
+actual RNG loop. Its accepted laws agree coordinatewise with an independent
+FFT; it is not presented as another physical joint circuit. In total 1,364
+sampler calls execute, with observed sampler checksum 102,058 against 725,416
+reserved units. Reference/path/setup units are separately counted. Weighted
+traversal does not establish the distribution of all finite machine RNG values.
+
+## Matched returned-sample comparison
+
+Authoritative report:
+`out/nested_phase_sampler_comparison_20260912T154915832670Z.json`;
+log: `out/nested_phase_sampler_comparison_main_final.log` (five checks pass).
+The state is the previous NC long-row fixture. Six construction modes include
+cached alternatives, the hybrid cut, automatic selection, right caching and
+a supplied phase table. Each uses both proposals. Every automatic work row
+selects the hybrid cut in this fixture.
+
+These are work-marginal averages from constructed float rows and C80's
+**uncapped mathematical envelope**, not averages fitted to four draws:
+
+| Construction | Proposal | Expected attempts | Expected Fourier component terms | Expected progression marginal queries |
+|---|---|---:|---:|---:|
+| cut 5 or cut 12 | mass | 637.15 | 407,003 | 14,017 (cut 5); 2,549 (cut 12) |
+| cut 11 / auto | mass | 149.34 | 22,360 | 2,389 |
+| cut 5 or cut 12 | root_mass | 288.07 | 183,318 | 6,338 (cut 5); 1,152 (cut 12) |
+| cut 11 / auto | root_mass | 67.35 | 10,045 | 1,078 |
+
+The roughly eighteen-fold Fourier-component saving survives rejection.
+Marginal-query savings against cut 12 are much smaller because its stride
+has a smaller reduced Fourier register. The full report separates root-mode
+square roots/divisions, column work, row construction, selector and phase costs.
+Right caching lowers hybrid row phase calls from 578 to 302 and products
+from 1,024 to 748. The table baseline charges its values, storage and lookups.
+
+Forty-seven of forty-eight capped requests return. One cut-5 mass-mode request
+exhausts its cap; all its work remains in totals. Per-request and per-return
+counters including failures are recorded. Four seeds per configuration are
+not a statistical runtime estimate; failed calls are not restarted or filtered.
+
+Four complete-output marginal queries, summing every work label, agree with
+the existing full-work sequential_path reference within 6.51e-19. Its omitted-
+phase control changes checked outputs, and two sequential draws return.
+This supplements complete tiny-law tests; it is not a full long-output TV
+certificate. Dense matrix products, validation and QR shapes are charged
+separately and cannot be equated with scalar geometric queries. No native
+speedup over this baseline follows. Full-r cached/sequential approaches remain
+relevant at fixed r.
+
+Preflight reserves 11,948,224 numeric bytes, 59,266,012 scalar named units and
+288,419,170 dense diagnostic units. Actual scalar budget usage is 26,563,649.
+The dense checksum includes overlapping unitarity subcounts; neither checksum
+is an additive native FLOP count. No Q-by-r archive or timing sweep is used.
+
+## Validation and next boundary
+
+The fresh core gate passed before implementation. `test_lab.py` passes in
+`out/nested_phase_sampler_lab.log`, including distinct-oracle, revival,
+varying-stride, pre-copy cap and invalid-input regressions. `test_claims.py`
+passes in `out/nested_phase_sampler_claims.log`. An AST comparison with the
+saved pre-task source confirms all pre-existing work-first functions/classes
+are unchanged. The other six science suites were not rerun.
+Indexes were regenerated and all ten documentation checks pass in
+`out/nested_phase_sampler_docs.log`; `git diff --check` is clean.
+
+TODO41 is complete at bounded float implementation/comparison scope. TODO42
+owns cut selection for total expected sampling work without constructing every
+competing row. Certification, arbitrary mixers, wider scaling and native timing
+remain separate. No manuscripts, abstracts, existing defaults, host settings
+or commits changed in this follow-up.
+
+---
+
+# OB — Observable fine-work dynamics need not break certification
+
+TODO 25's bounded implementation/comparison is complete. C61 owns the extended
+exact-input promise, C62 the dimension-aware norm transport, C63 the accepted
+law, and C64 the forward/backward mass budget. This extends an existing proved
+construction; it is not a new simulation principle or a factoring breakthrough.
+
+The qsim-research skill kept the comparison on a fixture that fails the binary
+scalar shortcut, required separate coordinate/CDF/matrix dimension accounting,
+and led main to repair verifier predicates rather than accept unanimous pass
+reports at face value. Lower-cost agents supplied full-law/edge tests and a
+read-only proof audit; main implemented production changes, strengthened the
+tests and reran them. Default b=2 behavior remains available and tested.
+
+## Implementation boundary
+
+`VerifiedReflectionCircuit(..., block_size=3)` is opt-in. Angles remain exact
+rational multiples of pi; backgrounds rotate fine labels 0/1 and leave label
+2 unchanged. This is a supplied indexed orbit promise, not a new physical
+three-qubit gate interface or arbitrary rounded-unitary input. The b=2 scalar
+sampler explicitly rejects b=3. The optional arithmetic backend is unchanged.
+
+Main generalized vector lengths, twisted-shift divisors, exact label updates,
+proposal snapshots and coherent acceptance sums. The existing finite
+contraction and forward-state/backward-effect identities are reused. The
+amplitude planner charges all six real coordinates and three-bin categorical
+updates; norm mode uses the corresponding conservative integer radius factor.
+The finite-work tree remains binary, so its probability error budget does not
+change merely because the work block grows. Matrix costs still do.
+
+## Complete-law and edge evidence
+
+The primary fixture is the frozen r=9,b=3,t=4 circuit from §FW. For target
+TV 1e-3 and 1e-6, the experiment covers both prefix and finite-work proposals,
+both rectangular and norm enclosure modes, all four histories, three initial
+sectors and all sixteen outputs. Each component law and complete accepted law
+normalizes exactly. Per-component P192/P256 outward TV bounds meet their own
+plans; proposal TV, acceptance success and final TV meet the common plan.
+Independent full-r products are normalized and agree with ideal interval
+midpoints within the declared 2e-14 tolerance. That independent floating
+comparison is not itself the numerical certificate.
+
+At target 1e-6, the accepted-law TV upper bounds are about 1.844e-8 for the
+prefix proposal and 1.808e-8 for finite work. Both enclosure modes satisfy
+the contract; matching reported summary numbers is not proof that their
+entire approximate laws are bit-for-bit identical. The comparison also gives
+an outward late-background-removal TV lower bound about 0.05095, confirming
+that its non-scalar work dynamics are observable.
+
+The edge experiment checks invalid dimensions/divisibility/rounded angles and
+scalar specialization, exact route endpoints, width zero, and complete forced
+laws. An insertion-0 angle pi*2^-128 supplies a strictly positive tiny prefix
+coordinate mass, with an outward upper bound below 2^-250; the known prefix
+normalization factor is explicitly checked. This is a coordinate mass, NOT
+proof of an exact-zero binary output branch. No all-zero binary block was
+observed at the requested full-law accuracy in that fixture. A separate p=0
+mass-oracle test rounds an exact half-half root to zero weights and checks
+the declared finite-bit fallback; it does not claim that coarse test meets
+the primary target accuracy.
+
+C56's early span-preserving cancellation is tested on its exponent MARGINAL,
+not silently strengthened to a joint-sector assertion. Moving the same fixed
+rotation to the next insertion supplies a visible reference control. Both
+compared laws normalize. The fixed-initial verified output laws differ as
+well, which is distinct from a single binary conditional ratio.
+
+For actual adaptive replay, main widens a valid backward effect only AFTER
+selecting a bit. The production cursor rebuilds twice in total and replays
+that selected bit once; the resulting weights exactly equal a fresh run at
+the final precision. Resetting E to identity at the SAME depth/output prefix
+changes its normalized binary law by about 0.2200. This is a genuine
+conditional-ratio control, unlike §FW's binary mass-only example. All six
+real/imaginary coordinates are exercised in the enclosure comparison, with
+endpoints extracted at their evaluation precision. Higher-precision midpoint
+containment is labeled a diagnostic, not a new containment theorem.
+
+Authoritative main-reviewed reports:
+
+| Experiment | Checks | Report | Log |
+|---|---:|---|---|
+| `experiment_verified_odd_block` | 4/4 | `out/verified_odd_block_20260911T051252893314Z.json` | `out/verified_odd_block_audited.log` |
+| `experiment_odd_block_edges` | 6/6 | `out/odd_block_edges_20260911T051833615443Z.json` | `out/odd_block_edges_audited.log` |
+| `experiment_odd_block_comparison` | 7/7 | `out/odd_block_comparison_20260911T051014870500Z.json` | `out/odd_block_comparison.log` |
+
+## Bounded matched timing
+
+Only after the tiny full-law gates pass, the comparison runs a SEPARATE
+supplied r=3*(2^60-1),b=3,t=63 circuit with work rotations at insertions
+16,32,48 and two coherent reflections at 21,42. This is not a width-scaling
+fit or evidence that the tiny visibility magnitude persists unchanged.
+
+At target TV 1e-6, median whole-construction-and-sampling times are about
+0.1152 seconds for prefix-component rejection and 0.01480 seconds for
+finite-work rejection, a ratio about 7.78. The two methods consume different
+random words: their three seeded attempt counts are respectively 4,2,1 and
+2,1,2, each repeated twice with alternating execution order. There are three
+random traces per method, not six independent traces. This is not a universal
+speedup or an optimality claim against all tensor/history decompositions.
+
+All setup, rejected attempts, CDF words and refinement are charged. The wide
+finite-work runs rebuild their forward matrices at higher precision before
+the first bit, so their recorded replay counts are zero; the edge experiment
+separately exercises replay AFTER a selected bit. Maximum working precisions
+in these runs are 202 for prefix rejection and 212 for finite work: higher
+precision does not imply more total work when repeated contractions disappear.
+Retained scalar counts are not RSS; no wide orbit/output table is allocated.
+The backend-wide primitive-error constant remains deferred in TODO 24.
+
+## Preserved failures and corrections
+
+- The full-law agent first supplied an incorrectly shaped float comparison
+  gate; `out/verified_odd_block_20260911T051005477475Z.json` records the rejected
+  input. Its repaired report `out/verified_odd_block_20260911T051025646760Z.json`
+  remains available. Main then added the omitted independent TARGET-error
+  predicate, guarded accumulated report rows, and used the standard harness
+  schema. Per-component agreement alone would not check the coherent target.
+- The first edge invocation omitted the optional backend; its failure is
+  `out/odd_block_edges_failure_20260911T050958854802Z.json`. A subsequent
+  false invalid-mask control and insufficient replay predicate are retained
+  in `out/odd_block_edges_20260911T051031155739Z.json` and the matching
+  `out/odd_block_edges_failure_20260911T051031160350Z.json`.
+- Further agent reports at `051356958085Z`, `051445451623Z` and
+  `051453674461Z` under the `out/odd_block_edges_` prefix are preserved.
+  The final agent report `out/odd_block_edges_20260911T051528897662Z.json`
+  explicitly disclosed that it did not trigger production replay. Its
+  reset-effect comparison also used a root versus a later node. Main did not
+  treat this as the requested same-node adaptive test; the authoritative
+  correction above now exercises both actual replay and the correct control.
+- Main also checked exact route destinations rather than only determinism,
+  aligned the near-zero forced circuit with its tiny-coordinate diagnostic,
+  tested the coarse fallback separately, required all reference masses to
+  normalize, and selected a nontrivial six-coordinate enclosure label.
+  These are verifier corrections, not evidence of a failed production theorem.
+
+## Validation and follow-up
+
+Fresh core passed before science: `out/odd_verified_core.log`. Affected
+suites pass in `out/odd_verified_lab.log` and `out/odd_verified_claims.log`.
+Without the optional backend, lab passes with explicit arithmetic skips in
+`out/odd_verified_lab_no_flint.log`. Existing binary complete-law regressions
+pass in `out/odd_verified_sampling_regression.log`,
+`out/odd_verified_finite_work_regression.log` and
+`out/odd_verified_rejection_regression.log`. The other six science suites
+were not rerun. The documentation gate is `out/odd_verified_docs.log`.
+Neither paper nor either abstract workshop was edited; no commit was made.
+
+Reproduce, substituting any experiment name from the table:
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' --with 'python-flint==0.9.0' python -m experiments.experiment_odd_block_comparison
+```
+
+An initial algebra audit suggests a connection between forward channel memory
+loss and true-mass-weighted sampling error, without discarding backward
+measurement effects. Main and a lower-cost agent checked the candidate POVM
+argument; no mixing/compression experiment or new sampler is supplied here.
+The primary-source check found directly relevant product-contraction/MPS work:
+main read Definition 2.1, Propositions 2.2/2.4 and the good-block condition
+and proof of Proposition 3.9 in
+[Pathirana, arXiv:2605.00157v1](https://arxiv.org/html/2605.00157v1).
+It bounds memory loss using contractive channel products, including cases
+where a one-step criterion is insufficient. This is relevant prior work,
+not our discovery of a general replacement principle. Its random-cocycle
+and MPS application sections have not been audited here. TODO 26 owns the
+specific next question and its required counterexamples.
 
 ---
 
@@ -1282,32 +6103,484 @@ predicted first:
 
 ---
 
+# PC — Audit what the gate description supplies
+
+C74 owns the elementary proofs and their oracle/physical distinction. While
+auditing the wider word-envelope comparison, main asked whether its supplied
+indexed gates could be evaluated directly on actual modular orbit encodings.
+The useful split is between fine-coordinate/cell-reflection evaluation and
+high-order phase evaluation. This is a scope clarification, not a new
+discrete-log algorithm or a lower bound on quantum gate synthesis.
+
+A lower-cost agent independently checked the algebra and prepared an exact
+integer/Fraction probe. Main corrected the proposed inverse-doubling error
+threshold, strengthened the verifier and reran it. The decoder receives only
+noisy oracle values, not the underlying coordinate. Those values are generated
+from known test coordinates: the experiment DOES NOT implement the hypothetical
+physical x-to-phase evaluator required by the reduction.
+
+## Exact finite evidence
+
+Main's `out/physical_orbit_coordinates_20260911T084518735050Z.json` passes
+7/7 checks using system Python 3.12.3, with NumPy 2.4.6 imported by the harness.
+The scientific calculations are integers/Fractions, not floating contractions.
+Seven frozen prime/composite fixtures test every orbit label, with orders up
+to 96, fine dimension up to six and coarse modulus up to 32. Exact-order and
+simultaneous orbit/table preflights run before the relevant allocations.
+
+The fine-coordinate table and physical cell reflection match every reference
+label. Plain inversion fails on each fixture. All tested nontrivial q phases
+recover their promised coordinate residues at rational error 3/(8s), including
+wraparound; an error of one full grid step supplies the insufficient-precision
+control. Subgroup-table recovery and independently generated reflection-group
+closure agree with C74/C59. The extra N=97,a=5,b=3,M=32 fixture uses labels
+(0,8,16): their phase orders already permit a small static grouping. This
+guards against presenting an easy low-order family as a new simulation win.
+
+Inverse doubling checks 4,636 residue/error-pattern cases: all signs of
+1/16 errors for M=2,...,16, and four fixed patterns at M=17,31,64,127.
+It checks both grid recovery AND the contracted circular-error bound.
+The epsilon=.24 control has a concrete failure already at M=2,m=0:
+observations (19/25,6/25) produce estimate 31/50 and the wrong grid residue.
+This refutes the agent's initial epsilon<1/4 sufficient-condition suggestion;
+the claim uses the proved epsilon<1/6 condition and tests epsilon=1/16.
+
+Charged fixture/reference updates total 16,544; decoder/reference updates
+total 85,526, below separate caps 250,000 and 150,000. They are explicitly
+not native instruction, bit-runtime or RSS measurements. The small full-orbit
+reference is test-only; it is not hidden inside the proposed b-entry evaluator.
+
+## Corrections and limits
+
+The first initial report, `out/physical_orbit_coordinates_20260911T084134955450Z.json`,
+stopped at the unwrap preflight: its 206,348-operation plan exceeded 150,000.
+Earlier fixture computations had run; no unwrap measurements were completed.
+The requested four-pattern wider coverage had not been fully wired into the
+caller and still expanded all 64 patterns for two wider moduli. Main corrected
+that mismatch without raising the cap. The first main pass is preserved as
+`out/physical_orbit_coordinates_20260911T084229232279Z.json`; the final pass
+adds the larger small-phase-order fixture, exact error-bound predicates and
+raw negative-control observations.
+
+Before that first run, audits caught missing Fraction serialization, a static
+comparison made by rebuilding the claimed cosets rather than generating the
+group, incomplete allocation/cost guards and excess repeated setup powers.
+These were verifier defects, not evidence against the reductions.
+
+This test checks the coordinate/phase algebra and oracle decoder. It
+does not independently compile the full physical fine-work gate or a clean-
+ancilla reflection rotation, and does not establish that arbitrary supplied
+high-order characters admit a cheap classical evaluator. TODO 33 retains
+those distinctions; C75/CG subsequently complete the bounded compiled-circuit
+question without changing this algebra/decoder experiment.
+
+Core/law checks in the unchanged system-Python environment pass in
+`out/word_envelope_core_system_python.log` and
+`out/word_envelope_laws_system_python.log`. The new exact claim regression
+is recorded in `out/physical_coordinates_claims.log`. WE records earlier
+affected lab/backend-absent and complete-law gates. No additional six-suite
+coverage is implied. The host/runtime reliability question remains open in
+TODO 34; exact references and redundant checks do not prove hardware health.
+
+Reproduce from research/:
+
+```bash
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_physical_orbit_coordinates
+```
+
+Main inspected the normalizer paper's coordinate-conversion/phase premises
+and the classical discrete-log bit-security theorem statements. C74 records
+the exact prior-art reading scope. No new cryptographic-hardness or simulation
+breakthrough is claimed. No manuscript, abstract or production sampler was
+changed by this follow-up.
+
+---
+
+# PE — Do not divide a global claim by the smallest conditional probability
+
+**Follow-up:** C61/§VP now implement the exact-input oracle/kernel boundary.
+The account below is the preceding investigation, when that boundary was
+still open; its numerical diagnostics do not become certificates retroactively.
+
+TODO 24 made progress but remains open. C60 owns the proved sparse-block
+error bound, its scaled-amplitude accuracy requirement and rejection
+comparator. Main read Bravyi–Gosset–Liu's robustness lemma AND its complete
+supplemental proof, then derived a direct post-prefix-oracle version for
+this harness. This is standard error-analysis reasoning applied here, not
+a novelty or breakthrough claim.
+
+The useful distinction is between worst conditional error and error in the
+overall sampled law. A nearly zero block can have a very wrong normalized
+direction while its mass-weighted contribution is negligible. Conversely,
+equal block masses do not establish correct directions. The bound uses
+the FULL Born laws, not just block marginals. One agent initially interpreted
+the symbols as block marginals and proposed a refutation; clarifying that
+definition made its example a valid negative control, not a theorem failure.
+
+Three lower-cost agents worked on rational block inequalities, output-grid
+quantization and native numerical precision. Main implemented the rational
+budget helper, audited all three scripts, completed the quantization script
+after repeated verifier errors, reran the final experiments and added tests.
+The qsim-research skill's control, normalization and input-contract rules
+prevented several premature claims of certification.
+
+## Exact-rational checks and what the planner actually requests
+
+The block experiment checks 392 seeded rational partition cases with at most
+12 coordinates, including the one-step Markov-kernel inequality. Its explicit
+zero-block control has ideal mass 1/100, uniform-fallback weighted TV 1/200
+and full-law TV 1/100. Equal-mass opposite-direction blocks have full TV one
+despite zero block-marginal TV. Another 50 exact-rational cases check the
+accepted-measure normalization bound for rejection, including zero mass.
+They test a conditional error theorem, not actual floating rejection draws.
+
+`lab/sampling_error.py` contains exact-rational budget and accuracy-planning
+helpers. For t=63,b=2,135 block updates and requested TV<=10^-6, the conservative
+planner asks for real/imaginary scaled-coordinate errors at most 2^-62 and
+29 unbiased random bits per exact-CDF block draw. Its computed total budget
+is about 6.071e-7. These are ABSOLUTE amplitude-accuracy and ideal RNG requests,
+not a claim that a 62-bit machine mantissa suffices. The helper explicitly
+returns `certifies_existing_float_sampler=False`.
+
+The oracle requirement ranges over all labels, not only those visited in
+a diagnostic. The dimension factor costs linearly more accuracy bits in t;
+obtaining those bits with certified gate inputs, phase evaluation and
+contraction arithmetic remains the implementation gap.
+
+## Output-grid rounding: complete tiny transition laws
+
+Keep r=10,b=2,t=4, background Rx(pi/2) at insertions 1,3, and coherent
+q=0@s2,q=1@s3 rotations of strength pi/4. Quantize each real/imaginary
+sqrt(M)-scaled prefix amplitude to the nearest multiple of 2^-p. Sweep
+p=0,1,2,4,6,8,10,12. This is rounding the existing complex128 oracle's
+OUTPUT, not changing its internal arithmetic or proving its input accuracy.
+
+The finite reference enumerates all sampling transitions and, separately,
+every unique coordinate of each idealized post-prefix amplitude function.
+Partial QFT coordinates contain low remaining exponent labels and measured
+output prefixes once each. The rounded kernel declares uniform-within-block
+fallback when all rounded weights are zero. The production sampler is
+unchanged and does NOT silently gain this fallback.
+
+All reference/rounded transition laws normalize. The unrounded transition
+law agrees with the existing independently constructed full-r joint law to
+TV below 2.2e-16. The derived weighted, full-Born and global-L2 inequalities
+hold on every tested row, including the scaled uniform-grid error bound.
+Selected results:
+
+| absolute grid bits p | output TV | summed weighted conditional TV | twice summed full-prefix Born TV, capped at one |
+|---:|---:|---:|---:|
+| 0 | 0.572443 | 1.62155 | 1 |
+| 4 | 0.0378565 | 0.101046 | 0.692082 |
+| 8 | 0.00216204 | 0.00612763 | 0.0447583 |
+| 12 | 0.000118193 | 0.000427632 | 0.00244870 |
+
+At p=12 the largest measured local conditional TV is still 0.5. Its recorded
+parent mass is about 3.08e-34: a numerical-null event in this floating reference,
+not a certified nonzero physical probability. It illustrates why that maximum
+alone is a poor distribution-level diagnostic. No monotone-rounding theorem
+is inferred from the finite precision rows.
+
+The deliberately discard-only chain is actually propagated; it loses all
+mass at p=0 and retains about 0.903889 at p=2. Those subnormalized arrays are
+NOT called probability laws or compared using TV. An independent normalized
+64-coordinate control has amplitude error 1/8 but TV 1/2, refuting the false
+dimension-free bound TV<=maximum coordinate error.
+
+A normalized rounded-final-amplitude table is also compared to its global
+L2 bound. This is explicitly not the output law of an implemented approximate
+rejection sampler. The rejection comparison in C60/its rational experiment
+states the separate accepted-measure error promise still needed.
+
+## Native precision and the input-error floor
+
+The separate fixed fixture uses r=10,b=2,t=4, Rx(pi/7) at insertions 1,3 and
+q=0@s2,q=1@s3 rotations of strength pi/5. Rational multiples of pi are the
+mathematical input intent; trigonometry is still numerical. Identical finite
+full-r products are evaluated at complex64, complex128 and native clongdouble.
+On this platform NumPy reports 23,52,63 fraction bits respectively (not the
+storage-format name as a precision guarantee). The script checks matrix and
+phase dtypes. Long double is a stronger numerical reference, not exact truth.
+
+Normalized output TV against the reconstructed long-double reference is
+about 3.33e-8 for complex64 and 4.69e-17 for complex128. The complex128
+normalized marginal matches production within 4.17e-17 per output. Raw
+complex64 mass is 1.0000001769512892 and its raw half-L1 gap is about 8.85e-8;
+that latter number is NOT the normalized TV. Native-precision sums are kept
+through normalization before serializing report numbers to ordinary floats.
+
+Widening stored complex128 WORK-gate coefficients to clongdouble, while
+evaluating QFT phases at target precision, leaves normalized TV about 1.69e-17.
+Its matrix unitarity defect is about 1.08e-16 versus 4.29e-20 for reconstructed
+long-double inputs. More decisively, the stored Rx column's squared norm
+minus one is a nonzero EXACT rational number:
+
+    6149843566922181 / 324518553658426726783156020576256.
+
+Merely widening storage cannot remove that input error. This does not imply
+that all effects of coefficient rounding are observable or establish a
+universal error floor for every circuit/output.
+
+## Failed verifiers and corrections retained
+
+- The quantization scaffold originally shared a cache whose first unrounded
+  query prevented later rounding, and shifted work labels regardless of the
+  controlling exponent bit. Main caught both. Early reports
+  `out/prefix_precision_20260911T031501417682Z.json`, `...031522965930Z.json`
+  and `...031536900639Z.json` include failed controls and an undefined-variable
+  exception. They are not evidence for the final algorithm.
+- `...031733684132Z.json` aborted on a zero rounded full-prefix vector.
+  Explicit normalized zero-block/global-zero semantics are now stated.
+  The later scaffold also overwrote its fallback flag and scaled the reference
+  by sqrt(M) twice, quantizing a different function than the sampler. Main
+  took over, corrected both and reran. The original single-stage error control
+  was unsupported; the final independent analytic control is specified above.
+- A discard-control mass was initially assigned from whether fallback occurred
+  rather than measured. Main replaced it with actual discard-chain propagation.
+  The script now gates the intended inequalities and calls its final-amplitude
+  comparator by its actual task, not an approximate rejection sampler.
+- The precision-input experiment's first report
+  `out/precision_inputs_20260911T031604103421Z.json` fails normalization and
+  production comparison. Later early PASS reports, including
+  `...031641306995Z.json`, still had extra background insertions absent from
+  production and mislabeled raw half-L1 errors as TV. Main required matching
+  schedules, separate raw/normalized metrics and native-precision normalization.
+  Their apparent agreement did not justify overlooking the different circuits.
+- The rational audit initially returned a worst-case zero-block error while
+  labeling it the measured uniform-fallback error. Main corrected that to the
+  actual conditional TV and added timestamped reports and normalization guards.
+
+## Reproduction and next boundary
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_block_error_bound
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_prefix_precision
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_precision_inputs
+```
+
+Main-audited final reports:
+
+| experiment | checks | report |
+|---|---:|---|
+| rational block/error budgets | 6/6 | `out/block_error_bound_20260911T032244838032Z.json` |
+| full rounded transition laws | 5/5 aggregate | `out/prefix_precision_20260911T032216641658Z.json` |
+| matched native precision | 4/4 | `out/precision_inputs_20260911T032137214322Z.json` |
+
+Logs: `out/block_error_bound_main_audited.log`,
+`out/prefix_precision_main_audited.log`, `out/precision_inputs_main_audited.log`.
+Core/lab/claims pass in `out/prefix_precision_core.log`,
+`out/prefix_precision_test_lab.log`, `out/prefix_precision_test_claims.log`.
+The other six science suites were not rerun for this isolated helper addition.
+The documentation gate passes all ten checks in `out/prefix_precision_docs.log`;
+indexes were regenerated and `git diff --check` is clean.
+No manuscript, abstract workshop or production sampler semantics changed;
+no commits or publication. TODO 24 stays open: next implement and test the
+verified amplitude oracle under explicit exact input semantics, then connect
+its certified absolute errors to a finite-bit categorical kernel. The broader
+user research goal remains active.
+
+---
+
+# PF — Sample the eigenphase after the defect
+
+The user requested continued research, with lower-cost agents doing initial
+tests and potential breakthroughs explicitly flagged. Two `gpt-5.6-luna`
+agents independently implemented the physical mixing experiment and the
+conditional-prefix probe. The main agent derived and implemented the reusable
+sampler, inspected their code/results, corrected test hygiene, and reran the
+experiments. This was concrete progress on the active research goal, not a
+claim that the open-ended goal is finished.
+
+The qsim-research workflow again changed the comparison: failure of initial
+spectral dephasing was only a control. The stronger baseline conditions on a
+FINAL eigenphase after the defect and retains a short coherent exponent
+prefix. C54 owns that derivation and its sparse-rejection bound.
+
+## The physical experiment
+
+`experiment_mixing_defect.py` fixes the same tiny arithmetic instance and
+insertion point as the preceding experiment, replacing its diagonal gate by
+the clean-orbit-preserving mixer between work labels |1> and |5>. The gate
+is four commuting Pauli rotations built by the existing Circuit engine;
+its generator is specified in the experiment. No new circuit propagator was
+written. Only its angle varies in the main series.
+
+The full physical unitary is checked on all work states and spectators before
+the sweep. References are the existing Fourier-compiled arithmetic with
+`statevec.run`, the time-ordered finite spectral effects, and a clean-basis
+joint amplitude table followed by FFT. The physical arithmetic order is never
+reversed. The independent agent's completed run passes **27/27 checks**:
+
+- Full-unitary error is below 2e-16 and orbit leakage is zero.
+- Spectral/circuit output errors are below 2.4e-14; clean-FFT errors below 2e-16.
+- The old ideal scalar model fails by up to about 0.0667 per output, and initial
+  physical-work spectral dephasing by about 0.0483.
+- Moving the defect to the end fails by about 0.0357. Reusing the previous
+  diagonal phase offset fails by about 0.122.
+- Extended spectral precision changes the checked row by below 2e-16; an
+  extended-state replay with the existing gate constants agrees below 3e-14.
+
+This is a genuine work-label mixer, but those failures are not hardness
+evidence. The weighted final-eigenphase baseline succeeds.
+
+## Independent prefix and rejection verification
+
+`experiment_prefix_probe.py` passes **18/18 checks**. It includes seeded
+complex orbit unitaries at two periods and two prefix sizes, including an
+early prefix longer than the orbit. Its independent route constructs the
+conditional CONTROL state and applies the existing coherent inverse-QFT
+engine. This differs from both the spectral-effects calculation and the
+streamed-column implementation in `lab/prefix.py`.
+
+The weighted mixture agrees with the spectral outputs within 8e-16; the
+late/early sampling factorization agrees with coherent inverse QFT within
+1.6e-15. The physical mixer gives nonuniform final weights, about
+0.1306–0.2028. Uniform weighting fails by about 0.022, and erasing the early
+amplitude phases fails by about 0.212. These controls prevent mistaking the
+prefix for an ordinary classical probability table.
+
+The agent also checks the sparse rejection envelope on generic COMPLEX
+normalized columns, not only the arithmetic mixer. For supplied bounds
+D=1,2,3 the enumerated mean acceptance is 1, 1/2, 1/3 up to floating-point
+roundoff, and no envelope violation occurs. This is a Parseval/Cauchy-Schwarz
+identity checked by enumeration, not an inference from an acceptance histogram.
+
+Main-agent review removed an unnecessary tolerance cutoff in the probe oracle
+and a tautological “orientation” diagnostic that recomputed its own expression.
+The genuinely independent circuit/effect comparisons remain. All predictions
+and meaningful controls still pass after those changes.
+
+## Bounded scaling, with its assumptions visible
+
+`experiment_prefix_scaling.py` passes **39/39 checks**. It holds the sparse
+mixer and four-amplitude early prefix fixed. One series varies exponent width
+through 2–8, 16, 32 and 63 at fixed period. Another uses supplied abstract
+periods through 1,000,000,007 at fixed width. These large-period cases are
+explicitly INDEXED CYCLIC-ORBIT ORACLES, not compiled modular circuits or a
+large physical-qubit benchmark. No order-finding speedup is inferred.
+
+Each row samples sixteen fixed-seed paths, compares their reported joint
+(eigenphase, output) probability with a forced path, and checks it independently
+using an integer-reduced finite geometric tail plus a direct four-point DFT.
+Full small marginals agree with spectral effects within 3.1e-15. The largest
+sampled independent absolute error is below 2e-16 and positive-reference
+relative error below 6.1e-15. Every strictly positive reference is included
+in the relative-error report; there is no probability threshold hiding rare
+cases. These are the sampled paths, not a uniform precision certificate for
+all possible outputs. None of these samples has zero reference probability.
+
+Each sampled phase row has four complex amplitudes, 64 bytes of payload.
+This is NOT peak process memory: rows, FFT/feedback arrays, sparse columns,
+Python objects and caller-owned data coexist. The largest dense array in the
+physical unitary check is 262,144 bytes; a pre-allocation guard enforces its
+16 MiB limit. Full reference enumeration in the scaling probe is separately
+guarded to the small period and width range. Setup column calls and every
+sample's proposal/column counts are saved. The oracle does not own an orbit
+table. The table-free result relies on the exact known-index input contract
+in C54; arbitrary computational labels cannot silently substitute for indices.
+
+### A caught allocation error and an imperfect artifact trail
+
+The initial scaling probe mistakenly attempted a dense identity matrix in its
+largest abstract-period row. NumPy rejected the shape during size preflight
+with “array is too big”; the agent reports no evidence of material RAM
+allocation. The corrected code never constructs dense reference data for
+abstract rows and now has explicit guards before reference allocations.
+
+The first failure log was overwritten by the agent's rerun. It cannot be
+claimed preserved: `out/prefix_scaling_initial_failure.md` records the reported
+traceback and this limitation, rather than inventing a replacement raw log.
+This failure was in the experiment's reference setup, not the prefix sampler,
+and is not scientific evidence for the scaling result. Main-agent inspection
+and a fresh safe rerun confirmed the final guarded code and successful report.
+
+## Reproduction and review
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_mixing_defect
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_prefix_probe
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_prefix_scaling
+```
+
+Matching JSON/log files are under ignored `out/`, including all declarations,
+checks, failures-as-controls, measured probabilities and resource accounting.
+The completed runs use Python 3.12 and NumPy 2.4.6. The main agent reran all
+three experiments after review. The core, lab and claims science suites pass;
+their logs are `out/mixing_test_core.log`, `out/prefix_test_lab.log`, and
+`out/prefix_test_claims.log`. The other six suites were not rerun for this
+additive helper; previous consolidation results remain separate evidence.
+
+A second lower-cost agent audited zero/full prefixes, repeated orbit indices,
+invalid columns, impossible latent phases and retry-cap failure. The saved
+audit is `out/prefix_code_audit.md`. It found no numerical discrepancy in its
+bounded cases. Main fixed its minor `None`-label error-type finding and added
+a regression; Python bool-as-int acceptance remains consistent with surrounding
+integer APIs. The audit is a dated report, not an unchanged-source certification.
+The ten-check documentation gate passes. Papers and abstract workshops were
+not modified in this follow-up, and no commits were made.
+
+## Impact and what remains open
+
+This was flagged during derivation as a candidate compression result. Initial
+agent tests and main-agent checks now support the mathematical mechanism and
+implementation. It is **not established as a research breakthrough**: the
+construction uses standard conditioning and rejection sampling, and does not
+remove order discovery, arbitrary orbit-index access, or an exponentially
+large early prefix. C54 gives the precise positive result and limitations.
+
+Primary-source review included Van den Nest §4 on computationally tractable
+states/sparse operators and Schwarz–Van den Nest Theorem 1 on approximately
+sparse OUTPUT distributions. See C54 for references. That output-sparsity
+promise is distinct from this sampler's sparse-defect-column promise; neither
+paper is cited as proving our specific implementation or its novelty.
+
+TODO 18 closes this bounded experiment. TODO 19 asks whether a localized
+finite-rank defect admits a representation that also removes the large-prefix
+FFT. Cheap evaluation of a probability is not yet a method for sampling the
+whole distribution: that distinction remains a required control on the next
+direction. TODO 14 remains the broader frontier and the thread goal stays active.
+
+---
+
 # PK — TODO 12d SOLVED: the peak deficit is a COUNTABLE SET, and it is the two dominant Fourier modes
 
 ## two dominant Fourier modes
 
-`experiments/experiment_c17_deficit.py`. Claim **C44**; C17 regraded from
-"the factor is empirical" to derived. Paper A §5 rewritten around it.
+> **Review correction (2026-09-09).** The global peak formula below was
+> over-promoted. The local Toffoli observations explain possible doubling but do
+> not determine the global maxima after intervening CNOTs and interference. A
+> four-qubit counterexample has atomic peak 4 and rotation peak 10, disproving
+> the universal derivation. Retain the formula only as a measured regularity in
+> the nine arithmetic rows; C44 is narrowed accordingly. The atomic
+> peak/Walsh-suffix characterization remains valid.
+
+`experiments/experiment_c17_deficit.py`. Claim **C44**; the arithmetic
+regularity is retained, while the universal derivation is withdrawn. Paper A §5
+is rewritten around the narrower result.
 
 **The question.** Permutation-native propagation halves peak memory —
 2.000000 exactly for ripple-carry adders, but **1.9997** for modexp, where all
 three logged instances satisfied `rot = 2·perm − 2` exactly. A constant
 additive deficit of 2, independent of instance size, was unexplained.
 
-### The derivation (read off the gadget, no measurement needed)
+### The local gadget observation (not a universal peak derivation)
 
-Two facts about the standard Clifford+T Toffoli gadget settle it.
+Two target-local facts motivated the original, invalid global inference.
 
 1. A Z-type string commutes with every Z-rotation, so it **cannot branch until
    an H turns a Z into an X**. The gadget's only H acts on the target c, so
    only strings carrying Z_c ever leave the diagonal.
 2. Once a string is X_c-type, the gadget's four T gates on c are rotations
    about Z_c, and those act *within* span{X_c, Y_c}:
-   `X_c → cos·X_c − sin·Y_c`, `Y_c → cos·Y_c + sin·X_c`. **That space is
-   closed**, so the four T gates branch ONCE between them, not 2⁴ times.
+   `X_c → cos·X_c − sin·Y_c`, `Y_c → cos·Y_c + sin·X_c`. That target-local
+   space is closed only for a fixed rest-label component. Interleaved CNOTs
+   change other labels, so it does **not** follow that full strings branch once.
 
-Hence every Z_c-carrying string contributes exactly 2 Paulis and every other
-string exactly 1:
+Hence a Z_c-carrying string can contribute two Paulis within the gadget while
+other strings contribute one at that local step. Intervening CNOTs and
+interference prevent this local count from proving a relation between global
+maxima. The arithmetic rows nevertheless satisfy the following measured
+regularity:
 
 ```
     N_max^rot = 2·N_max^perm − |B|,     B = { z ∈ S : z_c = 0 }
@@ -1368,8 +6641,9 @@ observable**, not about modular exponentiation. Paper A now says so.
 
 ### Grading, and what is still open
 
-- `N_max^rot = 2·N_max^perm − |B|` — **derived + verified 9/9.** This is what
-  upgrades Paper A §5 from "upper bound of 2, empirical".
+- `N_max^rot = 2·N_max^perm − |B|` — **measured 9/9 in the arithmetic rows.**
+  It is not a universal derivation; the counterexample above disproves that
+  broader claim. The exact atomic-peak/Walsh-suffix characterization remains.
 - `|B| = 2` for the standard observable, with B the two |c| = ½ modes —
   **verified 6/6, mechanism identified, NOT proved.** Proving it needs a
   characterisation of which peak-time strings avoid the scratch register, which
@@ -1389,6 +6663,991 @@ index bookkeeping were solving a problem that did not exist.** Meanwhile the
 checks that only *counted* B (P4/P5) passed 6/6 through both passes, which is
 what made the diagnosis quick — the failure was localised to the boundary
 machinery, not to the idea.
+
+---
+
+# PR — Stronger recognition baseline after C83
+
+The previous goal turn made concrete progress at C83/QC; its cheaper formula
+left a possible distinction in circuit recognition. This turn resolves that
+distinction algebraically and numerically. C84 owns the projector-reflection
+proof, three-bit tableau criterion, exact replacements and equivalence to
+C83. The broader user goal remains active. Known stabilizer ingredients and
+the same acceptance set prevent a breakthrough claim from these results.
+
+## Authoritative experiments
+
+`experiments/experiment_toffoli_stabilizer_rank.py` and
+`out/toffoli_stabilizer_rank_main.json` / `.log` compare C83 against a stronger
+generic recognizer on the SAME prepared input cell. Thirty-four five-qubit
+cases include explicit witnesses and 24 seeded affine-transformed quadratic
+cells. A Stim preparation circuit independently checks the cell's input ray;
+Stim Pauli expectations give exact joint probability. Direct basis-index
+Toffoli action then checks both the accepted C83 update and each proposed
+physical Clifford replacement on the same signed vector.
+
+All 34 acceptance decisions agree: 17 accept and 17 reject. Every one of the
+eight exact replacement labels occurs. Every rank scan reads 15 tableau
+entries and stores only three small basis columns; these are operation counts,
+not measured runtime or allocation peaks. Constructing the tableau AND a
+separate Stim simulator, seven expectation calls for compatibility, any
+conversion and signed extraction are extra. There is no claim that this
+experimental arrangement is an optimized complete simulator.
+
+The decisive pair freezes n=5, full support and a linear target sign; adding
+only the target-spectator quadratic edge changes rank two to rank three and
+causes the C83 cubic-sign escape. Its input/output overlap becomes 3/4,
+incompatible with a distinct stabilizer ray. The separate fixed-target/free-
+controls case triggers curved-support escape. The p=1 case has overlap -1;
+its exact -I replacement succeeds while dropping that sign fails vector
+equality. The experiment completes 39/39 checks with a final JSON report.
+
+These vector checks use floating normalization, not rational arithmetic.
+Stim's float32-origin input-ray comparison uses tolerance 2e-7; signed
+replacement/cell comparisons use 1e-12. Exactness is supplied by C84's proof
+and exact Stim Pauli expectations. Zero observed vector errors do not make
+the complete experiment an exact-arithmetic execution. Incidental harness
+elapsed times are not a comparative performance benchmark.
+
+`experiments/experiment_projector_dense.py` and
+`out/projector_dense_main.json` / `.log` integrate Luna's independent audit.
+Thirty-three deterministic Clifford circuits through n=5 prepare pure inputs;
+direct basis-index Toffoli produces outputs. The detector enumerates all
+Hermitian Pauli expectations, one matrix at a time, and counts magnitude-one
+values. A pure state is stabilizer iff this count is 2^n; the detector does
+not use the projector criterion. Projector probability is computed separately
+both by matrices and by the control/target-minus projection.
+
+Observed p classes 0,1/8,1/4,1/2,1 have counts 5,9,11,5,3. Every row agrees
+with the criterion. Ten inputs have relative complex phases that cannot be
+removed by a global scalar. The corrected detector's closest nonunit
+expectation has distance about 0.5 from magnitude one, far above its 2e-9
+tolerance. Maximum matrix dimension is 32. The projector calculation holds
+three Pauli matrices plus identity and bounded temporaries; the one-matrix
+bound applies only to the detector. All five integrated harness checks pass.
+The global-input-minus check only tests linearity; the explicit p=1 output
+minus and main experiment's signed replacement test carry the phase evidence.
+
+## Failures and provenance
+
+Main run R9aae56f94bfc4f38 printed successful science checks but exited one
+when JSON serialization encountered a NumPy boolean. Its complete failed
+source/log survive as `out/toffoli_stabilizer_rank_failed_v1.py` / `.log`.
+The only correction wraps the recorded input comparison in native `bool`.
+R8185697158cd4875 then exits zero with its complete report. The initial run
+remains a failed run, not an accepted report.
+
+The independent worker's import failure survives in its attempt directory
+and sealed run Ra684a770b5344bbc. A pre-sign-check draft was saved later;
+the exact source of that original failing execution was not sealed then.
+Rbbd1ea0c734d46dc and R1b6385dfd5184dd2 are both terminal zero exits, with
+the second adding an explicit p=1 sign check. The former finish was recorded
+late; coordinator checked the records before acceptance. Their log text is
+identical because the added assertion does not alter the printed summary.
+
+Coordinator inspection found two misleading unused worker metrics: the
+'nearest nonunit' calculation included the identity and was always zero,
+and the one-live-Pauli metadata did not describe the projector workspace.
+Integration corrected both, removed an overwritten unused roll calculation,
+and added actual relative-complex coverage. Neither faulty metadata field
+was used to establish the worker's p criterion. Failed evidence and bounded
+numerical limits are retained rather than recast as exact validation.
+
+## Swarm and implementation audit
+
+Astra's proof task T2a446b94621a40a4 accepted S0431af745c4b40d2. Sol's primary
+literature/source task T302b8787d6e84fc4 accepted S99c87e6207264a63. Luna's
+independent test task T4b16b6fa36e8419a accepted S016cb24e503e4ec7 with the
+metric limitations above. Main task T943f7c5ffdf5442f submitted
+S3ce37fd134f54c49, reviewed against archived code/report hashes by Astra as
+V8ee9d55d5f4c4a20. Only the coordinator edited canonical files.
+
+The source audit is preserved in the baseline worker's `audit.md` and pinned
+`src-audit/` checkouts. Stim supplies the direct tableau cell access needed
+by the strong recognizer, but its tableau lacks a defined ket global phase.
+Cirq's CH implementation explicitly carries `omega` through signed amplitude
+and phase updates. The audited QuantumClifford CCZ path uses decomposition
+and sparsification, while its tableau inner product returns magnitude only;
+the audited Tsim pipeline targets probability sampling and drops scalars
+that cancel from that output. These are source/API distinctions, not measured
+performance rankings. Exact commits and source locations live in the audit;
+C84 cites the supporting primary interfaces and mathematical predecessors.
+
+Neither splitting every Toffoli without merging nor seven independent
+expectation solves is the strongest recognition-only baseline. The direct
+tableau rank scan already decides exactly the same one-cell boundary. A
+phase-sensitive full-output comparison could still measure implementation
+tradeoffs, but would not restore that exclusive mathematical advantage.
+
+The science core passed before this work
+(`out/toffoli_stabilizer_core_initial.log`). Both bounded experiments pass;
+no production library, existing science suite, manuscript or abstract was
+modified this turn, and no other science suites were run. The earlier native
+legacy-suite failure remains with TODO34. Generated indexes and documentation
+are checked by `tools/reindex.py` / `tools/check.py`, with final log
+`out/projector_rank_docs.log`. Changes remain uncommitted.
+
+TODO45 is complete at proof/bounded-discriminator scope. TODO46 owns the
+next question beyond individual-cell closure; TODO42 remains separate. Do
+not repeat this local rank comparison or call a different tableau layout a
+new recognition principle.
+
+---
+
+# PS — A stronger baseline appears before the rejection sampler
+
+TODO 20 proposed extending the localized sampler to repeated blocks covering
+the whole orbit, testing whether output effects survive while the conditional
+row remains a short Fourier sum. The lower-cost initial tests supported that
+formula. Main then noticed the stronger common symmetry: all the repeated
+blocks preserve eigenspaces of U^b. Sampling that coarse phase first retains
+a small work register even with several separated noncommuting mixers.
+C56 owns the derivation, sufficient conditions, costs and limits.
+
+The qsim-research workflow changed the implementation plan here. The stronger
+simple baseline displaced the planned single-defect rejection helper, and the
+independent-reference rule prompted replacement of an agent's new full-state
+loop with the existing Circuit/statevec engine. A probability-level control
+also replaced a vacuous amplitude comparison. Passing formulas alone were not
+treated as evidence for a new simulation barrier or breakthrough.
+
+## Work split and authoritative runs
+
+Three `gpt-5.6-luna` agents handled bounded initial formula, invariance and
+coarse-sector tests. One then tested main's production sampler against an actual
+modular circuit. Main implemented `lab/periodic.py` and `sequential_path` in
+`lab/semiclassical.py`, audited the agents' scripts, strengthened allocation
+guards and controls, reran the experiments and added regression tests. A
+follow-up agent challenged the input-specific cancellation discovered during
+that review. The scientific code and records remain uncommitted.
+
+Final main-reviewed experiments:
+
+| Experiment | Checks | Coverage |
+|---|---:|---|
+| `experiment_periodic_formulas` | 41/41 | harmonic amplitudes, phase weights, normalized accepted law and interference/feedback/divisibility controls |
+| `experiment_periodic_invariance` | 48/48 | binary thresholds, fixed odd-block impact series, spectral/prefix and extended-precision checks |
+| `experiment_periodic_sectors` | 38/38 | explicit sector projections, existing Circuit/statevec references, production conditional paths and invalid-dephasing controls |
+| `experiment_periodic_sampler` | 12/12 | physical modular circuit with three defects, ideal/end controls, original schedule, wide actual draws and resources |
+| `experiment_periodic_input_cancellation` | 17/17 | reached-span cancellation, arbitrary complement blocks, divisibility/leakage controls and a retained commuting leakage example |
+
+Their authoritative report/log pairs are:
+
+- `out/periodic_formulas_20260911T014441596588Z.json` and
+  `out/periodic_formulas_main_run.log`.
+- `out/periodic_invariance_20260911T014433811255Z.json` and
+  `out/periodic_invariance_main_run.log`.
+- `out/periodic_sectors_main_corrected.json` and
+  `out/periodic_sectors_main_corrected.log`.
+- `out/periodic_sampler_20260911T014818251729Z.json` and
+  `out/periodic_sampler_main_run.log`.
+- `out/periodic_input_cancellation_20260911T020207788747Z.json` and
+  `out/periodic_input_cancellation_main.log`.
+
+Earlier agent reports are preserved but do not supersede these reviewed runs.
+In particular, `out/periodic_sectors.json` predates the reference/control audit,
+and `out/periodic_sampler_20260911T014520164314Z.json` predates the schedule
+control correction and fuller payload accounting.
+
+## What the bounded tests actually found
+
+The harmonic experiment fixes seeded complex W, b=3, r=6, t=8 and steps
+s=0..8. Separate controls include r=9 and identity W. Joint errors against
+SparseOrbitPrefix stay below 6.5e-15, and spectral marginal errors below
+5.5e-15. The normalized accepted early-output law is additionally checked by
+enumerating component proposals and acceptance, with maximum error below
+3.8e-14. It is not just a restatement of the averaged rejection bound.
+The pointwise rejection cost reaches about 56 despite an averaged cost of 3;
+this supports the need for the averaging qualification in C56.
+
+The invariance experiment resolves the binary threshold one insertion at a
+time. The b=2,r=6 and b=4,r=12 rows are visibly nonideal before their predicted
+thresholds and agree with ideal afterward to about 1e-14. A fixed b=3 block at
+t=8,s=3 gives output TV between about 0.465 and 0.592 for r=3,6,...,18.
+These are finite visible examples, not an asymptotic non-dilution theorem or
+a universal statement about odd blocks. The commutator, harmonic formula,
+spectral/prefix and float64/longdouble comparisons test the mechanism, not
+merely the output size.
+
+The revised sector experiment compares explicit orbit-space projections of
+U^n and W against the sector matrices. Specialized b=2 and b=3 gates in the
+existing Circuit engine supply an independent statevec reference, with at most
+t=6,r=12. Single-defect mixtures agree with original-order spectral effects
+within 4.5e-15; the two-defect full-orbit comparison is below 1.7e-16.
+Production conditional probabilities match the independently constructed
+sector circuits within 8.4e-15. The wrong-twist test compares matrices at a
+nontrivial phase: simply reversing alpha's sign can relabel a uniform mixture
+and is not necessarily an observable-level falsifier.
+
+The physical test uses N=7,a=3 and its clean orbit [1,3,2,6,4,5]. W01 mixes
+local block positions 0/1, W12 mixes 1/2, both by Rx(pi/2). They have exact
+three-work-qubit Pauli-rotation constructions; full matrices and statevec
+actions are checked, including unchanged invalid labels 0 and 7. With t=5
+and W01 after control count 1, W12 after 3, W01 after 4, summed coarse-sector
+joints match the actual compiled modular circuit within 2.24e-14. The
+physical reference's norm error is 1.69e-13. This is a small physical
+realization of these particular blocks, not a locality theorem for arbitrary W.
+
+Removing inverse-QFT feedback changes that physical distribution by TV 0.347;
+retaining only alpha=0 changes it by 0.256. Reversing just the arithmetic/defect
+schedule, with preparation and final QFT fixed, changes it by 0.0868. The
+defect-free arithmetic-reversal control remains valid within 2.9e-14.
+These comparisons specifically guard the original time-order contract.
+
+At t=63, eight actual draws each were made for r=6 and abstract supplied
+r=3,000,000,021, using b=3 and defects after 16,32,48 controls. Per path,
+forward-factor payload is 9,216 bytes and the reported branch-matrix payload
+is 18,144 bytes; supplied blocks plus identity occupy another 576 bytes.
+Those are payload categories, NOT peak process memory. NumPy temporaries,
+interpreter overhead and input/setup must not be erased by quoting only the
+smallest category. The implementation stores O(t*b^2) scalars, not constant
+total memory. The large period is given; no factoring/order search was done.
+Wide seeded draws exercise execution and guards, not every rare probability
+or an arbitrary-precision guarantee.
+
+The independent input-cancellation challenge uses seven seeded genuinely
+complex block-diagonal cases, including L=1 and L=r and arbitrary unitary
+complement blocks. They agree with ideal to below 3.1e-15. A first-span block
+with r=6,L=4 (non-dividing) instead gives TV about 0.553. At r=8,L=4, a
+rotation between labels 0 and 5 gives TV about 0.0754. These controls exhibit
+failures when the sufficient hypotheses are removed; they are not necessary
+conditions for invisibility. Main reviewed the spectral reference use, added
+pre-allocation guards, and retained the initially invisible leakage case as
+the explicit commutation test described below.
+
+## Failed predictions and audit corrections
+
+1. The first invariance run indexed an early row beyond its length when L<b.
+   Its preserved failure report is
+   `out/periodic_invariance_failure_20260911T013734915333Z.json`.
+   The periodic multiplier is now evaluated directly at each residue rather
+   than inferred from a prefix too short to contain it. A second run failed
+   JSON serialization of complex metadata, recorded in
+   `out/periodic_invariance_failure_20260911T013750986410Z.json`; real/imaginary
+   payloads repaired reporting, not the scientific formula.
+2. The initial sector script used a second Q-by-b propagation loop. It was
+   replaced with the existing Circuit/statevec reference, as required by the
+   repository's independent-reference rule. Its b=2 inverse-shift control had
+   a large amplitude difference but unchanged measured probabilities. The
+   revised b=3 probability-level counterexample differs by about 0.0193.
+   Agent audit reports `out/periodic_sectors_audit_20260910_v2.json` and its
+   matching log retain this correction; the main rerun agrees. Dropping the
+   twisted-cycle wrap phase is a separate control from dropping inverse-QFT
+   feedback, despite both being called feedback in some raw labels.
+3. The initial physical sampler control reversed ALL gates, including state
+   preparation and QFT. Its large discrepancy was not clean evidence about
+   arithmetic/defect reordering. Main replaced it with the schedule-only
+   comparison above and added the defect-free positive control. Main also
+   removed a duplicate instrument implementation from the no-QFT-feedback
+   control, using the actual Circuit with only its Fourier phase gates removed.
+4. Main's first claims regression assumed a specific odd b=3 W01 at s=1
+   must be visible. It failed, preserved in `out/periodic_test_claims_initial.log`.
+   For r=6,t=4, that insertion is ideal within roundoff, whereas s=2 is
+   visibly different. The spectral reference agrees with the sampler. The
+   reached two-label span is preserved at s=1 and L=2 divides r: this led to
+   C56's separate input-specific cancellation proof. The corrected regression
+   tests BOTH cancellation at s=1 and visibility at s=2, rather than deleting
+   the failed scientific prediction from the record.
+5. Main initially invoked the revised sector experiment as a script instead
+   of the documented module command. It stopped before science with
+   `ModuleNotFoundError: circuits`; `out/periodic_sectors_main.log` is retained.
+   The corrected `python -m experiments.experiment_periodic_sectors` invocation
+   passed without a code change.
+6. The input-cancellation agent's first leakage control rotated labels 0 and
+   4 at r=8,L=4 and was invisible. Its failed 15/16-check report is
+   `out/periodic_input_cancellation_20260911T015834046319Z.json`; the associated
+   exception report is
+   `out/periodic_input_cancellation_failure_20260911T015834050294Z.json`.
+   Changing the selected unreached label to 5 gives the visible control above.
+   Main additionally explained and retained the ORIGINAL 0/4 example: its
+   two-level rotation commutes with U^4, so moving it to the traced end is
+   valid despite its violation of span preservation. The final run verifies
+   both the zero commutator and ideal output. This is a sufficient-versus-
+   necessary condition distinction, not numerical noise or a sampler bug.
+
+## Validation and interpretation
+
+Core passed before the investigation (`out/periodic_test_core.log`). Full
+affected lab and claims suites pass in `out/periodic_test_lab_initial.log`
+and `out/periodic_test_claims_corrected.log`. The other six science suites
+were not rerun for these helper additions. Dense diagnostic arrays are bounded
+before allocation, with small r/t caps and 16 MiB reference ceilings. Production
+uses its separate dimension/width and conservative payload guards. No GPU is
+needed for these tiny checks.
+
+Reproduce from research/ using the module invocation, for example:
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_periodic_sampler
+PERIODIC_SECTORS_REPORT=out/periodic_sectors_reproduction.json OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_periodic_sectors
+```
+
+The other experiment names in the table use the same module invocation.
+Timestamped reports preserve earlier evidence; choose a fresh sector-report
+path because that script's default path is fixed. Main regenerated the ledgers
+and ran the documentation gate after writing this record. Neither manuscript
+nor either abstract workshop was edited in this follow-up.
+
+The interesting link is to symmetry sectors plus sequential ancilla/MPS
+sampling and forward-state/backward-effect inference, whose primary sources
+and exact scope are recorded in C56. This is a useful enlargement of the
+known-order tractable family and a stronger baseline for future tests, not
+evidence of a new general-purpose simulation method. TODO 21 owns the next
+discriminating question, beyond the common symmetry; larger period records
+alone would not test it.
+
+---
+
+# QC — Compressing the observable after the CNOT frame
+
+This goal turn follows C82/CF's allocation result. It made concrete progress:
+the coordinator implemented a restricted exact query evaluator, Astra audited
+the closure proof and frozen implementation, Sol checked primary prior art
+and stronger baselines, and Luna supplied independent bounded tests. The
+broader breakthrough goal remains open. C83 owns the theorem, API, asymptotic
+scope and prior-art boundary; this note owns executed evidence and discovery.
+
+## Matched scalar comparison
+
+`experiments/experiment_quadratic_cell_memory.py` and
+`out/quadratic_cell_memory_main.json` / `.log` own the measurements. The small
+sweep freezes m=4, n=14 and a deterministic 19-CNOT prefix, varying only p from
+0 through 4. Registers are (u_i,v_i,a_i), shared control w and observed target
+t. The nonlinear schedule is Toffoli(w,a_i;u_i) for i<p, then all
+Toffoli(u_i,v_i;t). Before the CNOT prefix, the pullback phase is
+
+    f=t+sum_i u_i v_i+w sum_(i<p) a_i v_i.
+
+The requested result is ONE full-space signed physical Walsh coefficient,
+including its normalization. Every method receives the actual Circuit and
+physical masks. The cells additionally receive output cut {w}; cut discovery
+is not measured. The stronger formula first inspects the circuit's layout,
+observable and gate sequence and converts the query through the prefix.
+Thus it is not given an expanded polynomial for free. It sums over w with
+sign, and analytically eliminates u_i,a_i using the constraints
+v_i=z_ui and z_ai=w z_ui for i<p (otherwise z_ai=0).
+
+Four selected signed queries agree among cells, sparse PPS and the recognized
+formula at every p. Construction plus one negative query is measured once
+per method with `tracemalloc`, following garbage collection:
+
+| p | sparse PPS peak bytes | streamed cells peak bytes | recognized formula peak bytes |
+|---:|---:|---:|---:|
+| 0 | 63264 | 4472 | 1000 |
+| 1 | 139072 | 4320 | 1000 |
+| 2 | 225088 | 4256 | 1000 |
+| 3 | 235896 | 4256 | 1000 |
+| 4 | 277296 | 4256 | 1000 |
+
+Two branches suffice throughout, processed one at a time. The p=4 cell peak
+is about 65 times smaller than sparse PPS, but the recognized formula is
+smaller still. Sparse PPS constructs its full dictionary to answer the query;
+this is a measured route to the same scalar output, not a lower bound on
+memory for that output. Peaks include result/counter objects and conversion
+to `Fraction`, but exclude the prebuilt Circuit, interpreter, native RSS and
+prior allocations. They are single-run Python-allocation observations, not
+stable benchmark constants or timing results.
+
+One separate restricted endpoint uses m=p=32, n=98 with the same prefix-depth
+rule. Cells and the charged formula both return exactly -1/2^33, with measured
+peaks 25692 and 2100 bytes respectively. Cells perform two full replays:
+38 CNOTs, 64 affine Toffoli transports, 64 quadratic Toffoli updates and 64
+Gauss pair eliminations. Formula recognition records 84 gate inspections.
+No sparse or dense run was attempted there; this endpoint changes width as
+well as the gate count and is not an extension of the frozen-width sweep.
+
+The exact support count for this family was independently derived in the
+code review. Each fixed-w Fourier support has 2^(2m+1) masks; the intersection
+has 2^(2m-p+1), and half the intersection cancels in the coherent sum. Hence
+
+    S(m,p)=2^(2m+2)-3*2^(2m-p).
+
+It matches the small enumerated supports 256,640,832,928,976. The large
+report's 2^66-3*2^32 is DERIVED, not enumerated, allocated or a scalar-query
+memory requirement. Known stabilizer structure explains this compression.
+
+Both controls are nonvacuous: a tiny branch sum +1/4-1/4 is zero while the
+sum of magnitudes is nonzero, and the uncut cubic intermediate sign raises
+the named certificate escape. The memory experiment finishes 28/28 checks,
+exit zero, without harness warnings. Tiny sparse references use exactly
+representable dyadic floats; no large-coefficient threshold claim follows.
+
+## Independent checks and failed drafts
+
+`experiments/experiment_quadratic_cells.py` integrates the independent worker
+draft with stronger coordinator assertions. Its reference is existing exact
+classical permutation replay plus an integer Walsh butterfly, and direct
+exhaustive upper-triangle Boolean evaluation for the Gauss/product helpers.
+`out/quadratic_cells_main.json` / `.log` record:
+
+- 961 seeded quadratic-form/extra-linear combinations through dimension five,
+  and 200 affine products, including repeated-variable reductions;
+- 42 circuit/cut/query cases through seven qubits, including eight seeded
+  mixed circuits: 41 exact matches and one supported rejection, with six
+  negative and 35 zero successful coefficients;
+- full coordinate cuts required to succeed, plus a direct one-dimensional
+  nonparallel-cell fixture comparing actual tangent sets and signed images;
+- explicit cubic and curved-cell rejections, and a zero coefficient whose
+  incoherent raw branch magnitude sum is 16.
+
+The integrated audit passes all four harness checks. This is a finite
+correctness corpus, not a scaling sweep or exhaustive coverage of arbitrary
+affine cells. Core section 7 separately checks full coefficients against
+independent dense conjugation, signs, three partition choices, two named
+escapes, a 65-bit physical mask, and pre-allocation branch-cap rejection.
+
+The worker needed two import-path fixes and an unexpected P2 coverage fix
+because its first selected coefficients were all zero. A draft comparison
+of unequal matrix rows also failed to establish different tangent spaces;
+the corrected control cuts both b and t in Toffoli(a,b;t). Worker failed logs
+remain sealed in run records R33bb39b1bf114121, R75e2681d7182407e and
+R31740a0ee3124785. Their original draft scripts were overwritten, a provenance
+limitation. The immutable third run's phrase 'intentionally failed' was
+corrected in the replacement submission: that coverage failure was unexpected.
+
+Coordinator strengthening initially referenced a helper name absent from the
+submitted worker version, raising `NameError` before P3. Both its script and
+log survive as `out/quadratic_cells_integration_failed.py` / `.log`. The final
+version shares an independent upper-triangle evaluator across its reference
+checks and completes successfully. These are verifier defects, not evidence
+that unsupported cells can be approximated safely.
+
+## Review, validation and limits
+
+Board math task T2925f4e09c34412b accepted Sfe307f2cefa843f9; baseline task
+T156f581d0eb24503 accepted S344a6f71256f47d4. Test task T0815738651e84391's
+first submission had an incorrect core-log pointer; replacement
+Sb04c445898594d1c is accepted with corrected archived evidence. Main task
+T8b1c470bc31a498a submitted Sab54242e0eea44e3, independently reviewed by Astra
+as Va2e81ab4b4ed4118 against frozen source/report hashes. That review audited
+the solver, gamma, Gauss sign, normalization, formula and support derivation;
+it did not execute another performance comparison.
+
+The initial core gate passed before science changes
+(`out/quadratic_observable_core_initial.log`). The final core including new
+regressions passes (`out/quadratic_cells_core_final.log`), as do the two bounded
+experiments above. No full legacy or other science suites were rerun. CF's
+native-crash/incomplete legacy result remains with TODO34. Documentation is
+validated with `tools/reindex.py` and `tools/check.py`; its final log is
+`out/quadratic_cells_docs.log`. No commits, publication or manuscript edits
+were made in this investigation.
+
+The cheaper formula and known Gauss/stabilizer decomposition exclude a broad
+breakthrough claim from these results. Generic phase-sensitive CCX splitting
+and merging has not been benchmarked against the local certificate. TODO45
+owns the next discriminator; repeating this recognized family's width pilot
+would not resolve it. TODO42 remains a separate sampling-cost question.
+
+---
+
+# QD — A precision improvement, not a speed improvement
+
+C70 owns the proof, implementation contract, integer bounds and limitations.
+Main implemented the bounded-grid sampler; lower-cost agents independently
+audited the algebra/code and built the finite-law/comparison probes. Main
+read their code, corrected predicates and reran both. The qsim-research
+skill required complete finite laws, a strongest matched baseline and
+preserved failures; these prevented treating fewer precision bits as a win
+in runtime. Defaults and manuscripts remain unchanged.
+
+## Frozen finite-law audit
+
+Authoritative main report:
+`out/quantized_reverse_work_20260911T065458560042Z.json` (5/5 checks).
+The frozen RI family has r=9,b=3,t=4, initial W0, W1/W3, two route
+insertions, all four deterministic histories, all three initial sectors,
+all three boundary labels and all sixteen outputs. Requested TV is varied
+between 1e-3 and 1e-6. P192/P256 vary the independent target enclosures;
+the actual finite kernel is held fixed, not resampled with higher precision.
+
+For EVERY boundary label, the quantized proposal is checked against outward
+ideal norm-mass intervals from C69's raw vectors. Its compressed terminal
+denominator is not the ideal proposal mass and is never used as such.
+Accepted submeasures are normalized separately for each initial sector.
+Both their normalized laws and success masses meet C70's plans.
+
+| Requested TV | Largest per-j proposal TV upper bound | Proposal budget | Largest accepted-law TV upper bound | Accepted-law plan |
+|---|---:|---:|---:|---:|
+| 1e-3 | 9.45e-6 | 9.92e-5 | 2.82e-5 | 8.13e-4 |
+| 1e-6 | 9.19e-9 | 9.69e-8 | 3.10e-8 | 7.93e-7 |
+
+The independent full-r diagnostic agrees with the target interval midpoint
+to at most 2.78e-17; it is a floating diagnostic, not the certificate.
+Omitting terminal acceptance has TV lower bound about 0.235674. Fixing one
+boundary proposal instead of mixing j changes the proposal by about 0.236.
+The separate exact claims regression covers the stronger frozen-j-through-
+rejection error. No empirical output histogram is used as a TV certificate.
+
+## Matched costs
+
+Authoritative SERIAL main report:
+`out/quantized_reverse_comparison_20260911T065650763335Z.json` (5/5 checks).
+It was run after the law and lab jobs finished; earlier overlapping timings
+are retained but not used for this comparison.
+
+The supplied UG fixture has r=3*(2^60-1), b=3,t=63, the same repeated
+rational-pi mixer at every control and no routes. All methods request TV
+1e-6; setup and every rejected attempt are timed for seeds 624–628.
+
+| Method | Median setup + returned sample | Maximum observed backend precision |
+|---|---:|---:|
+| Quantized reverse | 0.0315 s | 64 bits |
+| Raw reverse | 0.00947 s | 212 bits |
+| Full forward/effect | 0.00495 s | 202 bits |
+| Checkpoint spacing 8 | 0.00778 s | 202 bits |
+
+Both reverse methods used attempts [5,3,5,2,1] on these seeds. The quantized
+grid used p=34: maximum dynamic coordinate bits 35, initial-vector bits 36,
+raw-child bits 70, weight bits 141 and terminal ratio operand bits 140.
+No operator refinement or trajectory replay occurred in these finite rows.
+These observations do not bound all backend calls or demonstrate a native
+memory improvement. The complex-coordinate working allowance is 240, not
+240 bytes or a count of fixed-width machine scalars. C70 explains its units.
+
+The separate binary scalar fixture still favors C65 (median 0.000150 s).
+The comparison also enumerates binary r=10 width-1/3 endpoint laws and
+ternary r=9 width-0/1/3 laws. Each fixed sector is normalized before mixing;
+TV against the finite-work kernel is bounded by the SUM of both certificates.
+Controls show integer growth without compression and wrong conditional
+weights if norms are computed after projective compression.
+
+This settles TODO 29 at its bounded scope. Exact Python integer/rational
+compression costs outweigh lower verified operator precision here. Do not
+optimize this representation further or change defaults on these results.
+
+## Failures and main-audit corrections
+
+- Initial lab runs had a missing closing parenthesis in the newly added
+  planner regression. `out/quantized_reverse_lab.log` and the corresponding
+  `_no_flint.log` preserve that syntax failure; fixed/final runs pass.
+- The first finite-law preflight counted discarded attempt payloads as
+  retained storage and exceeded its guard. The corrected probe budgets its
+  actual retained summarized-law/report payload, not every transient attempt.
+  Failure: `out/quantized_reverse_work_failure_20260911T064652050406Z.json`.
+- An incorrect expected integer helper value made the helper control fail.
+  Failure: `out/quantized_reverse_work_failure_20260911T064717105213Z.json`.
+- An aggregate-cost predicate multiplied an already aggregate block count by
+  attempts again. Failure:
+  `out/quantized_reverse_work_failure_20260911T065135012062Z.json`.
+- Main found the endpoint verifier pooling accepted mass across initial
+  sectors, which is not the implemented retry law. Per-sector normalization
+  and the summed-certificate predicate replace that comparison. Earlier
+  passing reports are historical, not evidence for the corrected endpoint law.
+- Main separated the initial vector's finer grid/bit bound from the dynamic
+  state's bound, added missing per-j and actual-child-size checks, and added
+  binary endpoint cases. The agent's first proposal check covered only the
+  uniform-j mixture. Final reports above supersede those weaker predicates.
+- Main added positive rare-child, exact-zero child, local refinement without
+  past-state changes, and no-hidden-forward-builder regressions. An initial
+  audit worry about all-zero rounded weights was inapplicable: these child
+  weights are exact integer norms. The finite CDF cannot select a zero weight.
+
+## Validation and reproduction
+
+Core ran first and passed: `out/quantized_reverse_core.log`. Scoped gates:
+`out/quantized_reverse_lab_final.log`, `out/quantized_reverse_claims.log`,
+and `out/quantized_reverse_lab_no_flint_final.log`. The other six science
+suites were not rerun. Documentation gate: `out/quantized_reverse_docs.log`.
+No commit or manuscript/abstract edit was made.
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' --with 'python-flint==0.9.0' python -m experiments.experiment_quantized_reverse_work
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' --with 'python-flint==0.9.0' python -m experiments.experiment_quantized_reverse_comparison
+```
+
+The useful next lead is structural rather than another precision sweep:
+coherent history count may greatly exceed the number of backward-reachable
+sector labels. TODO 30 owns its proposed derivation, first route-set audit
+and unimplemented coherent-amplitude/sampling test. That lead is not a
+result established by C70. TODO 24's backend-wide complexity boundary remains
+open and deferred; the user's broader research goal remains active.
+
+---
+
+# RA — Certification need not resolve a rare probability relatively
+
+Follow-up: C64/C65 and §FW now provide opt-in verified finite-work/scalar
+proposals and clarify the late-mixer limitation of this fixed binary fixture.
+The evidence below is the earlier prefix-component comparison, not a claim
+that it remains the strongest implementation.
+
+C63 owns the proof and input/resource contract. This follows §NG's precision
+audit. The qsim-research skill required separate proposal certification,
+complete tiny laws, must-fail controls and matched requested accuracy. Three
+lower-cost agents supplied an exact-rational initial probe, a complete-law
+verifier and a read-only proof/code audit. Main implemented the sampler,
+corrected the verifiers and reran the affected checks. No paper/abstract
+edits or commits were made.
+
+## Why not immediately build an exact-real sampler?
+
+Main read [Brassard, Devroye and Gravel, Section 4, Algorithm 4 and Theorem 2](https://pmc.ncbi.nlm.nih.gov/articles/PMC7514202/).
+Adaptive fair-bit comparisons can implement exact rejection with computable
+probabilities. Their algorithm first constructs a proposal from approximations
+at every output; its refinement bound uses that proposal's positive floor.
+That is not a free table-free proposal for our circuit. We do not import
+their communication/random-bit bound as a quantum-contraction runtime bound.
+For the current finite-TV task, C63 instead under-accepts slightly and bounds
+the total lost mass. This application makes no novelty claim for rejection
+sampling, adaptive comparisons or accepted-measure perturbation.
+
+The useful link to C60 is the weighting: a rare block can have large relative
+conditional error while contributing little to the overall law. Rejection
+has the analogous accepted-submeasure bound. We pay explicitly for that lost
+mass; we do not label a quantized local decision exact.
+
+## Implementation and meaningful baselines
+
+`lab/verified_rejection.py` streams the same C59 finite histories for final
+acceptance. The original verified oracle now exposes that existing component
+iteration; the ordinary coherent sum and both enclosure modes retain their
+math. A chosen proposal history contracts just one deterministic routed
+component. Its proposals use C61's VERIFIED prefix sampler, with rational
+angle inputs and finite-bit integer kernels. The float finite-work sampler
+is not used inside a purportedly certified proposal.
+
+The stronger float finite-work instrument's linear-depth arithmetic cost is
+therefore NOT achieved here: component proposal work still rebuilds prefixes.
+This distinction matters both for positioning the result and for deciding
+what remains worth optimizing. Both compared algorithms receive the same
+supplied indexed circuit and promise the same joint (gamma,y) TV tolerance;
+neither discovers the order or constructs physical gate decompositions.
+
+## Exact-rational edge probe
+
+`out/rejection_deficit_20260911T042546841544Z.json` passes 4/4 checks.
+The endpoint probe covers eleven fixed cases at five word precisions,
+including exact-zero/cancellation, negative outward lower endpoints and
+denominators down to 2^-1024. It checks the exact deficit inequality and
+agreement with the production integer floor. Only L varies in the fixed
+two-cell accepted-law sweep. Wrong proposals and uncharged mass deletion
+give the required counterexamples, each with TV=1/2.
+
+The initial failure `out/rejection_deficit_20260911T042223122558Z.json`
+is preserved. The agent initially set scaled numerator P equal to proposal q,
+then compared the resulting law to a different declared target p. This was
+an inconsistent fixture, not a failure of the bound. The corrected agent
+report `out/rejection_deficit_20260911T042417648171Z.json` remains too.
+Main then added negative-lower-endpoint cases, explicit true-value validity
+checks and comparison to the production floor. This avoids testing only
+intervals whose lower endpoints are already probabilities.
+
+## Full tiny laws, not histograms
+
+The fixed fixture remains r10,t4 with the exact gates in
+`experiment_verified_sampling.fixtures()`. All four component Markov laws
+are enumerated by the EXISTING exact Fraction transition evaluator, mixed
+using the implemented finite-bit history probabilities, then multiplied by
+the actual acceptance threshold at each of the eighty joint cells. Every
+component, history mixture and normalized accepted law sums to one exactly.
+
+`out/verified_rejection_20260911T042746299715Z.json` passes 4/4 aggregate
+checks, including separate proposal error and success bounds. Outward exact
+Fraction TV bounds against verified ideal intervals are:
+
+| Requested target TV | Proposal TV upper | Accepted-output TV upper | One-attempt success |
+|---|---|---|---|
+| 10^-3 | 5.10714e-6 | 2.06971e-5 | 0.3966184 |
+| 10^-6 | 6.19037e-9 | 1.77592e-8 | 0.3966582 |
+
+Displayed error bounds round upward; success values are descriptive decimals.
+The full exact fractions are in the report. Both P192 and P256 references
+pass; neither is an independent propagation algorithm. Independence comes
+from the existing full-r float matrix product: ideal target midpoint cells
+agree within about 6.94e-17, and all four deterministic-route components
+also pass individual independent-product/normalization checks. Floats are
+diagnostics, not the certificate. Skipping acceptance has an OUTWARD LOWER
+TV bound above 0.1775, a genuinely separating control.
+
+The first agent PASS report, `out/verified_rejection_20260911T042515574744Z.json`,
+had two invalid inference checks: it used an UPPER TV bound to infer a
+nonzero error, and its proposal check merely required TV>=0. Main replaced
+those with a lower bound and the actual proposal budget, checked the success
+lower bound and requested target, and compared IDEAL intervals to independent
+products rather than using loose accepted-law agreement as the only reference.
+The agent's serialization failures in logs
+`out/verified_rejection_test_20260911T042409Z.log` and
+`out/verified_rejection_test_20260911T042502Z.log` remain.
+Main's first stricter rerun also exposed nested Fraction report serialization;
+`out/verified_rejection_20260911T042713826848Z.json` retains that failure.
+The final report uses the standard harness schema and exact-string conversion.
+
+Reference allocations are tiny and capped before enumeration. The existing
+transition cache allowance applies; extra retained dictionaries have a
+conservative entry allowance for these frozen precisions. These are resource
+guards, not measured process/native memory. No reference table is used by
+either wide production sampler.
+
+## Zero/near-zero controls and matched wide timing
+
+`out/rejection_comparison_20260911T042906091975Z.json` passes 9/9 checks
+(including descriptive timing bookkeeping, not nine separate discoveries).
+At r6,t2, final K(q1,theta), gamma0,y1, the identity component vanishes.
+The angle sequence is zero, pi/2^4, pi/2^16, pi/2^64 and pi/2^256; only that
+angle changes. All absolute-width decisions terminate at P64 with no retries.
+At the two smallest positive angles, the finite acceptance grid rounds a
+strictly positive ideal acceptance to zero. The exact outward deficit bound
+passes: this is charged approximation, not an exact local sampler.
+
+The supplied-wide input is the SAME rectangular-mode r=(2^61)-2,t63 fixture
+as §NG, target TV 10^-6, seeds 624/625/626, two repeats and alternating
+algorithm order. Times include construction, planning/history setup, all
+rejected proposals, acceptance, refinements and bit requests. There are only
+THREE distinct random traces, not six independent seeds. Rejection takes
+3,2,4 attempts on those respective seeds, repeated identically.
+
+Median elapsed seconds are about 0.25137 for prefix sampling and 0.12704
+for certified rejection: about 1.98 times faster in this bounded comparison.
+The first report `out/rejection_comparison_20260911T042322683508Z.json`
+had the same qualitative result; it is retained. This is not a crossover,
+uniform runtime bound, optimal implementation claim or inference of native
+memory usage. Prefix proposals contracting one history can outweigh the
+retry cost here; the stronger linear-depth proposal is still uncertified.
+Both existing sampler defaults remain unchanged; the comparator is explicit.
+
+An exact two-cell control also shows that a one-attempt cap plus uncharged
+fallback can change the law by TV=1/4. This does NOT say that a fixed iid cap
+with explicit abort biases the accepted law conditional on success; C63
+distinguishes that case from a fallback or query-dependent numerical failure.
+
+## Validation and reproduction
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' --with 'python-flint==0.9.0' python -m experiments.experiment_verified_rejection
+```
+
+Substitute `experiment_rejection_deficit` or `experiment_rejection_comparison`
+for the other two probes. Optional python-flint remains outside project
+metadata. Seeds are diagnostics, not evidence of ideal unbiased randomness.
+
+Fresh core gate: `out/certified_rejection_core.log`. Affected suite passes:
+`out/rejection_test_lab.log` and `out/rejection_test_claims.log` (Arb enabled).
+Full-law regressions: `out/rejection_verified_sampling_regression.log` (8/8)
+and `out/rejection_coherent_sampling_regression.log` (6/6).
+`out/rejection_no_flint_lab.log` passes with explicit backend-test SKIPs;
+it is not a verified-arithmetic test. The other six science suites were not
+rerun for these helper changes. Documentation gate: `out/rejection_docs.log`.
+Current next work belongs only in TODO 24. No general simulation breakthrough
+or backend-wide worst-case precision theorem is inferred from these rows.
+
+---
+
+# RI — Move the initial condition into a terminal rejection test
+
+C68 owns the exact density/pure-trajectory proofs and costs. This is an
+initial mathematical/full-law audit, NOT a certified finite-precision reverse
+sampler or a measured replacement for C67. The idea arose during §UG's
+stronger-baseline comparison: perhaps the positive backward effect can itself
+be sampled as a work state. Main derived the proposal/boundary identity
+before measurement. One lower-cost agent independently audited both proofs;
+another implemented the tiny raw-effect probe. Main audited and reran it.
+
+No forward mixing gap is required. This does not justify resetting the
+backward effect: the trajectory is where its measurement memory now lives.
+The primary reversal formulas actually read are cited in C68. Novelty of
+this application has not been established.
+
+## Complete-law evidence
+
+`experiment_reverse_instrument_probe.py` fixes r9,b3,t4, the earlier W1/W3
+backgrounds, both deterministic reflection declarations, and observable
+W0=embedded Rx(pi/4). All four histories and three initial sectors are
+enumerated at P192/P256. Width and gates stay fixed across precision.
+
+The existing branch builder and QFT helper form UNNORMALIZED reverse effects
+from exact-enclosed I/3. All 24 complete laws have proposal mass enclosing
+one and accepted submass enclosing one third. At every output the accepted
+interval overlaps the separately contracted joint final-sector/output target.
+Bijective routes and uniform initial sectors explain why that joint target
+equals the conditional target divided by three. Scalar interval widths are
+below 2^-120, excluding vacuously broad overlaps. Overlap is a numerical
+consistency check, not an equality proof.
+
+The independent full-r `direct_joint` floating diagnostic agrees with target
+midpoints within about 2.8e-17; it is not the certificate. Expected attempts
+are derived and total accepted mass checked, not estimated from a histogram.
+Omitting acceptance changes at least one conditional law by outward TV at
+least about 0.235673. That lower bound charges BOTH laws' interval radii.
+The normalized mixed I/3 null has constant acceptance one third, checked
+without dividing at zero effects; it is not a new production input option.
+
+Authoritative report:
+`out/reverse_instrument_probe_20260911T060723268281Z.json`, 4/4 checks;
+log `out/reverse_instrument_probe_audited.log`. A 16 MiB structural preflight
+covers both retained precision reports, scalar strings, serialization copies
+and live tiny-reference arrays. It is not RSS. This diagnostic retains full
+laws and uses the full-storage builder; it does not measure streaming savings.
+
+## Preserved verifier failures
+
+The first reference supplied a two-dimensional background on three-state
+work: `out/reverse_instrument_probe_failure_20260911T055948344721Z.json`.
+Strict P1/C2 failures remain in `out/reverse_instrument_probe_*.json` reports
+stamped `20260911T060001445011Z`, `20260911T060026450921Z`,
+`20260911T060115723212Z` and `20260911T060158744959Z`, with paired failure
+reports. The verifier confused physical and measurement-order output bits,
+and Python division constructed binary64 1/3 BEFORE handing it to Acb.
+Precision doubling cannot repair that rounded exact input.
+
+Main identified the initialization error and bit-reversal signature and
+required checking raw negativity before clipping to known nonnegative masses.
+The agent repaired these without weakening mass-one/one-third predicates;
+its first pass is `out/reverse_instrument_probe_20260911T060604813187Z.json`.
+Main then charged both radii in the TV control, bounded interval widths and
+serialization, retained control metadata, and renamed the misleading overlap
+field `exact_identity` to `enclosure_overlap`. The stronger rerun is above.
+
+## Regression and validation
+
+`test_claims.py` uses a rational rotation with entries 3/5 and 4/5 and a sign
+branch. Its Kraus operators are nonnormal, preventing a vacuous adjoint test.
+Both completeness relations hold exactly and the pure reverse accepted mass
+is target/b. Dropping rejection or the adjoint gives different rational laws.
+This analytic check is not a new generic propagator or three-state sampler.
+
+Core passed before science as recorded in §UG. The claims suite was rerun
+after this regression and passes with the optional backend
+(`out/reverse_instrument_claims.log`). Other scoped lab/full-law checks are
+in §UG; the other six science suites were not rerun. Documentation validation
+shares `out/uniform_gap_docs.log`. No manuscript/abstract edits or commits.
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' --with 'python-flint==0.9.0' python -m experiments.experiment_reverse_instrument_probe
+```
+
+This is the more promising lead because it removes mixing assumptions and
+forward checkpoints in exact arithmetic. Whether it wins at equal certified
+accuracy is unresolved. TODO 28 alone owns that next experiment; C68 keeps
+numerical and coherent-history boundaries explicit.
+
+---
+
+# RO — Reachable orbits and the latent-eigenphase baseline
+
+The user requested consolidation into the two paper manuscripts, followed by
+further research. PAPER_A.md now integrates the operational-equivalence and
+tensor-memory findings; PAPER_B.md integrates contraction, balanced controls,
+conditional sampling and this follow-up. Claim files remain authoritative;
+abstract workshops were not rewritten as duplicate manuscripts.
+
+## Derivation and experimental design
+
+C51 gives the descending-power reachable-set bound. It was derived before
+measurement. The implementation exposes the SAME existing classical replay
+kernel on selected inputs (`walsh.classical_images`), then memoizes compiled
+branch actions in `lab/reachable.py`. No full work-space permutation table is
+built; neither an order nor a supplied orbit goes into the compiled sampler.
+
+The correctness gate replays every clean work input x<N for each distinct
+compiled multiplier, on both control branches, checking arithmetic and scratch
+cleanup. It uses separate wrappers/caches so that measured sampler setup and
+cold replay do not benefit from a pre-enumerated clean code. Every queried
+cached input and output is checked clean at block boundaries. The ordinary
+noncommuting-gate counterexample remains a required negative control.
+
+Two one-parameter series are kept separate: N=21,a=2 while varying exponent
+width, then a=2,t=32 while varying N across the fixed list below. Changes in
+order in the second series are consequences of the changing modulus, not a
+claim to have held the arithmetic instance fixed. Fixed RNG seeds couple the
+compiled, high-level modular, and orbit-vector samplers for exact path checks.
+
+## Results
+
+The completed experiment passed **141/141 checks**. Complete small output
+distributions agree with an independent FFT, and the smallest is checked
+against the existing Fourier-compiled state-vector simulator. Wider sampled
+paths agree with geometric-series marginal probabilities and two classical
+work-state baselines. Forced rare outcomes reach probabilities around 10^-19;
+the largest positive-reference relative error is **1.78e-14**. No amplitude
+tolerance truncation is used; `occupied_1e10` is only a diagnostic count.
+
+At fixed N=21,a=2, stored work support rises from 4 at t=2 to 6 at t=3 and
+stays at 6 through the checked widths up to t=32. At fixed a=2,t=32:
+
+| N | r | Compiled work bits | Peak stored amplitudes | Cached transitions after sampled paths |
+|---|---:|---:|---:|---:|
+| 15 | 4 | 16 | 4 | 8 |
+| 21 | 6 | 19 | 6 | 18 |
+| 35 | 12 | 22 | 12 | 30 |
+| 77 | 30 | 25 | 30 | 150 |
+| 143 | 60 | 28 | 60 | 210 |
+| 221 | 24 | 28 | 24 | 54 |
+| 323 | 72 | 31 | 72 | 234 |
+| 437 | 198 | 31 | 198 | 5202 |
+| 667 | 308 | 34 | 308 | 4258 |
+
+For the last row a scratch-dense vector would require 2^34 complex amplitudes,
+or 256 GiB of complex128 payload alone. **That vector was not allocated.**
+The sparse result stores 308 work amplitudes plus labels, temporary vectors,
+gate lists, caches and history. This is NOT a measured process-memory reduction
+ratio and not a generic "66-qubit simulation" benchmark: exponent width is 32,
+work width 34, but the arithmetic structure determines which labels are
+evaluated. The compiled helper's int64 labels currently cap the reused
+work-plus-control circuit at 63 qubits.
+
+## A useful negative result, then a stronger comparator
+
+The first run passed 135 checks and showed that ordinary orbit-vector sampling
+was faster than compiled sparse sampling. This is useful: removing the scratch
+overhead has not established an advantage over an obvious classical method.
+
+That prompted the C52 spectral baseline, derived and declared before a second
+run. All conditional effects are polynomials in one modular-multiplication
+unitary. Initial |1> gives a uniform distribution over its orbit eigenphases,
+so one can sample a latent k/r and generate output bits by scalar Bernoulli
+updates. The underlying argument is explicitly prior art in
+[Cleve et al., §6](https://arxiv.org/abs/quant-ph/9708016), equations 6.2–6.4
+and the measurement-commutation argument that follows. We verified the small
+mixtures by summing conditional-on-k probabilities, not by mistaking one such
+probability for the marginal.
+
+The spectral comparator is charged for discovering r by repeated multiplication
+until return to 1. That takes O(r) arithmetic steps and no orbit table. It then
+needs no work vector to sample. The added diagnostic also verifies coherent
+exponent/work Schmidt rank min(r,2^t), including a scalar-rank-1 example whose
+joint rank is 6. These ranks are not output-sampling memory lower bounds.
+
+Illustrative **single-run** timings at N=667,a=2,t=32 (Python 3.12, CPU):
+
+| Work | Seconds |
+|---|---:|
+| Compile distinct arithmetic circuits | 0.959 |
+| First compiled sparse sample, initially empty caches | 0.863 |
+| Eight compiled sparse samples, after the first sample | 0.0157 |
+| Enumerate orbit and construct orbit transition arrays | 0.000497 |
+| Eight orbit-vector samples | 0.00215 |
+| Discover order without storing orbit | 0.00000963 |
+| Eight latent-eigenphase samples | 0.000503 |
+
+Warm sampling may still populate missing cache entries; it is not advertised
+as fully cached. Compilation time includes the existing builder's emitted
+rotation representation as well as its logical trace. Times are illustrative,
+not repeated competitive benchmarks; microsecond setup timings especially do
+not support precise ratios. High-level modular and spectral baselines do not
+simulate arbitrary dirty-scratch arithmetic, but they do solve the same ideal
+clean-input output-sampling task under comparison. No MPS superiority is claimed.
+
+## Reproduction and provenance
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_reachable_order_finding
+```
+
+Report: ignored `out/reachable_order_finding.json`, with declarations, checks,
+profiles, cache/setup costs, rare outputs, Python/NumPy versions and timings.
+Completed run: Python 3.12.10, NumPy 2.4.6, CPU, about 7.81 seconds overall.
+The initial 135-check run succeeded under Python 3.14 with CUDA for the small
+dense reference. An expanded 3.14 run exited 139 during the modulus sweep,
+without a Python traceback; its partial log is preserved as
+`out/reachable_order_finding_py314_failed.log`. The known interpreter instability
+motivated the 3.12 rerun; this particular crash's cause was not diagnosed.
+All predictions were retained. Do not compare the cross-interpreter compilation
+times as an algorithmic speedup.
+
+The fresh nine-suite science gate and ten-check documentation gate are recorded
+in the consolidation handoff. This bounded reachable-state follow-up is done.
+TODO 14 now asks where a controlled noncommuting perturbation makes the
+spectral reduction inadequate; bigger ideal-orbit sweeps alone are postponed.
 
 ---
 
@@ -1493,6 +7752,1064 @@ general. Claim C34.
 
 ---
 
+# RV — Remove normalization before trying to certify it
+
+C69 owns the finite-error proof, API, termination assumptions and costs.
+Main implemented the sampler; lower-cost agents independently audited its
+proof/code and supplied complete-law and comparison experiments. Main
+strengthened predicates and reran both. The qsim-research skill's existing-
+helper and stronger-baseline rules prompted the simpler unnormalized vector
+construction: C64 and C63 already control its proposal and boundary acceptance.
+No new normalized-trajectory precision theorem was needed.
+
+`VerifiedReverseWork` is opt-in and does not change the default sampler or
+add a coherent-history outer option. It retains the selected reverse vector
+and current children, constructing exact branches on demand. All forward
+states are absent. Precision refinement replays fixed bits and j; rejection
+redraws j but keeps the initially chosen coarse sector. C69 explains why
+these two labels have different redraw rules.
+
+## Complete finite laws
+
+`experiment_verified_reverse_work.py` fixes §RI's r9,b3,t4 circuit including
+W0. It enumerates all four histories, three initial sectors, three boundary
+labels and sixteen outputs at targets 1e-3 and 1e-6; target intervals are
+checked at P192/P256. There are 48 accepted-law rows, not 24. Each
+j-conditional proposal normalizes exactly as Fractions and meets its own
+TV bound against enclosed terminal D. The boundary-averaged accepted law
+normalizes by its ACTUAL accepted mass, not the ideal one third, and meets
+the separately proved accepted-law budget. Success and expected-attempt
+bounds are checked from the full finite law, not a sample histogram.
+
+At target 1e-3, maximum outward accepted-law TV is about 2.67e-5 against a
+plan bound about 6.10e-4. At 1e-6 it is about 2.88e-8 against about 6.02e-7.
+The shared prefix target also agrees with an independent full-r floating
+diagnostic. The latter is not the outward certificate. Skipping acceptance
+has outward TV at least about 0.235673 in a conditional law. Width-zero
+identity rows include exact ZERO ACCEPTANCE NUMERATORS with denominator
+one; these are not evidence of a zero denominator. The separate lab tests
+explicitly require at least one zero-denominator trajectory.
+
+Authoritative report: `out/verified_reverse_work_20260911T062706832480Z.json`,
+4/4 checks; log `out/verified_reverse_work_audited.log`. Main discarded the
+unnecessary retention of every full attempt dictionary, added per-j proposal
+checks and corrected row counts and zero-case labels. A structural 16 MiB
+guard covers retained summarized laws, serialization and current small
+dictionaries; it is not native RSS. The diagnostic enumerates a tiny tree;
+the production sampler never allocates that tree.
+
+## Matched cost result: storage wins, timing does not
+
+`experiment_reverse_work_comparison.py` uses §UG's supplied wide r,b,t and
+fixed five seeds 624–628 at target 1e-6. Timings include worker snapshot
+construction plus an accepted sample; the supplied input circuit is built
+once outside the timer. All rejected attempts are included. Different random
+decompositions are NOT expected to return matched outputs for a shared seed.
+
+| Method | Median seconds | Range seconds | Highest working precision |
+|---|---:|---:|---:|
+| Full storage | 0.00519 | 0.00514–0.00538 | 202 |
+| Checkpoint k8 | 0.00782 | 0.00779–0.00792 | 202 |
+| Reverse rejection | 0.01033 | 0.00313–0.02799 | 212 |
+
+Reverse attempts are 5,3,5,2,1. Five timings do not establish an expected
+runtime, asymptotic speedup or universal slowdown. They DO fail to justify
+replacing either existing method for speed. The binary comparison includes
+C65's stronger scalar sampler; its median is also lower than reverse here.
+
+Retained forward matrices remain 64 for full storage and 15 for k8, with
+persistent branch counts 126 and zero respectively. Reverse retains neither
+and has a bound of four work vectors. Like-scoped conservative working
+scalar allowances are 1845,360,240 respectively, INCLUDING reverse matrix
+temporaries. Comparing only its vector entries to a baseline's total working
+allowance would exaggerate savings. None of these is RSS; supplied gate data,
+output bits and scalar bit lengths still count. No width limit was raised.
+
+Tiny endpoint fixtures at widths 0,1,3 include W0 and routes at both ends.
+Their complete normalized reverse laws agree with the certified finite-work
+baseline within the sum of their budgets, with matching final-sector labels.
+A separately forced t32 no-background probe records 30 zero-block fallbacks
+across all checked paths; it is not a complete t32 law. Omitting acceptance
+differs from the MATCHED independent tiny target by float-diagnostic TV about
+0.168811. Resetting to e_j changes normalized conditional weights, not merely
+their scale. The stronger outward omission check is in the full-law probe.
+
+Authoritative report: `out/reverse_work_comparison_20260911T063147820197Z.json`,
+5/5 checks; log `out/reverse_work_comparison_audited.log`. Main added complete
+edge-law comparisons, equal-accuracy predicates, a like-scoped scalar-storage
+comparison and an aggregate 32 MiB retained-report preflight.
+
+## Preserved failures and corrections
+
+Main's initial polynomial norm used Arb general exponentiation `x**2`.
+Intervals crossing zero then gave NaN and triggered futile precision doubling.
+The initial smoke process was stopped after confirming it live; its log is
+`out/reverse_sampler_initial.log` (buffered, empty). The bounded diagnostic
+`out/reverse_sampler_accept_diagnostic.log` records the timeout traceback.
+The repair uses multiplication as in C63; a regression checks finiteness on
+coordinate intervals crossing zero. The repaired smoke log is
+`out/reverse_sampler_smoke.log`. No timeout-limited run was called certified.
+
+The full-law agent's first independent-reference check failed due to a
+normalization mismatch, preserved in
+`out/verified_reverse_work_20260911T062505232146Z.json` and its paired failure
+report. The intermediate reports stamped `20260911T062522793897Z` and
+`20260911T062545497189Z` precede main's stronger predicates and allocation fix.
+
+Comparison logs `out/reverse_work_comparison_test_20260911T062*.log` and
+their reports preserve dependency/API and guard-definition failures. Early
+passing reports also had a mismatched omission fixture, raw rather than
+normalized reset comparison, constructor-excluded timing, misleading default
+forward counts, a vacuous rare-case predicate and overwritten harness schema.
+Main flagged these; the agent repaired them before its pass stamped
+`20260911T062912361783Z`. Main's additional audit/rerun above is authoritative.
+These were verifier defects, not evidence against the reverse identity.
+
+## Validation and next boundary
+
+Core passed first (`out/reverse_sampler_core.log`). Backend-present lab and
+claims pass (`out/reverse_sampler_lab_final.log`,
+`out/reverse_sampler_claims.log`); backend-absent lab passes with explicit
+verified-arithmetic skips (`out/reverse_sampler_lab_no_flint_final.log`). Lab
+checks child and terminal replay with deliberately widened intervals, exact
+zeros, API/plan validation and forbids invoking the full forward builder.
+Claims include the exact frozen-j counterexample. The other six science
+suites were not rerun. Documentation gate: `out/reverse_sampler_docs.log`.
+No manuscript/abstract edits or commits; the broader research goal is active.
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' --with 'python-flint==0.9.0' python -m experiments.experiment_verified_reverse_work
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' --with 'python-flint==0.9.0' python -m experiments.experiment_reverse_work_comparison
+```
+
+This is a validated memory tradeoff, not a general simulation breakthrough.
+The tempting next link is local quantum-instrument error plus exact dyadic
+state compression, to avoid the full-tree precision coefficient. That follow-up
+is now completed by TODO 29 / C70 / §QD, not certified by C69 itself.
+TODO 30 owns the next structural investigation; TODO 24's broader backend
+bit-cost issue remains separate.
+
+---
+
+# SA — Shared-variable reductions and a rejected raw encoding
+
+C90 owns the causal-lift theorem and source baselines. C91 owns the exact
+arithmetic reductions, mask scope and clean/dirty distinction. This is progress
+within TODO50, which remains open; no general simulation breakthrough or
+best-known memory advantage is established. The broad user goal remains active.
+
+## How the two lines of investigation changed the next action
+
+The side-board proposals in `topic:cnot-math-brainstorm` suggested global
+quadratic restriction and parity-rank decompositions. Sol read the cited
+primary theorem bodies. Root independently specialized the degree-drop kernel
+to the factored causal lift, and a second Sol worker checked the native
+control planes and affine-branch converse. The first carry stages already
+settle rejection of the raw representation, while its successful one-parity
+cases have an affine baseline. The worker also derived a nonzero easy endpoint
+that the raw lift rejects. No native size experiment was warranted.
+
+Root had created task `T2e51fb2255364667`, attempt `Ad603d1740e204919`, and
+registered prediction `Me2e8a7915464497a` for a small recognizer comparison.
+The independent proof settled its proposed discriminator before any source
+was written or run started. The task was cancelled with that reason. The
+prediction is unexecuted, neither confirmed nor refuted by measurement.
+
+Meanwhile Astra derived the two-macro autocorrelation and its constant-state
+full outside average. Root independently derived a nonzero full-space probe;
+Astra checked it before execution. Its order independence exposed a possible
+vacuous chronology test, so Astra supplied a different conditional query that
+does detect order. Root implemented both comparisons against the actual gate
+trace. The full outside average and the fixed-dirty-fiber chronology query
+have deliberately different masks and normalization contracts.
+
+Astra additionally proved the three-domain clean-scratch conjugacy and its
+native a=1/a=2 scalar reduction. Root checked the branch equations, bijection
+and bounded carry/borrow construction. These latter results are proof-only:
+there is no implemented chart decoder, clean scalar API or benchmark.
+
+## Actual-gate experiment
+
+Source: `experiments/experiment_shared_control_average.py`. Reproduce with:
+
+```bash
+timeout 60s uv run python -u -X faulthandler -m experiments.experiment_shared_control_average
+```
+
+Prediction `M7822d1cb9ef14f7d` preceded the original run
+`Rd56eed62abd84e80`. All eight scientific checks passed with terminal exit
+zero, but the source called `finish()` without `report_path` and put rows and
+metadata on unused attributes. Its two control results also used the generic
+check method. The numerical comparisons were sound; the JSON report was
+absent and the control labels needed correction.
+
+Original source and raw log are preserved as
+`out/shared_control_average_revision1.py` and
+`out/shared_control_average_revision1.log`. Root corrected only report
+arguments and control reporting. Prediction `Mc07d35ef2b194ad4` preceded
+the identical-fixture rerun `R339f6c762a054d2d`, which again terminated with
+exit zero. The corrected report is `out/shared_control_average_report.json`,
+with raw log `out/shared_control_average_main.log`. All eight checks pass
+without warnings, including both explicitly marked must-fail controls.
+
+| exact comparison | scope | result |
+|---|---|---|
+| full shared-variable DP vs actual gate sums | N=3,a=2, two native macros, all 128 combined outside masks | zero errors; 18 nonzero coefficients |
+| conditional low-bit autocorrelation vs actual gate sums | all 64 t,h,e1,e2 assignments in that fixture | zero errors |
+| order-independent low-bit family vs reversed word map | same 64 assignments | zero errors |
+| signed carry DP vs explicit t,h,w integer sums | N=9,c=(3,6),m=5; 24 mask/enable cases | zero errors; negative carry coefficients exercised |
+| order-sensitive conditional query vs actual gates | N=3,a=1,t=2,h=0,u=1, both macro orders | C91's two distinct predicted values agree |
+
+The first fixture has eleven qubits and 216 actual logical operations. Each
+full-space reference coefficient sums all 2,048 labels. Three such small
+gate maps are constructed across the two fixtures; the larger-word arithmetic
+check constructs no seventeen-qubit gate map. Missing incoming carry destroys
+C91's nonzero full-space probe; treating disabled dirty macros as identity
+changes the conditional chronological probe as predicted. All constants,
+masks, controls and caps were frozen before execution. These are correctness
+fixtures, not a width-scaling or timing experiment.
+
+The direct side uses existing `walsh.classical_permutation` replay of logical
+X/CNOT/Toffoli operations. The carry DP has a different scalar construction.
+C89's word map is used only for explicit wrong/reversed references; it is not
+the main full-space reference. The test does not independently verify the
+stored Clifford+T decompositions as unitaries. Exact integers/Fractions avoid
+floating-point tolerances. Allocated bytes, RSS and comparative runtime were
+not measured; the harness elapsed time is descriptive only.
+
+## Reviewed evidence and retained corrections
+
+| board task | accepted submission | accepting review |
+|---|---|---|
+| Td63294941a95401f, Astra arithmetic proof | Sa0255906e6c04810 | Veeff7565b3ec45f2 |
+| T8f87ef33ee7f48c4, Sol primary-source audit | S73d41f041b4742c3 | V88cd6475777446c4 |
+| T6260d3aeb7394589, Sol native-lift proof | S073d9402a64342bc | V9305195d5915428f |
+| Ta65a555030304995, root implementation | S0721470decb1493a | V45550e55b4e846ab |
+
+Proof artifact: `out/agent-board/workers/Afccf9c8c16cc42d9/signed_enable_reduction.md`.
+Source audit: `out/agent-board/workers/A00093affbfac4b39/cubic_degree_drop_rankwidth_audit.md`.
+Native-lift audit: `out/agent-board/workers/A63afbd07db3341ef/audit.md`.
+Root read the full actual artifacts and checked archived hashes/current
+identities. Astra independently read both implementation versions, the exact
+reporting diff, both logs, corrected report and core evidence before accepting.
+Workers made no canonical edits.
+
+The native-lift worker's initial submission `Sad8dfbdf3bd84024` had corrupted
+summary/limitation text despite a valid evidence artifact. Review
+`V8c7fbd4520124948` requested clean metadata and qualification of an endpoint
+Gauss-sum argument that had implied unverified C83 intermediate API closure.
+The accepted revision corrects both; the original submission is retained.
+No scientific execution failed in this investigation.
+
+The primary audit includes Carlet's Boolean multiplication kernel,
+Montanaro's supplied hitting-set/linear-change algorithms and de Colnet's
+exact quadratic sign-edge rank-width baseline. Root read the relevant primary
+definitions and algorithm/theorem bodies before using those comparisons.
+The rank decomposition is supplied and its width belongs to the expanded
+representation; ordinary Gauss elimination already handles Boolean quadratic
+slices irrespective of that width. No favorable native decomposition has been
+constructed here. C90 owns the corresponding source links and claim limits.
+
+## Validation scope
+
+Core ran before new science and after the reporting correction; both observed
+terminal exits were zero and their logs end in ALL TESTS PASSED:
+`out/shared_average_core_initial.log` and `out/shared_average_core_final.log`.
+The affected new experiment passed as above. Production helpers were unchanged
+and the other eight science suites were not rerun. There was no timeout or
+native crash in these bounded runs; TODO34 retains its prior unresolved issue.
+Documentation indexing exits zero (`out/shared_average_reindex.log`), and
+all ten documentation checks pass (`out/shared_average_docs_check.log`).
+Scoped whitespace and new-source syntax checks pass. All four reviewed tasks
+are accepted and closed; the redundant raw-lift pilot is cancelled. C90/C91
+canonical transfers received independent review with no further correction.
+No manuscript, dependency, default or host setting changed; nothing was
+committed or published.
+
+---
+
+# SB — Contracting unsigned bit gaps without losing joint carries
+
+C96 owns the exact block formula, state invariant and charged cost bounds.
+TODO50 owns the next performance discriminator. This work supplies an
+optional contraction kernel; it does not revise the completed IS benchmarks.
+
+Root noticed that a mask-free bit block has two integer thresholds, for
+addition carry and threshold-subtraction borrow. Their intersection counts
+can replace its individual signed-bit steps. An Astra author derived the
+joint formula and hand fault fixtures before implementation; a fresh Astra
+referee accepted it. Root then implemented the optional module and ran the
+bounded candidate test, followed by a second fresh Astra code/evidence review.
+
+The scoped primary-source check found established carry automata and
+bit-parallel correlation algorithms in
+[Wallén, Section 3.3](https://research.ics.aalto.fi/publications/bibdb/HUT-TCS-A84.pdf).
+That section uses an n-bit register cost model for its stated averaged
+carry object. C96 is a block summation of C89's fixed-shift, thresholded
+DP; this search does not establish priority or the fastest competing
+thresholded evaluator. No novelty or optimality claim is made.
+
+## Frozen proof and candidate evidence
+
+The accepted pure derivation is task T7c9d42e5395646f8, attempt
+A8cf5cf5d38b24f23, submission S023deae7d4044fda, digest
+3ac42234bff0be6b8ac9c54b4f9be83f463e6d614d8ce62d272e57de62c32d83.
+Fresh review V983b541304cc4183 accepted it; closure Cbb4069c25d6948da
+preceded candidate claim. Its `derivation_v1.md`, `contract_v1.json`,
+hash record and lint log are in that attempt directory. The derivation
+SHA256 is b0db9e3fb72d3458cb235b988cbf688e11325305fbf6d95b98e9460702decc1b.
+No scientific execution occurred in the proof task.
+
+Candidate task T6c486b9da006455c, attempt Aa965875ab97c4eed, binds that
+accepted proof and accepted blind native reference Sd3de4ca7b85e451b.
+The new `experiments/experiment_sparse_walsh.py` SHA256 is
+658d77c670ec6419bf23dcf0f393842cde615829387b54cfaa8f50e63e7ce1e9.
+The three original interval modules retain their accepted hashes.
+
+The exact run is
+
+    OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 timeout 180s uv run python -u -X faulthandler out/agent-board/workers/Aa965875ab97c4eed/correctness_v1.py
+
+M0b30e9ed495f400c declared the contract, and M55d219b44e884263 froze
+the hashes/predictions before run Rbd06bddc95694cd7. Core had already
+passed first in the same continuing scientific session; its log is
+`out/packed_interval_core_initial.log`. Actual candidate exit was zero.
+All evidence is frozen in submission S2d68fa78a8de4209, digest
+7512f09f95b4b7f39b3071e84f72e9681e5d6be91ef2e96289ee123d894c53cb.
+Fresh review Vb2af416848684bbc accepted it; closure C27200bb33c1345ba.
+
+The attempt owns `correctness_v1.py`, `correctness_report_v1.json`,
+`correctness_run_v1.log`, source/run lint logs and `provenance_v1.md`.
+Report SHA256 is 2d34c10a7e2cbc7cf9387b393997401a32e471aa2e2d00ff8d602dc1e262ed3c.
+
+## What the finite check establishes
+
+All 12 harness checks passed:
+
+* Direct signed sums matched all 74,586 prefixes for bits 0 through 4,
+  every mask pair, threshold and translation residue represented by
+  a centered signed shift.
+* Direct block-word arithmetic matched 5,456 joint transition rows
+  for block widths 1 through 5, every local shift/limit and all incoming
+  carry/borrow states.
+* The unchanged C89 bit DP matched 84 deterministic wider cases through
+  4,097 bits, including sparse/dense masks, empty/full limits and signed
+  shifts spanning multiple wraps. Checked transfer bounds held.
+* Each of the packed and streamed interval paths matched all 66,304
+  frozen native-gate numerators using the new contraction.
+* All 28 invalid-input fixtures rejected before shortcuts.
+
+The five fixed faults were rejected with their predicted wrong results:
+
+| Fault | Arguments (n,L,s,A,C) | Exact | Faulty |
+|---|---|---:|---:|
+| Independent carry/borrow marginals | (3,6,2,0,4) | -2 | 0 |
+| Inclusive borrow threshold | (2,2,0,0,0) | 2 | 3 |
+| Strict carry threshold | (3,3,2,0,4) | 1 | 3 |
+| Borrow-only full-limit terminal | (2,4,-3,1,1) | -4 | 0 |
+| Drop final addition carry-one paths | (2,4,-3,1,1) | -4 | -3 |
+
+Direct sums and block-word arithmetic are elementary independent references
+at this layer, so no new blind-reference task or gate interpreter was
+needed. The wider recurrence shares C89's four-state model. The earlier
+native reference retains its disclosed interpreter/builder limits; its
+frozen report was reused, not rerun. Both interval representations still
+share accepted local macro arithmetic. The mutant driver deliberately
+shares the unaffected signed-bit step to isolate the named fault.
+
+Source/report lint has zero errors and one informational dynamic-control-ID
+finding; all five controls are explicitly resolved in the report. Run-log
+lint is clean. Submission lint's additional informational entries are the
+mechanical lint logs. An initial run.start API request used prose instead
+of the prediction message ID and was rejected before any run or execution;
+the corrected request and provenance record preserve that administrative
+error. There was no failed scientific run or discarded fixture.
+
+The prefix bound is implemented separately from the surrounding conditional
+width guards. No allocation, RSS or runtime measurement was performed here.
+Both packed and streamed competitors can use the same improvement; no
+full outside-average or broader quantum-simulation advantage follows.
+Documentation checks and the final integration review are attached to
+task T4f60b8fc8ebd4c18, attempt A7a996e99e6f044dc.
+
+---
+
+# SC — From nested prefix shifts to one digit carry
+
+C93 owns the mathematical results, charged bounds, normalization and scope.
+TODO50 owns the remaining research question. This checkpoint is progress
+toward the user's broader simulation goal; it does not complete that goal.
+
+## Derivation and independent scrutiny
+
+The authorized swarm retained Astra for algebra, Sol for the endpoint/source
+audit and a second Sol worker for the quotient and independent cell checks.
+Root remained the sole canonical writer. All work started from C92's frozen
+dirty Mersenne equations and the TODO50 target. No further mask search or
+conditional-piece-count benchmark was run.
+
+Astra first conditioned on ternary signed enable digits. Each sector makes
+every order-specific prefix shift constant while pinning only the required
+scratch digits, allowing the existing affine arrangement proof to apply.
+This yields a growing enabled algorithm even for arbitrary permutations.
+Its unequal sector cardinalities are essential. A tempting rank-three
+interpretation was rejected algebraically: the local matrix has rank two,
+which neither establishes a lower bound nor preserves the useful fixed
+prefix catalog in a rank decomposition.
+
+Root then proposed conditioning on the final signed difference instead of
+the full signed-digit word. One binary addition carry reconstructs earlier
+differences during the low-to-high scan. Root derived the compatible backward
+history for complete reversal. Astra independently audited both directions
+and simplified the target phase so that the final count need not be guessed
+in an outer loop. Sol independently checked the normalization, index
+conventions, membership tests and carry terminal condition before execution.
+
+In parallel, Sol derived the smaller endpoint carry alphabet and compared
+it with the stronger interval and sector constructions. The other Sol
+worker derived the exact P-odd quotient, scratch-top path projection and
+one-macro cancellation. These results prevented an unsupported even-depth
+selection law and supplied a charged finite-array competitor. C93 owns
+their proof statements; neither worker's side construction was implemented.
+
+Root inspected the primary arithmetic BDD construction and product bound
+in Bartzis–Bultan, and Kiefer's supplied-automaton minimization theorem,
+including their proof bodies. Sol inspected the archived Wallén body cited
+in its memo. C93 links the applicable sources. This audit supports the
+stated known-method comparisons, not a claim to published novelty or a
+literature-wide optimal algorithm.
+
+## Bounded candidate implementation
+
+Source: `experiments/experiment_shift_cofactor.py`. Reproduce with:
+
+```bash
+timeout 60s uv run python -u -X faulthandler -m experiments.experiment_shift_cofactor
+```
+
+The core gate ran first and exited zero; its complete log is
+`out/shift_cofactor_core_initial.log`. Under task `T175f5d83273c42d3`, attempt
+`Abe0d09e5bb9e497a`, prediction `M9f62a9a5b8af4d08` preceded run
+`R64537598a64a4b6a`. The actual terminal exit was zero. All seven checks
+passed, with no harness warnings. Root read the entire raw log
+`out/shift_cofactor_main.log` and every report row in
+`out/shift_cofactor_report.json`; the independent worker also read both.
+
+The family was fixed at N=7,a=1,n_exp=1, varying only prefix depth q=1,2,3
+and checking both declared schedules. The target is C93's full dirty-space
+coefficient. Every signed shift sector was compared with the actual logical
+gate map, including its unsigned mass and independently derived cardinality.
+All 50 sector pairs and six full-space scalars agree exactly. Each gate map
+enumerated 16,384 physical labels; unused multiplicand spectators were
+removed only after checking divisibility. The candidate uses integers and
+exact `Fraction` geometry; it does not use a floating Walsh transform.
+
+The one-macro zeros agree with C93's proof. The three-macro values and the
+omitted-incoming-carry control reproduce the frozen DS common-mask row;
+DS remains their numerical home. The newly observed two-macro coefficients
+are 3/128 ascending and 7/256 descending. These values were not predicted
+before measurement; only equality with the independent gates was predicted.
+They are finite fixture evidence, not a nonzero growing-depth formula.
+
+The run constructed 22,996 cells: 480 open-strip cells and 22,516 singleton
+slice cells. Its peak line count was 138, peak event count 145, peak current
+DP count 48, and maximum integer scratch span two. These are descriptive
+internal counts, not total allocated bytes or a measured performance win.
+Current/next dictionaries, geometric events, arithmetic objects and the
+validation reference also occupy storage. The reference and report retain
+dense/sector data only for this bounded correctness test; C93's algorithm
+streams sectors and cells. No size or allocation benchmark was attempted.
+
+Both compulsory wrong references were meaningful: complete reversal changed
+the selected nonzero three-macro scalar, and omitting arithmetic h changed
+it to the DS wrong-reference value while retaining the physical h phase.
+Neither mutation was used to replace the actual circuit under study.
+
+## Independent cell verification and preserved failure
+
+Task `T4f8b5243704249b0`, attempt `A0d41a707f3324d11`, used direct integer
+membership and C89 `macro_image` instead of the digit DP. Its source is
+`out/agent-board/workers/A0d41a707f3324d11/verify_shift_cofactor_cells.py`.
+Reproduce with:
+
+```bash
+timeout 60s env PYTHONPATH=. uv run python -u -X faulthandler out/agent-board/workers/A0d41a707f3324d11/verify_shift_cofactor_cells.py
+```
+
+The first prediction `M4d592171975541a9` preceded run `Rd086f4b1e8d54e5c`,
+which exited one before any candidate/direct comparison. Its deterministic
+selection policy incorrectly required each depth/direction/sign slot to
+contain both open and point geometry. One slot was empty. The complete
+source and log are preserved under the attempt's `revision1/` directory,
+and the board also archives that failed log. This was a verifier selection
+failure, not a failure or pass of the scientific prediction.
+
+Revision two changed selection to global deterministic coverage quotas.
+Root inspected the source diff: direct arithmetic, membership rules and
+wrong-reference definitions were unchanged. Prediction `Mdd0522e92d8d43cf`
+preceded run `R811f671c2a554fa1`, which exited zero with all six checks
+passing and no warnings. The same attempt contains the complete final log,
+`verify_shift_cofactor_cells_report.json`, and a source/report review memo.
+
+All 40 selected cells matched both signed numerator and unsigned mass over
+74,240 direct loop visits. Coverage included all p,h pairs, both schedules,
+all shift signs, the three tiny depths, 35 critical singleton cells and
+five open cells containing multiple integer scratch values. One separately
+fixed N=63,q=1 cell spans 30 scratch values; this stresses geometry rather
+than constituting a width sweep or growing-depth benchmark.
+
+Making the upper boundary inclusive changed nonzero row 8 from (-2,2) to
+(-2,4), where each pair is (signed sum,mass). Omitting the true signed-range
+condition for negative S changed row 27 from (-2,2) to (0,4). These controls
+test boundary multiplicity and signed-shift handling even when a final
+full-space sum might hide a cancellation. The direct reference shares the
+reviewed C89 arithmetic and candidate geometry generation; it independently
+tests cell summation, while global partition correctness has separate proof
+and the complete tiny gate-sector checks.
+
+## Frozen evidence and review
+
+Root read the complete proof/source memos, raw logs, reports and preserved
+verifier revision, then verified archived evidence hashes. The historical
+failed-run log has the original current-path name in its run manifest;
+its bytes match the preserved revision1 file, not the later successful log.
+
+| submission | scope | final disposition |
+|---|---|---|
+| S968a64ed29064891 | Astra ternary and final-shift proofs | accepted; task closed |
+| Sc60c0d730508495d | Sol endpoint frontier and source audit | accepted; task closed |
+| S0fdf91dfea274d08 | Sol quotient proof and charged recurrence | accepted; task closed |
+| Sda9284db313b47f8 | independent cell source, both runs and full evidence | accepted; task closed |
+
+The source audit has preserved evidence-version corrections. Its original
+submission `Sb0ab226595cf4b5c` was replaced after a post-freeze baseline
+paragraph addition, and `Sbbe3d9aa7acb42b3` was replaced to include the
+subsequently requested implementation review. Neither replacement corrected
+a mathematical failure. The original body is preserved under revision1;
+the accepted final submission binds all three artifacts immutably.
+
+Key SHA-256 identities, with the board manifest owning all artifact paths:
+
+| artifact | SHA-256 |
+|---|---|
+| candidate source | 7dcc149a9a6ebc8d26c042ad40cf8cecd185f9f25d598a815eacfbffc4500016 |
+| candidate report | d74c6e64fa468a60db72ccefe185b8e89599b5c2320f1f1b6ec24ec12108ecda |
+| candidate raw log | 43b2cf01dd8a31ada70729752881e448b49bb2425c7b717940d166d6b8f6f927 |
+| final direct verifier source | 2b6735c9bcd17c1b1c8f6be6f9ea0e6091e43eca42631e3485f33419f9228114 |
+| direct verifier report | c79295103e71278e50b2185fbf0399b544bff19423da4ac5b6b2a547c2e39cbf |
+
+Final syntax and whitespace checks pass. Regenerating indexes with
+`uv run python tools/reindex.py` and running `uv run python tools/check.py`
+exited zero; all ten documentation checks pass. Logs are
+`out/shift_cofactor_reindex.log` and `out/shift_cofactor_docs_check.log`.
+The successful science checks were not repeated after documentation-only
+edits. Astra also audited the final C93 mathematical transfer in board
+message `M13430e0f72904506`, with no correction requested.
+
+Coordinator write task `T175f5d83273c42d3` is the authoritative record of
+independent final review and integration. Its submission/review/closure
+manifest owns the exact integrated version and final validation logs.
+Worker tasks were closed before updating their snapshotted TODO50 input.
+The scope is a bounded experiment and documentation; no production helper,
+manuscript, dependency, host setting, commit or publication was changed.
+Other eight science suites were not rerun; TODO34's earlier native crash
+remains unresolved. Preserve the existing dirty worktree.
+
+---
+
+# SD — Detectable coherences are not a sampling-memory barrier
+
+The qsim-research workflow led this follow-up to preserve the actual time
+ordering, derive a discriminating test first, and add the strongest simple
+comparator. That last step changed the interpretation before measurements:
+the selected defect has an input-specific exponent-phase replacement. A failure
+of the old physical-work mixture would therefore not establish a difficult
+sampling problem. C53 gives the derivation and its scope.
+
+## Design and independent checks
+
+The main series fixes the modulus, base, exponent width, insertion point and
+work gate from C53's example; only theta varies. Arithmetic powers are applied
+in their original ascending order, with the defect after the first two blocks.
+All exponent outputs are compared across three distinct calculations:
+
+- finite spectral effects from the two time-ordered Fourier filters;
+- the existing `statevec.run` engine on the existing Fourier-compiled arithmetic,
+  inserting the one physical gate before the remaining arithmetic and inverse QFT;
+- an independent computational-basis joint amplitude table followed by NumPy FFT.
+
+Before the sweep, existing selected Toffoli replay validates every clean work
+input on both branches of every needed multiplier, including scratch cleanup.
+The spectral oracle is explicitly order/orbit-informed. The main circuit
+reference is coherent throughout and is never replaced by descending-power
+arithmetic. A second clean initial work label checks complex effect orientation,
+not just the all-ones spectral density of |1>.
+
+Controls include zero perturbation; a nontrivial commuting XXX rotation
+(equal to a power of U on this orbit); an invalid move of the work rotation
+to the end; and a separate earlier-insertion case where the gate is
+noncommuting on the orbit but scalar on the actual reachable states. The
+phase-adjusted scalar sampler is checked against the full coherent output
+distribution, not merely against the original ideal distribution.
+
+## Measurements
+
+The completed experiment passes **57/57 checks**, with no harness warnings.
+The largest full-circuit probability discrepancy is **2.35e-14**; the
+independent FFT discrepancy is below **3e-16**. Selected rows of the main sweep:
+
+| theta/pi | Physical-work dephasing TV error | Detectable eigenbasis pairs | Real coherence-response rank |
+|---:|---:|---:|---:|
+| 0 | below 2e-16 | 0 | 0 |
+| 1/8 | 0.032836 | 12 | 11 |
+| 1/4 | 0.068602 | 12 | 11 |
+| 1/2 | 0.156990 | 12 | 11 |
+| 1 | 0.251481 | 6 | 5 |
+
+Negative angles are also tested. These pair/rank counts are finite numerical
+diagnostics at absolute tolerance 1e-10, not a general rank theorem. At the
+half-pi row, pairs (0,3), (1,4), (2,5) are undetected; the other pairs enter
+the measurement. The eleven nonzero singular values are well separated from
+the floating-point floor (smallest about 0.048, next below 4e-16).
+
+The largest single-output error from discarding initial work-eigenphase
+coherences is **0.0520833** (numerically 5/96), while leaving the original ideal sampler unchanged
+gives a largest error of **0.15625**. Moving the half-pi defect to the end
+produces a **0.078125** error. All required failure controls therefore detect
+real differences. Yet the phase-adjusted scalar mixture recovers the coherent
+distribution to the circuit's numerical precision. This is the principal
+result: the original model fails, but this test case remains cheaply sampleable.
+
+The separate earlier-insertion control changes the output by less than
+3e-14 despite a nonzero orbit commutator. Noncommutation is therefore an
+insufficient test even for whether the observed distribution changes.
+
+An extended-precision spectral calculation changes the half-pi result by
+less than 2e-16. Running the SAME coherent engine with an extended-precision
+state agrees within 2e-14. Its pre-existing compiled gate constants remain
+float64: this is not an arbitrary-precision certification. The math identities
+are exact; all reported distributions are floating-point evaluations.
+
+## Implementation and resources
+
+`lab/spectral.py` provides only bounded dense finite-sum/effect diagnostics,
+not another circuit propagator or a compressed sampler. Width and entry caps
+are enforced before allocation, with Python-integer budgeting to avoid int64
+overflow. `lab.semiclassical.eigenphase_path` gains optional product exponent
+phase offsets. The default ideal path is unchanged and allocates no phase
+vector; supplied offsets require O(t) storage in this implementation.
+
+Each complex128 coherent reference state has 4,096 amplitudes / 65,536 bytes
+of payload. The spectral effect array has 576 complex entries / 9,216 bytes.
+These are individual array payloads, NOT process peaks or a memory-advantage
+benchmark. Gate lists, temporary vectors, filters, SVD work and all-output
+enumeration coexist. Orbit discovery, circuit compilation, compiled clean-input
+validation and each reference/comparator timing are recorded separately in JSON.
+No lookup cache is passed from validation into a claimed timed sampler.
+
+The experiment is small: roughly a few CPU seconds, using Python 3.12.10 and
+NumPy 2.4.6. It enumerates complete distributions solely for validation. The
+phase-adjusted scalar *sampling* path is separately covered in `test_lab.py`
+against coherent inverse-QFT circuits with arbitrary product phase offsets;
+full-mixture enumeration timings are not advertised as single-sample timings.
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_spectral_defect
+```
+
+Raw report/log: ignored `out/spectral_defect.json` and `out/spectral_defect.log`.
+The report retains all declared predictions, controls, per-output probabilities,
+pair contributions, singular values, errors, payloads and setup timings.
+Regression coverage is in the existing lab and claims suites; validation logs
+are `out/spectral_test_lab.log` and `out/spectral_test_claims.log`.
+The core science gate, affected lab and claims suites, and all ten documentation
+checks pass. The other six science suites were not rerun for this bounded
+helper/API extension; their prior consolidation runs are separate evidence.
+
+## Interpretation and next step
+
+This is a useful negative for the proposed hardness direction, and a sharper
+measurement criterion. It is NOT a breakthrough in general classical quantum
+simulation. The familiar distinction between coherence being present and a
+measurement detecting it is explicit in Theurer et al., Definition 1,
+Proposition 2 and Definition 3 of
+[Quantifying Operations with an Application to Coherence](https://arxiv.org/abs/1806.07332).
+We read those definitions/proposition in the primary paper; they are framing
+and prior art, not evidence that our circuit-specific phase transfer is novel.
+
+The bounded experiment is closed in TODO 17. TODO 14 carries the next question:
+test a clean-orbit-preserving work rotation that genuinely mixes basis labels,
+then compare with a rewritten-circuit/small-prefix baseline before building
+any general tensor representation. The target should leave the early reachable
+subset while remaining in the full orbit: a unitary confined to the early
+subset can transfer its transpose to the equally weighted, perfectly correlated
+early exponent register. This is a design observation, not another measured
+experiment or a claim of hardness for the revised target.
+Larger sweeps of this diagonal defect would
+mostly reverify the identity already derived in C53. Neither manuscript nor
+the abstract workshops was changed during this experiment.
+
+---
+
+# SE — Scratch-space operational equivalence
+
+Fourth investigation in the requested sequence. The controlled construction
+and its exact logical-code argument are in C50. The experiment is
+`experiments/experiment_scratch_equivalence.py` and passed **36/36 checks**.
+
+For each of N=7,a=6 and N=7,a=3, hold exponent width 4, total width 17,
+layout and observable fixed. Vary only the number k=0..4 of appended
+CCX(b_j,t_j,x_0) guards. The logical subspace contains every exponent and
+every x<N with clean scratch: 112 basis inputs per variant. All variants
+agree exactly on their full output images and restricted observables.
+
+| Base | k=0 | k=1 | k=2 | k=3 | k=4 |
+|---|---:|---:|---:|---:|---:|
+| a=6: full Walsh support | 15549 | 15994 | 16030 | 16036 | 31982 |
+| a=3: full Walsh support | 64353 | 64471 | 64454 | 64422 | 129152 |
+
+For legitimate order-finding initialization x=1, the exponent-only sign
+function is unchanged: Walsh support 1 for base 6 and 8 for base 3. The
+complete post-inverse-QFT output distributions agree within 1.50e-15.
+Gate-level evolution of a nontrivial coherent code state agrees up to one
+global phase within 4.14e-16. The code identity is proved by the zero guard
+controls; that proof, not a single random-state check, establishes the
+coherent logical-isometry equivalence.
+
+Arithmetic outputs are prepared using the independently gated circuit's
+permutation replay; the guards and inverse QFT are evaluated with the existing
+state-vector simulator. This is not an independent dense re-simulation of
+every arithmetic gate for every variant. The original Fourier/Toffoli layout
+confound is absent: all variants use exactly the same physical register.
+
+## The useful converse
+
+The deliberately invalid CNOT(e_0,x_0) changes legitimate arithmetic, but
+exactly translates the Walsh coefficient vector. Full support stays 15549
+or 64353 respectively. At a=3, the maximum difference in actual order-finding
+output probability is **0.1015625**, despite the identical support count.
+At a=6 those output statistics happen to remain unchanged (within numerical
+error), though the logical arithmetic is wrong. The control was explicitly
+predicted for the odd-order example, not for every changed computation.
+
+Thus neither equal full-support counts nor differences in those counts certify
+logical equivalence. This is consistent with Paper A's exact representation
+identity and helps identify the task to which that identity applies.
+
+```bash
+OPENBLAS_NUM_THREADS=1 LAB_GPU=1 uv run python -m experiments.experiment_scratch_equivalence
+```
+
+Complete rows and provenance are in ignored `out/scratch_equivalence.json`.
+The pilot is complete; discovering a general cheap clean-subspace quotient
+or optimizing circuit extensions is a separate research problem.
+
+---
+
+# SG — Distinguishing small counting atoms from a small full average
+
+C95 owns the mathematical statements, normalization and theorem-application
+limits. TODO50 owns the next discriminator. This work did not produce a
+faster full-average algorithm, a hardness result or a simulation breakthrough.
+
+Root assigned an Astra worker to examine whether C93's final signed shift
+could become a third geometric variable, avoiding its explicit enumeration.
+That assignment ran alongside the independent packed comparator recorded in
+IS. The mathematical work used no scientific execution, rank sweep or
+cell-count experiment.
+
+The first finding was an obstruction to the literal convex sign-cell lift.
+The audit strengthened it from a catalog argument to actual reachable native
+tests in both chronological orders. Checking the final observable was
+essential: the reversed witness has constant target despite its alternating
+internal test. C95 retains this distinction explicitly, preventing an
+unsupported scalar-complexity inference.
+
+The worker then replaced ordinary cells by an exact set recurrence using
+the common dyadic residues of T and T+S. The state labels are small, but
+their associated sets carry the real complexity. Each individual atom has
+a bounded fixed-dimensional integer-polytope encoding; the missing theorem
+concerns the intermediate generating functions after repeated intersections.
+The recurrence retains the terminal phase and disabled/S=0 multiplicity.
+Neither small atoms nor a polynomial-sized symbolic DAG were counted as
+a proved efficient evaluator.
+
+The frozen artifacts are
+`out/agent-board/workers/Abc638d48ac874162/derivation_v1.md` and
+`out/agent-board/workers/Abc638d48ac874162/source_audit_v1.md`. Task
+`T01231bc478594169` submitted `S138cc9000dc549ab`, digest
+`d6447391c5995b365fb3e2a878c1972a3864b10ab7bddaf25d016037682ea545`.
+The original task `T78ea35af80c94a17` was cancelled solely to replace its
+mutable C94 input path by the exact accepted archive. The worker resumed
+its derivation without restarting research; no old-attempt files or
+scientific runs were discarded.
+
+The author and a fresh Astra referee inspected the primary Barvinok–Woods
+projection/intersection theorem bodies and their fixed-parameter hypotheses,
+including treatment of rational-function specialization. The audit also
+checked Nguyen–Pak's short Presburger results and the limitation of an
+earlier conditional positive route. C95 links the sources; no general
+Presburger hardness statement was transferred to the native family.
+
+Fresh independent review `V61870d526fc74d9a` accepted the frozen proof and
+source audit. Root independently read both artifacts and checked physical
+witnesses, recurrence equations, quotient uniqueness, phase and normalization.
+Frozen lint has zero errors; its sole information entry correctly identifies
+the evidence-lint log as lacking a scientific harness verdict. There were
+no scientific runs requiring a harness or native-reference repetition.
+
+Canonical integration task `Tb9fac3a1ea8e4eac` owns the documentation checks
+and faithful-integration review. C92/C93 and the validated streaming source
+remain unchanged. The concrete next mathematical task is recorded only in
+TODO50, with construction, intermediate size and signed extraction charged.
+
+---
+
+# SK — QSim research skill validation
+
+The user requested a small research-alignment skill and a practical test.
+This is tooling/workflow validation, not a new scientific claim or experiment
+supporting either paper. Skill Creator guided authoring and the independent
+forward tests; OpenAI Docs supplied the discovery/invocation conventions.
+
+## Installation and scope
+
+Source: `~/.codex/skills/qsim-research/SKILL.md`, with
+`agents/openai.yaml` providing its UI name, invocation hint, and enabled
+implicit-matching policy. The user-level discovery path
+`~/.agents/skills/qsim-research` is a symlink to that single source, not a
+second maintained skill copy. This follows the current
+[skill-discovery documentation](https://learn.chatgpt.com/docs/build-skills).
+The skill is installed outside the repository; it is not included in a commit
+of this research tree.
+
+The skill points to existing project documents and claim files. It does not
+embed result numbers, claim statuses, or a fixed next research direction.
+It distinguishes discussion, design, execution and write-up, asks for a precise
+simulation task and matched baselines, and preserves scope for exploration.
+There is no new simulator, general-purpose plugin, or additional research
+framework hidden in the package.
+
+`AGENTS.md` is the repository entrypoint to the existing `CLAUDE.md` and skill.
+The test-gate wording in `CLAUDE.md` was clarified: scientific code work starts
+with the core science gate; conceptual discussion and skill/docs-only changes
+do not automatically execute science suites. This removes conflicting workflow
+instructions without weakening the checks for scientific code.
+
+## Tests
+
+The supplied Skill Creator validator passed. Separate semantic checks verified
+UI metadata constraints, the explicit invocation hint, enabled implicit policy,
+and the discovery symlink target. The installed skill and test snapshot have
+identical SHA-256:
+
+`6aba6e5ce0b67c51869281cf4779a705f7b06f917f39413b0e052b9f862e5eb4`
+
+Independent evaluators started without this conversation's history. Each read
+the same frozen skill, then addressed a realistic request using a project
+snapshot at `/tmp/qsim-skill-eval.H5QuBM/research`. They were given the task and
+raw repository artifacts, not expected answers. The discussion/review trials
+were read-only; the execution trial could create only its prefixed test files
+and output artifacts. No evaluation changes were requested in the live papers,
+claim ledger or scientific code.
+
+| Trial | User task | Observed behavior | Assessment |
+|---|---|---|---|
+| Conceptual | Explain within 120 words whether scalar tensor rank one implies cheap Shor output sampling; no tests or edits | Distinguished scalar/joint ranks and sampling cost; charged order discovery; cited current claims; reported only read-only inspection | Pass |
+| Claim review | Assess whether the recorded small-amplitude run establishes a memory advantage over classical Shor simulators; suggest wording without editing | Distinguished retained amplitudes from process memory, compared orbit and spectral baselines, charged discovery, checked primary literature, and noted absent raw JSON in the snapshot instead of claiming to reverify it | Pass |
+| Reproduction | Test the proposed universal factor-two peak bound on the supplied tiny circuit, using the existing harness and propagators, with a control and saved report | Reproduced the existing counterexample with a same-layout single-Toffoli control; retained the false candidate prediction, saved JSON with `ok: false`, and reported exit 1; used existing engines and checked dense/Walsh references plus higher precision | Pass |
+
+The first two trials cite the existing ledger and do not assert a new finding.
+The reproduction is likewise a test of workflow behavior on an existing
+research question, not a promotion of its hypothesis. A failed scientific
+prediction can be the correct outcome of a passing skill-behavior trial.
+
+The main agent inspected the reproduction source and report and reran it in
+the isolated snapshot: exit 1, four successful checks and the one refuted
+candidate bound, with no harness warnings. The negative-control condition
+was resolved as expected. This is a successful failure-preservation test,
+not an all-green scientific experiment. Existing witness results remain in
+their original claims; no new scientific claim was created.
+
+The live papers, claim directory, and inspected propagation/harness source
+files were compared against the pretrial snapshot and were unchanged. Review
+evaluators reported read-only operations; these reports are not a complete
+host-level audit of every possible side effect. The third evaluator's source,
+JSON and audit, plus the frozen skill, are retained under ignored
+`out/skill_validation/`. The experiment source is an archival fixture: copy it
+to a fresh snapshot's `experiments/` before rerunning its module command.
+
+## Limits and reproduction
+
+These are qualitative smoke tests, not a controlled with/without-skill study.
+They cannot establish that the skill caused better decisions than an unassisted
+agent, guarantee future correctness or discovery, or establish automatic
+selection by the running UI. The trials explicitly supplied the skill path;
+automatic matching is enabled in metadata, not behaviorally measured here.
+
+To rerun, use fresh independent contexts with the three task descriptions
+above and the installed skill. Use an isolated project snapshot for any
+execution and inspect both the answer and persisted report. Do not include
+this validation note or an answer rubric in the evaluator's task context.
+The temporary snapshot is disposable and is not the authoritative repository.
+
+The core science gate was run before the instruction clarification and passed;
+no scientific implementation was changed for this skill. Documentation and
+skill validation are the relevant final gates for this task; the supplied
+skill validator, metadata/discovery checks and all ten documentation checks
+passed. No full nine-suite science rerun was necessary for instruction-only
+changes. No commits or publication actions were taken.
+
+---
+
+# SR — The pi revival was predicted, not fitted to the sweep
+
+TODO 22 replaced the localized kick by Rz on one actual work qubit, keeping
+the previous background and insertion fixed. Main derived the exact orbit
+sign sequence before the measurements and noticed that the pi rotation
+permutes coarse sectors. C58 owns the proof and its scope: final orthogonality
+of control-independent bijective routes suffices even without individual-sector
+conservation. It does not make generic sector mixing cheap or prove hardness
+when the shortcut fails.
+
+Three existing lower-cost `gpt-5.6-luna` agents tested physical circuits,
+integer sign/period structure, and abstract routed-sector formulas. Main
+implemented `RoutedOrbitCircuit`, audited the references and controls, reran
+all three experiments, and added lab/claims regressions. The qsim-research
+skill's strongest-baseline and must-fail-control rules motivated the routing,
+regrouping and exponent-transfer comparisons; they also prevented the false
+interpretation of an invisible but incorrect phase operator as an identity.
+
+## Physical comparisons and the useful negative controls
+
+The N=7,a=3,t=5 background is W01@s1,W12@s3,W01@s4, all Rx(pi/2) repeated
+on b=3 orbit blocks. Physical work-bit-1 Rz(theta) is inserted after s=2.
+The angle sweep includes zero and both signs of pi/8, pi/4, pi/2 and pi.
+Existing compiled Circuit/statevec and full-r `sequential_path` agree to
+below 2.3e-14 in every output probability.
+
+Wrong initial coarse dephasing evolves the SAME branches from the density
+(|orbit 0><orbit 0|+|orbit 3><orbit 3|)/2. Its TV discrepancy at positive
+pi/8, pi/4 and pi/2 is about 0.0369, 0.0681 and 0.0963, respectively. It
+vanishes within reference roundoff at zero and plus/minus pi. End-only Rz
+changes no output law. A genuinely repeated diagonal phase agrees with both
+the periodic helper and the coarse-dephased full-r reference at all angles.
+
+The naive C53-style transfer substitutes Rz(theta) on early exponent bit 1
+while leaving the earlier mixers unchanged. It fails: output TV reaches
+about 0.327 and the full-state L2 difference reaches 1. This is one tested
+replacement, not a no-go theorem for all exponent-side descriptions.
+
+The next modulus is N=13,a=2,r=12,t=5, with the same orbit-block schedule and
+physical bit-1 Rz(pi/4). Existing Circuit rotations and CNOT conjugations
+implement the two-level background gates on the actual four work qubits.
+Every one of the 16 work inputs is checked against an explicit matrix;
+background gates fix invalid labels, and Rz has zero label leakage. The
+compiled output agrees with full-r to 1.23e-14, and regrouped b'=6 sectors
+agree with full-r to 2.78e-17. C58 explains the exact period-six sign sequence.
+
+An important control initially did NOT fail. Repeating only the first three
+N=13 bit-1 signs changes the phase operator (max entry error about 0.765),
+but not this early-insertion output (TV below 5e-17): the reached labels
+still see the same signs. Retain this as an input-specific positive control.
+The separately identified bit-0 phase does expose the wrong period-three
+substitution, with TV about 0.0428. Changing the tested bit is an explicit
+control choice, not part of the fixed-bit angle sweep.
+
+## Routed helper audit and resources
+
+The independent routing experiment projects D_q between explicit sector
+bases for b=2,3 and M=2,3,4, including negative charges and multiples of M.
+Maximum projection error is below 1.7e-15. Full-r original-order contraction,
+an independently assembled routed contraction and production agree below
+8.4e-17 on the multi-route rows. An r=4,b=2 existing Circuit/statevec fixture
+gives a separate physical reference. A wrong routing target fails at matrix
+level; freezing the sector despite routing fails at probability level.
+
+The width-63 execution uses supplied r=3,000,000,021,b=3 and several integer
+routes. It draws an actual sample with no orbit/output table. The finite-work
+routine reports a conservative 47,664-byte matrix payload estimate, not peak
+RSS or total process memory. This is not a precision guarantee or order
+discovery. Integer phase reduction is essential even for this diagnostic:
+direct trigonometry of an exponentially large unreduced angle is invalid.
+
+Dense references stay tiny: r<=18 in the physical/routing experiment and
+r<=24 in the sign audit. Individual dense allocations are capped at 16 MiB;
+these are per-allocation checks, not a 16 MiB process-peak claim. The actual
+N=7/t=5 state has 13 qubits and 131,072 complex-vector bytes; N=13/t=5 has
+15 qubits and 524,288 bytes. N=13 compiles to 22,496 gates, below the revised
+30,000-gate fixture cap. Widths 4–7 are preflighted, NOT a measured physical
+width sweep. The sign audit enumerates the two tiny orbits once and charges
+18 modular orbit steps; no generic efficient recognition algorithm is claimed.
+
+## Failures and main-audit corrections retained
+
+- The sign agent's earliest log (`out/phase_structure_test.log`) includes
+  overstrong half-complement checks on N=13 higher bits. The exact sign
+  sequences refute that extension; C58 limits the general parity argument.
+  Two early failures (`...022614096276Z`, `...022644924875Z`) confused modulus
+  with orbit length; `...022719087901Z` had a wrong grouped block shape.
+  All are retained as `out/phase_structure_failure_20260911T*.json`.
+- The vacuous bit-1 control is visible in
+  `out/phase_structure_test_20260911T0225Z.log`. The associated
+  `out/phase_structure_failure_20260911T022733777240Z.json` actually records a
+  subsequent complex-JSON serialization exception, NOT the failed-control
+  detail. An agent summary conflated those; the raw log is authoritative.
+  Main also replaced tautological period checks and fixed a cap off-by-one.
+- The routing experiment's first fractional-phase schedule canceled in the
+  output probabilities. Its failed report is
+  `out/sector_routing_20260911T022843809698Z.json`. The corrected, explicitly
+  changed insertion exposes the wrong deterministic substitution. A separate
+  wrong-sign probability check remains vacuous; only its matrix check is
+  counted. Both facts are retained rather than hidden behind the pass total.
+- Main caught a character-matrix allocation guarded as a vector after an
+  allocation, and unreduced large phases in the independent wide reference.
+  Guards now precede the actual matrix allocation; integer reduction is used
+  before trigonometry. Earlier wide-reference reports are historical.
+- N=13 first exceeded the proposed gate budget before state propagation
+  (`out/physical_phase_failure_20260911T023301695151Z.json`). The bounded gate
+  cap was raised to 30,000. The next independent physical comparison caught
+  incorrect local-to-physical work-qubit embedding, with output error 0.0414:
+  `out/physical_phase_run_4.log` and
+  `out/physical_phase_20260911T023325579579Z.json`. Corrected embedding passes.
+- Main fixed an ignored theta argument in the new N=13 reference, added the
+  missing explicit -pi assertion and checked the N=13 Rz matrix as well as
+  leakage. An initial lab regression expected bool indices to be rejected,
+  unlike the inherited integer API; the failed log
+  `out/physical_phase_test_lab.log` is retained. The corrected validation test
+  uses a noninteger float. No production integer semantics were changed.
+
+## Reproduction and status
+
+From research/, run each module with Python 3.12 and bounded NumPy:
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_physical_phase
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_phase_structure
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -m experiments.experiment_sector_routing
+```
+
+Main-reviewed reports:
+
+| experiment | checks | report |
+|---|---:|---|
+| physical phase and N=13 circuit | 38/38 | `out/physical_phase_20260911T023618836612Z.json` |
+| exact phase structure | 14/14 | `out/phase_structure_20260911T023609004174Z.json` |
+| deterministic sector routing | 99/99 | `out/sector_routing_20260911T023350927347Z.json` |
+
+Logs are `out/physical_phase_main.log`, `out/phase_structure_main_audited.log`
+and `out/sector_routing_main.log`. Core, lab and claims pass in
+`out/physical_phase_core.log`, `out/physical_phase_test_lab_audited.log` and
+`out/physical_phase_test_claims.log`. The other six science suites were not
+rerun for this helper addition. C58 records the primary-source positioning:
+standard block-permutation mathematics, not a new normalizer/factoring theorem.
+The documentation gate passes all ten checks in `out/physical_phase_docs.log`;
+indexes were regenerated and `git diff --check` is clean.
+No manuscript, abstract workshop, commit or publication change in this follow-up.
+The broader goal stays active; TODO 23 owns the next discriminating question.
+
+---
+
 # T — DOES C15 SURVIVE TRUNCATION? (TODO step 7). Peak cost: yes. Accuracy: to a point.
 
 Every C15 figure was δ=0, and nobody runs PPS at δ=0 — so the practical claim
@@ -1591,6 +8908,731 @@ The practical claim stands, with a stated boundary:
 
 So "period-finding precision is free" is true for *memory* and true for
 *accuracy up to moderate δ*, and must not be stated unqualified.
+
+---
+
+# TR — Tensor rank and finite-state memory
+
+Second investigation in the requested sequence. C48 contains the exact local-
+basis and residue-factorization statements. The diagnostic is
+`experiments/experiment_tensor_memory.py`; reusable tools are in
+`lab/tensors.py`. These are dense measurements, not a compressed propagator.
+
+The saved run passed **72/72 checks** over 29 rows. All reported ranks are
+numerical over R, not GF(2), and remain unchanged across relative tolerances
+10^-8, 10^-10, 10^-12 (with corresponding absolute floors). Representative
+normalized cut singular-value vectors agree before/after Walsh transformation
+within 2e-13. Every natural-order cut is measured for each row; only selected
+circuit suffixes are sampled, not every gate.
+
+## The promising half
+
+| Ideal scalar function | Exponent widths | Walsh support | Maximum cut rank |
+|---|---|---|---|
+| N=7,a=3, r=6, LSB | 4,8,12,16 | 8,128,2048,32768 | 3 throughout |
+| N=13,a=4, r=6, LSB | 4,8,12,16 | 1 throughout | 1 throughout |
+| N=15,a=7, r=4, LSB | 4,8,12,16 | 4 throughout | 2 throughout |
+
+The residue automaton reproduces the scalar function on the tested inputs.
+The first row cleanly separates dense coefficients from tensor rank. The second
+recovers the earlier scalar-period counterexample rather than attributing all
+cost to the multiplicative order. A fixed seeded random 12-bit sign function
+has support 4096 and maximum cut rank 64: the small-rank control fails as it must.
+
+## The cautionary half
+
+For the full N=7 arithmetic function (including all invalid scratch inputs):
+
+| Base | t=2 support/rank | t=3 support/rank | t=4 support/rank |
+|---|---|---|---|
+| 6, r=2 | 15549 / 128 | 15549 / 128 | 15549 / 128 |
+| 3, r=6 | 15539 / 128 | 30712 / 153 | 64353 / 217 |
+
+The rank-3 ideal function does not make its full scratch-space pullback rank 3.
+In the t=3 suffix scan, 645 reversed logical gates give support/rank 258/17 for
+base 6 and 730/15 for base 3; one completed final block gives 2606/65 and
+3142/64 respectively. Early sampled suffixes leave the observable unchanged
+(rank 1), so those trivial rows are not evidence for general compressibility.
+The full-space ranks already rule out the most optimistic tiny-memory guess
+in this ordering. They do not prove an asymptotic lower bound for every ordering.
+
+## Reproduction and interpretation
+
+```bash
+OPENBLAS_NUM_THREADS=1 LAB_GPU=1 uv run python -m experiments.experiment_tensor_memory
+```
+
+Raw profiles, singular-value gaps and provenance are in ignored
+`out/tensor_memory.json`. CPU fallback uses the existing Walsh replay. Each
+standard arithmetic builder is checked on all legitimate basis inputs against
+modular exponentiation and scratch cleanup; the existing science suites supply
+the independent state-vector gate for these unchanged builders. An initial run
+was interrupted because it redundantly reran the full state-vector verifier
+for every exponent value at every width; no prediction was changed.
+
+The finite-state/tensor connection is established prior art:
+[Kiefer, weighted-automaton minimization](https://arxiv.org/abs/2009.01217) and
+[Li, Precup and Rabusseau, automata and tensor networks](https://arxiv.org/abs/2010.10029).
+The useful project-specific outcome is the controlled ideal/full-space contrast,
+not a claim that tensorizing a Walsh transform is new. Compression algorithms,
+ordering searches and minimal weighted-automaton discovery remain open beyond
+this first-pass diagnostic.
+
+---
+
+# UG — Quantify the gap, then charge a stronger baseline
+
+C66 owns the uniform phase-gap proof and approximation contract; C67 owns
+the exact checkpoint recurrence and its cost boundary. This note records
+TODO 27's bounded evidence. The qsim-research skill's stronger-baseline rule
+prompted the checkpoint implementation because the sufficient mixing warm-up
+from §FM was already outside the current width limit. Lower-cost agents
+supplied the initial probes and algebra audits; main implemented the opt-in
+production change, strengthened verifier predicates and reran the evidence.
+
+## Uniform certificate, not a useful approximation warm-up
+
+`experiment_uniform_phase_gap.py` freezes the repeated embedded Rx(pi/7),
+b=3, NO-route family. At each of 2048 circular phase points it encloses both
+alternating twelve-channel products in the existing eight-dimensional
+orthonormal traceless Hermitian basis. P192 and P256 are separate checks;
+the circuit builder uses period 3N to represent each exact phase j/N.
+
+The maximum mesh Frobenius upper bound is approximately 0.7659369241.
+C66's proved induced-norm perturbation adds at most 12*pi/N, bounded using
+355/113, approximately 0.01840777102. The resulting uniform upper bound is
+approximately 0.7843446951, below the preregistered 4/5 threshold. This is a
+certificate for ALL sector phases and supplied M in the fixed family, not
+an inference that a dense mesh probably missed no exceptional sector.
+
+The no-background control retains an explicit conserved traceless mode at
+a NONZERO sector phase. The undersized N=1 mesh cannot certify contraction
+after its between-mesh padding is charged. Branch unitarity, basis geometry
+and imaginary/zero-containment checks all pass. The experiment does not
+differentiate the raw exponentially powered branch phase: C66 first removes
+only the scalar phases that cancel inside forward conjugation.
+
+Authoritative report: `out/uniform_phase_gap_20260911T055228005798Z.json`,
+3/3 checks; log `out/uniform_phase_gap_audited.log`. The reported run takes
+about 8.5 seconds and includes both precision meshes. A 32 MiB structural
+preflight covers their retained records plus serialization; it is not RSS.
+The actual conservative warm-up consequence remains the one in §FM, now
+with the numerical constant justified uniformly. It does not produce a
+useful memory saving within the current API. No width limit was increased.
+
+## Exact checkpoint/recompute implementation
+
+`VerifiedFiniteWork(..., checkpoint_spacing=k)` is opt-in; None preserves
+the default. Shared exact branch and forward-update helpers keep the existing
+target and finite-TV certificate. The cursor retains block starts and one
+reconstructed descending block, rebuilding branches on demand. Precision
+refinement preserves selected bits and replays the backward effect. Lazy
+helpers use weak references so discarded cursors do not retain native
+matrices in reference cycles. C67 gives the proof and complete cost scope.
+
+The comparison's tiny fixture is r9,b3,t4 with Rx(pi/7) after EVERY control
+and two reflection insertions. This is a deliberately specified fixture,
+not an assertion that it is identical to §OB. It covers all four histories,
+three initial sectors and sixteen outputs at target TV 1e-6. Full-storage
+and k=1,2,4 laws match as exact Fractions; all are enclosed within the existing
+prefix target's accuracy budget. Every target component mass encloses one.
+This file uses that distinct prefix contraction, not a second full-r circuit
+simulation; the separate b=2/3 full-law regressions cover that comparison.
+
+The reset control changes NORMALIZED conditional weights at a fixed prefix,
+not merely their scale. Correct weights are (228058542726,325014642565);
+incorrect reset weights are (575577455539,523934172237). Widening E at fixed
+p=40, P=64 after one bit forces a genuine rebuild to P128 and one effect
+replay; it agrees with a fresh same-prefix high-precision cursor. The test
+does not change the declared bit-accuracy contract after sampling begins.
+
+No-background t4 complete laws normalize and agree, but do not exercise
+an all-zero rounded block. A separately bounded t32 forced rare path does:
+all compared spacings record five declared fallbacks and the same exact
+forced probability. That is not an exhaustive t32 law or a sampled frequency.
+
+The supplied wide case uses r=3*(2^60-1), b3, t63, the repeated mixer and no
+routes. At target TV 1e-6, output-zero forced probabilities match exactly and
+three matched seeded samples return the same output and final sector. Full
+storage versus k8 gives the following measured counters for the forced path:
+
+| Counter | Full storage | k8 |
+|---|---:|---:|
+| Peak retained forward matrices | 64 | 15 |
+| Persistent branch matrices | 126 | 0 |
+| Conservative structural matrix bound | 205 | 40 |
+| Total forward updates across refinements | 126 | 187 |
+| Recomputed forward updates | 0 | 61 |
+| Branch-pair constructions | 126 | 251 |
+
+Both paths rebuild once and end at P202. The recomputation count includes
+the abandoned lower-precision block as well as the final pass. A single
+worker-construction-plus-forced-path timing is about 0.00434 seconds full
+versus 0.00692 seconds checkpointed. This is not a median, end-to-end order
+discovery benchmark, speedup claim or native-memory measurement. Input gate
+descriptions are supplied once outside that timer and remain storage costs.
+The full output law is not enumerated at width63.
+
+Authoritative report: `out/checkpoint_comparison_20260911T055820817140Z.json`,
+4/4 checks; log `out/checkpoint_comparison_audited2.log`.
+
+## Audit trail and preserved failures
+
+The initial mesh attempt failed with an Acb API call error:
+`out/uniform_phase_gap_failure_20260911T054933655247Z.json`. The agent's first
+passing report is `out/uniform_phase_gap_20260911T054948489378Z.json`.
+Main repaired the written Lipschitz constant/norm, a null eigenphase
+denominator hidden by sector zero, the missing serialization allowance and
+the undersized-grid control's actual charged bound. All original thresholds
+and mesh/product lengths were retained.
+
+The checkpoint invocation before its module existed is preserved in
+`out/checkpoint_comparison_test_20260911T055213Z.log`. The first scientific
+run, `out/checkpoint_comparison_20260911T055239729562Z.json`, failed its
+zero-fallback prediction. The explicit rare-prefix probe repaired coverage;
+the prior agent pass is `out/checkpoint_comparison_20260911T055442675026Z.json`.
+Main then strengthened the savings/recomputation predicates, fixed replay to
+hold the accuracy contract constant, charged construction in the timing and
+bounded retained full laws before allocation. A main syntax error is retained
+in `out/checkpoint_comparison_audited.log`; the successful rerun is separate.
+
+An agent summary mistakenly called the branch-matrix count the forward-state
+count. The authoritative fields and table above distinguish them. A passing
+report never licenses silently treating structural matrix counts as RSS.
+
+## Validation and scope
+
+Core passed before science (`out/uniform_gap_core.log`). Backend-present lab
+and claims pass (`out/uniform_gap_lab.log`, `out/uniform_gap_claims.log`). Lab
+also passes with the optional backend absent and verified arithmetic explicitly
+skipped (`out/uniform_gap_lab_no_flint.log`). Lab covers checkpoint bounds,
+boundary routes, widths zero through five, precision replay and cursor lifetime.
+Existing binary and odd-block full-law regressions pass:
+`out/uniform_gap_binary_regression.log`, `out/uniform_gap_odd_regression.log`.
+The other six science suites were not rerun. The documentation-gate log is
+`out/uniform_gap_docs.log`; no manuscripts, abstract workshops or commits
+were changed in this follow-up.
+
+Reproduce the new probes with this environment, changing only the module name:
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' --with 'python-flint==0.9.0' python -m experiments.experiment_uniform_phase_gap
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' --with 'python-flint==0.9.0' python -m experiments.experiment_checkpoint_comparison
+```
+
+The mathematical gap is useful structural progress, while checkpointing is a
+known scheduling technique with demonstrated local savings. Neither establishes
+a general simulation breakthrough. A stronger reverse-instrument lead emerged
+from this baseline comparison; C68/§RI record its initial audit and TODO 28
+alone specifies its next bounded certification question. TODO 24 keeps the
+broader backend bit-cost issue deferred.
+
+---
+
+# UP — Which work histories can actually interfere in this marginal?
+
+C77 owns the support-separation theorem, strict endpoint condition and exact
+floor-sum implementation. This note owns the discovery, bounded tests and
+limits. The direction changes the task from compressing the entire state to
+predicting a specified low-output marginal. It neither contradicts C76's
+dense sector coupling nor establishes an efficient full-output sampler.
+
+Main derived the partial-Fourier/separation criterion before this turn.
+Three lower-cost agents supplied an independent proof audit, an initial
+integer-count verifier and two independent output routes. Main implemented
+the arithmetic helper, audited and strengthened the verifiers, and reran them.
+Only the stateless support helper was added to production code; existing
+samplers, defaults and propagators were not changed.
+
+## Frozen circuit and the sharper support argument
+
+The NEW sparse-mixer fixture, frozen in TODO 36 before execution, is
+N61,a2,r60,b3,t6. The order is independently checked. It has initial W(pi/4),
+post-control W(-pi/10) at i4 and W(pi/11) at i5, no other mixers, and G_1
+after the i4 mixer. It is not a retuned row from GS/UT. All control powers
+keep their original ascending order. Only the requested output-prefix length
+d=1,2,3 changes across the primary comparison.
+
+The original conservative radius counts all three mixers, R=6. It certifies
+d1 but not d2: the latter's minimum center distance touches 2R. Main noticed
+that the terminal W can instead be stripped under the final work trace,
+without commuting it through arithmetic. The resulting R=4 certifies d2.
+Main derived this before reading the agent's output; the agent had already
+completed its original R6 run. Both stages are retained rather than rewriting
+the earlier prediction. At d3 neither radius certifies uniformity.
+
+The initial sequential reference found precisely this useful distinction:
+d2 was uniform even though the conservative certificate was inconclusive.
+A failed sufficient test is not evidence against the property. The sharper
+argument was independently audited, then added as an explicit main predicate.
+
+## Exact arithmetic certificate
+
+`out/uniform_prefix_counts_20260911T101413613709Z.json` passes 3/3 checks.
+All 9,000 cases over r=1..40,t=0..8,d<=t,R=0..4 agree with direct modular
+counts. The family performs exactly 193,600 direct q-loop terms under its
+2,000,000 cap; the touching control separately uses three q values and 64
+Gaussian-integer quarter-root terms. Width-63 cases use independent quotient
+formulas rather than enumerating their exponentially many histories.
+The test retains only aggregate rows, bounded edge cases and at most sixteen
+mismatch examples; no orbit/prefix numeric arrays are created by the probe.
+This does not bound total imported-library/process RSS.
+
+The must-fail test is stronger than a mere off-by-one counter comparison.
+Main added a normalized state allowed by the inclusive support promise whose
+shared endpoint produces a nonuniform Fourier prefix. It is a different
+state from the actual phase circuit, as C77 explains. This establishes that
+the weak equality-accepting criterion can make a genuinely false uniformity
+prediction, even though the actual circuit happens to pass a sharper test.
+
+Main read the AtCoder floor-sum documentation, the Euclidean implementation
+and its CC0 license. The exact-Python implementation credits that standard
+recursion and does not import the source's overflow semantics. The experiment
+checks the arithmetic, not novelty of floor sums or discovery of the order.
+
+## Two independent full-output routes
+
+The final sequential report is
+`out/uniform_prefix_output_20260911T101723682629Z.json` (5/5 PASS).
+It assembles full-r branch matrices and calls the EXISTING sequential_path
+for each complete output, then groups those same probabilities by y mod 2^d.
+The API has no prefix-stop argument, so no fictitious partial-run savings
+are reported. The identity-final-shift control changes only the last
+controlled translation, leaving its common work gate unchanged; its first
+output bit is deterministically even, so the uniformity control fails.
+
+The independent state-vector report is
+`out/uniform_prefix_statevec_20260911T101250167022Z.json` (4/4 PASS).
+It evaluates the fixed sparse schedule's closed boundary formula, places
+orbit amplitudes on physical residue labels and uses existing Circuit/statevec
+for the twelve-qubit inverse QFT ONLY. This is not validation of a compiled
+N61 arithmetic circuit. Main replaced the initial branch-action wrappers by
+the literal fixed matrix formula; no second reusable propagator was added.
+Post- and pre-terminal branch states are retained in the same pass.
+
+The complete 64-outcome laws and the control are compared in
+`out/uniform_prefix_cross_reference.log`; both independent routes agree
+within 2e-15 per outcome. The high-history Gram formula separately matches
+every tested prefix within 3.9e-16. Removing the common terminal W changes
+the computed Gram matrices by at most 4.5e-16, while preserving both R4
+support and d2 orthogonality. Numerical support displays use a 2e-12 cutoff;
+the exact support promise follows from the construction, not this cutoff.
+
+Both first-bit and two-bit laws are uniform at floating precision. The
+three-bit law is nonuniform with TV 2.317360332e-5 from uniform; this
+uncertified outcome is retained, not a theorem that every failed certificate
+must be nonuniform. The full 64-point law has uniform-approximation TV
+.2346269487, so this is not an accidentally uniform entire output.
+
+Uniform prefix bits are NOT independent of the remaining bits. A lower-cost
+read-only audit of the released law found a product-of-marginals discrepancy;
+main then included this as a reproducible negative control. Its full-law
+TV is .0235642153, and the maximum pairwise TV between conditional suffix
+laws is .0703971779. The diagnostic derives the marginals from the enumerated
+law; it does not provide a free suffix oracle or benchmark an implemented
+compressed sampler. Keeping the correct Fourier feedback is a stronger
+next comparison than discarding these correlations.
+
+## Resource and verifier audit
+
+The sequential reference executes 128 calls, charging 165,888,000 units of
+t*r^3. It checks the call cap BEFORE each call, not just afterward. Setup
+counts separately reconcile six repeated matrices, eleven shifts, 120
+modular phase values, fourteen construction products, forty explicit
+unitarity checks and two initial matrix-vector calls. Its aggregate numeric
+preflight is 4,497,664 bytes under 16 MiB, including both simultaneously
+retained fixtures and the instrument's internal working estimate.
+
+The boundary/QFT route evaluates 128 conditional branch columns total:
+64 original and 64 identity-shift control. Original pre-terminal columns are
+retained during the same pass, not evaluated as another 64 histories. Counts
+are 921,600 dense work matrix-vector terms, 15,360 shift entries, 7,680
+phase entries, 114,688 Gram terms and 6,272 Gram-probability terms. Two
+90-gate QFTs charge 737,280 gate-entry updates under 5,000,000. Its aggregate
+numeric preflight is 3,151,872 bytes. These are explicitly named arithmetic/
+entry counts, not native FLOPs, bit runtime, total RSS or physical gate cost
+for preparing the boundary. No timing advantage is claimed.
+
+Initial reports are
+`out/uniform_prefix_counts_20260911T100445237192Z.json` and
+`out/uniform_prefix_output_20260911T100426158162Z.json`. Main capped mismatch
+examples, removed an unused integer-memory-cap assertion, and tested exact
+metadata/loop bounds. In the output verifier, main replaced a tautological
+classification-string predicate with law/unitarity/cost tests, corrected a
+preflight counting only one of two retained fixtures, and added the pre-call
+cap plus exact even-parity requirement. Scientific inputs and tolerances
+were unchanged. Intermediate strengthened reports remain preserved.
+
+The first boundary/QFT run passed its numerical checks but failed while
+serializing an internal NumPy orbit array. Its traceback is preserved in
+`out/uniform_prefix_statevec_initial.log`; NO partial JSON was written because
+serialization failed before writing. The corrected initial report is
+`out/uniform_prefix_statevec_20260911T100706255837Z.json`. Main subsequently
+fixed cloned cumulative control counters, an understated payload estimate,
+an extra branch-recomputation pass, and weak retained-array predicates.
+The final Gram products and their costs are instrumented inside the loops.
+Independent lower-cost audits found no substantive remaining proof/code issue.
+
+## Validation and continuation
+
+Core passed first in `out/uniform_prefix_core.log`. Lab and claims pass in
+`out/uniform_prefix_lab.log` and `out/uniform_prefix_claims.log`, including
+the new helper's exact/brute and invalid-input regressions plus C77's endpoint
+and Fourier checks. Backend-absent lab checks pass in
+`out/uniform_prefix_lab_without_backend.log`, explicitly skipping only the
+optional verified-arithmetic sections. The other six science suites were not
+rerun. System Python 3.12.3, NumPy 2.4.6 and one BLAS thread were used; the
+backend-enabled gates use python-flint 0.9.0. Small passing checks do not
+settle TODO 34. No host settings, firmware, manuscripts, abstracts or defaults
+were changed, and no commits were made.
+
+The documentation gate is recorded in `out/uniform_prefix_docs.log` after
+index regeneration. Reproduce from research/:
+
+```bash
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_uniform_prefix_counts
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_uniform_prefix_output
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_uniform_prefix_statevec
+```
+
+The skill's insistence on the actual marginal and strongest simple baseline
+led to both the terminal-W improvement and the correlation check. The exact
+prefix certificate is useful progress, not a general breakthrough. TODO 37
+alone owns the next conditioned-suffix/feedback comparison; the broader
+research goal remains active.
+
+---
+
+# UT — Optimize the observable, not automatically its purification
+
+C53 owns the general early-unitary transfer criterion, root-fidelity optimum
+and parity obstruction; C76 owns the additive gate's dense sector boundary.
+This is a stronger-baseline follow-up to GS, not a new phase-estimation or
+simulation algorithm. Main derived the matrix optimization, requested a
+lower-cost initial experiment and independent proof audit, then corrected
+the verifier and added the actual physical-output comparison.
+
+## Same circuit, stronger candidate
+
+The input and insertion are exactly GS's N13,a2,b3,r12,t3 schedule with
+s=2 early controls and k=0,1,2. The four-column pre-kick boundary A is formed
+from the existing branch matrices, normalized to Frobenius norm one. A work
+G_k gives B=G_k A. An arbitrary early-exponent E gives A E^T, allowing more
+than the failed scalar phase-per-history replacement. This operation is
+at the insertion, not commuted through the earlier arithmetic.
+
+The SVD of A^dag B supplies the best joint-state candidate. The mathematical
+identities and exact-transfer criterion follow from standard purification
+freedom/polar optimization, not a new theorem. Main read Uhlmann's definition,
+explicit fidelity formula and amplitude/polar discussion, Sections 2–3,
+equations (3), (12), (17)–(20), in
+[Transition Probability (Fidelity) and its Relatives](https://arxiv.org/pdf/1106.0979).
+The unsquared root-fidelity convention is explicit. No claim relies on the
+paper's later parallel-transport discussion. An independent lower-cost proof
+audit agreed, including the transpose and rank-deficient cases.
+
+## Main finite findings
+
+The final report is
+`out/additive_phase_transfer_20260911T095307109554Z.json` (5/5 PASS).
+At k1 and k2, the joint-optimal root fidelities are .9441123032 and
+.9170944664. The best diagonal-only values are .8091199332 and .7230247906;
+omission gives .3135672902 and .5970156977. Nevertheless, neither general
+candidate transfers exactly: squared vector residuals are .1117753935 and
+.1658110672, with work-density commutator Frobenius norms .2969898042 and
+.3763019961. These are small floating diagnostics, not an asymptotic theorem.
+
+Main embedded each target/general/diagonal/omitted boundary into the same
+ten-qubit physical layout, with the unprocessed high control in |+>, then
+used existing Circuit/statevec for the remaining controlled power, terminal
+mixer and inverse QFT. The target agrees with the independent full-r law
+within 2.074e-14 per outcome; every candidate law normalizes and cleans its
+scratch. The joint-optimal candidate's output TVs are .1511231980 (k1) and
+.1581159429 (k2). The diagonal-only TVs are .2051832075 and .1086860902.
+Omission is substantially BETTER on this measured task: its baseline values
+are owned by GS and reproduced in this report. No ordering of output errors
+was predicted from the state-fidelity ordering; the observed reversal is
+retained rather than selecting a different input.
+
+The k0 state and output are nulls. A separately normalized four-column
+Fourier purification supported on four work labels has diagonal work density.
+It permits exact nontrivial general transfer (root fidelity one) while
+diagonal-only transfer has squared residual 1.2007600702. This synthetic
+control demonstrates that the stronger test is not just the old scalar test;
+it is not substituted for the physical initial state.
+
+## Independent output formula and an observable-specific restriction
+
+After the physical comparison, main asked a lower-cost agent to check the
+surprise by a finite closed formula. With X any candidate boundary and
+v_y[l]=exp(-2*pi*i*y*l/8), the output law is
+
+    p_y = ||(I+(-1)^y U^4) X v_y / 4||^2.
+
+The last common W cancels under the norm; it need not commute with U^4.
+The agent's independent read-only calculation matched the complete physical
+laws and ordering within 2.2e-14. That pilot has no standalone JSON; main
+then added the formula and normalization/error predicates to the released
+experiment. This is a fixed boundary identity, not a second propagator.
+
+Summing even y suggested a sharper test, derived before that marginal was
+measured: output parity depends only on the work density at the split. An
+early-register-only trace-preserving operation cannot change it. Main and an
+independent lower-cost audit derived C53's no-signalling lower bound and
+compared the direct work-overlap formula to the physical parity marginal.
+Their agreement is within 5.5e-14. The target/background gaps evaluate to
+.001399550303399 (k1) and .001246125230684 (k2). Thus the formula obstructs
+the entire restricted early-register-only class on these numerical witnesses,
+not merely the particular polar candidates. These decimals are NOT interval-
+certified lower bounds, and the restriction excludes work-coupled rewrites,
+high-register operations, postselection and general classical samplers.
+
+## Budgets, precision and corrected failures
+
+The final twelve suffix propagations each use 3,849 Pauli rotations and
+jointly charge 47,296,512 gate-entry updates under the 100,000,000 cap.
+The aggregate pre-allocation numerical estimate is 1,459,712 bytes under
+16 MiB. Instrumented diagnostic matrix products total 157 calls and 54,800
+scalar product terms; parity inner products charge 576 entries. Eight SVD
+dimensions and four eigensystem dimensions are recorded separately. The
+independent reference makes 24 sequential_path calls and charges 124,416
+t*d^3 units. These are not native FLOP/bit-runtime counts, total process
+memory, physical synthesis costs for E or a timing comparison. Setup of the
+supplied tiny reference matrices is not claimed free or included in the
+diagnostic matrix-loop count.
+
+An independent square-root-density route checks root fidelity; its tolerance
+was conservatively set to 2e-7 because of rank-deficient square-root roundoff.
+Actual errors are below 3.4e-16. Residual identities use 3e-12 tolerance;
+physical laws and the parity/formula comparisons use 3e-10. Near the k0
+null, cancellation in sqrt(1-F^2) can produce a spurious approximately
+2e-8 bound or zero, so these are float diagnostics, not numerical certificates.
+
+The lower-cost initial report
+`out/additive_phase_transfer_20260911T094223554480Z.json` failed P1 because
+its synthetic Fourier matrix had Frobenius norm squared four rather than
+one. Its log `out/additive_phase_transfer_initial.log` is preserved. Main
+caught that normalization mistake before interpreting the synthetic result.
+The initial actual-state measurements are retained, but its resource and
+identity predicates were incomplete: an accepted classification string was
+tautological, residual identities were recorded but not checked, some guards
+followed allocation, and work counts were an uninstrumented expression.
+Main corrected all of these, handled a zero diagonal overlap with a unit phase,
+removed import-time experiment creation, and added the physical suffix check.
+
+The first corrected physical report
+`out/additive_phase_transfer_20260911T094836405466Z.json` passes 4/4; the
+final report additionally includes the independently derived closed formula
+and parity test. The new predicates were declared before their new
+measurements. The original k values, mixer schedule and insertion did not
+change. A separate read-only agent audited the corrected physical embedding,
+normalization, optimization and counters and found no substantive error.
+
+## Validation and handoff
+
+GS's core-first pass also covers this uninterrupted scientific follow-up.
+The affected claims suite passes in `out/additive_transfer_claims.log`,
+including independent two-state general-transfer and state-optimal-but-
+output-worse regressions and a nonzero parity witness. No shared production helper changed; the other
+seven science suites were not rerun. System Python 3.12.3 and NumPy 2.4.6
+with one BLAS thread were used; the claims gate also uses python-flint 0.9.0.
+The documentation gate is recorded in `out/additive_phase_docs.log` after
+regenerating indexes. No manuscript, abstract, default, host-setting or
+firmware changes or commits were made. TODO 34 remains unresolved.
+
+Reproduce from research/:
+
+```bash
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_additive_phase_transfer
+```
+
+The skill's same-output/strong-baseline requirement materially changed this
+investigation: a state-only optimization initially looked favorable, but the
+complete measured law favored omission. C53 now records the stronger criterion
+and restricted output obstruction. TODO 36 retains observable-native
+contraction as the next question, not further tuning of this state optimum.
+No new efficient sampler, general hardness claim or breakthrough is established.
+
+---
+
+# VP — The oracle requirement is now implemented for specified exact gates
+
+**Follow-up:** C62/§NG distinguish the observed doubling endpoint from the
+smallest scanned sufficient precision and test an opt-in norm enclosure.
+The execution numbers below remain historical; they are not minimum-precision
+or worst-case-runtime results.
+
+C61 owns the mathematical construction, input/trusted-arithmetic contract and
+cost limits. This follows §PE: the existing rational planner now has an
+exact-input ball-arithmetic oracle and an integer categorical kernel to use.
+TODO 24 stays open for the uniform working-precision bound and certified
+same-accuracy rejection comparison, not because these two components remain
+unimplemented. Neither paper nor either abstract workshop was edited.
+
+Main read the backend's primary documentation, implemented
+`lab/verified_prefix.py`, factored the original finite component contraction
+into a shared arithmetic-callback helper, and wrote the exact tiny transition
+experiment/regressions. Three existing lower-cost agents investigated the
+backend, independent full-r reference and integer kernel; main audited and
+reran their tests. The qsim-research skill's exact-input, independent-control
+and fact-ownership rules materially constrained the claims recorded here.
+
+The old float sampler's public API, gate order and mathematical algorithm are
+preserved. The shared-loop refactor can change last-bit floating rounding
+(multiplication by a reciprocal square root replaces division); it is not a
+bitwise-identical execution promise. No rounding certificate is added to that
+sampler. No dependency was added to project metadata; verified experiments
+explicitly request the optional pinned backend through uv.
+
+## Backend and exact kernel probes
+
+The backend probe passes 5/5 checks in
+`out/ball_backend_20260911T033015739206Z.json`. Exact rational phase inputs,
+binary midpoint/radius extraction and precision-context restoration work.
+At the fixed cancellation target 10^-30, working precision 64 misses the
+target and 128 reaches it. A 256-bit midpoint converted through Python float
+leaves the original tiny ball, a decisive must-fail shortcut control.
+
+The corrected integer-kernel report is
+`out/dyadic_kernel_20260911T034344168055Z.json`, 6/6 checks. It includes nine
+signed/tied rounding cases; four rational categorical fixtures; and a bounded
+sweep of 1,680 integer-weight/bit-count cases totaling 10,416 words. Every word
+is compared to an independent Fraction strict-CDF rule, not just bin counts.
+All-zero fallback, exact-zero filtering, negative rejection and scripted
+initial-integer rejection have explicit checks. Randomness quality itself is
+assumed, not certified by those tests.
+
+## Independent tiny amplitude diagnostic
+
+Fix r=10,b=2,t=4, W1=Rx(pi/7), W3=Rz(pi/5), and reflections K2(q=0,pi/5),
+K3(q=1,pi/5). Use the EXISTING direct full-r matrix product, not a second
+generic propagator. At each arithmetic/background/reflection boundary and
+each unique partial-QFT label, compare the dyadic oracle to that float
+reference. Only requested coordinate accuracy varies.
+
+The final report is
+`out/verified_prefix_reference_20260911T034430917442Z.json`, 5/5 checks,
+1,520 distinct labels. Maximum real/imaginary coordinate discrepancies at
+p=4,12,24 are approximately 0.0312338, 0.000122011, 2.97802e-8. These are
+float-reference diagnostics; the oracle guarantee comes from its verified
+finite expression and radius-plus-rounding argument, not these measurements.
+The 128-bit ball midpoints agree with the reference within 2.23e-16; that
+does NOT mean the rounded float reference lies inside the narrower balls.
+
+An analytically empty-circuit coordinate is exactly zero in both its ball
+and dyadic representations. Numerical near-zero coordinates of the mixed
+fixture are separately labeled. Reverse query order, ignored high exponent
+bits and context restoration (including a diagnostic exception) pass.
+Wrong route sign, moved insertion and deleted imaginary components fail the
+prefix comparison. Moving the insertion is NOT reversal of W/K at one
+insertion; those two supplied operations commute in this model.
+
+The reference caps its Python label count at 2,000 and each dense array at
+32 MiB; its largest full-r matrix payload is 1,600 bytes. This is not a claim
+that the Python label list occupies the payload of a hypothetical NumPy table,
+nor a total-process RSS limit. Diagnostic calls have a 512-bit cap; they are
+not a replacement for the uncapped all-label mathematical oracle argument.
+
+## Exact tiny transition laws and a supplied-wide run
+
+`experiment_verified_sampling` enumerates the complete finite-bit Markov law
+with exact Fractions, retaining at most 160 unique states after consumed
+exponent bits are removed. Conditional probabilities come from exact integer
+CDF counts. No histogram uncertainty is involved. Its TV upper bound against
+the ideal final joint law, INCLUDING within-sector work labels, is evaluated
+with outward 160-bit final-amplitude balls. The existing independent full-r
+reference separately agrees with the marginalized ball midpoints to 6.94e-17.
+
+The final report `out/verified_sampling_20260911T034157376089Z.json` passes
+8/8 checks. Vary only requested target TV, with p,L chosen by the planner:
+
+| Target TV | Coordinate bits p | Categorical bits L | Outward observed TV upper bound |
+|---|---:|---:|---:|
+| 1/4 | 10 | 6 | 0.020521609 |
+| 1/64 | 14 | 10 | 0.001392361 |
+| 1/4096 | 20 | 16 | 1.819685e-5 |
+| 1/1,000,000 | 28 | 24 | 6.948777e-8 |
+
+All laws sum to one EXACTLY and meet the rational planned budgets. The last
+budget is 1/1,048,576, below the requested target. The independent float
+reference is diagnostic; it does not enter that outward TV calculation.
+
+The supplied-wide case has r=2^61-2, t=63, three specified background rotations
+and three reflections (eight histories), fixed seed 624. At target TV=10^-6,
+the planner requests p=61 and L=28. The observed run uses 135 vector queries,
+69 stochastic updates and 38 precision retries; maximum working precision is
+154 bits. Its rational budget is 89432351553/144115188075855872 (about 6.21e-7).
+Elapsed sample time in this report is about 0.243 seconds, not an asymptotic
+benchmark or a same-accuracy comparison against rejection.
+
+This is concrete evidence that requested absolute accuracy bits and working
+mantissa bits are different. The wide run has no orbit/sector/output tables
+and no reference cache; it still has ball scalars, exact integers, phase
+evaluation costs and backend allocations. Peak traced Python memory during
+the tiny sweep was 558,223 bytes; tracing excludes native backend allocations
+and was stopped before the wide run. Do not report it as the wide sampler's
+total memory or RSS.
+
+The coarse p=0 control keeps mass one with normalized all-zero fallback;
+deleting those blocks instead gives mass zero. A diagnostic precision cap
+raises, and the float comparator returns no numerical certificate. These
+controls expose missing assumptions; they do not close the remaining
+same-accuracy certified rejection comparison.
+
+## Preserved failures and audit corrections
+
+- `out/ball_backend_failure_20260911T032959873464Z.json`: the initial fixture
+  expected unit norm from a single unit phase divided by sqrt(2); its norm
+  squared is one-half. The corrected two-phase fixture replaces it.
+- The first dyadic-kernel failure passed Fraction weights to an intentionally
+  integer-only API. The corrected reference clears denominators exactly.
+  Its first passing report, `out/dyadic_kernel_20260911T033622738308Z.json`,
+  mislabeled a uniformization of unequal weights as “deleting zero bins.”
+  Filtering exact zeros while preserving weights/labels is valid. The final
+  control deletes a whole zero approximate block carrying actual mass.
+  Main also fixed a negative-input test whose second failure flag could never
+  turn false. Previous reports are retained, not silently overwritten.
+- `out/verified_prefix_reference_20260911T033847946488Z.json` overstated float
+  tolerance agreement as enclosure containment, called thresholded numerical
+  zeros exact, double-counted ignored high exponent labels, and claimed a
+  context test it had not executed. Main required explicit corrections. The
+  intermediate corrected report `out/verified_prefix_reference_20260911T034131226450Z.json`
+  still mislabeled some resource/zero counters; main fixed those too.
+- Main's resource-label cleanup introduced a leftover variable NameError,
+  preserved in `out/verified_prefix_reference_20260911T034343403566Z.json`.
+  It was a verifier bookkeeping failure after measurements, not a failed
+  amplitude prediction. The final report above follows the correction.
+
+## Validation and reproducibility
+
+Use the isolated scientific environment from the research root:
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' --with 'python-flint==0.9.0' python -m experiments.experiment_verified_sampling
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' --with 'python-flint==0.9.0' python -m experiments.experiment_verified_prefix_reference
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' --with 'python-flint==0.9.0' python -m experiments.experiment_dyadic_kernel
+OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' --with 'python-flint==0.9.0' python -m experiments.experiment_ball_backend
+```
+
+Core passed before scientific edits (`out/verified_prefix_core.log`). Full lab
+and claims suites passed WITH the backend (`out/verified_prefix_test_lab.log`,
+`out/verified_prefix_test_claims.log`), including analytic Bell/H amplitudes,
+exact-zero coordinates, deliberately inflated valid enclosures forcing a
+refinement retry, and raising on capped exhaustion. The lab suite also passed
+without the optional backend and explicitly SKIPPED the Arb tests
+(`out/verified_prefix_no_flint_test_lab.log`); that skip is not a verified test.
+
+After the shared contraction refactor, the coherent sampling, formula and
+compiled-indexed-circuit experiments pass in
+`out/verified_prefix_refactor_sampling.log`,
+`out/verified_prefix_refactor_formula.log`, and
+`out/verified_prefix_refactor_circuit.log`. The other six science suites were
+not rerun for these helper additions. Documentation regeneration/checking is
+recorded in `out/verified_prefix_docs.log`. No commits were made.
+
+Impact: this closes an implementation gap for a narrow exact-input family;
+it does not establish a broadly faster classical simulator. The remaining
+research question is specified only in TODO 24, not duplicated here.
 
 ---
 
@@ -1948,6 +9990,481 @@ PPS would propagate is not the same object. Keep the caveat.
 
 ---
 
+# WE — Count the supplied word once
+
+C73 owns the proof, implementation contract and resource limits. Main added
+opt-in word support to the existing reverse-vector and merged-prefix adapters;
+lower-cost agents supplied independent support, law and comparison harnesses.
+Main strengthened their predicates before rerunning. Alphabet mode remains
+the default. This is an improved global rejection envelope, not new group
+theory or a new numerical certificate.
+
+## Independent support and complete tiny laws
+
+Main's `out/word_envelope_support_20260911T083245217209Z.json` passes 4/4.
+The verifier separately evolves actual reached sectors and affine E/O maps,
+comparing exact sets at every reverse depth for all sectors at M=1,...,31
+and selected sectors at M=101,1009,1000003. It also checks setup counters,
+scalar-only returned metadata, input snapshots and pre-growth rejection.
+Its 164,184 charged reference updates/maps are below the frozen 500,000 cap;
+these are not all CPU instructions. Simultaneously retained gamma/prefix
+sets and their temporary updates have a separate preallocation guard.
+Production releases its offset sets and never retains these verifier tables.
+
+The 64-insertion, nine-label structural input in the raw report is accepted
+by word mode with envelope 226 while alphabet mode rejects its conservative
+payload cover. This is an input/setup check, NOT a complete 64-insertion law
+or a proof that actual memory necessarily exceeds a cap in alphabet mode.
+The genuinely growing powers-of-three alphabet must raise MemoryError from
+the word setup's live-offset cap; a ValueError does not satisfy that control.
+
+Main's `out/word_envelope_laws_20260911T083252349572Z.json` passes 4/4.
+Ten fixtures in both modes give 20 reverse law rows and 6,170 forced
+sector/fine-boundary/output cases, including a genuine nine-insertion circuit.
+Every accepted submass and normalization is checked against the existing
+independent full-r contraction and sequential instrument. Maximum accepted-law
+TV discrepancy is 3.59e-16; success-mass error is at most 5.56e-17. These are
+floating diagnostics, not certified error bounds on unseen executions.
+
+There are 2,765 canonical prefix requests, evaluated in both modes and against
+the full-r reference: mode discrepancy is exactly zero in this run, and the
+largest reference discrepancy is 3.04e-16. The fixtures include odd/even coarse
+moduli, fixed points, noninvertible differences, initial/terminal insertions,
+zero angles and genuinely nonzero even-modulus rotations. Twenty-four forced
+rows have exactly zero terminal norm and correctly return zero proposal,
+acceptance, numerator and submass; these are not caught numerical exceptions.
+
+On the unsaturated r=14,b=2 chronological word (0,1,0), the global envelope
+drops from seven to six, and the mathematical success probability rises from
+1/14 to 1/12 with unchanged accepted law. Gamma zero alone reaches three
+sectors, while other gammas reach six: the local-only global-envelope control
+fails as required. This is a set-bound counterexample, not a claim that this
+specific wrong envelope necessarily produces acceptance greater than one.
+
+Separate UNMEMOIZED returned samples in both modes have actual attempt work
+summed independently, and prefix work checked against existing direct-set
+bookkeeping. History calls are forbidden. The shared reference guard runs
+before dense allocation; its largest nine-insertion operation allowance is
+212,362,884 entry touches and simultaneous dense payload allowance 336,384
+bytes. These are reference bounds, not production costs or native RSS.
+
+## Comparison checkpoint: long runs aborted, not a completed benchmark
+
+The frozen fixture uses M=2^40-1,b=3,t=16 and FA's separated three-label
+cyclic word, pi/4 rotations, initial Rx(pi/4) and alternating subsequent
+Rx(pi/7)/Rz(pi/5) blocks. k varies by one from zero through sixteen, with
+seeds 7430–7432. Four primary methods use reverse/prefix contraction and
+alphabet/word envelopes. Each reverse row has an 8,192-proposal cap and every
+row a soft 60-second limit. Main froze an additional 600-second sweep budget
+before running; optional legacy prefix anchors at k=0,4,8 require a cheap
+preflight. Setup, independent verifier work, every attempt/query and working
+complex slots are separate. Word sets are constructed once and forbidden
+from being rebuilt during sampling. Instrumentation uses constant-size
+running counters, not an O(attempts) list.
+
+Lower-cost initial high-k preflight
+`out/word_envelope_comparison_20260911T083708470044Z.json` passes its four
+row checks. At seed 7430, word mode reduces reverse attempts from 1,366 to
+100; both prefix modes use 81 queries and equal support peaks. This is ONE
+seed, not a typical speedup or a completed four-method comparison. The reduced
+word bound changes rejection, whereas the prefix contractions remain the same.
+
+Main's serial `out/word_envelope_comparison_main.log` exits 139 with a
+segmentation fault after the k=12 groups. Faulthandler reaches sparse_norm's
+NumPy vdot call. The harness had not yet written a final JSON, so numerical
+rows from that run were lost; the log is preserved. An isolated k=13,
+reverse_alphabet, seed-7430 reproduction passes in
+`out/word_envelope_comparison_20260911T084200760406Z.json`. The failed run's
+exact in-group seed was not logged, so this is a nearby reproduction, not
+proof that the identical failing call passed.
+
+Main added per-row checkpointing and explicit start labels, then repeated
+the same environment. `out/word_envelope_comparison_checkpointed.log` exits
+132 with Illegal instruction during unit_phase's NumPy trigonometry at
+k=10, reverse_alphabet, seed 7431. Its
+`out/word_envelope_comparison_20260911T084241528152Z.partial.json` preserves
+134 completed rows (four preflight, nine legacy anchors, 121 sweep rows),
+explicitly marked INCOMPLETE, not a scientific verdict. These different native
+fault sites do not establish a NumPy, interpreter or hardware root cause.
+Both runs use Python 3.12.10 and NumPy 2.4.6; neither is the documented 3.14
+failure assumed to recur. No norms, phases or production loops were changed
+to suppress the crashes.
+
+System Python 3.12.3 with the SAME NumPy version passes core and all new tiny
+laws, and the four-row high-k diagnostic in
+`out/word_envelope_comparison_20260911T084458560301Z.json`. This short preflight
+does not prove long-run stability. A brief exact-integer follow-up overlapped
+its execution, so its timing is not an authoritative serial comparison either.
+Do not pool these environments or cherry-pick completed rows from the aborted
+sweeps. Host/runtime evidence is saved in `out/word_envelope_runtime_environment.log`;
+TODO 34 owns the diagnostic plan and hardware lead. No system settings changed.
+
+TODO 32 remains open. Do not infer runtime improvement from the envelope ratio
+alone. The tiny full-r/static baseline remains inexpensive, single-label input
+simplifications remain available, and C71's neighboring-label error bound does
+not certify the separated replacement. Failure of that sufficient bound or
+the huge static group is not hardness. Long scaling is postponed pending
+reliability; the more consequential coordinate-promise follow-up is C74/PC.
+
+## Audit trail and scoped validation
+
+- Early law reports preserve an import of a nonexistent reference helper and
+  a verifier division by zero on valid exact-zero branches. Production did
+  not throw those verifier errors. Later passing versions still reported an
+  underestimated reference payload and checked only summary sample counters;
+  main replaced those reports with shared-guard metadata and actual internal
+  counter instrumentation, and added a nonzero even-modulus fixture.
+- The first support cap control used a word that did not grow enough and
+  correctly failed to fail. Subsequent stronger reference versions exhausted
+  their operation budgets by rerunning direct recurrence at every depth;
+  caching each gamma's depth sequence once removed that redundant work without
+  dropping any of the 34 rows. All reports remain under `out/word_envelope_support_*`.
+  Earlier passing predicates compared only the E/O representation, not an
+  independent reached-set recurrence. Main also charged the comparison maps
+  and guarded combined all-gamma retention before the final rerun.
+- The comparison code's initial draft charged an extra independent E/O audit
+  only to word-mode setup, checked call counts but not summed internal work,
+  and had no history-item accounting for the legacy anchor. These were audit findings
+  before timing, not measured performance failures.
+
+Core ran first. Logs `out/word_envelope_core.log`,
+`out/word_envelope_lab.log`, `out/word_envelope_claims.log` and
+`out/word_envelope_lab_no_flint.log` pass. The last explicitly skips optional
+verified-arithmetic tests. The existing FA full-prefix/law regression passes
+in `out/word_envelope_fa_regression.log` with report
+`out/fixed_alphabet_prefixes_20260911T083001429761Z.json`; the MP complete-law
+regression passes in `out/word_envelope_mp_regression.log` with report
+`out/merged_prefix_sampling_20260911T082938440507Z.json`.
+The other six science suites were NOT rerun. No manuscript, abstract workshop
+or sampler default was changed; no commit was made.
+Documentation gates are recorded in `out/word_envelope_and_coordinates_docs.log`.
+
+Reproduce from research/:
+
+```bash
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -u -m experiments.experiment_word_envelope_support
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python 3.12 --with 'numpy<2.5' python -u -m experiments.experiment_word_envelope_laws
+```
+
+---
+
+# WF — Sample a work outcome, then restore all compatible exponent histories
+
+C78 owns the proof and precise oracle/schedule/cost contracts. This note owns
+the discovery and bounded implementation evidence. The starting observation
+was FB's residual high-history coherence, not a new dense-sector count.
+
+Main first considered support-based bounds on the cross-history terms. A more
+useful change was the contraction order: a final computational WORK measurement
+commutes with the exponent QFT. Sampling its marginal is easy given a coherent
+fixed-history column. Conditioning on the work index then preserves only the
+compatible exponent histories, whose amplitudes must be reconstructed coherently.
+The auxiliary exponent used to draw the work marginal must be discarded.
+
+Initially the finite cone suggested a sparse row whose size includes Q/r.
+C77's partial-Fourier identity then supplied a rejection-free grouped-prefix
+sampler for that row. Main subsequently noticed that the literal late-phase
+schedule has stronger structure: its long rows are unions of few arithmetic
+progressions with constant coefficients. Existing C55 progression sampling
+and coherent-component rejection apply. Their relative phases and the actual
+work weights are essential; they are not a classical mixture approximation.
+
+Two lower-cost audits independently checked the sparse-row identity and the
+general late-only progression proof. The component rejection uses a mixture
+of component FOURIER laws, not a uniform-output proposal; confusing those
+proposals would invalidate the exact mean-attempt statement. C78 explicitly
+separates the two methods. Known order/index, pointwise phase access, coherent
+column evaluation and a small number of late HISTORIES are substantive inputs.
+
+## Initial sparse-row pilot
+
+The frozen row pilot is the same UP circuit, with only its common terminal W
+stripped under the work trace. No physical gate is commuted across a control.
+The final main report is
+`out/work_first_rows_20260911T104128015399Z.json` (3/3 PASS), with raw output
+in `out/work_first_rows_main.log`. It uses the existing dense closed boundary
+as a CHARGED tiny oracle, not a scalable column implementation.
+
+The complete row-mixture law agrees with the independent UP reference at
+TV **2.41e-16**. Modular progression enumeration covers all nonzero row
+amplitudes, and the resulting work marginal agrees with the direct column
+Born marginal within **6.94e-18** TV. The work distribution is not uniform:
+its TV from uniform is **.06944914**. Incorrect uniform-work weighting changes
+the output by **.00463295** TV.
+
+The must-fail control explicitly builds the conditional Born mixture by
+discarding exponent-row interference. It yields the uniform output, differing
+from the coherent law by **.23462695** TV. This tests the load-bearing
+coherences, not just normalization of a positive distribution. Every tested
+prefix agrees with the independently grouped reference and normalizes.
+
+There are **576** candidate entries across sixty work rows, within the
+conservative **1,080** preflight. Main found that the first implementation
+scanned every empty residue group despite claiming a sparse grouping method,
+and reported planned upper bounds as actual terms. The corrected implementation
+groups only occupied residues, increments actual counters inside the loop and
+guards cumulative budgets before calculation. Final terms are **8,064** for
+the requested short prefixes, **36,864** for complete row laws and **36,864**
+for the Born-mixture control. The dense oracle separately charges sixty-four
+columns and **460,800** matvec terms, with column norm error below **4.5e-16**.
+
+The final aggregate numeric preflight is **592,896 bytes**, including retained
+final/pre-final rows, construction matrices/temporaries and laws, under 16 MiB.
+It is not a process RSS bound. Reference support scans and dense oracle work
+remain part of this tiny verifier, not costs removed by an implemented sampler.
+
+An initial orbit-coordinate/physical-label indexing mistake was corrected
+without changing the circuit. A serialization failure also occurred. The
+file `out/work_first_rows_failure_serialization.log` is a RETROSPECTIVE agent
+description, not its original raw traceback; do not cite it as a retained
+raw run. The first retained passing report is
+`out/work_first_rows_20260911T103444852474Z.json`, followed by the strengthened
+agent report `out/work_first_rows_20260911T103811510460Z.json`. Main's final
+run above uses explicit system Python 3.12.3/NumPy 2.4.6 and one BLAS thread.
+The agent confirmed that the original indexing traceback was not retained;
+the later passing runs reproduce the corrected law, but do not repair that
+provenance gap. Retained agent reports also identify system Python 3.12.3.
+
+## Progression extension and limits
+
+For the literal sparse late-phase schedule, main derived the finite component
+formula before requesting another lower-cost initial probe. C78 owns the
+general b/r/H proof and its upper bound. It does not require Gauss-sum phases:
+the diagonal phase is evaluated at a particular work index after conditioning.
+This is why dense coupling in the old Fourier-sector basis need not govern
+the full sampling task in this restricted schedule.
+
+The final main progression report is
+`out/work_first_progressions_20260911T105444407294Z.json`, **4/4 PASS**, in
+`out/work_first_progressions_main.log`. Its primary literal sparse columns
+and progression rows agree with the charged existing pre-final oracle within
+**7.11e-16** amplitude error. The complete coherent law agrees with UP within
+**2.16e-16** TV. The primary maximum is nine components; its envelope and
+accepted-law checks match the proved row-dependent mean attempt count.
+
+Main found that the initial prototype READ an orbit table even though it
+allocated no such table inside its helpers. The corrected literal column/row
+constructors evaluate physical phases with modular exponentiation at the
+queried index. Only the tiny dense reference uses the supplied orbit list.
+The fixed six-bit fixture also had singleton progressions throughout, so it
+did not test the long-progression identity. Main froze a separate width-eight
+row test, retaining the same N,a,r,b,angles,k and penultimate-control-relative
+insertion rule. This is an explicit width family, not a retuned UP law.
+
+All secondary rows now contain two- or three-term progressions. Their expanded
+coefficients agree with literal sparse columns within **1.58e-16**; geometric
+Fourier sums agree with direct finite-root sums within **2.78e-17**. Forty
+work rows have nine components and twenty have ten, reaching the C78 upper
+bound. Main also checks the genuinely NONUNIFORM component-mixture proposal
+on these longer components: maximum acceptance is **.43649684**, error in
+its mean acceptance 1/m is below **5.6e-17**, and its accepted law matches
+the coherent law within **7e-18** per outcome. The secondary route is a
+row/formula check, not an independent compiled arithmetic/QFT reference.
+
+Counters are instrumented before loop operations. Both fixtures together
+charge **2,880** column-local terms, **2,160** row-local terms, **1,492**
+reference expansion entries, **162,432** geometric-component evaluations
+and **305,664** direct-root terms. The combined preflight is **660,240**
+of these named terms under a one-million cap. Pointwise phase evaluations
+separately charge **2,800** modular-power queries, plus sixty reference label
+queries. The dense primary oracle's work is separately checked. The final
+numeric preflight is **702,848 bytes**, including retained secondary sparse
+column values and temporary law arrays; Python object/report overhead is
+bounded in object count, not asserted to equal this numeric payload or RSS.
+
+The first progression report
+`out/work_first_progressions_20260911T104249397048Z.json` preserves a float-
+argument error at the integer geometric-sum API. Passing primary reports
+`out/work_first_progressions_20260911T104309022089Z.json` and
+`out/work_first_progressions_20260911T104345423424Z.json` retain the earlier
+table-dependent, singleton-only implementation. A direct-script invocation
+failed to import lab in `out/work_first_progressions_final_system312.log`;
+reproduction uses the module command below. Report
+`out/work_first_progressions_20260911T105127657345Z.json` preserves the
+secondary control failure from leaking primary L=32 into the L=128 component
+start. That parameter leak was fixed without changing either fixture.
+The agent's subsequent reports pass but identify Python **3.12.10**, despite
+their log filenames saying system312. Main's final report above records actual
+system Python **3.12.3**, NumPy **2.4.6** and the explicitly single-thread run.
+Neither set of small passes settles the separate host-reliability question.
+
+Main removed a 1e-30 proposal cutoff, added explicit zero-proposal handling,
+strengthened setup/work and law predicates, charged omitted secondary data,
+and checked the long-row acceptance law without extra propagation. No cutoff
+prunes a small positive component. Negative controls retain both the
+incoherent-proposal and incorrect-uniform-work output discrepancies.
+The lower-cost agent then read main's final source/report and found no
+substantive remaining correctness or scope defect. These named operation
+counters are not a native instruction count or an arbitrary-precision bound.
+
+At the formula-only checkpoint, the existing interval/progression primitive
+supplied the next implementation, but those diagnostics were not a working
+end-to-end sampler. No random samples or timing comparison had been performed.
+The subsequent implementation is recorded below. Small late-history count, gate setup,
+order/index discovery, precision and failure handling must remain explicit.
+General multi-defect schedules can destroy the constant-progression coefficients.
+No general quantum-simulation/factoring advance or timing advantage follows.
+
+Main read Van den Nest's CT definition and sparse-operator theorem body and
+Schwarz–Van den Nest's sparse-output theorem assumptions; C78 links the exact
+primary sources and distinguishes their contracts. These are standard
+conditioning/Fourier/rejection ingredients. A complete priority study for the
+specialization is still open; no novelty claim is made.
+
+## Formula-checkpoint validation
+
+At that checkpoint, the C77 core/lab/backend checks were the production gate.
+New exact Gaussian-integer regressions in test_claims.py check work weights,
+zero rows, sparse prefixes, full interference and component acceptance;
+`out/work_first_claims.log` passes. The regenerated documentation gate is
+`out/work_first_docs.log`. No production sampler, manuscript, abstract,
+default, host setting or firmware was changed, and no commit was made.
+
+```bash
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_work_first_rows
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_work_first_progressions
+```
+
+The qsim-research skill's actual-observable and coherent-reference rules led
+to the work-first route and exposed the verifier's hidden dense loops. This
+is the most promising restricted sampler connection in the present batch,
+not a declared general breakthrough. TODO 38 subsequently completed the bounded
+implementation and strongest-baseline comparison below; the broader goal stays active.
+
+## Implemented sampler and actual decision paths
+
+Main added `lab/work_first.py:LateWorkProgressions`, with supplied small
+unitaries, known/indexed period and a deterministic pointwise phase callable.
+Its scalar rejection loop reuses `progression_sample`; it does not allocate
+orbit/output/exponent arrays or expand progression entries. Input/cost/precision
+limits remain C78's contract. Queried phases and supplied unitaries are checked
+at float tolerances, not globally certified. Exhaustion raises without a
+fallback; failed calls must not simply be discarded.
+
+Three lower-cost initial testers supplied the scientific/edge/comparison
+experiments. Main's final reports are:
+
+| test | report under `out/` | verdict |
+|---|---|---|
+| joint formulas and actual draws | `work_first_sampler_20260911T111839577336Z.json` | 5/5 |
+| zero/cap/retry edges | `work_first_sampler_edges_20260911T111528371942Z.json` | 4/4 |
+| strongest same-output comparison | `work_first_sampler_comparison_20260911T111839083292Z.json` | 5/5 |
+
+All three main reports identify system Python **3.12.3**, NumPy **2.4.6**,
+with one BLAS thread. Main logs are respectively
+`work_first_sampler_main_final.log`, `work_first_sampler_edges_main.log`,
+and `work_first_sampler_comparison_main_final.log`. Lower-cost sampler pilots
+identify Python 3.12.10; edge/comparison pilots identify 3.12.3. A filename
+or requested interpreter does not supersede the recorded runtime.
+
+The sampler's primary complete JOINT law matches the dense pre-final oracle
+within **1.09e-18** per entry. The independently checked work marginal differs
+by **9.54e-17** TV. All conditional/proposal laws normalize; the normalized
+accepted law matches the coherent law within **6.94e-18**. Both width fixtures
+retain the former formula checks, including nontrivial progressions at width
+eight. There are **512 actual draws per width**, with means **5.5215** and
+**9.3359** proposals and maxima **48** and **72**. Each draw checks ranges,
+positive target mass and actual local/phase/progression/prefix counters.
+The **7,607** total proposals are below the explicit **262,144** worst-case
+budget, with each individual call capped at 256. These draws are smoke tests,
+not histogram evidence of a one-percent accuracy guarantee.
+
+Main's independent `test_lab.py` FFT regression checks a small-period case
+where residues alias. A second regression enumerates **all 128 actual
+first-attempt RNG paths** for r=b=2,Q=4,W0=I,W1=H, including the primitive's
+interval bit and gcd lift. The accepted joint submass is exactly 1/8 at
+(j,y)=(0,0),(1,2), with total rejected mass 3/4. A deliberate no-acceptance
+control gives the wrong joint law. This exercises actual sampling decisions,
+not merely the forced probability formula. The independent edge experiment
+adds one real reject-then-accept path with varying row component counts,
+explicit exhaustion, exact-zero cancellation, zero work/proposal masses and
+pre-copy allocation traps. It is not itself an exhaustive multi-retry tree.
+
+The same-output comparison reproduces the existing 60-dimensional sequential
+reference and obtains TV **2.30e-16** for the new helper's enumerated float law.
+The cached, independently validated FB candidate has TV **.01252649** and
+omitting G has TV **.03459335** against that reference; neither meets the
+frozen 1e-3 or 1e-2 law thresholds. The comparison additionally returns eight
+helper samples (42 proposals) and four reference samples. This establishes
+the restricted exact-arithmetic route's relevance beyond those approximations,
+NOT certified finite-RNG accuracy or speed superiority. FB is explicitly a
+cached baseline law in this experiment, not an uncharged fresh sampler run.
+
+The incorrect redraw-work-after-rejection law differs by **.00666690** TV;
+fully dephasing exponent histories differs by **.23462695**. The former is
+essential because rejection success varies with the work row. Initial edge
+code had a vacuous control that repeated a positive counter assertion; it now
+executes a deliberately wrong two-column redraw path and checks independent
+RNG call counts as well. Main strengthened the exact-zero and allocation tests.
+
+## Resource and failure audit for the implementation
+
+The helper's frozen-fixture reserve is **6,272 numeric bytes**, including
+conservative temporary storage, with **288 bytes** of retained matrices;
+Python containers and the phase oracle's internals are separate. Its local
+construction bound is 27 terms per draw, not a dense orbit scan. The full
+sampler verifier reserves **1,053,072 numeric bytes** and charges **824,156**
+actual named diagnostic scalar terms against **874,680** preflighted, plus
+the separately budgeted dense oracle/setup and random proposals. The dense
+Fourier reference charges all **245,760** root terms, the formula checks
+**2,920** pointwise modular powers, and dense oracle matvec terms are retained
+separately. The comparison's reserve is **3,846,784 bytes**, including the
+existing sequential workspace. It charges **128** forced reference calls,
+**four** reference draws, **6,048,000** dense setup product terms and **120**
+pointwise phase queries. Counts of shared matrix references are not claimed
+as fresh matrix allocations. The edge reserve is **56,064 bytes**, with
+**64** actual local-column terms and **1,536** direct-root terms. None of
+these numeric-payload bounds is a process RSS or bit-runtime measurement.
+
+Preserved failures and superseded passing reports are not erased:
+
+- `work_first_sampler_initial.log` retains a complex-JSON serialization
+  traceback. `work_first_sampler_20260911T110724980686Z.json` failed the first
+  zero-row control; the fixture was corrected to contain an unreachable row.
+  `work_first_sampler_20260911T111413157986Z.json` retains a counter-predicate
+  failure. Earlier passing pilots lacked the later complete accepted-law,
+  resource and per-draw checks.
+- `work_first_sampler_edges_20260911T110951977188Z.json` failed a tuple-versus-
+  length zero-component predicate; `...111310306969Z.json` failed the scripted
+  RNG call-count expectation. The corrected count accounts for the reduced
+  Fourier dimension after taking the gcd. Main additionally replaced a
+  planned direct-root count by a counter updated before actual evaluation.
+- `work_first_sampler_comparison_20260911T111017335926Z.json` preserves the
+  FB prefix-dimension mix-up (H=4 versus the sampler's late-history H=2).
+  `...111037256587Z.json` preserves the wrong imported constructor's period
+  (12 versus 60). These descriptions follow the actual retained tracebacks,
+  not an agent's later reversed recollection. Main corrected shared-reference
+  allocation accounting and strengthened returned-reference probability checks.
+
+Main's final sampler verifier also fixes a leaked width-eight range bound
+in the width-six sample check. No scientific fixture was retuned to repair
+these verification defects, except replacing the invalid zero-row CONTROL
+fixture. The full target schedules and fixed random seeds stayed unchanged.
+
+## Implementation validation and next question
+
+Core, lab (including the optional verified backend), and claims pass in
+`out/work_first_sampler_core.log`, `out/work_first_sampler_lab_transition.log`,
+and `out/work_first_sampler_claims.log`. The other six science suites were not
+rerun for this opt-in helper. Documentation validation is recorded in
+`out/work_first_sampler_docs.log`. No existing sampler default, manuscript,
+abstract, host setting, firmware or commit changed. These small passes do not
+resolve TODO 34's host issue.
+
+```bash
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_work_first_sampler
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_work_first_sampler_edges
+PYTHONFAULTHANDLER=1 OPENBLAS_NUM_THREADS=1 uv run --no-project --python /usr/bin/python3.12 --with 'numpy==2.4.6' python -u -m experiments.experiment_work_first_sampler_comparison
+```
+
+The qsim-research skill's independent-control, actual-output and charged-cost
+requirements materially strengthened this implementation audit. TODO 38 is
+complete at this bounded scope; TODO 39 owns the next, genuinely changed
+earlier-phase schedule and its possible binary-residue-cycle connection.
+The broader research goal stays active.
+
+---
+
 # X — CRYPTANALYSIS IMPORT (TODO step 5). A usable bound, tight at the extremes.
 
 C12 gave a qualitative bridge. This makes it an inequality and tests it against
@@ -2098,22 +10615,25 @@ goes 1037322 → 4186980 and a=4 (r=3) goes 512784 → 4152181.
 
 **Mechanism.** aᵉ mod N depends only on e mod r. If r | 2ᵏ then only the low k
 bits of e matter, so every additional exponent qubit adds a variable the Walsh
-support cannot touch — the support is pinned to a fixed subspace. Any odd factor
-in r makes the period incommensurate with the GF(2) basis and the support
-spreads over everything.
+support cannot touch — the support is pinned to a fixed subspace. An odd factor
+does not force every selected scalar output bit to be dense: its relevant
+minimal period can be smaller than r. The circuit-level β>1 growth below is
+therefore an empirical result for the measured observables and constructions.
 
 **Statement of the result.**
 
-> For reversible modular exponentiation with computational-basis observables,
-> Pauli-path simulation cost is **independent of the exponent-register size when
-> the order r is a power of two**, and **Θ(2^q) as soon as r has an odd factor.**
+> For the measured reversible modular-exponentiation construction and
+> computational-basis observables, Pauli-path simulation cost is **independent
+> of the exponent-register size once the order r is a power of two and the
+> identity tail is present**. The observed **Θ(2^q)-type growth when r has an
+> odd factor** is empirical, not a universal function-level theorem.
 
 Consequences:
 
 1. **Period-finding precision is free, or fatal, depending on r.** The exponent
    register is what sets the accuracy of the continued-fractions step; here
-   enlarging it costs PPS *nothing* when r is a power of two and quadruples cost
-   per two qubits otherwise.
+   enlarging it costs PPS *nothing* when r is a power of two; the reported
+   β>1 controls quadruple cost per two qubits.
 2. **The textbook demo is the degenerate case, quantitatively.** N=15 a=7 has
    r=4. Every "we simulated Shor on N=15" result sits in the corner where PPS
    cost does not grow at all. Cryptographic N has r with odd factors
@@ -2304,15 +10824,18 @@ every previous sweep used r=2 (α=1). It is **not** constant from n_exp=2:
   17   3  16      4      3   22    2093202     grew     (lock predicted at 5)
 ```
 
-**Rule: the support locks at n_exp = α + 1, where α = v2(r).** Verified exactly
-for α=1 and α=2; α=3 and α=4 are still growing at the largest width reachable
-(q ≤ 22), consistent with locking at 4 and 5.
+**Sufficient rule: the support is invariant for n_exp ≥ α + 1, where α = v2(r).**
+The first lock at α+1 is measured for the reported α=1,2,3,4 rows, but the
+parity argument alone does not exclude an earlier stabilization for a particular
+observable or construction.
 
 **Mechanism (this one *is* clean).** The u_a block for exponent bit i multiplies
 by `a^(2^i) mod N`, which equals 1 exactly when r | 2^i, i.e. when i ≥ α. So
 blocks i ≥ α are identity on the valid subspace. With n_exp qubits the blocks
 are i = 0..n_exp−1, so at least one identity block exists iff n_exp ≥ α + 1.
-The support locks the moment the first identity block appears.
+The parity reduction guarantees width-independence once the first identity block
+appears; first locking is an additional measured property of the selected
+observable and construction.
 
 **Why this was missed:** every earlier sweep used r=2, i.e. α=1, and started at
 n_exp=2 = α+1 — exactly on the threshold. Pure luck. Had the original controlled
@@ -2322,7 +10845,8 @@ would have looked false.
 **Corrected statement for Paper B:**
 
 > support is constant in n_exp **for n_exp ≥ v2(r) + 1** when r is a power of
-> two, and Θ(2^q) as soon as r has an odd factor.
+> two. Growth consistent with Θ(2^q) when r has an odd factor is a measured
+> circuit-level result, not a universal function-level theorem.
 
 Secondary observation: the locked value is close to **half** the Hilbert space
 at the lock point (density 0.473 at α=1, 0.490 at α=2, and 0.499 already at
