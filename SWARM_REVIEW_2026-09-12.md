@@ -336,6 +336,117 @@ round's defects were coordinator process failures rather than science: a
 submission frozen past a lint error, and a stale manifest. Guard
 submission scripts with `set -e` and a pre-submit lint gate.
 
+### Live-round addendum, 2026-09-15 (C102/HD, C103/HB; not blinded)
+
+This text is not given to a trial referee. Eight review rounds across three
+tasks. Defective submissions: `Sbb5c0cd4a94c420d`, `Sa4101c802d464f5d`,
+`S1738a7ee8ab344ac`, `S46ec5c96e8ef4d55`, `S019c6e69f27c474d`. Corrected:
+`Sb66f293fef1d4a37`, `S6c04859f17224bee`, `S03aee9cd96c548ef`. The author was
+the coordinator throughout, working in-session without delegation; its doc gate
+and evidence lint passed before every submission.
+
+- **C102/HD, task `Ta294b7d88a4c4015`.**
+  - `V06b5088b79994f1c` requested eight corrections. Its catch was a fixture
+    confound, not a computation error: ROBDD size splits by N mod 4, and every
+    n = 7 fixture is N ≡ 1 (mod 8), so the all-N "step rose at n = 8" was class
+    mixing. The coordinator had raised none of the eight.
+  - `V6840fa9b93014e09` verified the unchanged-science hash claim in detail and
+    confirmed all eight were present in the bytes, then found three wording
+    defects plus one mechanical blocker: a monotone decline the two n = 8
+    fixtures do not establish (N = 197 alone reverses it), a brute-force check
+    described as validating the u_a counts when it validates only the reducer
+    at ≤ 5 variables, and a post-review reconstruction described as "the same
+    check" as an unarchived session check.
+  - `Vee711b303f314378` accepted v3 and found two further inaccuracies **in the
+    submission's own limitations text**: a wrong line range for the lint
+    advisories, which the coordinator had generalised from the tail of the log
+    rather than reading it, and a false reason for dropping a retained failure
+    log from the manifest. Both are recorded in closure `Cf31ebb9eaea34122`
+    rather than edited into the frozen submission.
+- **C103/HB, task `T58ddf9e611124d65`** (proposal) and its integration
+  `Tf102392bd0124c1f`.
+  - `Vc7ce69ad6e4b4fe1` requested seven corrections, including a control-0
+    identity asserted without its cancellation argument and a false sentence
+    on work-part scaling.
+  - `V2e9e6c322bee4511` accepted, verifying Lemma 0 against the actual gate
+    list rather than the prose, and required two corrections — one of them the
+    missing α + μ crossover, without which "base-2 growth does not carry over"
+    reads as a claim about the measured range when most measured levels at
+    large β are the trivial 2^k.
+  - `V9b418bf68edf4bfd` blocked the integration on three defects, one inside
+    the corrective sentence itself (below), one a qualifier dropped in HANDOFF
+    that made the statement false at β = 3, and one shipping canonical
+    experiments that still wrote into the frozen attempt directory, so running
+    either as documented would overwrite the evidence of its own runs.
+  - `V1191ce2833ad4129` verified all three fixes independently — deriving the
+    crossover from the recursion and recomputing μ(β) from (N, a) alone — and
+    blocked on three one-line residuals, including a fix that shipped a
+    documented command failing on a clean tree.
+  - `V92cd2849d91843e0` accepted v3, verifying the documented command by
+    executing it verbatim in a sandbox with a stubbed `uv`.
+
+**Two defect classes this round that the section 5 set does not cover.**
+
+1. **Error inherited from an accepted review.** The α + μ crossover was stated
+   one level early — D_μ(μ) = 2^μ exactly, so the bound is trivial for every
+   k ≤ α + μ and the trivial-level count is min(t, α+μ+1). That wording came
+   verbatim from `V2e9e6c322bee4511`, an *accepted* review, and the coordinator
+   carried it into a canonical claim without deriving it. A referee's formula
+   is not a citable source; it is a number like any other, and CLAUDE.md's rule
+   against typing a number that already exists applies to it. Trial use: a
+   reviewer that accepts `S46ec5c96e8ef4d55` without checking the threshold
+   against Lemma 3's recursion is not ready for this class.
+2. **A correction applied to some of a fact's homes.** The fix for that
+   off-by-one landed in two of the four files holding the threshold, leaving
+   the published `one_line` and TODO13 stating the loose version — the
+   duplication failure mode this repository was restructured to prevent,
+   occurring inside the fix for it. The structural response was to remove a
+   home rather than synchronise it: the threshold now has one owner (C103
+   Limits), one carried sentence (HANDOFF), one historical mention (HB).
+
+**Mechanical blocker worth a process rule.** `Sa4101c802d464f5d` could not be
+accepted whatever a referee concluded, because `HANDOFF.md` drifted after the
+freeze and `review.create(accept)` raises `candidate_changed`. The drifted text
+was a review-status block describing its own review as pending. Freeze
+`HANDOFF.md` last, or keep review-status prose out of the submitted candidate
+set.
+
+**Capacity.** Three referee agents in the preceding session died on API usage
+limits before recording anything, leaving only partial notes. The mitigation
+adopted here — instruct each referee to record its review *before* any optional
+deepening — held: all six referees in this round recorded a verdict. Briefs
+also forbade reading the terminated agents' partial directories, so no context
+was inherited.
+
+**Shadow review originated no catch again.** It reproduced the class-split
+numbers, the two limitations errors and the crossover before acting on them,
+but every finding this round came from a referee. The coordinator did catch one
+of its own edits — a patch that inserted a `mkdir` mid-command — by reading the
+result back before proceeding, which is edit hygiene rather than review. All
+four live-round addenda now agree; none of them can count the misses nobody
+caught, so the rule to keep shadow review until blinded calibration is
+unchanged.
+
+**Board mechanics.** The recursive dependency revalidation refused the
+integration task because a closed dependency's sealed input `claims/C102.md`
+had drifted — by the accepted prose corrections to C102 itself. Since a closed
+task cannot be resnapshotted, the result was bound instead through hash-sealed
+inputs, a deliberate override recorded with its cost in `Mf2ab5cb32c584940` and
+approved by the user. Worth arb's attention: prose-only drift in a
+non-technical input invalidates an otherwise sound dependency, and the only
+routes available are override or reopening accepted work.
+
+**Usage.** Referees ran as Claude Code subagents with `model: inherit` (session
+model Opus 5) and `effort: xhigh`. Recorded per review: `V6840fa9b93014e09`
+117k tokens / 36 tool calls / 12 min; `V2e9e6c322bee4511` 144k / 53 / 18 min;
+`Vee711b303f314378` 91k / 28 / 9 min; `V9b418bf68edf4bfd` 113k / 40 / 12 min;
+`V1191ce2833ad4129` 88k / 30 / 8 min; `V92cd2849d91843e0` 76k / 36 / 7 min.
+Cost fell as scope narrowed, and the second-cheapest (`V1191ce2833ad4129`)
+still returned three blocking findings; the cheapest returned an accept, which
+says nothing either way. That is weak evidence for scoping a version review
+rather than repeating a full audit, and none of it measures referee quality,
+which stays unmeasured.
+
 ---
 
 ## 6. Findings: arb 0.1.0 (for `~/Workspace/agent-research-board`)
