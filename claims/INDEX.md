@@ -7,7 +7,7 @@ frontmatter; the claim file is the single source of truth for its own
 status. Retracted claims are in `claims/retracted/` and **may not be
 cited as support**.
 
-**98 live · 19 retracted**
+**103 live · 19 retracted**
 
 ## Live
 
@@ -108,6 +108,11 @@ cited as support**.
 | [C96](claims/C96.md) | A | proven | Exact thresholded Walsh sums skip mask-free bit blocks in at most 2K+1 joint carry/borrow transfers, with growing-integer costs retained |
 | [C97](claims/C97.md) | A | proven | Synchronized native carry catalogs have polynomial signature bounds, but storing all stopped-prefix catalog carries requires exponentially many keys |
 | [C98](claims/C98.md) | A | proven | For fixed disjoint Walsh masks the C96 contraction keeps every state, row and prefix value within 2^(p0+K+2G), independent of width; the overlapping … |
+| [C99](claims/C99.md) | A | proven | Off-diagonal Pauli pullbacks through a basis permutation are counted by its difference distribution table: 4^n/δ² ≤ T ≤ 4^(n-1), with the maximum for … |
+| [C100](claims/C100.md) | A | proven | The DDT count of C99 holds in the Weyl basis of any finite abelian group; XOR pairing and a telescoping-sum obstruction bound the difference classes, … |
+| [C101](claims/C101.md) | A | proven | The X-X OTOC of a basis permutation equals its boomerang connectivity entry; Cuccaro adders have the exact carry butterfly F = 1 - 2^(i-j); in … |
+| [C102](claims/C102.md) | A | established | For two compiled-arithmetic fixtures the PPS object has far smaller canonical decision diagrams: Cuccaro top sum bit, Walsh 3*2^(m-1)-2 against 3m+4 … |
+| [C103](claims/C103.md) | B | established | In one exponent-first order, the ROBDD of C15's full-space modexp pullback has exponent-level widths at most 2^alpha D_mu(k-alpha), with mu(beta) the … |
 | [F12](claims/F12.md) | B | narrowed | At function level, β=1 gives selected-bit width independence; β>1 has no universal density claim because minimal scalar periods vary |
 | [dictionary-biased-product-input-state-ma](claims/dictionary-biased-product-input-state-ma.md) | B | established | Dictionary: a biased product input state makes ⟨O⟩ = Σ_z c_z ∏_{i∈z} δ_i, i.e. exactly the p-biased WHT of Gangopadhyay et al. (JAMC 2023) with δ_i = … |
 | [superseded-the-residual-ladder-the](claims/superseded-the-residual-ladder-the.md) | B | established | Superseded (§RS): the residual ladder is 1 − 2^−(k+1) in the conditioning depth k |

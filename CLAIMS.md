@@ -6,7 +6,7 @@
 Edit the individual claim file, not this. It exists so the papers can
 ship one self-contained supplementary document.
 
-98 live claims, 19 retracted.
+103 live claims, 19 retracted.
 
 ---
 
@@ -8609,6 +8609,714 @@ Not claimed: any measured runtime, allocation or RSS change; any change to
 the C89/C94 width<=4096 or q<=256 guards; a bound for arbitrary overlapping
 masks beyond the stated condition; novelty or optimality; any whole-state,
 PPS/CNOT peak-memory or post-QFT statement.
+
+---
+
+## C99 — Off-diagonal Pauli pullbacks through a basis permutation are counted by its difference distribution table: 4^n/δ² ≤ T ≤ 4^(n-1), with the maximum for every direction exactly when the permutation is APN
+
+*status: proven · paper: A*
+
+# C99 — The differential counterpart of the Walsh identity
+
+C8 counts diagonal pullbacks by Walsh sparsity, and C25 turns published
+nonlinearity into a lower bound. C13 records that this identity stops at
+X/Y-type observables. This claim gives the exact counterpart for those
+observables, in terms of the difference distribution table (DDT). DB records
+how the result was found and checked.
+
+## Identity
+
+Let U|y> = |π(y)> on n qubits and M = U† X^a Z^b U. Then M|y> = s(y)|σ(y)>
+with s(y) = (-1)^(b·π(y)) and σ(y) = π⁻¹(π(y)⊕a). The coefficient of X^c Z^d
+is 2^-n Σ_{y∈D_c} s(y)(-1)^(d·y), where D_c = {y : y⊕σ(y) = c}. Its size is
+|D_c| = DDT_{π⁻¹}(a,c). So the X-support of the pullback is exactly row a of
+the DDT of π⁻¹. The term count is
+
+    T(a,b) = Σ_c |supp Ŵ[1_{D_c}·s]|.
+
+At a = 0 this reduces to C8.
+
+## Counting theorem (a ≠ 0)
+
+σ is an involution, and π(y⊕c) = π(y)⊕a on D_c. So D_c is a union of
+k = |D_c|/2 pairs {y, y⊕c}. The transform of D_c vanishes off the coset
+d·c = b·a, which has 2^(n-1) elements. On that coset it is a signed sum of
+k terms. Hence:
+
+* if k is odd, D_c contributes exactly 2^(n-1) terms;
+* if k = 2, D_c contributes exactly 2^(n-2) terms.
+
+Throughout, DDT(a,c) means DDT_{π⁻¹}(a,c), and R_a and N4(a) are read from
+row a of that table. The orientation can matter for non-involutive
+permutations. For a map with a symmetric DDT, row a is the same in both
+orientations. For an APN map the counts, bounds, R_a and N4 agree in both
+orientations, but the X-support SET can still differ: the C1 control shows
+this for Gold x³ over F32 at a = 1, b = 0, where both counts are 256. On the
+PRESENT S-box at a = 1, the π⁻¹ row gives the true count T = 40, while the
+DDT of π would give 16 (V88c6aae3d06240d2). The experiment's closed-form
+fixtures (inversion maps) are involutions, so they cannot detect this. The
+uncertainty principle on GF(2)^n, with Cauchy–Schwarz over Σ_c |D_c| = 2^n
+and differential uniformity δ, gives
+
+    4^n/δ² ≤ Σ_c 2^n/DDT(a,c) ≤ T(a,b) ≤ R_a·2^(n-1) ≤ 4^(n-1),
+
+where R_a is the number of nonzero entries in row a. δ is the same for π and
+π⁻¹. T(a,b) = 4^(n-1) for every a ≠ 0 iff π is APN. For a differentially
+4-uniform permutation, T(a,b) = 2^(n-2)(2^n − 3·N4(a)) independent of b,
+where N4(a) is the number of entries equal to 4 in row a of DDT_{π⁻¹}. Only
+classes with an even number k ≥ 4 of pairs can make T depend on b; odd k
+always contributes exactly 2^(n-1).
+
+## Evidence
+
+`experiments/experiment_differential_bridge.py` passes 8/8 predictions and
+4/4 must-fail controls; the log is `out/differential_bridge/run1.log`.
+
+* The identity matches an independent dense Pauli-transfer computation for
+  all 4^n labels on eleven fixtures with n ≤ 6. These are Gold x³ and
+  inversion S-boxes, random and affine permutations, and the 6-qubit
+  Cuccaro adder's gate-level Clifford+T unitary.
+* It matches the gate-level PPS propagator on 100 enumerated labels of the
+  8-qubit adder.
+* The derived exact values hold: 16 and 256 terms for APN permutations
+  at n = 3 and 5; 52 and 976 terms for inversion over GF(16) and GF(64).
+* The Schrödinger-direction, naive-Walsh, dropped-sign and unsquared-bound
+  mutants all fail as required.
+
+On F10's 14-qubit modexp, `experiments/experiment_differential_bridge_scale.py`
+confirms the counts predicted before measurement: X_x0 = 849,836 and
+Y_x0 = 849,442. A dense GPU reference gives exactly the formula's support
+sets and also reproduces F10's recorded Z-type counts. The run of record is
+`out/differential_bridge/scale_run3.log` (board run R8ee3a5298ba44c23), made
+on the archived `lab/differential.py`; the earlier reproduction scale_run2
+(R9ff21679dd1a4787, from a reclaimed attempt) is identical apart from
+timings. The first run, `scale_run1.log`, used
+an earlier unpreserved version of that helper, which was extended afterwards
+for C100; all three runs give identical verdicts and numbers.
+
+## Scope
+
+This is an exact count of the FINAL pullback's Pauli terms. It is not the
+gate-level intermediate peak: on F10's fixture, Clifford+T propagation held
+at least 6,019,010 live terms against a final 849,836 (DB; compare C17).
+It is not a faster simulator either. The δ-bound was vacuous on both tested
+Cuccaro adders, which have directions with DDT entry 2^n (δ = 2^n). Whether
+other full-space arithmetic permutations, such as F10's modexp where every
+qubit is a control somewhere, share this is unverified. The per-row
+bound Σ_c 2^n/DDT(a,c) and the exact identity still apply. Novelty is not
+established: the identity is elementary, and only a brief search was made
+(DB).
+
+---
+
+## C100 — The DDT count of C99 holds in the Weyl basis of any finite abelian group; XOR pairing and a telescoping-sum obstruction bound the difference classes, and on ToffoliModExp(7,3,n_exp=3) the Pauli/mixed term-count ratio for the clock-shift observable is 0.64–1.88, in both directions
+
+*status: proven · paper: A*
+
+# C100 — Group-covariant differential counts
+
+C99 is the case G = GF(2)^n. GB records how this extension was found,
+including a refuted prediction.
+
+## Identity (any finite abelian G)
+
+With W(a,χ)|y> = χ(y)|y+a> and U|y> = |π(y)>, the pullback is
+U† W(a,χ) U |y> = χ(π(y)) |σ(y)>, where σ = π⁻¹ T_a π. Its coefficient on
+W(c,ψ) is |G|⁻¹ Σ_{y∈D_c} χ(π(y)) conj(ψ(y)), with D_c = {y : σ(y) − y = c}
+and |D_c| = DDT^G_{π⁻¹}(a,c). The term count T_G(a,χ) is the sum over c of
+the Fourier support of 1_{D_c}·χ∘π. By the uncertainty principle on G,
+
+    Σ_c |G|/|D_c| ≤ T_G(a,χ) ≤ R_a·|G|.
+
+## Class-count constraints (a ≠ 0)
+
+1. **XOR pairing.** Only in GF(2)^n is σ always an involution. There every
+   class is a union of c-pairs, so R_a ≤ |G|/2 and T ≤ |G|²/4 (C99).
+2. **Telescoping obstruction.** Since Σ_u (π⁻¹(u+a) − π⁻¹(u)) = 0, the
+   differences over a row sum to zero, and c = 0 never occurs. If all
+   |G|−1 nonzero differences appear, the repeated one must equal −Σ_G g. In
+   a group with more than one involution Σ_G g = 0, which is impossible, so
+   R_a ≤ |G|−2. In a group with exactly one involution, Σ_G g is that
+   involution, and R_a = |G|−1 is not excluded. The argument needs no
+   involution at all: in odd-order groups Σ_G g = 0 as well, so R_a ≤ |G|−2
+   there too. It fully explains the Z/2×Z/4 maximum of 48: R_a ≤ 6 gives
+   T ≤ R_a·|G| ≤ 48.
+
+## Evidence
+
+`experiments/experiment_group_bridge.py`; log
+`out/differential_bridge/group_run1.log`, exit 1 on purpose.
+
+* The identity matches explicit Weyl-matrix traces on all 4096 labels, for
+  four order-16 groups × four permutations.
+* Group-matched collapse: +5 mod 16 has one term per label in Z/16 but up to
+  10 in GF(2)^4. A GF(2)-linear map has one term per label in GF(2)^4 but
+  up to 171 in Z/16.
+* The bounds hold on every label.
+* XOR rules fail outside GF(2): Z/16 has 2-point classes with supports
+  {8, 12, 14, 15, 16}, and Z/8 reaches R_a = 7 against the XOR cap of 4.
+* Exhaustive search over all 40320 permutations of each order-8 group:
+  - GF(2)³: max T 16, max R_a 4;
+  - Z/8: max T 55, max R_a 7;
+  - Z/2×Z/4: max T 48, max R_a 6.
+
+  The pre-registered maxima 56 and 56 were refuted. The R_a values fit the
+  obstruction above, which was derived after the run. In Z/8, every one of
+  the 11,264 rows with R_a = 7 has a doubled class {y1, y2} that loses
+  exactly 8/o(y2−y1) characters for its best χ, where o(d) is the additive
+  order of the doubled pair's difference d = y2 − y1. That gives maxima 52, 54 and
+  55 for difference orders 2, 4 and 8 (6144, 1024 and 4096 rows), so no
+  R_a = 7 row has a full-support doubled class. Three computations cover
+  every permutation, direction and character of Z/8:
+  - the experiment;
+  - an independent recount written without lab code in review
+    Vefabe53d66914d24 (`out/agent-board/reviews/referee-c100-1/r1_order8_Z8.log`);
+  - an exact Z[ζ₈] recount in review Vfb370f16c33e447a
+    (`out/agent-board/reviews/referee-c100-1-v2/z8_independent.log`), which
+    found T = 56 − 8/o(d) for all eight χ on every such row.
+
+  The maximum 55 and that row formula are therefore **established for Z/8 by
+  complete enumeration**. The coordinator's archived check
+  (`out/agent-board/workers/A869ad224272b43d0/z8_r7_double_class.log`) is a
+  partial cross-check: it covers every R_a = 7 row but keeps only the best
+  character. There is no conceptual proof yet; a referee's
+  unreviewed case sketch exists. Nothing is claimed for larger cyclic
+  groups.
+
+## Scoped measurement: the actual clock-shift observable
+
+The fixture is ToffoliModExp(7, 3, n_exp=3): 16 qubits, full dirty space,
+with the three exponent qubits read as one Z/8 digit. M_a = U†(T_a ⊗ I)U is
+counted in the Pauli basis and in the mixed Z/8 × GF(2)^13 basis.
+
+* Every mixed X-part has exponent digit a.
+* At a = 4 the Pauli count equals C99's formula count, 1,929,129.
+* Pauli/mixed term ratios for a = 1..7: 1.684, 1.400, 1.878, 0.638, 1.878,
+  1.400, 1.684.
+* R = 256 in the mixed basis for every a. In the Pauli basis R is 767 for
+  odd a, 512 for a = 2 or 6, and 256 for a = 4.
+
+On this fixture the Pauli/mixed ratios range from 0.64 to 1.88 in both
+directions: neither basis dominates, and both carry millions of terms. The
+average class needs about 7.5k–32k characters (T/R). This is one fixture,
+not a scaling law. Non-degeneracy of the base comes from ord_7(3) = 6.
+
+---
+
+## C101 — The X-X OTOC of a basis permutation equals its boomerang connectivity entry; Cuccaro adders have the exact carry butterfly F = 1 - 2^(i-j); in compiled modexp the last two exponent bits share an OTOC profile whenever c_(t-2) = c_(t-1)^(+-1), which holds for beta in {1,3} when t-2 >= alpha
+
+*status: proven · paper: A*
+
+# C101 — OTOCs of reversible arithmetic are boomerang counts
+
+C99 counts off-diagonal Pauli terms with the difference table. This claim
+does the same for the out-of-time-order correlator, the standard scrambling
+diagnostic, using the boomerang connectivity table (BCT). BO records how it
+was found, including a control that did not fail.
+
+## Identity
+
+Let U|y> = |π(y)>, W = U† X^b Z^e U and V = X^a Z^d, with Z applied first.
+Then
+
+    F = 2^-n Tr(W† V† W V)
+      = 2^-n Σ_{y∈B} (-1)^(d·(y⊕σ(y)) ⊕ e·(π(y)⊕π(y⊕a))),
+
+where σ(y) = π⁻¹(π(y)⊕b) and B = {y : π⁻¹(π(y)⊕b) ⊕ π⁻¹(π(y⊕a)⊕b) = a}.
+|B| is exactly β_π(a,b), Definition 3 of Boura & Canteaut (ToSC 2018(3),
+p.295). So the X–X OTOC is β_π(a,b)/2^n.
+
+The proof follows |y> through V, W, V† and W†. W is a signed permutation
+whose underlying map σ is an involution (W² = (−1)^(b·e) I), and the four
+steps return to |y> exactly on B, with the stated phase. Known BCT results then read directly as scrambling statements, all
+from the same paper:
+* for APN permutations, 2^n F = DDT for a,b ≠ 0 (p.292);
+* for the inverse map with n even, max 2^n F = 6 (n ≡ 0 mod 4) or
+  4 (n ≡ 2 mod 4) (Prop. 6, p.303);
+* for PRESENT, F(1,5) = 1: a non-affine S-box direction with no scrambling
+  at all (Table 5).
+
+## Carry butterfly
+
+Consider b += a + c0 (mod 2^m) with dirty carry-in c0, carry-out z ^= carry,
+and a, c0 restored, as in the Cuccaro circuit. Then
+
+    F(X_{a_i}, U† X_{b_j} U) = 1 (j < i),  0 (j = i),  1 − 2^(i−j) (i < j < m).
+
+Proof: t = (a+b+c0) mod 2^m is uniform and independent of a. σ maps b to
+b + δ(t) mod 2^m, where δ(t) = ±2^j is fixed by bit j of t, and it flips z
+exactly when b + δ(t) wraps. X_{a_i} leaves b unchanged and shifts t by ±2^i,
+so the boomerang condition is δ(t) = δ(t ± 2^i):
+* If the two δ agree, both the b-part and the z-part hold.
+* If they differ and j < m−1, the b-part fails.
+* If they differ and j = m−1, the b-part holds (+2^(m−1) ≡ −2^(m−1)), but
+  exactly one of b ± 2^(m−1) wraps, so the z-part fails.
+
+So the condition holds exactly when bit j of t is unchanged by the ±2^i
+shift, which gives the formula. (The first write-up omitted the j = m−1 case,
+where all failures come from the carry-out; review V7cf842d53f784f58.)
+
+## Compiled modular exponentiation: tail-bit symmetry
+
+In ToffoliModExp the exponent register is only a control. For a non-exponent
+qubit q, F(X_{e_k}, U† X_q U) = E_L Pr_v[h_L and M_k commute at v], where
+h_L(x) = L⁻¹(L(x)⊕q), M_k is the compiled block for c_k = g^(2^k) mod N, and L
+is the product of later blocks. Each block is multiply–swap–unmultiply, so
+M_{c⁻¹} = M_c⁻¹ exactly as full-space permutations. This is not literal
+gate-list reversal: u_a(c⁻¹) lists its n controlled swaps in the opposite
+order, but those swaps act on disjoint pairs under one control, so they
+commute.
+
+For k = t−2 the average has two terms:
+F = ½ Pr[M_{t−2} commutes with ⊕q] + ½ Pr[h_{M_{t−1}} commutes with M_{t−2}].
+If M_{t−2} = M_{t−1}^(±1), substituting reduces both terms to the k = t−1
+event Pr[M_{t−1}(v⊕q) = M_{t−1}(v)⊕q], so the rows for e_{t−2} and e_{t−1}
+coincide. With c_{t−1} = c_{t−2}² the hypothesis means c_{t−2} = 1 or
+c_{t−2}³ = 1. For r = β·2^α with t−2 ≥ α, that holds exactly when β ∈ {1, 3}.
+Without t−2 ≥ α it can fail, because ord c_{t−2} is then even. Only this
+sufficient direction is proved.
+
+For the ideal modexp map, which multiplies on w < N and is the identity above,
+g^(2^k) = 1 gives F(X_{e_k}, X_{w_j}) = 1 for every j.
+
+## Evidence
+
+`experiments/experiment_boomerang_otoc.py` run 1 scored 10/11, exit 1 on
+purpose (log `out/boomerang_otoc/run1.log`):
+* The identity matches dense traces on 265,192 labels, and on 324
+  single-qubit labels of the 6-qubit adder's Clifford+T unitary.
+* The Boura–Canteaut values (6, 4, 16) hold, and the carry butterfly is exact
+  for m = 2, 3, 4.
+* The ideal-modexp F = 1 holds at the tail bits of N=5, g=2.
+* Controls C1–C4 failed as required.
+* C5 did **not** fail: β = 3 also gave identical compiled tail rows. The
+  mechanism above was derived after that run.
+
+`experiments/experiment_boomerang_otoc_tail.py` run 1 scored 6 substantive
+checks plus 1 always-passing record (Q4), exit 0
+(log `out/boomerang_otoc/tail_run1.log`), with predictions registered after
+that derivation:
+* Tail rows are identical for compiled N=9 and N=13 (β = 3).
+* They differ for N=11 with g=2 and g=3 (β = 5; max differences 0.0289 and
+  0.0287).
+* The block-inverse identity holds as permutations, and its mismatched-pair
+  control fails as required.
+* Board-recorded reproductions of both experiments match the original logs
+  except for the trailing exit line.
+* For both experiments, the absolute orientation (π, not π⁻¹) is anchored by PRESENT's F(1,5) = 1
+  against Table 5, where β(5,1) = 2, and by reading the forward replay code.
+  The adder6 fixture cannot detect orientation: both orientations give
+  identical OTOCs on all its X–X labels.
+
+## Scope and limits
+
+* **Exact counts, small sizes.** All values are exact counts of full-space
+  permutations of at most 20 qubits. No scaling law or runtime claim is made.
+* **The ideal-model sweep is weak evidence.** It passed on all 141 cases (8
+  of them with all-zero rows), but 124 of the 136 non-cube cases also have
+  equal rows. Of those 124, 24 are all zero. The other 100 repeat the same
+  values for every g at a given N. Post hoc, and not a proved mechanism,
+  these rows look determined by points the multipliers fix: the padded
+  region w ≥ N, plus fixed non-unit residues for composite N (N = 22 and 25
+  differ from the padded-pair fraction). Diagnostic:
+  `out/boomerang_otoc/q4_zero_rows.log`.
+* **Not a clean probe of β = 1.** The compiled tail-row symmetry is
+  guaranteed for β ∈ {1, 3} when t−2 ≥ α; the converse is unproved and was
+  checked only for β = 5 at N = 11 (two g, t = 4). Compiled tail rows are
+  not identically 1.
+* **No novelty claim.** Brief searches found no source linking the BCT to
+  OTOCs, which does not establish novelty.
+
+---
+
+## C102 — For two compiled-arithmetic fixtures the PPS object has far smaller canonical decision diagrams: Cuccaro top sum bit, Walsh 3*2^(m-1)-2 against 3m+4 ROBDD nodes (proved); u_a(ctrl,2) x0 on the full dirty space, near-dense Walsh ~2^(3n+3) against median ROBDD 9.7-14.3*4^n for n=4..8 (measured, one order, N-class dependent), a ratio growing roughly like 2^n
+
+*status: established · paper: A*
+
+# C102 — Walsh support against a canonical decision diagram of the same function
+
+C8 fixes the final PPS support for Z_j through a basis permutation U as the
+Walsh sparsity of f(y) = bit j of U(y), on the full space. That is one exact
+representation of f. This claim compares it with the reduced ordered binary
+decision diagram (ROBDD) of the same full-space f, and with an explicit
+decomposition into affine-subspace indicators (projectors of Z-type
+stabilizer codes). HD records how this was found and checked.
+
+Node counts use two terminals and no complemented edges ("plain") unless
+stated; the complement-edge count is also reported. Term and node counts are
+not allocated bytes.
+
+## Proved: the Cuccaro adder
+
+Take b += t + c0 mod 2^m exactly as `ToffoliModExp._add_t_into_b` builds it
+(MAJ sweep, UMA sweep, carry-out dropped, t and c0 restored), and f the top
+sum bit s = b_{m-1} ^ t_{m-1} ^ c_{m-1}, where c_k is the carry into k.
+
+* **Walsh.** In ±1 form C_{k+1} = (B_k + T_k + C_k − B_k T_k C_k)/2, and C_k
+  does not involve B_k or T_k, so the four monomial families are disjoint.
+  S_{k+1} = 2 + 2S_k with S_0 = 1 gives S_k = 3·2^k − 2. Multiplying by
+  B_{m−1}T_{m−1} maps characters injectively, so the PPS support is
+  **3·2^(m−1) − 2**.
+* **ROBDD, order c0, b_0, t_0, …, b_{m−1}, t_{m−1}.** Level c0 has 1 node.
+  For i < m−1, level b_i has 2 nodes, one per incoming carry. Level t_i has
+  1: after (c, b_i) = (0,0) or (1,1) the next carry is fixed, and after (0,1)
+  or (1,0) it equals t_i. Levels b_{m−1} and t_{m−1} have 2 nodes each, and
+  there are 2 terminals. Total **3m + 4**. With complemented edges the
+  b_{m−1} pair, the t_{m−1} pair and the two terminals each merge: **3m + 1**.
+* **Register-block order b_0..b_{m−1}, t_0..t_{m−1}, c0.** After all of b
+  is read, the subfunction of (t, c0) is the top bit of b + t + c0: a
+  half-length cyclic interval shifted by −b. Distinct b give distinct
+  non-constant subfunctions, so the ROBDD has **at least 2^m** nodes.
+* **Affine pieces.** With p_i = b_i ^ t_i, {c_k = 1} is the disjoint union,
+  over the highest non-propagating position, which must generate (c0 = 1,
+  or b_i = t_i = 1), of
+  "generate there, p_l = 1 above it": k + 1 affine subspaces. {c_k = 0} is
+  likewise a union of k + 1 kill pieces. Splitting on p_{m−1} gives a
+  **2m-piece** disjoint affine decomposition of f.
+
+So on the carry chain, exactly where PPS pays for Toffoli branching, the
+same exact function has linear-size canonical and affine representations.
+The linear/exponential ordering sensitivity of adder BDDs is textbook
+(Bryant, ACM Computing Surveys 24(3) 1992, §1.3–1.4, Table 1 and Fig. 4,
+which shows the same most-significant carry-chain circuit, there with a
+constant carry-in and here with a free c0). The Walsh count is
+elementary. What is new here is only the side-by-side count for the PPS
+object.
+
+Gate-level check, `lab.affine_pieces` with no merging: when each Toffoli
+branches on op[2], the propagate wire after MAJ's CNOTs, gate-by-gate
+pullback reaches exactly 2m pieces. Branching on op[1] gives 2^m. So the
+piece count depends on the branching rule, and the representation is not
+canonical.
+
+## Measured: controlled modular multiplication
+
+Fixture `ToffoliModExp(N, 2, n_exp=1).u_a(ctrl, 2)`, observable x0, full
+dirty space, q = 3n + 5 qubits. Variable order, top first:
+[exp, c0, anc, t_n, b_n, x_{n−1}, t_{n−1}, b_{n−1}, …, x_0, t_0, b_0].
+Every odd N in [2^(n−1), 2^n) for n = 3..6; N ∈ {65, 73, 81, 89, 97, 105,
+113, 121} for n = 7; N ∈ {129, 163, 197, 251} for n = 8. Medians over N:
+
+| n | q | Walsh W | ROBDD B (plain) | W/B | B/4^n | W/2^(3n+3) |
+|---|---|---|---|---|---|---|
+| 3 | 14 | 2,967 | 677 | 4.38 | 10.6 | 0.724 |
+| 4 | 17 | 30,777 | 3,196.5 | 9.63 | 12.5 | 0.939 |
+| 5 | 20 | 255,345 | 14,305.5 | 17.85 | 14.0 | 0.974 |
+| 6 | 23 | 2,070,948 | 58,695 | 35.28 | 14.3 | 0.988 |
+| 7 | 26 | 16,669,710 | 181,605.5 | 91.79 | 11.1 | 0.994 |
+| 8 | 29 | 133,778,537 | 634,011 | 211.00 | 9.7 | 0.997 |
+
+Median log2 steps per n (n = 4..8): Walsh 3.375, 3.053, 3.020, 3.009, 3.005;
+ROBDD 2.239, 2.162, 2.037, 1.629, 1.804. Median-based W/(B·2^n) runs 0.548,
+0.602, 0.558, 0.551, 0.717, 0.824 for n = 3..8. Over this range PPS final
+support grows like 8^n and the ROBDD roughly like 4^n or slower, so their
+ratio grows roughly like 2^n. The Walsh side is near-dense: f depends on all
+q variables, and W/2^q rises towards 1/4.
+
+**The ROBDD depends on N mod 4, and the fixture choice confounds the
+all-N medians.** Every n = 7 fixture is N ≡ 1 (mod 8), and n = 8 has two N
+in each class. From the archived reports (`class_split_v1.log` in the
+attempt directory, found by review V06b5088b79994f1c):
+
+| n | median B, N ≡ 1 (mod 4) | log2 step | median B, N ≡ 3 (mod 4) | log2 step |
+|---|---|---|---|---|
+| 3 | 672 (N=5) | – | 682 (N=7) | – |
+| 4 | 3,130 | 2.220 | 3,197.5 | 2.229 |
+| 5 | 13,577 | 2.117 | 14,911 | 2.221 |
+| 6 | 53,526.5 | 1.979 | 63,550.5 | 2.092 |
+| 7 | 181,605.5 | 1.762 | no fixtures | – |
+| 8 | 567,088.5 | 1.643 | 664,849.5 | – |
+
+Within the N ≡ 1 class the median step falls at every n, but the n = 8 entry
+rests on two fixtures and the fall is inside that noise: N = 197 alone gives
+a 7→8 step of 1.775, above the n = 7 step of 1.762, while N = 129 gives
+1.497. The monotone fall is a property of the medians, not a separation the
+two n = 8 fixtures establish. (N = 2^(n−1)+1 is not systematically extreme —
+N = 17 and N = 33 sit above their class medians at n = 5 and 6 — so the
+weakness is sample size, not a special N.) The all-N step rising
+from 1.629 to 1.804 comes from mixing classes, not from B. Per-fixture B
+ranges: at n = 6, 50,925–66,768; at n = 8, 512,765–683,089 (max/min 1.33).
+The registered verdicts P5b, P5c, Q1 and Q3 also hold under the class split.
+
+* **Control.** A random reversible circuit with the same numbers of X, CNOT
+  and Toffoli gates as u_a (qubits drawn uniformly, one seed per n), with
+  the same q, observable index and order, has a much more slowly growing
+  ratio: 7.05, 8.10, 9.77, 14.22, 15.75 for n = 3..7. The n8 run compares
+  its random R_7/R_6 (1.108) with u_a's R_8/R_7 (2.299).
+* **Independent route.** A gate-by-gate `dd` 0.6.0 composition agrees with
+  the complement-edge reducer on every adder m ≤ 8 and every u_a fixture
+  with n ≤ 4. `dd` counts complemented edges, terminal included, so this
+  cross-checks only the complement convention. The plain count is checked
+  at the reducer level only: brute-force distinct-subfunction enumeration on
+  random tables of at most 5 variables (at most 18 nodes), 600 comparisons,
+  0 mismatches, in
+  `out/agent-board/workers/A46391e1cf2954646/bruteforce_reducer_v1.log`.
+  It validates `lab/bdd_count.py`, not the u_a plain counts themselves, which
+  reach 683,089 nodes at q = 29 and have no independent recomputation above
+  q = 20.
+* **Peaks.** For n ≤ 5 the ROBDD composition peak, counted in complement
+  convention as the nodes of the intermediate function only, is within
+  1.35× of its final size. For n ≤ 4 the PPS peak is at least twice the
+  final Walsh support, which equals the perm_pps final support.
+* **Registered failure.** P5a, a Walsh step in [2.8, 3.2] for every n, failed
+  at n = 4 (3.375) and is preserved.
+
+## Scope and limits
+
+* **Final counts of one full-space function per fixture.** They are not
+  allocations, runtimes or sampling costs, and apart from the stated peak
+  checks they are not intermediate peaks. No bound on B for u_a is proved.
+  Whether B tends to 4^n·poly or to a smaller exponent is unresolved. The
+  N ≡ 1 (mod 4) median steps decline monotonically, but n = 8 has two N per
+  class and n = 7 has none with N ≡ 3, and one of the two n = 8 fixtures
+  taken alone reverses the decline, so the trend is not established at n = 8.
+* **Scope deviation.** The task's recorded budget was n ≤ 7 (26 qubits), and
+  the n = 8 experiment file was outside its write paths. The coordinator
+  extended to n = 8 under the user's standing authorization to spend
+  remaining usage, without amending the task first (recorded on the task
+  thread after review V06b5088b79994f1c).
+* **Order dependence.** One fixed order was used for u_a, with no reordering
+  search. A better order can only shrink B; a worse one can inflate it, as
+  the adder's register-block order shows.
+* **No escape from the order barrier.** ROBDD size is still exponential in
+  n here, and for ideal modular exponentiation C19/C48 bound the relevant
+  width by the multiplicative order r. Nothing here bears on factoring.
+* **Novelty.** Decision-diagram simulation of arithmetic and Shor-type
+  circuits is established (e.g. Zulehner and Wille; MQT DDSIM, TODO13), and
+  those bodies were not audited for this comparison. The adder facts are
+  textbook or elementary. The claim is the exact same-object comparison with
+  the PPS cost model of C8, not a new simulation method.
+
+---
+
+## C103 — In one exponent-first order, the ROBDD of C15's full-space modexp pullback has exponent-level widths at most 2^alpha D_mu(k-alpha), with mu(beta) the order of 2 in (Z/beta)^x/{+-1} (proved via C101); the bound is attained on 11 beta>1 fixtures (measured), but it is the trivial 2^k for k <= alpha + mu(beta), so exactly min(t, alpha+mu(beta)+1) levels are trivial and final Walsh support's base-2 growth in exponent width fails to carry over only asymptotically in t
+
+*status: established · paper: B*
+
+# C103 — exponent-first ROBDD widths of the modexp pullback
+
+Accepted as board submission `S6c04859f17224bee` by review `V2e9e6c322bee4511`
+(task `T58ddf9e611124d65`, closed as `Cba59956c7eca4d8b`); integrated by task
+`Tf102392bd0124c1f`. The proof below is carried over from the frozen
+`derivation_v2.md` in attempt directory
+`out/agent-board/workers/A54e702253b2c46ca/` **with the two corrections that
+review required**, so it is not verbatim: Lemma 0's scratch wording (marked
+below) and the α + μ crossover in Limits. The frozen file keeps the
+uncorrected wording, and states the crossover one level early; see Limits.
+
+`experiments/experiment_bdd_beta.py` and `experiments/experiment_bdd_mu.py`
+are the archived scripts with **one deliberate divergence each**: their `OUT`
+constant and the run command in their docstring point at `out/bdd_beta/` and
+`out/bdd_mu/` instead of the attempt directory
+`out/agent-board/workers/A54e702253b2c46ca/`. Running the archived versions as
+documented would have overwritten the frozen evidence of runs
+`R5e2b4f1518e74ec6` and `Re9eda3cc191a448a`. Nothing else in either file
+changed; the task and attempt provenance in their harness metadata is
+deliberately left pointing at the attempt that produced the result.
+
+## Object and order
+
+`ToffoliModExp(N, a, n_exp=t).build()` is a basis permutation U on q = q_w + t
+qubits: work register w (q_w = 3n + 4 qubits: b, t, x, c0, anc, with n the bit
+length of N) and exponent register e_0..e_{t−1}. `build()` applies X on x0 and
+then, for k = 0..t−1, the block u_a(e_k, c_k) with c_k = a^(2^k) mod N.
+
+Variable order, top first: e_0, …, e_{t−1}, then the work variables in any
+fixed order. ROBDD counts are plain: two terminals, no complemented edges.
+Level v holds the distinct subfunctions at the cut above v that depend on v.
+
+## Lemma 0 (a block is the identity when its control is 0)
+
+u_a(ctrl, c) = cmult_mod(ctrl, c) · cswap(ctrl, x, b) · cmult_mod(ctrl, c^{−1})^{−1}.
+
+* **The control is never a target.** Every gate uses ctrl only as a control,
+  so ctrl is preserved.
+* **With ctrl = 0, the multiply half does not depend on c.** The constant c
+  enters `cmult_mod` only through the scratch loads `_load(·, (ctrl, x_i))`,
+  which are Toffolis controlled on ctrl and so do nothing when ctrl = 0.
+  Every other gate of `cc_add_mod` (the uncontrolled ±N adders, the
+  anc-controlled +N adder, the CNOT/X sign logic, and the adder of the
+  unloaded scratch) is independent of c. So cmult_mod(0, c) = C_0, the same
+  work-space permutation for every c.
+* **With ctrl = 0, the swap is trivial.** `cswap` is
+  CNOT(b,x)·Toffoli(ctrl,x,b)·CNOT(b,x), whose Toffoli is inactive, so it
+  reduces to two equal CNOTs, the identity.
+* **So the block is the identity.** u_a(0, c) = C_0 · C_0^{−1}.
+
+The scratch is *unloaded*, not empty: on the dirty space it holds arbitrary
+values. Were it empty, C_0 would itself be the identity and the cancellation
+would be vacuous; it is not. C_0 is far from the identity — review
+`Vc7ce69ad6e4b4fe1` measured 7872 of 8192 work states moved at N = 7 — and the
+block is the identity only through the cancellation above. With ctrl = 1, u_a(1, c) =: M_c is a permutation of the work space.
+Hence
+
+    U(e, w) = (e, P(e) ι(w)),   P(e) = M_{c_{t−1}}^{e_{t−1}} ··· M_{c_0}^{e_0},
+
+with ι the initial X on x0, and f(e, w) = bit x0 of P(e) ι(w). This is the
+C8/C15 object on the full dirty space.
+
+## Lemma 1 (exponent-level widths are prefix-product counts)
+
+Fix e_0..e_{k−1} and let P_k = M_{c_{k−1}}^{e_{k−1}} ··· M_{c_0}^{e_0}. The
+subfunction of the remaining variables is
+
+    (e_k, …, e_{t−1}, w) ↦ bit x0 of Q(e_k, …, e_{t−1}) P_k ι(w),
+
+which depends on the fixed bits only through P_k. So the number of nodes at
+level e_k is at most |S_k|, where S_k = {P_k : e ∈ {0,1}^k}.
+
+After all exponent variables, the work part is the shared ROBDD of at most
+|S_t| functions of q_w variables. Its width at work level l is at most
+min(|S_t| 2^l, 2^(2^(q_w − l))), so the work part has at most
+|S_t| (2^(q_w) − 1) + 2 nodes. That cap grows with t. ∎
+
+## Lemma 2 (a repeated or inverted letter forces coincidences)
+
+Let a_0, a_1, … be elements of any group and
+S_j = {a_{j−1}^{ε_{j−1}} ··· a_0^{ε_0}}, new letters multiplying on the left.
+Suppose that for some μ ≥ 1 and every i ≥ μ, either a_i = a_{i−μ} or
+a_i = a_{i−μ}^{−1}. Then for j ≥ μ + 1,
+
+    Δ_j := |S_j| − |S_{j−1}| ≤ |S_{j−1}| − |S_{j−1−μ}| = Δ_{j−μ} + … + Δ_{j−1}.
+
+*Proof.* S_j = S_{j−1} ∪ a_{j−1} S_{j−1}, so
+Δ_j = |S_{j−1}| − |{w ∈ S_{j−1} : a_{j−1} w ∈ S_{j−1}}|. Take u ∈ S_{j−1−μ}
+and write b = a_{j−1−μ}.
+* If a_{j−1} = b, set w = u. It lies in S_{j−1}, and a_{j−1} u = b u lies in
+  S_{j−μ} ⊆ S_{j−1}.
+* If a_{j−1} = b^{−1}, set w = b u ∈ S_{j−μ} ⊆ S_{j−1}. Then a_{j−1} w = u
+  lies in S_{j−1}.
+
+In both cases u ↦ w is injective. ∎
+
+## Lemma 3 (from Lemma 2 to D_μ)
+
+Define D(j) = 2^j for 0 ≤ j ≤ μ and D(j) = 2D(j−1) − D(j−1−μ) for j > μ.
+Put δ_j = D(j) − D(j−1) (j ≥ 1). Then δ_j = 2^{j−1} for j ≤ μ and
+δ_j = δ_{j−μ} + … + δ_{j−1} > 0 for j > μ.
+
+Claim: Δ_j ≤ δ_j for all j ≥ 1, hence |S_j| = 1 + Σ Δ ≤ D(j).
+* For j ≤ μ: Δ_j ≤ |S_{j−1}| ≤ 2^{j−1} = δ_j.
+* For j > μ: by Lemma 2 and induction,
+  Δ_j ≤ Δ_{j−μ} + … + Δ_{j−1} ≤ δ_{j−μ} + … + δ_{j−1} = δ_j.
+
+(A direct induction on |S_j| ≤ D(j) would not work, because the recursion
+subtracts a term; the increments are what is monotone.) ∎
+
+Consequences:
+* μ = 1: D(j) = j + 1;
+* μ = 2: D(j) = F_{j+3} − 1;
+* in general D grows with base λ_μ, the largest root of x^(μ+1) − 2x^μ + 1:
+  λ_1 = 1, λ_2 = 1.618, λ_3 = 1.839, λ_4 = 1.928, λ_5 = 1.966.
+
+Review `Vc7ce69ad6e4b4fe1` checked that the free model with only these
+relations attains D exactly for β = 3..21.
+
+## Theorem (exponent-first ROBDD bound for compiled modexp)
+
+Let r = β 2^α be the order of a mod N, with β odd.
+* For k ≥ α, c_k has order β.
+* c_{k+s} = c_k^(2^s), so c_{k+s} = c_k iff 2^s ≡ 1 (mod β), and
+  c_{k+s} = c_k^{−1} iff 2^s ≡ −1 (mod β).
+* C101 gives M_{c^{−1}} = M_c^{−1} as full work-space permutations
+  (re-checked for every unit at N = 7, 11 and 13).
+
+So the tail letters (k ≥ α) satisfy Lemma 2 with μ(β), the order of 2 in
+(Z/β)^× / {±1}. Writing P_k = T H, with H one of at most 2^α head products
+and T a tail prefix product, gives |S_k| ≤ 2^α D_{μ(β)}(k − α). So:
+
+    width at e_k ≤ L(k) = 2^k                             (k < α)
+                        = min(2^k, 2^α D_{μ(β)}(k − α))   (k ≥ α),
+
+    B(t) ≤ Σ_{k<t} L(k) + Σ_{l<q_w} min(L(t) 2^l, 2^(2^(q_w−l))) + 2.
+
+Values of μ(β): 3 → 1; 5 → 2; 7 → 3 (period only); 9 → 3; 11 → 5; 13 → 6;
+15 → 4 (period only); 17 → 4; 21 → 6 (period only).
+
+All prefix products lie in the finite group generated by the blocks, so at
+fixed N every width is eventually bounded by that group's order. This is
+formal only: at N = 7 the order of M_2 is 322176487219178376621827390400,
+far beyond any t considered.
+
+## β = 1: exactly affine in t
+
+Here c_k = 1 for k ≥ α. Every tail block is the same involution V (C23), so
+P_t = V^π H, where π is the parity of the tail bits and H comes from the head.
+For t ≥ α + 1:
+
+* **Head levels (k < α).** A head-prefix subfunction is
+  F(e_{≥k}, w) = h(e_head, π(e_tail), w). Whether it depends on e_k, and which
+  head prefixes coincide, is decided by h. Both tail parities occur once the
+  tail has at least one bit, so neither depends on t.
+* **First tail level (k = α).** Only parity 0 has occurred, so the classes are
+  the head prefixes whose F depends on the parity.
+* **Later tail levels (α < k ≤ t − 1).** The classes are (head prefix, parity
+  so far) ∈ 2^α × {0, 1}. The class (H, p) depends on e_k iff
+  h(H, 0, ·) ≠ h(H, 1, ·), and (H, p) and (H', p') coincide iff
+  h(H, p ⊕ x, ·) = h(H', p' ⊕ x, ·) for both x. Neither condition depends on k
+  or t, so every such level has the same count d.
+* **Work part.** The function set {h(H, p, ·)} is the same for every t ≥ α + 1.
+
+Hence B(t + 1) − B(t) = d for all t ≥ α + 1: B is exactly affine in t.
+
+## Measured
+
+* **`run_v1.log`** (board run `R5e2b4f1518e74ec6`), 9/9:
+  * β = 1 exactly affine in t at N = 7, 11 (tail count 4) and N = 13 (8).
+  * β = 3 widths equal L(k) at N = 7, a = 2 and 3 (t ≤ 16) and N = 13, a = 2
+    and 3 (t ≤ 12).
+  * β = 5 widths equal 2^α (F_{k−α+3} − 1) at N = 11, a = 2 and 3 (t ≤ 12).
+    Found post hoc on a = 2 and predicted before the a = 3 rows. B5 is a
+    record-only check.
+  * Walsh count 15549 at N = 7, a = 6 for t = 2..16, as C15 records.
+* **`mu_run_v1.log`** (board run `Re9eda3cc191a448a`), 7/7, predictions
+  registered first: equality at t = 9 for N = 19 (β = 9), 29 (β = 7), 31
+  (β = 15), 23 (β = 11) and 25 (β = 5, α = 2). Its controls C1–C3 and M3
+  follow automatically once M2 holds, so they are consistency checks rather
+  than independent fault detectors.
+* **Final Walsh support** doubles per exponent bit on every β > 1 fixture:
+  N = 7, a = 2, t = 16 gives ROBDD 8,517 nodes against Walsh 265,232,710.
+* **Independent recomputation** (review `Vc7ce69ad6e4b4fe1`): exponent-level
+  widths for all 45 `run_v1` rows with q ≤ 20, and totals for the 27 rows with
+  q ≤ 18. Review `V2e9e6c322bee4511` re-derived six fixtures without
+  `lab/bdd_count.py` at all.
+
+## Limits
+
+* **The bound is trivial for k ≤ α + μ(β).** D_μ(μ) = 2^μ exactly, so
+  L(k) = min(2^k, 2^α D_μ(k − α)) equals 2^k for every k ≤ α + μ(β). The first
+  strict improvement is at k = α + μ(β) + 1, where D(μ+1) = 2^(μ+1) − 1.
+  Hence **exactly min(t, α + μ(β) + 1) of the t exponent levels are the
+  trivial 2^k**, and the λ_μ < 2 growth base is asymptotic in t. μ(β) can
+  reach (β−1)/2 (β = 11 → 5, β = 13 → 6), and the asymptotic base carries a
+  constant of order (2/λ_μ)^μ. That formula reproduces the measured trivial
+  counts exactly on all five out-of-sample fixtures: 5, 6, 6, 6, 5 of 9 for
+  N = 19, 29, 31, 23, 25. At N = 23 (β = 11, α = 0, μ = 5) the widths are
+  1, 2, 4, 8, 16, 32, 63, 124, 244 — six of nine exactly 2^k. So the statement
+  that final Walsh support's base-2 growth does not carry over is true
+  asymptotically in t, and is *not* visible across most of the measured range
+  at large β. (For β = 3, μ = 1, the crossover is early and the separation is
+  visible throughout: N = 7, a = 2, t = 16 gives ROBDD 8,517 against Walsh
+  265,232,710.)
+* **One variable order, plain final counts.** Not bytes, not peaks.
+* **Fixed N.** The work-part cap is exponential in q_w = 3n + 4, so polynomial
+  in N, and grows with L(t). No cost polynomial in log N; no factoring
+  consequence.
+* **Equality measured, not proved.** Widths equal L(k) on all 11 β > 1
+  fixtures and the free model attains the bound exactly, so the compiled
+  blocks act freely on these words. That is not proved.
+* **A formal ceiling only.** The finite block group bounds all widths
+  eventually, but its order at N = 7 is about 3.2·10^29.
+* **Not DDSIM's state diagram or the MPS resource of C19.** TODO13 is not
+  settled as posed; this is separate from C45's state-aware contraction and
+  from C48's cut-rank/period statement (Paper B §11.1).
+* **The reducer comes from C102.** `lab/bdd_count.py` at the version accepted
+  under task `Ta294b7d88a4c4015`, whose brute-force cross-check validates the
+  reducer at ≤ 5 variables only.
+* **The μ(β) theorem is post hoc.** It was derived after `run_v1` exposed the
+  β = 5 widths; `mu_run_v1` is its out-of-sample test. The β = 3 and β = 1
+  derivations were registered before `run_v1`.
+* **Novelty unaudited.**
 
 ---
 

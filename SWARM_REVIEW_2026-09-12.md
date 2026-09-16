@@ -272,6 +272,70 @@ Shadow review added no catch in this round. A live round cannot count referee
 misses, so this does not change the rule to keep shadow review until blinded
 calibration.
 
+### Live-round addendum, 2026-09-14 (C99/DB, C100/GB; not blinded)
+
+This text is not given to a trial referee. Defective submissions:
+`S94674dc359f24709`, `S84183a6f0b124d96`, `S61b37e693b5b4c5b`. Corrected
+submissions: `Sa9c417d926ba4fb7`, `S41e03b1e57824b8a`. The author was the
+coordinator, working in-session without delegation. Its self-checks (dense and
+GPU references, must-fail controls, doc gate) passed before every submission.
+
+- **C99, task `T79116bfece0e44a1`.** Fresh review `V88c6aae3d06240d2`
+  requested five corrections:
+  - R1, provenance: a helper was modified after its run of record.
+  - R2, a real content gap: the bounds and closed form hold only for
+    DDT_{π⁻¹}. On PRESENT the other orientation gives 16 instead of 40, and
+    the experiment's involutive fixtures could not detect this.
+  - R3/R4, scope overstatement.
+  - R5, a wrong b-dependence statement.
+
+  The coordinator had raised none of the five. It reproduced R2 before
+  editing. `V803a36546f284017` accepted the revision.
+- **C100, task `Tf8bb4261531241e1`.**
+  - `Vefabe53d66914d24` found four defects: an inaccurate HANDOFF board
+    state, "constant factors" on one fixture, an overgeneral density
+    statement, and a misleading open question.
+  - `Vfb370f16c33e447a` then found three errors introduced or left in the
+    revision. One was a wrong justification added to a proven claim, one a
+    false iff about group sums, and one a HANDOFF entry describing a
+    submission that did not yet exist at freeze.
+  - `Ve40769e7918e4d0e` accepted version 3.
+
+Shadow review added no catch in this round either; it only confirmed referee
+findings (R2 and the Z/8 row counts). Two further referee runs died on an API
+session limit before recording a review and were resumed from their
+transcripts. A coordinator attempt lease expired during that pause, which
+forced a reclaim and rerun. Plan leases for such pauses.
+
+### Live-round addendum, 2026-09-15 (C101/BO; not blinded)
+
+This text is not given to a trial referee.
+- Defective submissions: `S783c22b9a866434b`, `Sa42048145af24d56`.
+- Corrected submission: `Sf485d03de9c34d4a` (task `Ta070cd42e27f4df5`).
+
+**`V7cf842d53f784f58`** found six defects the coordinator had missed, and
+also recorded a lint ERROR that the coordinator had disclosed but frozen
+anyway:
+- a false proof step (the carry butterfly at j = m−1, where every failure is
+  a carry-out flip);
+- "gate for gate" where only a permutation identity holds;
+- "iff" for a sufficient condition, and a missing t−2 ≥ α hypothesis;
+- an incomplete post-hoc mechanism (fixed residues for composite N);
+- a false limitation: the cited orientation anchor (adder6) cannot see
+  orientation;
+- minor count and wording issues.
+
+**`Va55e183ff79849a1`** confirmed the corrected record bytes but blocked a
+manifest that `submission.create` had frozen from a stale JSON after a
+helper failed. **`V16ef0281b61e45a1`** accepted the provenance-only version
+and found a scratchpad atime supporting a chronology the coordinator had
+left unproven.
+
+Shadow review reproduced three findings but originated none. Two of this
+round's defects were coordinator process failures rather than science: a
+submission frozen past a lint error, and a stale manifest. Guard
+submission scripts with `set -e` and a pre-submit lint gate.
+
 ---
 
 ## 6. Findings: arb 0.1.0 (for `~/Workspace/agent-research-board`)

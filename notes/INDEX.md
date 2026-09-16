@@ -7,13 +7,14 @@ they say what was believed at the time, so a note may contain a status
 later superseded. Where a note disagrees with a claim file, the claim
 file wins.
 
-**100 investigations**
+**105 investigations**
 
 | code | date | outcome | subject | claims |
 |---|---|---|---|---|
 | [AF](notes/AF-todo-affine-structures-and-the-function-level.md) | - | solved | TODO 11.1: AFFINE structures, and the function-level ½ rows EXPLAINED | C33 |
 | [BC](notes/BC-balanced-control-channels.md) | 2026-09-09 | established | Balanced nonlinear controls project exactly; biased controls have a certified geometric residual | C47 |
 | [BI](notes/BI-biased-inputs-gangopadhyay-kumar-nic.md) | - | record | BIASED INPUTS (Gangopadhyay–Kumar–Stănică–Gangopadhyay, JAMC 2023) | C8, C15, C18, C21, C24, C40, C42 |
+| [BO](notes/BO-boomerang-otocs.md) | 2026-09-14 | X-X OTOC = BCT identity verified; exact Cuccaro carry butterfly; compiled tail-bit OTOC symmetry explained by block inverses (beta in {1,3} when t-2 >= alpha) after a must-fail control did not fail; ideal-model sweep found non-discriminating | OTOCs of reversible arithmetic as boomerang counts | C101 |
 | [CF](notes/CF-cnot-coordinate-frame.md) | 2026-09-12 | bounded implementation improvement; no breakthrough established | Lazy CNOT coordinates save allocation, but a stronger physical-output baseline wins | C82 |
 | [CF](notes/CF-conditional-order-finding.md) | 2026-09-10 | established | Conditional measurement reproduces actual order-finding outputs; commutation and exponential work cost remain essential | C49 |
 | [CG](notes/CG-clean-physical-orbit-gates.md) | 2026-09-11 | confirmed | Clean physical orbit gates close the coordinate gap, without a sampling speedup | C56, C59, C74, C75 |
@@ -22,6 +23,7 @@ file wins.
 | [CP](notes/CP-carry-prefix-correlation.md) | 2026-09-12 | exact restricted implementation and independent checks; isolated-adder novelty closed; no-cut escape prediction refuted | Actual Cuccaro prefixes reach the known carry-correlation baseline | C85 |
 | [CT](notes/CT-finished-control-contraction.md) | 2026-09-09 | established | Exact finished-control contraction: bounded reduced support in both order branches and an idempotent β=1 tail | C45, C46, C42, C18 |
 | [CW](notes/CW-component-masses-and-weighted-rejection.md) | 2026-09-11 | confirmed | Component masses refine the work-first rejection envelope | C59, C78, C79, C80 |
+| [DB](notes/DB-differential-bridge.md) | 2026-09-14 | identity, counting theorem and APN extremality derived before measurement; all predictions and must-fail controls pass on dense, gate-level and a 14-qubit GPU dense reference that settled the out-of-sample F10 prediction | The differential bridge: DDT counts for off-diagonal Pauli pullbacks | C99 |
 | [DF](notes/DF-todo-12g-closed-negatively-there-cliff-and-os4.md) | - | retracted | TODO 12g CLOSED NEGATIVELY: there is no cliff, and §OS4's CLIFF OBSERVATION is RETRACTED | C1, C7, C21, C30 |
 | [DM](notes/DM-explicit-carry-dimers.md) | 2026-09-12 | nonzero exact arithmetic family and grid minor proved; direct dimer reduction removes generic gadgets; independent verifier defects retained and corrected | Explicit growing carry graphs expose a stronger dimer baseline | C87 |
 | [DS](notes/DS-dirty-prefix-symmetries.md) | 2026-09-12 | exact three-macro full-space discriminator found; growing disabled sector reduced; enabled closure remains open | Dirty-prefix reversal symmetry redirects the scalar; the disabled sector has a polynomial construction | C92 |
@@ -40,10 +42,13 @@ file wins.
 | [FM](notes/FM-forward-memory-and-backward-effects.md) | 2026-09-11 | confirmed | Forward-state approximation can preserve the output law without resetting measurement memory | C56, C64, C65, C66 |
 | [FW](notes/FW-verified-finite-work-and-scalar-tail.md) | 2026-09-11 | mixed | Verified finite-work proposals work, but a late-work invariance makes the binary benchmark simpler still | C56, C63, C64, C65 |
 | [G](notes/G-the-theorem-generalises-todo-step-the-whole.md) | 2026-08-08 | superseded | THE THEOREM GENERALISES (TODO step 9). V²=id is the whole condition. | C15, C29 |
+| [GB](notes/GB-group-bridge.md) | 2026-09-14 | identity verified in four order-16 groups; the XOR pairing is exponent-2 specific; the order-8 extremal prediction was refuted and explained for R_a by a telescoping obstruction; on one modexp fixture the Pauli/mixed ratio is 0.64–1.88, in both directions | Group-covariant differential counts and the clock-shift observable | C100 |
 | [GF](notes/GF-the-recurring-pattern-one-fact-two-corollaries.md) | - | record | THE RECURRING GF(2) PATTERN: one fact, two corollaries, one folklore gap | C15, C24, C30, C32, C33, C34, C36, C40, C41 |
 | [GPU](notes/GPU-cuda-backend-capacity-and-measurements.md) | 2026-08-08 | record | CUDA backend: what it buys, where it caps, and why the replay binds | - |
 | [GS](notes/GS-additive-phases-and-gauss-sums.md) | 2026-09-11 | confirmed | A cheap physical phase couples every coarse sector, but this is not sampling hardness | C53, C56, C58, C74, C75, C76 |
+| [HB](notes/HB-beta-dichotomy-decision-diagram.md) | 2026-09-15 | exponent-first ROBDD widths of C15's object bounded by 2^alpha D_mu(beta)(k-alpha) via C101's block inverse and a group counting lemma; attained on 11 fixtures including 5 out of sample; final Walsh support doubles per bit on the same fixtures; two referee rounds of write-up corrections, the second adding the alpha+mu crossover caveat | The beta dichotomy through a decision diagram: prefix-product counting | C103 |
 | [HC](notes/HC-history-carry-catalog.md) | 2026-09-12 | synchronized-prefix carry bound proved, but a complete stopped-prefix catalog histogram is exponential; reachable signed closure remains open | Shared carry slopes require chronology-sensitive reduction | C97 |
+| [HD](notes/HD-heisenberg-decision-diagrams.md) | 2026-09-15 | adder Walsh/ROBDD/affine counts proved and reproduced; u_a Walsh ~8^n against ROBDD ~4^n measured to n=8 (29 qubits) against a slowly growing random-circuit control; one registered prediction (P5a) failed at n=4 and is preserved; no bound for u_a, no escape from the order barrier | Heisenberg decision diagrams: the PPS object in a canonical Boolean store | C102 |
 | [HIST](notes/HIST-the-0716-residue-thread-as-it-stood.md) | - | solved | The 0.716-residue thread, as it stood at handoff (RESOLVED) | C30, C33, C34, C35 |
 | [I](notes/I-there-intermediate-adic-law-todo-step-answer.md) | - | negative | IS THERE AN INTERMEDIATE 2-ADIC LAW? (TODO step 6). No. Answer is negative. | C15 |
 | [IS](notes/IS-itinerary-streaming.md) | 2026-09-12 | exact all-mask conditional evaluator validated against blind native gates; frozen task-allocation thresholds passed against both current and packed C89, with no process-RSS saving established | Itinerary replay removes the conditional interval table with a measured allocation saving | C94 |

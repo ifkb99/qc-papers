@@ -217,6 +217,119 @@ dictionary and for Theorem 10; do not lean on it for anything else.
 
 ---
 
+# BO — Scrambling in reversible arithmetic, through the boomerang table
+
+C101 owns the statements. This note records the path to them.
+
+## Why
+
+After C99 and C100, the user asked for one more area of Claude's choice. A
+repository search found no OTOC or scrambling work: every earlier "OTOC"
+match was the word "protocol". The OTOC is the standard operator-scrambling
+diagnostic and is measured on hardware. Tracing V, W(t), V†, W(t)† through
+a permutation gives the boomerang condition of Cid et al., the third
+cryptanalytic table after the linear (C25) and difference (C99) tables. It
+also suggested a probe of the r = β·2^α invariant, in the spirit of TODO13.
+
+Primary source, body read: Boura & Canteaut, *On the Boomerang Uniformity of
+Cryptographic Sboxes*, ToSC 2018(3):
+* Definition 3 (p.295) matches the derived condition, with π in both places;
+* Prop. 2 (p.296): the BCT of π⁻¹ is the transpose, which makes the
+  orientation control C1 meaningful;
+* Prop. 6 (p.303): inverse-map values;
+* Table 5 (p.302): PRESENT.
+
+Searches for a BCT–OTOC link, and for exact OTOC counting in classical
+reversible circuits, found none.
+
+## Run 1: `experiment_boomerang_otoc` (10/11, exit 1 on purpose)
+
+Everything derived beforehand passed: the identity, the gate-level unitary
+check, the Boura–Canteaut values, the butterfly (0, ½, ¾, ⅞ on m = 4), and
+the ideal-model F = 1 at tail bits. The C99/C100 helper `power_map` was
+reused; the OTOC code in `lab/otoc.py` is new.
+
+P6 predicted identical tail rows for compiled β = 1, citing the C23/C46
+identical-involution mechanism. Its must-fail control C5 used β = 3
+(N = 7, g = 3) and did not fail: the rows were identical there too. The
+file is left failing.
+
+## Reading the construction again
+
+Flipping e_k turns the boomerang condition into the commutation of M_k with
+the later-block conjugate of the XOR by q. Compiled blocks satisfy
+M_{c⁻¹} = M_c⁻¹ as permutations. The gate lists are not literal reverses
+(the controlled swaps appear in the opposite order), but those swaps commute.
+For N = 7 the constants are 3, 2, 4, 2: 4 and 2 are inverses. So equality
+follows whenever c_{t−2}³ = 1 or c_{t−2} = 1, i.e. β ∈ {1, 3} when t−2 ≥ α.
+My control had picked the other β covered by this mechanism.
+
+## Run 2: `experiment_boomerang_otoc_tail` (6 checks plus an always-passing record)
+
+Predictions were registered after that derivation:
+* β = 3 compiled (N = 9, 13): tail rows equal.
+* β = 5 compiled (N = 11, g = 2 and 3): rows differ, which serves as the
+  control.
+* The block-inverse identity holds, and its mismatched pair fails.
+* The ideal-model sweep had no violations.
+
+That last result was a tell. The open count Q4 showed that 124 of 136 ideal
+cases *without* c_{t−2}³ = 1 also have equal rows. A post-hoc diagnostic
+(`out/boomerang_otoc/q4_zero_rows.py` and its log) showed that 24 of those
+124 rows are all zero. The other 100 are identical across every g at fixed N
+(for example N = 23: ¼, ¼, ¼, 1/16, 0). My first reading attributed them to
+the fraction of v with v and v ⊕ 2^j both in the padded region w ≥ N.
+Review V7cf842d53f784f58 showed that this misses N = 22 (j = 4) and N = 25
+(j = 3, 4). There, residues fixed by the tail multipliers pair with padded
+points: (11, 27) for N = 22 and (20, 28), (10, 26), (15, 31) for N = 25.
+The first entry of each pair is a fixed residue and the second its padded
+partner. Post hoc, the rows look determined by points the multipliers fix.
+In the ideal model the tail equality is mostly such a fixed-point artifact,
+and Q3 passes for that reason. The compiled circuits are what discriminate.
+
+Provenance: by file time, tail_run1 and tail_run2 ran the tail source
+revision cddcdc7c, which differs from the archived 5a7838f1 only in its
+STATUS docstring (V16ef0281b61e45a1 N1).
+
+## What it means
+
+* **Scrambling reads directly off the table.** OTOCs of permutation
+  circuits are exact combinatorial counts, and every published BCT becomes
+  a scrambling table. PRESENT has a nonlinear direction pair that does not
+  scramble at all.
+* **Adders scramble only locally.** Scrambling is total on the diagonal
+  and decays as 2^(i−j) along the carry chain.
+* **The invariant appears only as symmetry.** In compiled modexp the
+  r = β·2^α structure shows up in OTOCs through tail-bit symmetry, not as
+  F = 1, and it cannot tell β = 1 from β = 3.
+
+Candidate directions, not opened: signed OTOCs (d, e ≠ 0) as a
+Walsh-weighted BCT, and whether post-QFT OTOCs have a clock-shift (C100)
+boomerang analogue.
+
+## Review corrections (V7cf842d53f784f58)
+
+The first referee review (changes_requested) confirmed the identity, the
+Boura–Canteaut citations, the sufficient direction of the tail symmetry and
+the chronology. It required seven corrections:
+
+* **R1:** literal predict/must_fail registration, a new recorded run and a
+  clean lint.
+* **R2:** a carry-butterfly proof that handles j = m−1 through the carry-out.
+* **R3:** "as permutations", not "gate for gate".
+* **R4:** "if", not "iff", and state t−2 ≥ α.
+* **R5:** restate the padding explanation with fixed residues and zero rows.
+* **R6:** the orientation anchor is PRESENT, not adder6.
+* **R7:** minor wording and counts.
+
+The coordinator reproduced R2 (128, 256, 512 and 1024 carry-out-only
+failures at m = 4), R3 (the gate lists are not reversed) and R6 (adder6 X–X
+OTOCs are orientation-blind) before editing. The experiment docstrings keep
+their original pre-registered text, and their STATUS headers carry the
+corrections.
+
+---
+
 # CF — Direct CNOT memory investigation
 
 The user requested continued research specifically on CNOT memory, using a
@@ -1337,6 +1450,157 @@ The other six science suites were not rerun. These are scoped float/proof
 regressions, not a finite-bit sampling certificate or all-nine-suite claim.
 After the C80/CW and TODO40/NC records were updated, reindexing and all ten
 documentation checks passed (`out/component_weighting_docs_final.log`).
+
+---
+
+# DB — Differential cryptanalysis counts X/Y-type Pauli paths
+
+C99 owns the statement. This note records how it was found and checked.
+
+## How it was found
+
+The session started by cancelling two superseded Claude board tasks
+(Tff977bfd7b8b42b5, T15db99d348534ca4). The user then asked for an original
+idea. The ledger's cryptanalysis dictionary covers only the linear half:
+C12 and C25 connect Walsh sparsity and nonlinearity to diagonal observables.
+Its stated boundary is C13/F10, where X/Y pullbacks "blow past the cap".
+Differential cryptanalysis is the other half of that dictionary, so the
+question was whether the off-diagonal cost is its exact counterpart.
+
+A permutation conjugates any Pauli into a signed permutation matrix, so the
+pullback can be written in closed form before any measurement. The pair
+structure of the involution σ gave the odd-k and k = 2 class counts. The
+uncertainty principle and Cauchy–Schwarz then gave the δ-bound, APN
+extremality and the 4-uniform closed form. All exact values (16, 256, 52,
+976) were written into the experiment header before the first run.
+
+## Checks
+
+`experiments/experiment_differential_bridge.py`, first run on CPU;
+log `out/differential_bridge/run1.log`, exit 0, 12/12. The board-recorded
+reproductions run2.log and run3.log are byte-identical to it apart from
+run1's trailing exit line.
+
+| check | reference | result |
+|---|---|---|
+| identity, all 4^n labels | dense PTM from explicit kron Pauli matrices; adder6 from `Circuit.to_unitary()` | 0 mismatches on 11 fixtures (17,024 labels) |
+| identity, gate level | `pps.propagate` on 8-qubit Cuccaro adder, X_q, Y_q, X_qX_r, X_qZ_r | 0/100 mismatches; 1..52 terms |
+| a = 0 | Walsh sparsity (C8) | agrees |
+| APN extremality | Gold x³, inversion at n = 3, 5 | exactly 16 / 256 for every a ≠ 0, b |
+| 4-uniform closed form | inversion at n = 4, 6 | exactly 52 / 976 for every a ≠ 0, b |
+| bounds and class counts | all fixtures incl. random n = 4, 5, 6 (seed 20260914) | no violation |
+| affine | random invertible map + constant, n = 5 | 1 term for every label |
+
+Must-fail controls:
+* C1 (Schrödinger-direction σ') disagrees at gold3_gf32 a=1, b=0.
+* C2 (naive Walsh count) predicts 1 where the true count is 200.
+* C3 (dropped sign) changes the support at a=1, b=1.
+* C4 (the unsquared bound 4^n/δ = 512) is violated by the APN minimum 256.
+
+Uniform passes call for scrutiny (METHOD). The dense reference shares with the formula the permutation table, the
+U[perm, arange] = 1 construction, the qubit-0-least-significant convention
+and the label encoding. adder6's to_unitary route, P2's gate-level
+propagator and P10's recorded F10 counts anchor the absolute direction. C1 shows that the dense reference distinguishes the two conjugation
+directions. The δ-bound was not vacuous on the S-box fixtures (16 to 256),
+but it is vacuous on both adders (δ = 2^n).
+
+## Out-of-sample check on the F10 fixture
+
+F10 never measured this count. The formula predicted it first, as logged in
+run1.log: X_x0 → 849,836 terms and Y_x0 → 849,442 terms on the Toffoli
+modexp with N=5, a=2, n_exp=1 (14 qubits). The difference between the two
+can only come from classes with an even number k ≥ 4 of pairs. Script
+`out/differential_bridge/f10_pps_check.py` reruns the unchanged propagator
+with a 6M cap. Its first launch failed on an import path before any
+computation (`f10_pps_check_importfail.log`).
+
+The dictionary-propagator run (`out/differential_bridge/f10_pps_check.log`)
+was **inconclusive**. X_x0 hit the 6,000,000-term cap after 2,639 s with
+6,019,010 live intermediate terms. The 3,000 s timeout (exit 124) then
+killed the run after Y_x0 had started and before it printed. The Clifford+T decomposition therefore passes
+through more than seven times the final support: C99 counts the final
+pullback, not the gate-level peak (compare C17). That route had no GPU path,
+and choosing it was the mistake.
+
+`experiments/experiment_differential_bridge_scale.py` then settled the
+count on GPU (log `out/differential_bridge/scale_run1.log`, 4/4, about
+4 minutes on one A4500). `lab/differential.py` was extended for C100 after
+that run, so scale_run1 used an unpreserved earlier helper. The run of
+record is the board-recorded reproduction `scale_run3.log`
+(R8ee3a5298ba44c23), which ran on the archived helper with identical
+verdicts and numbers. scale_run2 (R9ff21679dd1a4787) is an earlier
+reproduction, identical apart from timings, from an attempt reclaimed after
+its lease expired. U and X^a Z^b are built as dense 16384 × 16384
+float64 matrices and multiplied with cuBLAS. The product is projected onto
+the Pauli basis by a batched Walsh transform over V[c,y] = M[y⊕c, y], so
+the route never forms σ, D_c or a DDT; it shares the permutation table and the
+conventions listed above with the formula.
+
+* The reference first matched the formula on all 4096 labels of rand6 and of
+  adder6 (P9).
+* It reproduced F10's recorded diagonal counts, Z_x0 = 3086, Z_x1 = 2926 and
+  Z_x0Z_x1 = 2848 (P10).
+* It gave X_x0 = 849,836 and Y_x0 = 849,442, with full (c,d) support sets
+  equal to the formula's (P11).
+* The Schrödinger-direction mutant gives 847,292 terms over 244 X-parts
+  against 247, failing as required (C5).
+
+The shared helpers now live in `lab/differential.py`; the first experiment
+keeps its inline copies as its record.
+
+## Interpretation and limits
+
+The Pauli basis is poorly suited to off-diagonal observables through
+nonlinear permutations. Each DDT class is a set of c-pairs, and a pair's
+indicator is dense over half of Walsh space. The same pullback is one signed
+permutation, which needs 2^n entries as a table. This explains F10's cap
+hit, with the exact final count now known; it does not make simulation faster. The δ-bound is compilation-
+independent, like C25, but it was vacuous on both tested adders (δ = 2^n).
+Whether that holds for the F10 modexp is unverified. The per-row bound and the exact identity remain informative.
+
+Prior art: brief searches found PTM surveys and DDT/boomerang Walsh
+characterizations, but no source combining Pauli pullback counts with the
+DDT. The identity is elementary and may well be known, so no novelty is
+claimed.
+
+Candidate directions, not opened as TODOs:
+1. The same derivation applies to any abelian group. Z/2^t differences in
+   the exponent register match the post-QFT observable (TODO14) better than
+   XOR differences, and controlled modexp has orbit-structured differences
+   there.
+2. A monomial-frame hybrid could keep signed-permutation operators
+   symbolically between non-permutation gates, as C82 does for linear frames.
+   Extracting the expectation value would still carry the cost.
+3. Paper A §3.3 could cite C99 to state where the Walsh identity stops.
+
+## Review corrections (V88c6aae3d06240d2)
+
+The first referee review (changes_requested) confirmed the proof and every
+logged number, and it required five corrections, all applied above and in
+C99:
+
+* **R1:** make a reproduction on the archived helper the run of record
+  (now scale_run3, run under attempt Aa544a40df7804b52), because of the
+  helper change.
+* **R2:** state explicitly that the DDT is taken of π⁻¹. On the PRESENT
+  S-box at a = 1 the orientations give 40 against 16. Archived reproductions:
+  `out/agent-board/reviews/referee-c99-1-v2/present_check.log` (referee)
+  and `out/agent-board/workers/Af1dcc75393f94218/present_orientation.log`
+  (coordinator).
+* **R3:** say "final count", not the gate-level peak.
+* **R4:** scope the vacuous δ-bound to the tested adders.
+* **R5:** only an even k ≥ 4 makes the count depend on b.
+
+Its non-blocking notes: the Y_x0 timing wording and the independence
+statement are corrected; the run1/run2 exit-line difference is stated. The
+`lab/differential.py` docstring now names both claims. The `__main__`
+experiment name in run1–run3 log headers comes from the script's own
+`Experiment(__name__.rsplit(".", 1)[-1], doc=__doc__)` call under `python -m`, not from the
+harness, and is left as is. The following remain as stated limitations:
+* adder8 bounds were checked on 36 × 4 labels;
+* the comparisons use support and |coefficient|, not signs;
+* C2 is a weak control;
+* `lab/differential.py` carries out-of-scope helpers.
 
 ---
 
@@ -3279,6 +3543,121 @@ would have "confirmed" the conjecture for the wrong reason.
 
 ---
 
+# GB — Replacing XOR by other groups
+
+C100 owns the statements. This note records the path to them.
+
+## Why this was tried
+
+The user asked whether groups or geometry could help beyond C99's XOR
+result. C99's derivation uses only group translation plus one XOR-specific
+fact: σ is an involution. The post-QFT measurement in order finding is built
+from Z/2^t clock shifts. So the natural questions were what survives the
+change of group, and whether a basis matched to the exponent's own group
+shrinks the actual observable. C89's translated-interval exchange showed
+that the project's strongest diagonal constructions already rely on Z/2^m
+geometry.
+
+## Runs
+
+A helper smoke test (one random 8-element permutation, three groups)
+preceded the header; it measured no prediction. A later feasibility probe
+counted Part B classes (R = 256/767 at a = 1, 256/256 at a = 4) and timed
+one Fourier transform, but no term counts. PB3 was already declared open,
+so no prediction depended on that probe.
+`experiments/experiment_group_bridge.py` run 1 then scored 8/9, exit 1;
+log `out/differential_bridge/group_run1.log`.
+
+## The refuted prediction (PA4)
+
+I predicted exhaustive maxima of 56 for Z/8 and Z/2×Z/4. My argument
+assumed some permutation reaches R_a = 7 with a full-support double class.
+The measured maxima were 55 and 48, with max R_a 7 and 6.
+
+Reading the construction again: the differences telescope to zero around
+the row, so one repeated difference must equal −Σ_G g. That sum is nonzero
+exactly when G has exactly one involution; it is 0 when G has several
+involutions or none (odd order). So Z/2×Z/4 cannot reach R_a = 7. Z/8 can, and does. For a double class {y1, y2}, its support is full
+unless −χ(π(y2)−π(y1)) is an o(y2−y1)-th root of unity; when y2 − y1 has
+order 8 that always happens, which costs exactly one character. This does
+NOT mean that an R_a = 7 row forces an order-8 difference. The review
+Vefabe53d66914d24 found 7,168 of the 11,264 such rows with an even
+difference. The coordinator's archived check
+(`out/agent-board/workers/A869ad224272b43d0/z8_r7_double_class.log`) gives
+best counts 52, 54 and 55 for difference orders 2, 4 and 8. So the measured
+fact is that no R_a = 7 row has a full-support doubled class. Why the
+root-of-unity condition always holds has no conceptual proof. Because the
+enumeration covers every permutation, direction and character, 55 is
+nonetheless established for Z/8 by complete enumeration (the status
+relabelled under task T393699c97b9745ca). I first dismissed the Hall–Paige-type sum
+argument because c = 0 is excluded; that was wrong, since the argument bites
+on the repeated difference.
+
+## Part B reading
+
+On ToffoliModExp(7, 3, n_exp=3), the counts favor the mixed basis for
+a ≠ 4 (ratios 1.4 to 1.9) and the Pauli basis at a = 4 (0.64), where the
+shift is an XOR on the top bit. The a ↔ 8−a symmetry of the rows is
+expected, since M_{−a} = M_aᵀ; it was noticed after the run and is not
+evidence. The base is non-degenerate (ord_7(3) = 6), but n_exp = 3 and one base
+make this a single fixture. Both bases carry millions of terms out of 4^16.
+
+## Candidate direction (not opened)
+
+On this fixture, term counts stay dense in both bases: the average class
+needs about 7.5k–32k characters (T/R). This is not general. A group matched
+to the map can collapse counts completely (PA2: T = 1), and the uncertainty
+bound forces density only for small classes. The compression the project has actually achieved
+(C89 intervals, C93 cells) comes from the *shape* of the difference classes
+in their native geometry. A measurable follow-up: count geometric atoms
+(maximal intervals in Z/2^t, subcubes in GF(2)^n) of the Part B classes and
+compare their growth in n_exp with term counts. Define the prediction and a
+must-fail control before measuring.
+
+## Review corrections (Vefabe53d66914d24)
+
+The first referee review (changes_requested) confirmed the identity, the
+bounds, the telescoping proof, the preserved PA4 refutation and the Part B
+object. It required four corrections:
+
+* **R1:** make the HANDOFF board state accurate.
+* **R2:** replace "constant factors" with the measured ratio range.
+* **R3:** limit the density statement to this fixture.
+* **R4:** restate the Z/8 question.
+
+The non-blocking notes were also applied:
+* odd-order groups are obstructed as well;
+* the obstruction explains the maximum of 48;
+* cite ord_7(3) = 6 for non-degeneracy.
+
+Two points are recorded here:
+* PB3 cannot fail, so the run's "8/9 pass" includes a check that only
+  records data.
+* The Part B feasibility probe is disclosed in this note, not in the
+  experiment header, which is unchanged because it is frozen evidence.
+
+## Second review corrections (Vfb370f16c33e447a)
+
+The focused re-review of version 2 (changes_requested) confirmed R1–R4 and
+the shadow check. It required three one-sentence fixes, all applied:
+
+* **RC1:** the Z/2×Z/4 bound is R_a·|G| ≤ 48, not a singleton count.
+* **RC2:** the zero-sum condition above now covers odd-order groups.
+* **RC3:** the HANDOFF checkpoint had described C99's version-2 submission
+  before that submission existed; it now states only settled facts.
+
+Non-blocking notes from that review:
+* The shadow check has no must-fail control. The referee's independent exact
+  check supplies one: a mutant counter shifted to e+1 reaches 56 on exactly
+  the 7,168 order-2/4 rows.
+* The referee recorded an unreviewed case-analysis sketch suggesting that
+  T = 56 − 8/o(d) holds for every χ and is provable. That conceptual proof
+  remains a lead; the finite Z/8 statement itself is established by
+  complete enumeration.
+* C100 now gives the shadow-check path.
+
+---
+
 # GF — THE RECURRING GF(2) PATTERN: one fact, two corollaries, one folklore gap
 
 `experiments/experiment_gf2law.py`. Prior art checked at source first; the
@@ -3628,6 +4007,114 @@ the open-ended research goal remains active.
 
 ---
 
+# HB — How the μ(β) bound was found
+
+C103 owns the statement. This note records the path.
+
+## Why
+
+C102 (TODO54) compared Walsh support with the ROBDD of one compiled
+multiplier. The user then chose to keep researching before review. TODO13
+asks whether a third simulation method keys on Paper B's r = β·2^α
+invariant. The ROBDD of C15's exact object, on the full dirty space and in
+exponent-first order, was the cheapest same-object test. It ran as board task
+T58ddf9e611124d65, in proposal mode because Ta294b7d88a4c4015 held the write
+scope.
+
+## Path
+
+1. **Before measuring**, the β = 1 (C23 parity) and β = 3 (C101 block
+   inverse: every prefix product is M_c^s H) bounds were derived and
+   registered (Mc3a0e636ff9741de). The first write task, T90e1b7284a674a6c,
+   was cancelled over the write-scope conflict and replaced by the proposal
+   task.
+2. **run_v1** confirmed both bounds with equality. For β = 5 the widths were
+   2(F_{k+2} − 1) at N = 11, a = 2. That was noticed post hoc, then
+   predicted for a = 3 before its rows existed (M0b80d942f7e64a90). The same
+   message contained an arithmetic slip (174/282/454 for 176/286/464), which
+   was corrected before those rows existed (Md5afaf1c5e234e33). Both numbers
+   stay on record.
+3. **The counting lemma and μ(β)** were derived after run_v1 (derivation_v1).
+   A garbled board restatement was replaced by M5572e29dc56e49d7. An early
+   claim that β = 7 gets only 2^k was wrong: plain periodicity gives μ = 3.
+4. **mu_run_v1** registered equality on five untested moduli
+   (M108c659b84254901) and passed.
+
+## Review round 1 (Vc7ce69ad6e4b4fe1, changes_requested)
+
+The referee confirmed the lemmas, the theorem and every logged number, with
+independent q ≤ 20 recomputation and an 800-case group check. It required
+write-up fixes, all made in derivation_v2.md and draft_C103_v2.md:
+* **R1:** the control-0 identity needs the cancellation argument, since the
+  multiply half moves about 96% of states.
+* **R2:** the step from Lemma 2 to D_μ needs the increment induction.
+* **R3:** the β = 1 t-independence argument.
+* **R4:** a false sentence on work-part scaling.
+* **R5:** bound language, the finite-group ceiling, and precise
+  "basis-dependent" wording.
+* **R6:** relations to C19, C45, C48 and Paper B §11.1.
+* **R7:** this note was missing.
+
+It also observed that mu_run_v1's controls follow from M2's equality, so they
+are not independent fault detectors.
+
+## Review round 2 (V2e9e6c322bee4511, accept)
+
+A fresh referee verified Lemma 0 against the actual gate list rather than the
+prose, tracing that the constant reaches `cc_add_mod` only through
+ctrl-controlled `_load` Toffolis and that `cswap` collapses to two equal CNOTs
+at ctrl = 0, then confirming numerically at N = 7 and 11. It re-derived the
+exponent-level widths for six fixtures without using `lab/bdd_count.py`, and
+checked the prediction record precedes `run.start`.
+
+Two corrections were required before integration, and both are in C103 rather
+than in the frozen derivation:
+
+* **The scratch is unloaded, not empty.** The v2 wording said "the adders of
+  the empty scratch". On the dirty space the scratch holds arbitrary values;
+  were it empty, C_0 would be the identity, which the derivation's own
+  measurement (7872 of 8192 states moved) refutes.
+* **The crossover was missing**, and it is the one caveat that changes how the
+  headline should be read. Below it the bound degenerates to the trivial 2^k,
+  and since μ(β) can reach (β−1)/2, at large β most of the measured range sits
+  there. C103's Limits own the exact statement and the counts; they are not
+  repeated here.
+
+The second is a good illustration of the standing warning that a result
+agreeing with the hypothesis is the dangerous kind: every fixture satisfied
+the bound, the bound was attained, and the agreement was partly because the
+bound had degenerated to 2^k.
+
+It has a second lesson attached. Review `V9b418bf68edf4bfd`, refereeing the
+integration, found the crossover stated one level early — D_μ(μ) = 2^μ
+exactly, so level k = α + μ is trivial too and the first strict improvement is
+k = α + μ + 1, making the trivial count exactly min(t, α + μ + 1). That
+off-by-one came from the accepted review's own wording of the correction, and
+the coordinator carried it into the claim without deriving it. A referee's
+formula is no more citable-without-checking than any other number in this
+repo; the corrected version was checked against all five out-of-sample
+fixtures before it was written down.
+
+## Integration
+
+Board task Tf102392bd0124c1f, replacing Tbe30548d3e774494. The replacement was
+needed because the board's recursive dependency check went stale on
+prose-only drift in claims/C102.md (the accepted C102 v3 corrections); the
+accepted result is bound here by hash-sealed inputs instead, with the override
+and its cost recorded in Mf2ab5cb32c584940.
+
+## Candidate directions, not opened
+* A proof of equality: that the compiled blocks act freely on these words.
+* The same bound in other variable orders, or with the clean-input
+  restriction (C45's setting).
+* Whether any μ-type invariant appears in the post-QFT output distribution's
+  cost.
+* Where the α + μ crossover actually sits for the β that matter to Paper B,
+  and whether any fixture reaches t far enough past it to show λ_μ growth
+  directly rather than by extrapolation.
+
+---
+
 # HC — Testing a concrete shared-carry closure argument
 
 C97 owns the two lemmas and the exact catalog-histogram normal form.
@@ -3678,6 +4165,171 @@ bound or scalar hardness; the witness itself has a small factored unsigned
 count. The stronger signed and chronology-sensitive closure is still open.
 Documentation checks and final independent integration review are attached
 to task T4f60b8fc8ebd4c18, attempt A7a996e99e6f044dc.
+
+---
+
+# HD — Storing the pulled-back observable as a decision diagram
+
+C102 owns the statements. This note records how they were found and checked.
+
+## Why
+
+The user invited Claude to pick a direction on "the exponential growth of
+memory related to CNOT gates", and later authorized spending the remaining
+usage on it, with the arb board kept current (task Ta294b7d88a4c4015). C82
+already showed that CNOTs cost PPS nothing beyond a frame update. The
+support growth comes from Toffoli branching, and C8 identifies the final
+support with Walsh sparsity. So the question became whether the Pauli
+(Walsh) basis is a good store for this Boolean function at all.
+
+## Path, including dead ends (scratch pilots, not evidence)
+
+The pilot scripts and logs are archived in
+`out/agent-board/workers/A46391e1cf2954646/pilots/`. Board message
+M741d61dd419947ef discloses every number seen before registration.
+
+1. **Signed affine-subspace indicators.** A Toffoli splits a piece into a
+   signed three-term sum. On the adder this gave 2^m − 1 pieces, only about
+   1.5× below Walsh. Branching on one control instead (y_u = 0 kills the
+   product, y_u = 1 turns it into y_w) gave 2m pieces or 2^m, depending on
+   which control is branched.
+2. **The same rule on `cc_add_mod`.** Peaks were 2–2.3× below Walsh, but
+   final counts were above it (456 vs 86). The representation is not
+   canonical, so compute–uncompute cancellations were invisible. Sibling
+   merging (two cosets of the same subspace with equal coefficient) fixed
+   the final counts: u_a N=7 and N=11 gave 732 and 6081 pieces against
+   Walsh 3206 and 31022. This is a constant factor, and the merging is ad hoc.
+3. **Canonical ROBDD via `dd`.** With a good order it beat the affine pieces
+   on u_a. In register-block order it was exponential on the adder, the
+   classic XOR/ordering blowup.
+4. **A scratch scaling run.** It suggested the ratio was growing, but it
+   used complement-edge counts and dd peaks. A scratch prediction for n=6
+   (log2 peak in [16.2, 16.9]) was refuted at 15.64–15.89. A scratch n=7 run
+   was killed before printing, so n = 7 stayed unobserved.
+5. **A same-multiset random-circuit control.** It kept the ratio near its
+   generic value (the ROBDD of a random function on q variables is about
+   2^q/q). That separated "BDDs are compact" from "arithmetic is special".
+
+Coordinator speculation in chat, that the ROBDD was heading towards table
+scale (about N), was not registered and is not supported. The all-N n = 8
+step appeared to rise again, but review V06b5088b79994f1c showed this was a
+class-mixing artefact (see below). The asymptotics remain unresolved.
+
+## Checks
+
+The reducer `lab/bdd_count.py` counts ROBDD nodes from a truth table by
+bottom-up hash-consing, and never touches gates. Before any registered run
+it agreed with a brute-force distinct-subfunction count on 300 random tables
+(n ≤ 5, random orders, both conventions). That session check was not
+archived at the time and cannot now be recovered. A reconstruction of it,
+written after review V06b5088b79994f1c, is archived as
+`out/agent-board/workers/A46391e1cf2954646/bruteforce_reducer_v1.py`
+(600 comparisons, 0 mismatches; the first attempt failed on an import path
+and its log is kept beside it). It is the same procedure, not the same run:
+identity with the unarchived session check is not verifiable. The `dd` cross-check covers only the
+complement convention: `dd` counts complemented edges, terminal included. The truth tables come from the
+existing verified permutation replay: `walsh.classical_permutation`, or
+`accel.classical_permutation` for q ≥ 20, which `test_accel.py` gates.
+Walsh counts use `walsh.pullback_coefficients` below q = 20 and the exact
+integer GPU path above it. The `dd` composition is an independent canonical
+route that goes gate by gate and never builds a truth table.
+
+**`experiments/experiment_heisenberg_bdd.py`**
+* Board run R2fe53ff3836846c2, log `out/heisenberg_bdd/run_v1.log`: exit 139,
+  a native crash with no traceback during u_a n = 4, after the adder section
+  had passed (CLAUDE.md trap 3, CPython 3.14). Retained.
+* Board run Rdb87a87850f64ccc, log `out/heisenberg_bdd/run_v2.log`, the same
+  source under Python 3.12.10: exit 1 by design, 13/14. Its report is
+  `out/heisenberg_bdd/report_v1.json`; run_v1 crashed before writing a report.
+  * P1–P4 pass (derived; P1–P3 had already been evaluated for m ≤ 9 while
+    the reducer was being developed, as disclosed in M956c9a970d43415a).
+  * P5a FAILED: Walsh step 3.375 at n = 4, outside [2.8, 3.2].
+  * P5b, P5c, P6, P7 and P8 pass.
+  * Controls C1 (random ratio growth R_6/R_3 = 2.02 < 3; u_a 8.05), C2
+    (register-block order at m = 10: 3585 nodes), C3 (quasi-reduced mutant)
+    and C4 (adder without the first MAJ/UMA Toffoli) all failed as required.
+
+**`experiments/experiment_heisenberg_bdd_n8.py`**
+* Board run Rb9caf0557f6e4b48, log `out/heisenberg_bdd/n8_run_v1.log`,
+  report `out/heisenberg_bdd/n8_report_v1.json`: exit 0, 5/5. Predictions
+  were registered in M2d005ce2efc84ed9 before any n = 8 value existed.
+  * Q1: ROBDD step 1.804, in [1.0, 2.0].
+  * Q2: Walsh step 3.005.
+  * Q3: R_8/R_7 = 2.299.
+  * Q4: all eight n = 7 rows reproduced run_v2 exactly.
+  * C1 failed as required: random R_7/R_6 = 1.108.
+
+Each 29-qubit fixture took 222–273 s of wall time (harness row times),
+probably dominated by the host-side 2^29-entry reduction (an estimate; not
+profiled). The core gate (`out/heisenberg_bdd/core_v1.log`) passed before
+run_v2 and the n8 run. Its timestamp is 6.5 s after run_v1's run.start, so
+"before execution" is not established for run_v1, which crashed and is not
+evidence. Other science
+suites were not rerun, because no existing module changed.
+
+## Weak points a reviewer should press
+
+* **C1's construction and margins.** The random control keeps u_a's numbers
+  of X, CNOT and Toffoli gates but draws qubits uniformly, one seed per n; it
+  is not u_a's exact gate multiset. Margins are 2.02 against a threshold of 3,
+  and 1.108 against 2, the latter comparing random R_7/R_6 with u_a R_8/R_7. The
+  control's own ratio grows slowly, as expected for random functions
+  (their ROBDD is near 2^q/q).
+* **Medians over changing N, and an N mod 4 confound.** Found by review
+  V06b5088b79994f1c. B separates by N mod 4 (the N ≡ 3 class is larger at
+  n = 5, 6, 8), all eight n = 7 fixtures are N ≡ 1 (mod 8), and n = 8 has two
+  N per class. Within N ≡ 1 the ROBDD log2 steps are 2.220, 2.117, 1.979,
+  1.762, 1.643 (`class_split_v1.log`); the all-N rise from 1.629 to 1.804 was
+  class mixing. At n = 8 B spans 512,765–683,089 (max/min 1.33).
+* **One order for u_a, chosen from pilots.** No reordering search was done.
+* **Peaks.** Only n ≤ 5 (ROBDD, complement convention, nodes of the
+  intermediate function only) and n ≤ 4 (PPS). Everything at n ≥ 6 is a
+  final count.
+* **The affine-piece counts depend on the branching rule.** They are not a
+  function invariant.
+* **No primary-source audit** of decision-diagram quantum simulators (Zulehner
+  and Wille, DDSIM) was done beyond confirming that they exist. Bryant 1992
+  was read for the adder statements (§1.3–1.4, Table 1, Fig. 4). Its
+  bounded-cross-section bound (Berman; McMillan) is a possible route to a
+  proved u_a upper bound, not attempted.
+
+## Candidate directions, not opened
+
+* A proved upper bound on the u_a ROBDD from the compiled macro structure,
+  using cross sections or residue-state streaming, which would settle
+  H-table against H-square.
+* A dynamic-order or linearly transformed BDD (a C82-style frame that makes
+  CNOTs free) on the full ToffoliModExp, compared with Paper B's β
+  dichotomy (TODO13).
+* Gate-level peaks at n ≥ 6 with a compiled BDD package.
+
+## Review corrections (V06b5088b79994f1c)
+
+The first referee review (changes_requested) confirmed the adder proofs line
+by line, recomputed every u_a row with q ≤ 20 independently, and verified
+the chronology and the Bryant citation. It required eight corrections, all
+applied above, in C102 and on the task thread:
+* **R1:** clear the lint ERROR on the smoke helper (v2 omits it).
+* **R2:** disclose the N mod 4 split.
+* **R3:** correct the B/4^n range to 9.7–14.3.
+* **R4:** make the ranges exact.
+* **R5:** archive the brute-force check and state P6's convention.
+* **R6:** describe the random control accurately.
+* **R7:** state the dd peak convention.
+* **R8:** record the n = 8 budget and write-scope deviation.
+
+Non-blocking notes applied:
+* the timing statement is labelled an estimate;
+* the core-gate chronology is corrected;
+* the Bryant wording now notes the free carry-in;
+* C102 names the complement merges and the highest non-propagating
+  position, and says the Walsh side is near-dense.
+
+Also recorded:
+* run_v1's control_result says run_v2 used Python 3.13, while it used
+  3.12.10 (thread note).
+* No mutant exercises the complement branch or the dd cross-check.
+* Rows with q ≥ 23 have no independent recomputation.
 
 ---
 

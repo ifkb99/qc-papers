@@ -3,14 +3,119 @@
 Written for a session with no prior context. **Read `CLAUDE.md` first** for the
 conventions and traps; this file is only *where things stand*.
 
+**Decision-diagram checkpoint, 2026-09-15: C102 / HD / TODO54 (task Ta294b7d88a4c4015).**
+A single Claude coordinator session chose this direction at the user's
+invitation; the user then authorized spending remaining usage with arb kept
+current. C102 owns the proved adder counts (Walsh 3*2^(m-1)-2 against a
+3m+4-node ROBDD) and the measured u_a scaling to n=8 (Walsh ~2^(3n+3)
+against median ROBDD 9.7-14.3*4^n, with an N mod 4 class split). HD owns the pilots, three board runs (one native
+crash, one preserved failed prediction P5a, one clean n=8 run), controls and
+weak points. New code: `lab/bdd_count.py`, `lab/affine_pieces.py`, and two
+experiments, which need `--with dd==0.6.0` and Python 3.12 for long runs.
+No bound for u_a is proved and nothing escapes the C19/C48 order barrier.
+TODO54 is done. TODO13 stays open and now cites C103. Nothing was committed:
+C99-C103, their notes, experiments and lab modules are all uncommitted.
+
+**Review status, 2026-09-15: both results reviewed, closed and integrated.**
+* C102: task Ta294b7d88a4c4015. Round-1 referee V06b5088b79994f1c returned
+  changes_requested after confirming the adder proofs line by line and
+  recomputing every u_a row with q <= 20. Its catch: ROBDD size splits by
+  N mod 4 and every n=7 fixture is N = 1 mod 8, so the all-N "step rose at
+  n=8" was class mixing. All eight corrections were applied and frozen as
+  Sa4101c802d464f5d. Round-2 referee V6840fa9b93014e09 verified the
+  unchanged-science hash claim (snapshot digest 8cc4909846dfde6a, 16 files
+  byte-identical, no run metadata rewritten), confirmed all eight
+  corrections are present in the bytes, and returned changes_requested for
+  three wording/scope defects plus one mechanical blocker. Those four are
+  now applied here: the N = 1 (mod 4) monotone fall is stated as a property
+  of medians that the two n=8 fixtures do not establish; the brute-force
+  check is scoped to the reducer rather than the u_a counts; HD calls the
+  archived script a reconstruction of the unarchived session check; and this
+  block no longer describes its own review as pending. Round 3
+  (Vee711b303f314378) accepted the v3 re-freeze Sb66f293fef1d4a37 and the task
+  is CLOSED (closure Cf31ebb9eaea34122). Two record-level errors in the v3
+  submission text are recorded in that closure rather than edited into the
+  frozen submission: a wrong line range for the HANDOFF novelty advisories
+  (they start at line 134, not >=524) and a wrong reason for dropping a
+  retained failure log from the manifest. Neither touches a canonical file or
+  any measurement.
+* The mu(beta) width theorem was accepted by referee V2e9e6c322bee4511 and
+  task T58ddf9e611124d65 is CLOSED (closure Cba59956c7eca4d8b). It was a
+  proposal task, so it reaches the ledger through integration task
+  Tf102392bd0124c1f, which creates claims/C103.md and
+  notes/HB-beta-dichotomy-decision-diagram.md, copies the two experiments into
+  experiments/ under their frontmatter names, and applies the two corrections
+  the review requires (the "unloaded scratch" wording, and the alpha+mu
+  crossover caveat). Tf102392bd0124c1f replaced Tbe30548d3e774494, which could
+  not be claimed: the board revalidates dependency inputs recursively and went
+  stale on prose-only drift in claims/C102.md (the accepted v3 corrections).
+  The override and what it gives up are recorded in Mf2ab5cb32c584940.
+* Do not re-run the science: runs R2fe53ff3836846c2 (crash, retained),
+  Rdb87a87850f64ccc, Rb9caf0557f6e4b48, R5e2b4f1518e74ec6,
+  Re9eda3cc191a448a and Rf7a4f1d224f54e5c are finished and archived.
+* Process note from V6840fa9b93014e09: freeze HANDOFF.md last, or keep
+  review-status prose out of the submitted candidate set. A status line that
+  describes its own review invalidates its own freeze, which is what blocked
+  acceptance of Sa4101c802d464f5d.
+* What the mu(beta) result says, and what it does not: see claims/C103.md,
+  which owns the statement, the proof and the limits. The one thing worth
+  carrying here because it changes how the headline reads: the bound is the
+  trivial 2^k for k <= alpha + mu(beta), so at LARGE beta MOST measured levels
+  are trivial and the separation from PPS's base-2 growth is asymptotic in t.
+  At small beta (beta=3, mu=1) the crossover is early and the separation is
+  visible throughout, so the qualifiers matter. C103's Limits own the exact
+  statement. TODO13 stays open: this is a canonical diagram of the pullback,
+  not DDSIM's state diagram.
+
+**Differential/boomerang checkpoint, 2026-09-14/15: C99/C100/C101 / DB/GB/BO / TODO51-53.**
+A single Claude coordinator session, at the user's request:
+* cancelled two superseded Claude board tasks, with reasons on the board;
+* derived C99, the DDT count for X/Y-type Pauli pullbacks, and C100, its
+  extension to any finite abelian group. There, PA4 in
+  `experiment_group_bridge` is refuted and left failing on purpose.
+* derived C101, the X–X OTOC as a boomerang connectivity count, with an
+  exact carry butterfly and a compiled tail-bit symmetry (β ∈ {1, 3} when
+  t−2 ≥ α).
+
+The user then asked for referee review, so the coordinator opened write tasks
+T79116bfece0e44a1 (C99) and Tf8bb4261531241e1 (C100) and spawned fresh
+qsim-referee agents. Two coordinator process slips on C101 are recorded in
+its closure: one submission was frozen despite a lint error, and one with a
+stale manifest.
+* **C99** was accepted and closed (V88c6aae3d06240d2, then
+  V803a36546f284017). Its first attempt lease had expired during an API
+  rate-limit pause and was reclaimed.
+* **C100** was accepted and closed after two rounds of corrections
+  (Vefabe53d66914d24, Vfb370f16c33e447a, then Ve40769e7918e4d0e).
+* **Follow-up task T393699c97b9745ca** was accepted and closed
+  (Vc00905ba7aba40ec). It applied or dispositioned C99's wording notes and
+  relabelled the Z/8 maximum 55 and the row formula T = 56 − 8/o(d) as
+  established by complete enumeration, with no conceptual proof.
+* **C101** (OTOCs as boomerang counts, BO, TODO53) was accepted and closed
+  after three rounds: V7cf842d53f784f58 and Va55e183ff79849a1 requested
+  changes, then V16ef0281b61e45a1 accepted version 3.
+  `experiment_boomerang_otoc` exits 1 on purpose, because its must-fail
+  control C5 did not fail.
+* **Wrap-up task T54da8c3405ec4c1c** applied or dispositioned the carried
+  non-blocking notes and recorded the C101 referee catches. It was accepted
+  and closed after one round of corrections (Vf2cc905b879f49df, then
+  V55ef18e5bb7043a4).
+* **Final micro-task Tcc271e7afe344499** fixes the last wording items. Once it is
+  reviewed and closed, the board has no open assignments and C99–C101 have
+  no carried notes.
+
+On ToffoliModExp(7,3,3), the Pauli/mixed ratio for the clock-shift
+observable is 0.64–1.88, in both directions. TODO50 is unchanged. Nothing
+was committed.
+
 **Disjoint-mask checkpoint, 2026-09-13: C98 / DW / TODO50.**
 A Claude-coordinated round (Codex idle; board notice M3baabb2970914082)
 proved C98's width-independent coefficient bound for disjoint masks and its
 exact overlap failure range. DW owns the review history and the withdrawn
 fixed-q width study, which was designed but deliberately not executed.
 TODO50 now points away from that study. No code, experiment, manuscript,
-commit or publication changed; the stale earlier Claude submissions
-S57edfaa06f754400/Saacd7b3d73a24826 remain untouched. Preserve the dirty tree.
+commit or publication changed; the earlier Claude submissions
+S57edfaa06f754400/Saacd7b3d73a24826 were untouched then (their tasks were cancelled 2026-09-14). Preserve the dirty tree.
 
 **Sparse contraction and carry-catalog checkpoint, 2026-09-12: C96/C97 / SB/HC / TODO50.**
 C96 owns the exact sparse-mask block contraction and charged costs; SB

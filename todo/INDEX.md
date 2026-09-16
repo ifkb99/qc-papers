@@ -5,7 +5,7 @@
 One item per file. State is the directory it lives in: moving a file
 between `open/` and `done/` is how state changes.
 
-**10 open · 58 done**
+**10 open · 62 done**
 
 ## Open
 
@@ -77,6 +77,10 @@ between `open/` and `done/` is how state changes.
 | [47](todo/done/47-interacting-carry-contraction.md) | Can interacting carry chains retain cheap signed contraction after the single-adder baseline stops applying? | C86/MG validate exact planar matchgate contraction of two additions; growing nonvacuous arithmetic queries and practical advantage remain for TODO48 |
 | [48](todo/done/48-planar-carry-query-discriminator.md) | Does an explicit growing planar carry family retain nontrivial signed queries after the strongest arithmetic reductions? | C87/DM give an explicit nonzero growing family and stronger direct dimer baseline; further matching reductions and practical advantage remain for TODO49 |
 | [49](todo/done/49-carry-matching-reductions.md) | Do query-specific matching reductions or signed defects leave a useful carry-simulation advantage? | C88/ME prove essential-grid survival and a bounded-band exact recurrence; finite allocation savings are explained by known sparse methods; TODO50 redirects to actual shared-state controlled arithmetic |
+| [51](todo/done/51-differential-bridge.md) | Does differential cryptanalysis count off-diagonal Pauli paths the way linear cryptanalysis counts diagonal ones? | C99/DB prove the DDT identity, bounds and APN extremality for X/Y-type pullbacks; independent dense, gate-level PPS and 14-qubit GPU checks pass, including the out-of-sample F10 counts; no simulation speedup follows |
+| [52](todo/done/52-group-covariant-bridge.md) | Does the differential count generalize beyond XOR, and does a group-matched basis shrink the actual order-finding observable? | C100/GB extend the identity to any finite abelian group with XOR-pairing and telescoping class constraints; one extremal prediction refuted; on one compiled modexp the Pauli/mixed term-count ratio is 0.64–1.88, in both directions |
+| [53](todo/done/53-boomerang-otocs.md) | Are OTOCs of reversible arithmetic boomerang counts, and do they see the r = beta*2^alpha invariant? | C101/BO: X-X OTOC = BCT/2^n verified; exact carry butterfly; compiled tail-bit OTOC symmetry holds if the last two constants are mutually inverse (beta in {1,3} when t-2 >= alpha; converse unproved), found after a must-fail control did not fail; the ideal-model sweep is non-discriminating |
+| [54](todo/done/54-heisenberg-decision-diagrams.md) | Is the Walsh (Pauli) basis an asymptotically wasteful store for the pulled-back arithmetic observable, compared with a canonical decision diagram? | C102/HD: adder Walsh 3*2^(m-1)-2 vs ROBDD 3m+4 proved; u_a Walsh ~2^(3n+3) vs median ROBDD 9.7-14.3*4^n measured to n=8 (N mod 4 dependent) with a slowly growing random-circuit control; no u_a bound, no escape from the order barrier |
 | [hk1](todo/done/hk1-yao-backend.md) | Yao.jl backend | - |
 | [hk2](todo/done/hk2-decide-whether-env-should-tracked.md) | Decide whether .env should be tracked | - |
 | [hk4](todo/done/hk4-organize-experiments-into-proper-file-structure.md) | Organize experiments into a proper file structure, with a general | - |
