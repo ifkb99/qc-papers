@@ -1192,6 +1192,47 @@ No manuscripts were changed and nothing was committed or published.
 
 ---
 
+# CR — The exponent-cut rank (TODO 63, 2026-09-18)
+
+**Origin.** Surveyor candidate R1 in slate round 2 (note SN). The slate's prior: a few
+dozen distinct pseudo-random ±1 rows over thousands of columns are almost surely
+independent, so a measured rank equal to |S_k| would decide little, and the content
+had to be a proof.
+
+**Derivation.** Task `T095a76c1015e465e` went to a fresh deriver on the best available
+model (`S1e0938302b39406a`). It proved Theorems A–C. The prior turned out to be wrong
+in the way that matters: for β = 3, α = 0, where the letters commute, the rows are
+consecutive Krylov vectors T^i s, so they are independent only up to the Krylov
+dimension d. A fresh referee
+accepted it (`V13f2bfb187274d58`). It recounted d with its own Möbius-product code
+(40 random permutations in both orientations, 80/80 against exact Krylov rank) and reproduced the period. It
+required a scale-matched must-fail control, C5 (without it, a rank routine capped at
+1936 would pass P2b and P2c), and made I3–I5 record-only, since they test a statement
+that was not reached.
+
+**Experiment.** Task `T3e37f92ebd754215`, run by a falsifier (`Se701e050f6a04e80`,
+accepted `V3cec8224aec7454d`). 16/16 harness checks passed and every must-fail control
+failed as required. P2c, the one prediction against the prior (1937 rows → rank 1936),
+is gated in code on C5 failing. Beyond the plan, the falsifier registered P2e, an exact
+minimal polynomial over Z, and a bug check of it. The first attempt (`A9b6f006107614633`,
+run `Rd2c648bf30414b27`) lost its lease during a usage-limit cutoff after the run had
+finished. The coordinator reclaimed it and linked the late work (`Mbee26551788544fa`),
+and the same script was re-run in a new attempt: 102 log lines, 0 differing readings.
+
+**Process notes.**
+* The plan's "under five minutes" was exceeded: the main run took 7.2 min, within the
+  30-min cap. From the run log's own stamps, most of it was I2's exact eliminations
+  (raw 1937-row elimination 99.5 s, C5 86.0 s, the two Gram ranks 39.4 s and 39.6 s)
+  and the circuit replays (I4's alone 62.8 s). The I3–I5 eliminations took under a
+  second each. The experiment review's attribution to the I3–I5 eliminations was wrong
+  (integration review `V58130d845fce41c4` D2).
+* The board refused `run.start` on a prediction message from the expired attempt
+  (`invalid_prediction`); a verbatim reaffirmation (`Mfd70c990cb894be7`) was required.
+* The derivation's v1 exploration had a Berlekamp–Massey value of 4098, wrong through
+  int64 overflow. It was caught because it exceeded the 4096 ceiling.
+
+---
+
 # CT — Exact finished-control contraction
 
 The independent review reopened TODO 12c. Naive pruning whenever a term
@@ -1857,6 +1898,166 @@ Documentation regeneration and validation are recorded in
 `out/planar_query_docs.log`. All four bounded board tasks are accepted and
 closed. No manuscript was changed and nothing was committed or published.
 The canonical worktree remains uncommitted.
+
+---
+
+# DN — DD-native PPS propagation and the peak-node turn
+
+Two board rounds (2026-09-15/16) plus coordinator experiments (2026-09-16/17) on
+whether a decision diagram of the *propagated operator* beats the sparse Walsh
+dictionary. C102/C103 own the canonical diagram of the *final function*; this note owns
+the propagation-native route and the negative result about its one interesting feature.
+The route is superseded for the peak-memory goal by C104 (note ES), which removes the
+peak above a streamed output without diagrams.
+
+## The object and what is proved
+
+CNOT is memory-free in Heisenberg form: `perm_pps` maps a key by z ^ (z_t << c), a
+bijection, so term count cannot change; under C82's lazy frame the dictionary is not
+touched at all. Toffoli is the only gate that grows memory, and its branch is an
+XOR-convolution on a 2-dimensional space in frame coordinates. Two derived rules were
+verified against the engine on 300/300 random fixtures with a 300/300 control (gating:
+only Claim 1, the predicate-invariance rule, is harness-gated; see the promotion bullet
+below):
+the predicate parity is frame-invariant, and the scatter rule has a gather form. They
+are implemented in the frozen pilot `out/agent-board/artifacts/dd-pilot-20260915/`
+(ddprop.py sha256 d00cc123…), whose MTBDD is the propagator all later work used.
+
+## Measured, accepted on the board
+
+**Node counts** (task `T563881b120674641`, submission `S18ba76c1588945c1`, accepted
+`Vb2484fd40baa44bf` with four binding corrections I1–I4). ToffoliModExp(N=7, a=3),
+plain convention, peak DD nodes over peak dictionary terms, n_exp = 1..6:
+
+    dict peak   8,194  24,412  48,855  98,018  196,060  392,458
+    plain DD    2,301  12,657  30,989  63,673  113,648  185,608
+    ratio      0.2808  0.5185  0.6343  0.6496   0.5797   0.4729
+    weighted   0.2235  0.4173  0.3902  0.4399   0.3734   0.2896
+
+The plain ratio rises then falls, with its maximum at n_exp = 4; that is the "turn".
+Against a matched null (same qubit count, support cardinality and value multiset,
+random placement) the real/null node ratios are 0.351 / 0.534 / 0.648 / 0.667 / 0.606 /
+0.499, so the diagram is about 2x smaller than a structureless function of the same
+size, not the 3.5x a comparison against the dictionary suggests. (A separate
+node-over-support figure of 0.440 on a random support is not the matched null and must
+not be quoted as one.) Correction I1 of the review corrects a mis-denominated
+retained-byte row in the submission itself, and separately the coordinator's relay of
+it: like for like the retained fractions are 0.423 / 0.736 / 0.868 at n_exp = 1..3
+[ESTIMATE, from a synthetic dictionary validated to 1.25x on bytes per term], with the
+rigorous bracket 0.181–0.886 / 0.322–1.260 / 0.376–1.440.
+
+**Bytes** (same submission; two instruments, kept apart). Peak-to-peak the DD route
+costs 11.69x / 40.69x / 36.68x the dictionary route at n_exp = 1..3, from tracemalloc
+traced peaks under the default collector. Its never-collected node table alone is
+2.77x / 14.92x / 19.90x the dictionary route's whole traced peak, from the gc-forced
+retained instrument. The collector matters; three readings at n_exp = 2, paired like
+with like: 795,750,300 B peak with the collector off against 234,670,240 B with it
+forced (3.4x), both referee-dd-asym-1's; current against current is 9.05x; and the
+author's default-collector peak at the same point is 239,740,820 B. So the node-count
+advantage does not survive as bytes in this implementation.
+
+**Promotion** (task `T163d291c2cdd4cd0`, submission `S4279919efc104d37`, accepted
+`V0c95e8735e50477a`, 11/11 checks) produced a proposed `lab` module and experiment that
+were never integrated. Its registered prediction P5 PASSED on its two registered points
+(0.281 then 0.518, recorded "deteriorates=True"); what the later six-point series
+contradicts is P5's trend clause, and the reason for non-integration is the
+coordinator's integration hold (`Mff82e0d959c0493c` item 1, decision
+`M889892e48cad42b9`), not a refuted prediction. That round also established, and these
+are its findings' only ledger home:
+
+* **C103's variable order does not transfer.** At n_exp = 2 the exponent-first order
+  gives a ratio of 0.920 against index-ascending 0.518 on the same object (P6), so the
+  order that makes C103's bound work is not the order this store uses.
+* **Order invariance where the corrected prefix-saturation condition licenses it.** The
+  condition, in the form the earlier review corrected (a worker's first version had an
+  invalid induction): if the level widths saturate, w_i = 2^i for i = 0..m inclusive,
+  then permuting positions 0..m-1 changes nothing. At n_exp = 1 the profile gives
+  w_4 = 16 but w_5 = 31 ≠ 32, so m = 4 and positions 0..3 are licensed: all 24
+  permutations of them give total 1,581 nodes with byte-identical level profiles
+  (exhaustive). An order permuting positions 0..7, which the condition does not license
+  there, gives 1,585 — the must-fail control, earned.
+* **Guard and mutants.** The module and `perm_pps` both refuse the same 4/4 malformed
+  inputs, and five derived mutants are detected 40/40 each with 0/40 on the unmutated
+  run. In the accepted version only Claim 1's 300/300 is harness-gated; the
+  gather-equals-scatter 300/300 comes from the pilot's print-only check and superseded
+  submissions.
+
+The pilot's validator was print-only and exited 0 regardless (`M841349bedd124e52`);
+nothing print-only may be promoted.
+
+## The turn: C103's crossover refuted as its mechanism
+
+C103 puts the first non-trivial exponent level of the *final function's* ROBDD at
+k = α + μ(β) + 1, so the first t with any non-trivial level is α + μ(β) + 2. That
+equals 4 for N=7, a=3, which is where the node-count ratio turns. Two coordinator
+experiments (`experiments/experiment_dd_ordering.py`,
+`experiments/experiment_dd_alpha_replicate.py`; rows and verdict logs under
+`out/dd-ordering/`, gitignored) tested the prediction across bases. **Measured by the
+coordinator and never independently reviewed**, unlike the two board rounds above:
+
+| family | α | predicted turn | measured turn |
+|---|---|---|---|
+| N=7, a=2 | 0 | 3 | 5 (0.3067, 0.3376, 0.3819, 0.5119, 0.5488, 0.4567, 0.3442) |
+| N=7, a=3 | 1 | 4 | 4 |
+| N=7, a=4 | 0 | 3 | 5 |
+| N=7, a=5 | 1 | 4 | 4 |
+| N=5, a=2 | 2 | 5 | degenerate, see below |
+
+So the prediction fails on two bases, and not by an offset: it says a=2 turns *earlier*
+than a=3 and the measurement says later. Where the turn sits can be restated as the
+point at which the diagram's growth per exponent bit falls through the dictionary's
+steady 2.00x, but that is a restatement of where a ratio's argmax lies, not a mechanism;
+no mechanism for the turn is known. Two differences make the transfer unsurprising in
+hindsight: C103 bounds the exponent-first ROBDD of the Boolean pullback, while this is
+an index-ascending multi-terminal diagram of the Walsh COEFFICIENT function with the
+exponent variables at the bottom, and the promotion round measured that the order itself
+costs 0.920 against 0.518 at n_exp = 2. Note also, when comparing the two texts, that
+C103 indexes exponent levels by k while this note indexes by n_exp = k + 1; that is a
+convention difference, not a reason the transfer fails. Grouping by α fits the four
+non-degenerate families, but the α-partners at N=7 are necessarily inverse bases
+(2·4 ≡ 3·5 ≡ 1 mod 7), so that grouping cannot be separated from inversion symmetry;
+the test would need same-order non-inverse NON-DEGENERATE bases. Other small moduli have
+same-order non-inverse bases (N=8 and N=12) but only at order 2, which forces c_k = 1
+for k ≥ 1 and reproduces the N=5 degeneracy below; the first usable modulus is N=11.
+
+**N=5, a=2 is degenerate.** c_k = a^(2^k) mod N is 1 for k ≥ 2, so those blocks apply
+C23's involution V rather than growing the support (they are NOT identities: at N=7 the
+multiplier-1 block moves 7,168 of 8,192 work states and squares to the identity, and at
+N=11 it moves 61,440 of 65,536 (both measured, `V947329feabd540ad`); nothing measures it
+at N=5). The dictionary peak freezes at
+48,972 from n_exp = 3, so its ratio cannot turn. A must-fail control caught this.
+An exact GPU route (dense replay plus integer WHT, `out/dd-ordering/gpu_saturation.py`)
+confirms it independently: the final Walsh support is pinned at 32,143 for
+n_exp = 3..14, while the non-degenerate families approach exactly half the index space
+(0.4938 and 0.4960 of 2^27 at q = 27).
+
+## Withdrawn along the way (all the coordinator's)
+
+* "0.281 is a DD win": random ±1 functions on a RANDOM support of the same cardinality
+  need 3,606–3,633 nodes at n = 14, i.e. a node-over-support figure of 0.440–0.443
+(`Mb64ff4535cea4767`). That is the
+  free baseline, not the matched null; the matched-null ratios above (0.351–0.667) are
+  what carry "about 2x".
+* "The ratio deteriorates": refuted as a trend by the six-point series.
+* An over-retraction: the coordinator withdrew "it peaks at n_exp = 4 in both
+  conventions", which its own rows support (the weighted argmax is 0.4399 at n_exp = 4).
+  What was actually withdrawn (`Mff82e0d959c0493c` 2b) is the rise-then-fall SHAPE in the
+  weighted convention, which dips at n_exp = 3.
+* A live-diagram byte measurement (~8 B per node) that measured pointers, and a
+  tracemalloc window that charged only allocations made inside it.
+* "c_k = 1 blocks are identity permutations" (they are the involution V).
+* A relayed claim that ord(3 mod 7) = 6 governs the block sequence: the multipliers are
+  3, 2, 4, 2, 4, 2 with period 2 in the tail.
+
+## Where this leaves TODO 13 and the direction
+
+TODO 13 asked for a third simulation method keying on r = β·2^α. C102/C103 answered it
+for the canonical diagram of the final function. This note answers it negatively for the
+propagation-native diagram: the one feature that looked like an arithmetic signature is
+not one. TODO 13 stays open for its original target, a real DD simulator's state
+diagram, which nothing here touches. For the peak-memory goal the route is superseded:
+under a materialized output no method gains more than about 1.5x (note SL), and under a
+streamed output C104's exponent slices remove the peak without diagrams.
 
 ---
 
@@ -2574,6 +2775,115 @@ its frozen next pilot. It has not changed the implemented proposal. The
 current result is a restricted, costed float sampler plus a genuine long-row
 representation gap, not a generic breakthrough. The broader user goal remains
 active; no manuscripts, abstracts, host settings, firmware or commits changed.
+
+---
+
+# ES — Exponent slices under a streamed output (TODO 55, 2026-09-16/17)
+
+Chosen from slate round SL under output contract O2 (streamed exact output). This note
+records how C104 was reached, what was withdrawn on the way, and the board provenance.
+Calibration detail for the review rounds is in SWARM_REVIEW_2026-09-12.md section 5.
+
+## Sequence
+
+1. **Derivation and plan**, task `Ta86889efd4b24683`, three versions. v1
+   (`Sc90d08b3801742c1`) proved the slice lemma and a depth-first walk W, and refuted two
+   statements in the coordinator's brief (a target-role must-fail control that cannot
+   fail; "multiplier-1 blocks are identities", which are the involution V of C23).
+   Review `V947329feabd540ad` found that per-slice C45 runs B1 already deliver the
+   stream with existing code, and that a planned control could not fail. v2
+   (`Sec74297d42184c28`) derived B1 and the dense recursion K2; review
+   `Vc95cba7568944751` found the same unfailable-control defect in a new place and a
+   byte-ledger slack larger than the pitfalls it had to catch. v3 (`Sc4c99b9dd0c14e6c`),
+   with every control instantiated and asserted before submission, was accepted in
+   `Vaa6ee566b4454a47` with nine execution-time corrections.
+2. **Phase A**, task `Tc70e07bf09c54b3e`. Run 1 (`S5d39eb493d264070`) stopped at gate
+   G1 on 26,228 B against a 24,000 B precision band, traced to CPython tuple free-list
+   residue; a focused review (`V2d55fc6b31404ef2`) approved a proportionate amendment
+   after correcting two defects in the coordinator's amendment text. The rerun
+   (`S20e03f947ba94317`, accepted `V7293e51a79fe4ac6`) confirmed exactness at 14 points
+   and failed K2's leaf-slot band at F1 (N=7, a=2) t=4..6: robustly at t=5,6 (1,835 and
+   5,587 B over) and by 3 B at t=4, inside the ~46 B process-to-process variation.
+3. **Bug check** (exploration), task `T2074e4a4ace54998`, `S96857fe4418b49bd`, accepted
+   `V6b0fdd469efc4fd4`: the growth was a bounded keyword-dict free-list refill from
+   `np.take`'s wrapper, removable by calling the array method.
+4. **Fix plan and repeat**, tasks `T49f2eb21610b4bb4` (`S37d7675ac15f4190`, accepted
+   `V5df0e47ea3df4a6c`) and `T7ac44bd84996402b` (`S0077516c27884295`, accepted
+   `V0e29250446b9478a`): every registered prediction that was evaluated held. The
+   F3 (N=7, a=6) parts of the byte predictions at t=7..10 were not measured, so they
+   did not hold; the registered CPU projection dropped them (`V0e29250446b9478a`
+   IC-2, D(2)). The numbers are in C104. Their evidential weight is the digests, T_L,
+   the tight per-t bands and the difference-scored controls, not the wide bands
+   (`V0e29250446b9478a` IC-8); EQ-X, A2-X and SRC-X are sanity checks only.
+5. **Prior-art survey**, task `T8c5935fbd8814ef2`, `Sef28b547805c419a`: applied known
+   mathematics; it derived a careful dense route D*.
+6. **D* plan**, task `T0c34d1af337d41b0`. Review `Vbfd8fd978d2f46a0` (on
+   `S58deebc6e57a44b8`) showed D*'s second full-size array is avoidable (a windowed
+   replay), moving the claimed crossover from t=3 to t=4. Review `Vf1d3e39b30b84bb1`
+   (on `S4759788344bf4411`, accept) then showed that no crossover can be claimed: dense
+   routes trade passes for memory. The user chose not to run the D* measurement and to
+   open TODO 57 on time at matched memory.
+
+## Withdrawn or corrected statements (all the coordinator's unless stated)
+
+* "The leaf-slot excess doubles per exponent bit, a possible O(2^t) term": four points
+  of a free-list filling to its cap; withdrawn after the bug check.
+* "K2 is 114× below the engine at N=7 t=5": that used K2's phase-R peak; the whole
+  traced peak gives 99× (K2/E = 0.010).
+* "K2's memory is flat in t": the N=7 constancy is T_L = 2; at N=11 it grows with T_L.
+* ru_maxrss values once quoted as MB are KiB, over a ~41 MiB baseline.
+* Survey: "K2 is the partial Walsh–Hadamard transform over the exponent register"
+  (derivation_v3.md:730) omits the one-representative mechanism; corrected in C104.
+* Survey: "K2 is smaller than careful dense from t=3"; the windowed route moves that
+  to t=4 and the multi-pass family removes the crossover altogether (step 6).
+* C104's first integration draft stated that comparison backwards, saying the dense
+  route would be LARGER than K2 at t <= 3, which flattered K2 exactly where it is
+  1.5-5x worse. Caught by review `V99e34f8a27704055` (RC-1).
+* Note SL labelled the dense recursion "B1"; corrected to K2.
+* A linter false positive (`HARNESS-NO-CONTROL` on controls registered in a loop) failed
+  `S0077516c27884295`; the linter was fixed and the referee confirmed the controls.
+
+## TODO 57's round, and what it cost to state correctly (2026-09-17)
+
+The matched-memory question was derived (`S1b25ca7326624b0b`, accepted
+`V7fb5f7389f5941b8`), executed (`Sa13414787bd54716`, accepted `Va41b64e4d5064682`) and
+integrated into C104's Limits. Three defects in that chain are worth remembering, all of
+them mechanism claims rather than measurements:
+
+* The plan would have measured the wrong opponent. Design review `Vb02c29cc1e094239`
+  (C1) found that it excluded hybrids whose proved floors fit the budget, so its
+  registered arm was 4–23x slower than those members by the plan's own rows; a later
+  review (`V7fb5f7389f5941b8`, N4) separately observed that the fastest ADMISSIBLE
+  member is K2's own endpoint, from the family identity rather than from measurement.
+  Both were caught before any compute. The execution then measured those hybrids ABOVE
+  the budget, so the excluded members were not in fact admissible.
+* A mechanism was asserted from a numerical coincidence: the buffer gap equals the
+  plan's registered slack, 49,152 B, by two unrelated derivations. The causal step was
+  already in the earlier review's own hypothesis, which labelled itself untested
+  (`V751b7d55aeed4816` C1); the coordinator's correction brief then relayed it as that
+  review's account, and the executor wrote it down. Nobody ran the refuting check, which
+  was four integers from the plan's own ledger (`Va41b64e4d5064682` section 5). The correct account is a MISSING term for the unwindowed transform.
+* The executor then under-reported its own sharpest finding: the two counterfactual
+  admissibility flips are exactly the two arms that are faster than the reported winner.
+
+Every corrective round in that chain introduced a new defect. The pattern that produced
+them is narrow and nameable: a constant was matched rather than decomposed.
+
+## Hashes of the unversioned scientific inputs (2026-09-17)
+
+`out/` is gitignored, so these identities are the only link between C104 and its
+evidence: derivation_v3.md 52f9e25188ace435…, k2_proto_v3.py fbca01e4ea9bc97e…,
+survey.md a9c6c811207bfb00…, a2p_report_v1.json 9f2fe4b30f49…, c3_report_v1.json
+0d17cc4131c5…. Full list: `out/integrate-todo55/scientific_inputs.sha256`.
+
+## What this does and does not answer for the original goal
+
+The Heisenberg peak above a streamed exact output is removable at fixed N: K2's traced
+peak is two orders of magnitude below the dictionary engine's at N=7 t=5. That is a
+statement against the engine, a weak baseline. Against dense exact streaming no memory
+statement is available, because dense routes can make memory small by taking more
+passes; the open question is time at matched memory (TODO 57). The output itself stays
+at about 2^(q−1) terms (C30); compressing it is TODO 56.
 
 ---
 
@@ -9314,6 +9624,182 @@ changes. No commits or publication actions were taken.
 
 ---
 
+# SL — Slate round 1 (2026-09-16): peak memory of exact PPS on Toffoli modexp
+
+First use of METHOD.md "Where ideas come from" and SWARM.md phase 0. Two fresh
+contexts that could not see each other generated candidates: a surveyor
+(transfer, obstruction; board submission See53b1157d2844cd) and a deriver
+(structure inventory, exact symmetries, sequences; Sc7408765323745c1). The
+coordinator sealed its own candidate by hash before either returned.
+
+## Premise: the output contract
+
+"Same output as `propagate_perm`" was unstated, and both slates found it
+decisive. The final operator of the full-space modexp pullback has about
+2^(q−1) Walsh terms (C30's half density).
+* **O1** materialized dictionary: every method floors at the output, and the
+  peak term count (~0.748·2^q measured on N = 7) can shrink by at most ~1.5×.
+* **O2** streamed exact output: the Heisenberg peak above the output is removable.
+* **O3** exact compressed output: the output itself can shrink.
+
+## Candidates and choice
+
+Chosen **O2 with S1** (TODO 55); **S2** queued under O3 (TODO 56).
+
+| id | candidate | origin | contract |
+|---|---|---|---|
+| S1 | exponent-slice decomposition; each slice a C45 reduced observable | both slates, independently | O2 |
+| S2 | exponent-class form with Krawtchouk mixing, β ∈ {1, 3} | deriver | O3 |
+| S3 | decision diagram with work variables first, width ≤ 2^(q_w) at exponent levels | surveyor (not independent, below) | O3 |
+| S4 | carry C103 Lemmas 1–3 to the mid-propagation Walsh-coefficient diagram | coordinator, sealed | O3 |
+| S5 | orbit compression under exponent-bit permutations (symmetry proved at t ≤ 3) | deriver | O1/O3 |
+| S6 | exact integer tensor train, ranks from C48 cut ranks | surveyor | O3 |
+| K2 | dense work-state recursion (fair baseline at fixed N; labelled B1 in this note until 2026-09-17, and K2 in the TODO 55 derivation, where B1 means per-slice C45 runs) | both | baseline |
+| X1 | the ~3/4 peak cap as one broken linear structure at the top-carry Toffoli | deriver | O1 |
+
+## Killed, with reasons
+
+* **Multiplication OBDD lower bounds as an obstruction here.** Woelfel's bounds
+  (read in the body) need growing operand width; at fixed N they are constants,
+  and they bound a Boolean OBDD of a product bit, not Walsh-coefficient
+  functions at a propagation peak.
+* **Reordering exponent blocks to lower the peak.** Changes it by at most 0.2%
+  at t ≤ 3.
+* **S4 for peak memory under O2.** S1 reaches a linear-in-t peak with a proved
+  premise and existing code.
+
+## Unexplained (deriver)
+
+The first item was closed as a coincidence of totals in note SN (2026-09-18).
+
+* N = 9, a = 4 and a = 7 at t = 3 have equal support counts (255,973) and
+  different supports (symmetric difference 3,616).
+* N = 7, a = 2, 4 at t = 2: the prior step's support violates the b_msb ⊕ anc
+  hyperplane, yet the 3/4 cover still holds.
+
+## Process lessons
+
+* **Convergence.** The top candidate was found independently by both
+  generators; it had sat beside C45 through the depth-first chains.
+* **Blinding leaked through examples.** The coordinator withheld decision-
+  diagram paths, but METHOD.md's new examples named that work; the surveyor
+  disclosed it, so S3 does not count as independent. Blinding must cover
+  examples in recently edited permitted files.
+* **Re-running a worker's script can overwrite its evidence** when the script
+  writes to a hard-coded attempt path. The coordinator's reproduction was
+  stopped before its final write; the frozen submission was unaffected.
+  Re-runs go through a copy whose outputs point elsewhere.
+
+---
+
+# SN — Slate round 2 (2026-09-17/18): the next direction after C104
+
+Second use of SWARM.md phase 0. The thread SL → TODO 55 (C104) → TODO 57 had left
+TODOs 56, 58 and 59 behind it. Two fresh contexts, which could not see each other, ran
+on the best available model: a surveyor (transfer, obstruction; `S900eeb6398644d93`)
+and a deriver (structure inventory, symmetries, sequences, nine exact CPU runs;
+`Saf6eaffcf3a0462c`). Before dispatch the coordinator sealed its own candidate by hash
+(`M7763a806b65a4ca8`).
+
+**The trigger was weaker than stated.** TODOs 58 and 59 are reproducibility items, so
+the thread had one scientific residual (TODO 56), not three (surveyor, §0.2). The slate
+still changed the ranking.
+
+## Premise corrections (surveyor, §0.2–0.4)
+
+* The brief said K2 is "the fastest admissible member ... measured". C104 Limits
+  measures the non-endpoint slowdown only; that the endpoint is admissible is derived.
+* The Ω(2^q) O1/O2 floor is an **emission** floor of 2^(q−1) items, not an arithmetic
+  floor. For β ∈ {1, 3} the O2 arithmetic is polynomial in t below saturation, because
+  T_M and T_{M^−1} commute (C101), which collapses K2's leaves to 2^α(|E|+1)(|O|+1)
+  distinct spectra. This is derived and unmeasured. (Corrected 2026-09-18: an earlier
+  version said this changes C104's wording. C104 never states an Ω(2^q) floor; the
+  sentence the surveyor corrected was in the coordinator's slate brief. Detector: a
+  search of claims/C104.md for "floor", "Omega(2^q)" and "Ω(2" finds only "its proved
+  array floor", which is a different statement.)
+* SL's O3 has no query axis, and without one it is vacuous: the circuit is itself a
+  T_L·2^(q_w)-word exact representation with O(t·2^(q_w)) coefficient queries. O3 is
+  refined to (S_store, T_build, T_query).
+
+## Candidates and choice
+
+The user chose **R4 and R1**. C1 is queued behind a premise check.
+
+| id | candidate | origin | disposition |
+|---|---|---|---|
+| R4 | Gidney's measurement-based unlookup (X-measure, diagonal fixup, reset) has a Heisenberg adjoint that clears the lookup register's key bits: no branching, and diagonal stays diagonal | surveyor | **TODO 62** |
+| R1 | the rank of the ±1 matrix F_k across the exponent-prefix cut lower-bounds the bond of every representation linear across that cut, and is at most C103's \|S_k\| | surveyor | **TODO 63** |
+| C1 | one Rx(θ) between blocks: exact support is the same for every θ with irrational cos θ; the off-diagonal branch pays 27×/110×/220× at N = 3, 5, 7 (t = 2) | deriver | **TODO 64**, queued |
+| R2 / C2 | TODO 56's class form generalised to every β: W(z_e, z_w) = Σ_{g∈S_t} κ_g(z_e) Ĝ_g(z_w), κ from the prefix automaton | **both, independently** | TODO 56 **closed**, below |
+| C3 | distinct K2 multipliers T_L(t) = min(t, α + ν(β)), ν = ord_β(2), proved; verified on 17 families | deriver | into **TODO 58** (predicts 5 tables at F2 t = 7) |
+| R3 | β ≥ 5: count K2's distinct exponent-Walsh leaves | surveyor | parked; bounded below by R1's rank |
+| C5 | prove C103's equality through witness states (59–99% of dirty states separate all reachable words at t ≤ 8) | deriver | parked |
+| C4 | a time–space lower bound for O2 (pebbling) | deriver | parked (the surveyor discarded the Hong–Kung route: K2 escapes it by changing the DAG) |
+| R5 | a residue-automaton bound on C102's u_a ROBDD (growing N) | surveyor | parked |
+| C0 | the post-QFT distribution for the real input as the output contract | coordinator, sealed (sha256 c3eccf6a…c30c4) | **killed**: C52 already gives scalar conditional sampling with no work vector once r is known, and C45 makes the input expectation trivial. Neither slate generated it, and both discarded the neighbourhood. |
+
+## TODO 56, closed
+
+Both slates derived the same identity independently, and both found its value
+conditional. (i) Nothing in the ledger consumes Walsh-coefficient queries: the pre-QFT
+expectation is the z_e = 0 slice (C45), and post-QFT sampling needs amplitudes.
+(ii) C103's exponent-first ROBDD is already an O3 object answering queries in O(nodes),
+and it is smaller at the one benchmark point: 8,517 nodes against 58,279 class terms at
+(7, 2, t = 16). (iii) For β ≥ 5 in reach, |S_t| = 2^t for t ≤ α + μ + 1, and at
+N = 11, t = 12 the compression is 3.4× (arithmetic from C103's width law). The identity
+was instantiated at (11, 2, 4) and (7, 2, 4): the automaton κ equals brute-force class
+sums, and the reconstruction equals the direct transform in total count (521,932;
+62,330) and at 64 random keys (deriver s4). Whether the class form is minimal among
+linear representations is TODO 63.
+
+## Deriver's symmetry and seed results
+
+* **Sign law.** W_{a^−1}(z) = (−1)^{|z_e|} W_a(z) holds at t = 2 and 4 and fails at
+  t = 1 and 3 for N = 7, 9, 13. So (a, a^−1) at even t are one fixture, not two.
+* **SL seed "N = 9, a = 4 / 7 equal counts at t = 3".** Refuted as a symmetry: the
+  per-class supports differ (15,404 vs 15,414), the per-z_e count vectors are different
+  multisets with equal sums, and the same pair at N = 7 and 13 has unequal totals. It
+  is a coincidence of totals. The other SL seed (the 3/4 cover) is O1-only and was not
+  reopened.
+* **The dirty-space block group is not Z/r.** M_c^3 ≠ I moves 7,836 of 8,192 states at
+  N = 7, and M_{c^2} ≠ M_c^2, while both hold on the ideal orbit.
+* The deriver's own scripts had three defects, each caught by its own registered
+  cross-check and preserved as v1/v2: a uint8 sign overflow, the ideal-orbit set fed
+  through iota, and π/3 called generic.
+
+## Process lessons
+
+* **Convergence again.** As in round 1, the two generators converged on a candidate
+  (TODO 56's generalisation), this time together with its obstruction.
+* **Reading earlier slates costs independence.** Both workers read the round-1 slates,
+  which the brief permitted, and disclosed it. R2/R3 and C2 are therefore not
+  independent of the round-1 deriver.
+* **The coordinator's sealed candidate was already answered by the ledger.** It was
+  worth sealing, since it measured the coordinator against two fresh generators, and it
+  lost.
+* **Review statements carried into the ledger, three times.** In the integrations
+  of TODOs 62 and 63 the coordinator transcribed review statements without
+  re-deriving them: "support sizes differ" (review `Vab1fa0e744c8487c` I2), a float
+  rank of 1913 (`V58130d845fce41c4` D1) and a timing attribution that the run log
+  shows was wrong (D2). The referees caught all three. A mechanical detector was
+  tried afterwards on the frozen v1 submissions (`S776d9c75bb0d4899`,
+  `S688bd467869a4ed6`) and was not adopted. The phrase-overlap variant is archived
+  with its log in attempt `Ac15c8fb2825b4168` (`detector_trial.py`,
+  `detector_trial_n5.log`); the token-location run was not archived, and its result
+  below rests on inspection. Locating each number by token in the
+  sources' frozen evidence flagged none of them: 1913 is in the falsifier's own
+  frozen results file, copied there from the binding review, and the other two are
+  wording. Five-word phrase overlap with review bodies but not evidence flagged the
+  1913 line and the timing paragraph, but it missed "support sizes differ", and
+  it flagged 18 other lines, mostly binding corrections and shared phrasing. The rule is
+  now a list, in SWARM.md: the integration summary names each review-sourced
+  statement and what the author re-read.
+* **A premise check missed by the deriver.** C1 sits beside the perturbed-circuit
+  claims C52–C57 (single-defect output effects, including Rx(θ) kicks) and cites none of
+  them. TODO 64 starts with that check.
+
+---
+
 # SR — The pi revival was predicted, not fitted to the sweep
 
 TODO 22 replaced the localized kick by Rz on one actual work qubit, keeping
@@ -9778,6 +10264,45 @@ a general simulation breakthrough. A stronger reverse-instrument lead emerged
 from this baseline comparison; C68/§RI record its initial audit and TODO 28
 alone specifies its next bounded certification question. TODO 24 keeps the
 broader backend bit-cost issue deferred.
+
+---
+
+# UL — Measurement-based unlookup (TODO 62, 2026-09-18)
+
+**Origin.** Surveyor candidate R4 in slate round 2 (note SN), aimed at the gap that WD
+and Paper B §7.3/§13 item 3 had named "the one real gap": the windowed analysis
+assumed a unitary unlookup.
+
+**Round.** Derivation task `T4132ea2a6c784b19` was written by a fresh deriver on the
+best available model and submitted as `S3e2b424794764fa2`. A fresh referee accepted it
+(`Ve11cc8f5fd444c0a`) with no blocking findings. The author and the referee both judged
+that no run was needed: the derivation answers the TODO, and the conditional plan
+(engine reset rule, P1–P5, control F1, mutant M-drop) runs only if channel-model
+support sizes are to appear in the paper. In that case the referee requires a separate
+`kind:"implementation"` task for the engine change, a frame-path mutant, and M-drop
+instantiated at w = 2.
+
+**Corrections to the slate sketch.**
+* The surveyor's "deallocate ⇒ drop" was a mislabel. Deallocation gives the clear rule;
+  drop is measure-and-leave.
+* The surveyor expected the channel model to be "if anything, simpler". Exploration
+  found the channel support larger at two of the three WD instances (C/U = 1.69 at N = 5,
+  a = 2, w = 2; 1.83 at N = 7, a = 6, w = 1; 0.86 at N = 5, a = 4, w = 1; K = 0). These are exploration
+  numbers and enter no claim.
+
+**Referee corrections applied in C105.** D1: the tail triple for bit i is
+s ^= (2^i mod N), not X(s[0]). D2: Theorem 2 includes act·V_0. D3: the paper text is
+scoped to the lookup-register unlookup, and the support values are not reported.
+D4: 2.8 is derived under C38's hypothesis. The referee's own diagnostics
+(`out/agent-board/reviews/referee-derive-62/`) confirmed W² = id on the full 19-qubit
+space at (5,4,w=1) and (7,6,w=1), and the witness input y = 8704 with the source's own
+`replay()`.
+
+**Observations (exploration, not claims).** The z_s = 0 slices of the two final
+spectra differed at every instance tried (the derivation listed this under a proved
+heading; it rests on exploration only, integration review `Vab1fa0e744c8487c` I1).
+The s-marginal count at K = 1 is 7,714 at both (5,4) and (7,6),
+although the full supports differ. This is an observation only.
 
 ---
 

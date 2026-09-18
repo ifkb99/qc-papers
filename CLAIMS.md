@@ -6,7 +6,7 @@
 Edit the individual claim file, not this. It exists so the papers can
 ship one self-contained supplementary document.
 
-103 live claims, 19 retracted.
+106 live claims, 19 retracted.
 
 ---
 
@@ -9302,9 +9302,12 @@ Hence B(t + 1) − B(t) = d for all t ≥ α + 1: B is exactly affine in t.
 * **Fixed N.** The work-part cap is exponential in q_w = 3n + 4, so polynomial
   in N, and grows with L(t). No cost polynomial in log N; no factoring
   consequence.
-* **Equality measured, not proved.** Widths equal L(k) on all 11 β > 1
-  fixtures and the free model attains the bound exactly, so the compiled
-  blocks act freely on these words. That is not proved.
+* **Equality measured, not proved, except at N = 7, a = 2 and 4.** Widths
+  equal L(k) on all 11 β > 1 fixtures and the free model attains the bound
+  exactly, so the compiled blocks act freely on these words. That is not
+  proved in general. At N = 7, a = 2 and 4 (β = 3, α = 0, so L(k) = k + 1)
+  C106 proves that the width at e_k equals |S_k| = L(k) for every
+  k < ord(M_2) and every t.
 * **A formal ceiling only.** The finite block group bounds all widths
   eventually, but its order at N = 7 is about 3.2·10^29.
 * **Not DDSIM's state diagram or the MPS resource of C19.** TODO13 is not
@@ -9317,6 +9320,356 @@ Hence B(t + 1) − B(t) = d for all t ≥ α + 1: B is exactly affine in t.
   β = 5 widths; `mu_run_v1` is its out-of-sample test. The β = 3 and β = 1
   derivations were registered before `run_v1`.
 * **Novelty unaudited.**
+
+---
+
+## C104 — For ToffoliModExp at fixed N, exponent qubits are only first controls of Toffolis in their own block, so the exact full-space Walsh spectrum of x0 splits into 2^t exponent-Walsh slices that later gates never mix (proved); it can be streamed exactly by per-slice C45 runs (B1) or by a depth-first recursion over exponent Walsh bits holding t+1 dense work vectors, a gather buffer and one gather table per distinct block (K2, proved exact); K2's traced peak is measured at (N=7, a=2) t<=10, (N=11, a=2) t<=6 and (N=7, a=6) t<=6 (0.41-0.58 MB, 2.65-4.82 MB, 0.42-0.49 MB); this is applied known mathematics, and no memory crossover with dense exact streaming is claimed because dense routes can trade passes for memory
+
+*status: established · paper: -*
+
+# C104 — exponent-slice decomposition of the full-space modexp Walsh spectrum
+
+Object: `perm_pps.propagate_perm` on `ToffoliModExp(N, a, n_exp=t).build()` with
+observable Z on x0; the exact final_terms (the Walsh spectrum of output bit x0 over
+all 2^q inputs, q = q_w + t, q_w = 3n + 4), delivered under output contract O2 as a
+stream yielding every (key, value) exactly once, not retained (note SL). How this was
+found, every withdrawn statement and all board provenance are in note ES.
+
+## Proved (derivation accepted in `Vaa6ee566b4454a47`; `Sc4c99b9dd0c14e6c`)
+
+* **Roles.** Exponent qubits occur only as the first control of Toffolis inside their
+  own block; no CNOT or X touches them.
+* **Lemma S (slices).** A gate can flip Walsh key bit z_q only when q is a CNOT or
+  Toffoli control. Once every such use of a qubit set has been propagated, each later
+  engine step commutes with restricting the dictionary to that set's bits = u; keys,
+  values and insertion order agree, with and without the C82 frame.
+* **Theorem K1 / B1.** Slice u equals the C45 reduced run
+  `propagate_perm(zmask=obs|u, trace_plus=exponent qubits)` XOR-translated by u, so
+  per-slice runs give the exact O2 stream with retained terms at most 2^(q_w+1) at step
+  boundaries (3·2^(q_w+1) within a step), independent of t. It fails under max_weight or if an exponent qubit takes a target role.
+* **Theorem K2.** A depth-first recursion over exponent Walsh bits streams the exact
+  spectrum, holding t + 1 dense int32 work vectors plus a gather buffer and one gather
+  table per distinct block permutation. Derived phase-R ledger
+  L_K2(t) = (t+2)·4·2^(q_w) + 8·2^(q_w)·T_L bytes, T_L the number of distinct blocks,
+  which is at most the number of distinct multipliers c_k = a^(2^k) mod N.
+
+## Implementation and description (neither is a proved clause)
+
+Implementation (k2_proto_v3.py): tables are keyed by a sha256 of
+the canonicalized block segment with the block's own exponent wire masked out, so equal
+segments share one table and T_L counts distinct keys. C101's identity
+M_(c^-1) = M_c^(-1) concerns the permutations, not these keys: c and c^-1 are different
+segments and get different tables, which is why T_L counts distinct multipliers rather
+than inverse pairs.
+
+Description (the survey's proposed wording, `Sef28b547805c419a`, not a proved clause):
+K2 is the Walsh–Hadamard transform over the exponent register evaluated depth-first on
+one orbit representative per node, using the controlled-permutation equivariance of the
+slices (C103 Lemma 0); it is not the plain partial transform, which needs the whole
+2^q table.
+
+## Measured (CPython 3.12.10, NumPy 2.4.6, CPU; tracemalloc unless labelled)
+
+Families: F1 = (N=7, a=2), F2 = (N=11, a=2), F3 = (N=7, a=6).
+
+* **Exactness at 26 points** (`V0e29250446b9478a` on `S0077516c27884295`, prototype
+  k2_proto_v3 sha fbca01e4…): K2's stream digest equals the frozen engine reference at
+  F1 t=1..6, F2 t=1..3, F3 t=2..6, and the dense pullback D at F1 t=7..10, F2 t=4..6,
+  F3 t=1 and F3 t=7..10; at F2 t=4,5 the slice u = 2^(t-1) also equals the perm_pps
+  engine, a route that shares no kernel with K2. All four routes build from the same
+  `toffoli_arith` gate list, so this does not check the modexp construction itself.
+  Per-slice runs B1 were exact at the 14 phase-A points (`V7293e51a79fe4ac6`).
+* **K2's whole traced peak W (bytes)**, with `gc.collect()` before the base and phase-P
+  readings in traced runs:
+  * F1 t=1..10: 414,402 / 483,171 / 483,079 / 483,171 / 483,171 / 483,171 / 483,171 /
+    513,598 / 546,529 / 579,394;
+  * F2 t=1..6: 2,654,634 / 3,185,579 / 3,720,436 / 4,249,245 / 4,781,418 / 4,822,769;
+  * F3 t=1..6: 419,874, then 488,067 at t=2..6 (t=7..10 bytes not measured; digests,
+    counts and T_L only).
+  * W is the phase-P (table) peak at F1 t<=7, F3 t<=6 and F2 t<=5, and the phase-R2
+    peak at F1 t=8..10 and F2 t=6. Its near-constancy at N=7 reflects T_L = 2: the
+    multipliers c_k = a^(2^k) mod N take only two distinct values there (2, 4 at F1;
+    6, 1 at F3, where the tail is all ones), so only two distinct block segments occur (`V7293e51a79fe4ac6` S3). It is not
+    independence of t; at F2, T_L = t until it reaches 5 at t = 5,6.
+  * Increments: ΔW = 4·2^13 + 163 and 4·2^13 + 97 B at F1 t=8→9→10;
+    Δ(peak_R1 − cur_P) within 4S+96..4S+176 B at N=7 and 4S+112..4S+144 B at N=11.
+  * W, the phase-P residue and its constancy hold only with the traced-only full
+    collection; without it the phase-P residue grows 2,496 B per t at N=7 and
+    4,864 B at F2 t=5→6. The untraced path is not measured.
+  * W excludes pre-tracing setup (gate list, points, consumer, K2 object) and the
+    interpreter; L_K2 is derived.
+  * PK1b (leaf slot) = 51,883 B at F1 t=1 and 51,899 + 32(t−1) B for t = 2..10.
+  * A non-gated plan observation (table residue within 800..1,500 B) was never
+    registered and is exceeded at F2 t=5,6 (1,594 and 1,686 B); no decision rests on it
+    (`V0e29250446b9478a` IC-3).
+* **Against the dictionary engine** (phase A, same harness, `V7293e51a79fe4ac6`):
+  K2/E by traced peak 0.286 / 0.142 / 0.040 / 0.020 / 0.010 at F1 t=1..5 and
+  0.189 / 0.067 at F2 t=1,2. E, B1 and D imported their modules after tracing started
+  and K2 before, an estimated tens of KB that matters only at F1 t=1,2. By ru_maxrss
+  (KiB, over a ~41 MiB interpreter and NumPy baseline) K2/E is 0.94 / 0.62 / 0.31 at
+  F1 t=1,3,5. Wall-time ratios were load-flagged (K2/E ≤ 0.0099 at F1 t≥3).
+* **An earlier K2 version** (k2_proto_v2) failed its leaf-slot band at F1 t=5,6
+  robustly (1,835 and 5,587 B over) and at t=4 by 3 B, which is inside the ~46 B
+  process-to-process variation of the same code and which the correction did not depend
+  on (`V7293e51a79fe4ac6` IC-3, `V6b0fdd469efc4fd4` IC-4). An
+  exploration bug check (`V6b0fdd469efc4fd4`) located the cause as a bounded
+  keyword-dict free-list refill from `np.take`'s Python wrapper: the growth stopped at
+  t=7 and fell 88 B per t through t=10, and replacing the call with the array method
+  removed it with identical output. k2_proto_v3 is that change (plan accepted
+  `V5df0e47ea3df4a6c`); its repeat reproduced the refill in a must-fail arm.
+
+## Prior art and wording
+
+Applied known mathematics (prior-art survey `Sef28b547805c419a`): the Walsh transform of
+a function through its restrictions (Canteaut–Charpin 2003, §II.B Prop. 1;
+Daemen–Govaerts–Vandewalle 1994, Eqs. 15, 21), the projector decomposition of a
+control-only block (Markov et al. 2018, §2 Eq. 1), slicing on fixed variables (Chen et
+al. 2018, §III.B.2), last-use variable elimination (C45), depth-first traversal of Pauli
+branches (Rudolph et al. 2025, §III.B), and the fast Walsh–Hadamard transform. In the
+searched sources and queries listed in that survey (§2), no statement of this
+combination for this output was found. No further claim is made.
+
+## Limits
+
+* **No memory crossover with dense exact streaming is claimed, and K2 is not the
+  smaller route at small t.** A single-pass windowed int32 dense route (D*w) has a
+  derived ledger of 4·2^q + 4w bytes for a replay window of w = 4,096 elements, plus a
+  32,768 B library-overhead estimate. Against K2's measured peaks the array terms alone
+  give K2/D*w ≈ 5.06 / 3.28 / 1.73 / 0.89 at F1 t=1..4 (3.61 / 2.68 / 1.55 / 0.84 with
+  the overhead term included): **D*w uses fewer bytes than K2 at F1 t ≤ 3**, and K2 is
+  smaller only from t=4, in both readings (design review `Vbfd8fd978d2f46a0` R1, whose
+  bands were computed against the earlier k2_proto_v2 peaks, which differ from the v3
+  peaks used here by 0–46 B at F1 t=1..4 and by 0 B at F2). The survey `Sef28b547805c419a` reaches the same conclusion one step
+  earlier for its unwindowed variant, which is below K2 at t ≤ 2 at both moduli.
+  K2's side of that comparison is measured, and TODO 57 later BUILT and traced the
+  table-free single-pass route (peaks 83,916 / 149,452 / 280,524 / 542,668 B at
+  F1 t=1..4), which measures this crossover; the ledger figures quoted in this bullet
+  are the derived ones that preceded it. Further, a dense route can split the spectrum by the Walsh
+  bits of its top k input-index bits and stream it from 2^k passes over a 2^(q−k) table
+  (exact at k = 1, 2, 3 on a 7-qubit random permutation:
+  `out/integrate-todo55/toy_multipass_check.py`; not built at scale). By arithmetic a
+  two-pass split at F1 t=4 has arrays below K2's measured peak, so even the t=4 side is
+  a property of D*w's single-pass representation rather than of dense exact streaming
+  (`Vf1d3e39b30b84bb1`, A1).
+* **Time at matched memory** (TODO 57; result `Sa13414787bd54716` accepted
+  `Va41b64e4d5064682`, whose grades these are). MEASURED, at the four points where a
+  matched-memory budget binds: the fastest member of the dense family that is not K2's
+  own endpoint and whose measured peak fits the budget is the table-free route, at
+  7.35x / 21.40x / 56.64x K2's wall at F1 t=4,5,6 and 187.55x at F3 t=6 (medians of
+  three untraced repeats). That the fastest
+  ADMISSIBLE member is K2's own endpoint follows from the accepted family identity, not
+  from measurement. Also measured: at N=7 the hybrid's whole peak is a CONSTANT phase-R
+  leaf transient of the unwindowed transform (102,083–102,371 B across transformed
+  tables of 65,536–262,144 B, constant to 0.28% over that fourfold table range) on a
+  base 10,736–20,845 B above its proved array floor,
+  and the plan's band carries no term for either; K2's own whole peak is its phase-P
+  table build at 11 of 11 points, so that transient never entered the band's anchor; at
+  N=11 the hybrid's own table build IS its whole peak, and its admissibility leg holds
+  while the single-point band itself FAILS low at all three rows, by 9,504 / 4,320 /
+  5,208 B. DERIVED: the band's slack decomposes with one transform term
+  (5,120 B) that is the WINDOWED transform's allowance, measured at 5,088–5,136 B, so
+  the defect is a missing term for the unwindowed transform (19.5x it), not a mis-sized
+  one; a windowed hybrid would make 10 of 11 arms admissible, with one still 3,973 B
+  over. COUNTERFACTUAL, on measured components: substituting the sub-cap transient
+  leaves all 14 hybrid rows outside their bands, so the band's failure does not depend
+  on the buffer cap; but it would admit F1t4 k=3 and F3t6 k=5, which are also the FASTER
+  arms (2.67x and 10.07x against the 7.35x and 187.55x above), so at two of the four
+  binding points the transform and the 8,192-element buffer cap decide both
+  admissibility and which member answers the question. EXPLORATION: the transient obeys
+  3 x 4 B x min(half-array, buffer size) + 1,656 B for n = 2^13..2^20. Not carried from
+  that round: any account making the 49,152 B coincidence a cause, any windowed-hybrid
+  statement as measured, and anything about dense routes in general, the family as a
+  whole, the t=1 side or a windowed K2.
+* Under TODO 55 alone no comparison of K2 with the dense pullback D or any dense route
+  was measured; TODO 57 measured the table-free route, as its bullet above records.
+* Only the listed families and t; only CPython 3.12.10 / NumPy 2.4.6; not the untraced
+  or uncollected path; "linear in t" is not established beyond the listed increments;
+  no proof of 4S per t.
+* The exponent-slice lemma is proved for `build()`; wrapped or windowed arithmetic
+  variants (lab/variants.py) were not checked.
+* **The evidence is unversioned.** Every prototype, raw reading and the survey's query
+  list live under the gitignored `out/` tree, so nothing in git reproduces these numbers
+  and nothing on the board flags this claim if those files change. Their sha256 are
+  recorded in note ES. Promoting the K2 prototype to a registered `lab` module with an
+  experiment is TODO 58.
+
+---
+
+## C105 — Measurement-based unlookup of the lookup register (X-measure, diagonal fixup, reset or deallocate) acts on diagonal PPS as the pullback that clears that register: Z-type and branch-free; with it, windowed modexp computes the same full-space function as the unitary-unlookup circuit on every input whose lookup register starts clean; C37's dead tail holds; off that set the functions differ (witness traced by hand) and the channel model's support sizes are not reported
+
+*status: proven · paper: B*
+
+# C105 — Measurement-based unlookup under diagonal PPS: the clear rule
+
+Object: `WindowedModExp` (`windowed_arith.py`) with the second lookup of every
+(lookup, add, lookup) triple, in the forward and in the inverted `mult_acc`
+(`:174`, `:186`), replaced by the channel "measure the lookup register `s` in the X
+basis, apply the diagonal phase fixup F_m on the window, return `s` to |0>". The
+activation `and_into` and its uncomputation stay unitary. Observable: a computational-
+basis Z-string (Paper B's regime). How this was found and all board provenance: note UL.
+
+## Proved (derivation `S3e2b424794764fa2`, accepted `Ve11cc8f5fd444c0a`)
+
+* **Clear rule.** For a diagonal observable the channel's adjoint is
+  Z^z ↦ Z^(z with the s-bits cleared). The coefficient is kept, and colliding keys are
+  summed. The rule is independent of the fixup table: the fixup is diagonal and
+  invisible to diagonal observables, so in the Heisenberg picture the unlookup reads
+  nothing. It holds under **reset** and under **deallocation** (the fresh register's
+  allocation pulls back as the same clear). The **drop** rule (terms with s-support
+  removed, C45's contraction) belongs to measure-and-leave, which is not a correct
+  construction: here the register `self.s` is reused (`:74`, `:118`, `:172`).
+* **C8 and C17 transfer.** The Heisenberg operator is diag((−1)^g) with g the x0 bit
+  through a deterministic, non-injective population map. Neither proof uses
+  injectivity, so the term count is still the Walsh sparsity of g, and the atomic peak
+  is still the maximum suffix sparsity. C82's frame rule for the reset is a logical
+  projection that leaves the frame unchanged. C104's Lemma S holds: an X flips no key
+  bit, the reset flips only s-bits, and window qubits are never CNOT or Toffoli targets.
+  C104's "Roles" clause does not hold for the windowed circuit.
+* **The lookup permutation on the full space.** With V the XOR of all table entries,
+  `lookup` is s ^= T(j) when act = 0 and s ^= V ⊕ T(j) when act = 1; act, the window and
+  (for w ≥ 3) the work qubits are restored, and the formula holds for clean work
+  qubits. The tail triple for multiplier bit i uses the table [2^i mod N]·2^w, so its
+  lookup is s ^= (2^i mod N) for every input: it reads no window.
+* **Agreement.** The channel and unitary population maps agree on every input with
+  s_in = 0, a strict superset of the valid subspace; every channel triple leaves s = 0.
+  **One-reset reduction:** the channel circuit equals the circuit in which only the
+  first unlookup in forward order is a reset. So the channel function depends on s_in
+  only through the first triple's addition, b += x_0·(s_in ⊕ act·V_0 ⊕ T_0(j)). The
+  s-marginals of the two final Walsh spectra are identical. Off {s_in = 0} the two
+  functions need not agree: they differ at a witness traced by hand (N = 5, a = 4, w = 1,
+  input y = 8704). Where else they differ is not characterised.
+* **C37's dead tail holds** in the channel model: no key in the final support has a
+  tail-window bit set.
+
+## Derived
+
+* **C38's 2-periodicity**, as an identity of whole dictionaries, under C38's own
+  hypothesis W² = id and at least one live window (a ≠ 1).
+* **w-independence of the final support size at r = 2** (a² ≡ 1 mod N) for w = 1, 2, 3,
+  in both models.
+* **The fixup's own implementation is transparent** for diagonal observables when its
+  ancillae carry no observable support at their uncomputation.
+
+## Limits
+
+* **Not reached:** whether the channel model's support is smaller or larger than the
+  unitary model's, and the peak. Exploration found both signs, so no general
+  inequality exists. The channel model's support values are not reported, and none
+  enters the ledger without a registered run.
+* Diagonal observables only. For X- or Y-type observables the fixup does not commute
+  and the rule fails.
+* Gidney's measurement-based uncomputation of the activation AND is not modelled.
+  The clear rule applies to it, and it would change the full-space function again
+  (asserted, not derived).
+* Exploration observations, including the z_s = 0 slices, are in note UL and are not
+  claims.
+* The lookup formula is proved for clean work qubits; w = 3 with dirty work qubits
+  is handled only for the tail and r = 2 tables; w ≥ 4 was not examined.
+* The derivation relied on WD's description of Gidney's gadget; no page or figure
+  of Gidney's papers is cited on this claim's authority.
+* C104's K1/B1 extension to the windowed circuit is not part of this claim.
+
+---
+
+## C106 — The exponent-prefix cut rank of the full-space modexp pullback lower-bounds the bond of every representation linear across that cut (TT/MPO, weighted automata, the exponent-class form, K2's distinct leaves) and is at most C103's |S_k|; when the block permutations commute it equals the rank of one column block, and for beta = 3, alpha = 0 it equals min(k+1, d) with d the Krylov dimension of one block; at N = 7, a = 2 d = 1936 exactly, so C103's widths are the minimal linear bond at every reachable t
+
+*status: proven · paper: B*
+
+# C106 — The exponent-cut rank: a lower bound on linear representations, and its exact value for commuting letters
+
+Object: f(e, w) = bit x0 of `ToffoliModExp(N, a, n_exp=t).build()` on all 2^q inputs
+(C103 Lemma 0: f(e, w) = h(P(e) ι(w)), with P(e) the prefix product of block
+permutations, ι(w) = w ⊕ 2^(x0) the initial X on x0, h(y) = bit x0 of y, and
+s(y) = (−1)^h(y) the sign vector on work states). For 1 ≤ k ≤ t, F_k is the ±1 matrix with rows indexed by the first k
+exponent bits and columns by (the remaining exponent bits, the work bits). Rank is over
+Q. D_k is the number of distinct rows; S_k is C103's set of prefix products. How this
+was found and all board provenance: note CR.
+
+## Proved (derivation `S1e0938302b39406a`, accepted `V13f2bfb187274d58`)
+
+* **Theorem A: the bound and its scope.** rank F_k ≤ D_k ≤ |S_k| ≤ C103's L(k). Any
+  factorization F_k = L·R across the cut has inner dimension at least rank F_k. This
+  covers:
+  * the bond of a tensor train or MPO over (e_0 … e_{k−1} | rest);
+  * the state count of a weighted automaton after the k-th exponent letter;
+  * the inner dimension |S_t| of the exponent-class form of note SN at k = t;
+  * the number of distinct exponent-Walsh leaf spectra of K2 (C104) at k = t;
+  * the level width of a quasi-reduced OBDD read as a tensor train.
+
+  It bounds **bond, not bytes**, and says nothing about sparse cores, a ROBDD queried by
+  model counting, "store the circuit and recompute", C45's reduced observable, the
+  Schrödinger-side MPS of C19, or cuts that are not exponent prefixes. By C48's
+  identity the same rank is that of the Walsh spectrum at this cut, under every partial
+  or full transform (the class-spectra matrix, C104's slice matrix, the full spectrum).
+  It is also exactly the operator Schmidt rank of U†Z_x0U across the cut, in any local
+  basis.
+* **Theorem C: a fixed column.** The all-zero work state is fixed by every block, so
+  the work input w* = 2^(x0), which ι maps to the all-zero work state (this is not the
+  Shor start w = 0), gives an all-(+1) column of F_k. Hence no row is
+  the negative of another, and every linear dependency among rows has coefficient sum
+  0. The rank drop of the ideal scalar function (to r/2 when −1 ∈ ⟨a⟩, because
+  x ↦ N − x flips the LSB) lives only on the clean orbit, whose columns contribute rank
+  at most r (r/2). Any independence beyond that is carried by dirty inputs.
+* **Theorem B: commuting letters.** If the block permutations commute pairwise,
+  rank F_k equals the rank of the E' = 0 column block. For β = 3, α = 0, every letter
+  is M^{±1} for one work permutation M (C101), and
+  **rank F_k = min(k + 1, d) for every t ≥ k ≥ 1**, with d = dim Q[T]s the degree of
+  the minimal polynomial of T : v ↦ v∘M⁻¹ on the cyclic subspace of the sign vector s.
+  d is computed exactly from the cycles of M as a sum of φ(m) over the cyclotomic
+  factors Φ_m present (derivation B3).
+
+## Proved by exact computation (experiment `Se701e050f6a04e80`, accepted `V3cec8224aec7454d`)
+
+At N = 7, a = 2 (and a = 4, the same letters mirrored), **d = 1936**, certified over Z
+in both directions:
+* d ≥ 1936: 1936 Krylov rows have a nonzero Gram minor mod p;
+* d ≤ 1936: μ = ∏_{m∈Mset} Φ_m has degree 1936 and μ(T)s = 0 exactly over Z;
+* μ is minimal: no polynomial with one factor dropped annihilates s.
+
+Berlekamp–Massey in the experiment, and a DFT count in the derivation's exploration,
+agree; they serve only as consistency routes. The
+period of s under M equals ord(M) = 322176487219178376621827390400, C103's recorded
+order, so the rows s∘M^j are pairwise distinct for j < ord(M), and D_k = k + 1 there.
+Also measured: rank = D_k = |S_k| = k + 1 on the t = 8 circuit for k = 1..8, by exact
+elimination over Q and over two primes.
+
+Consequences, stated at their reach:
+* **Reachable.** For every t ≤ 1935 at (7, 2) and (7, 4), rank F_k = |S_k| = D_k =
+  k + 1 at every prefix cut. So C103's exponent-level widths are the minimal bond of
+  any representation linear across these cuts. The width argument below also gives
+  level-e_k ROBDD width = D_k = |S_k| for every k < ord(M) at this family, which proves
+  here the equality of widths with |S_k| that C103 records as measured.
+* **Unreachable.** For 1936 ≤ k < ord(M), which needs at least 1936 exponent qubits,
+  the rank stays 1936 while D_k = k + 1 keeps growing. Every one of those k + 1
+  subfunctions depends on e_k, because its two children are distinct rows at cut
+  k + 1. So the level-e_k ROBDD width, k + 1, strictly exceeds the minimal linear bond
+  there. The statement "rank F_k = |S_k| for all t below saturation" is refuted only in
+  this unbounded-t sense.
+
+## Limits
+
+* **Not reached: letters that do not commute** (α ≥ 1 or β ≥ 5). At the six families
+  explored, only inverse pairs commute; commutation elsewhere is unchecked. Whether
+  rank F_k = |S_k| holds there has no proof and no obstruction.
+* **Verified at listed sizes only**, with no mechanism: rank = D_k = |S_k| at (7, 3),
+  t = 7, k ≤ 7; (11, 2), t = 6, k ≤ 6; (11, 3), t = 6, k ≤ 6. The derived checks at
+  those points also held: the all-(+1) column, a clean-column rank of at most 3, 5 and
+  5 with gate-kernel-free values, and circuit rows equal to word rows.
+* **d has no derived meaning.** It is not r and not an obvious divisor. At N = 9, a = 4,
+  d = 19,286 by two routes, with no certificate; no prediction is made at other (N, a).
+* The ±1 and 0/1 matrices' ranks differ by at most one; all statements are for ±1.
+  C30's ceiling d ≤ 2^(q_w−1) is a hypothesis where used (1936 < 4096 is consistent,
+  not a test).
+* **Exact elimination only.** Any tensor train or null vector at this cut must come
+  from exact elimination. The derivation's referee found a default-tolerance
+  floating-point rank unable to separate the 1937 Krylov rows from a copy with a random
+  last row (its own check, `V13f2bfb187274d58`; not frozen evidence of this claim).
+* **Shared component.** Every block and circuit permutation came from
+  `walsh.classical_permutation` and `toffoli_arith`. The only routes independent of
+  that gate kernel are the clean-orbit integer arithmetic, the ideal scalar function
+  and a planted dependency.
+* **Environment.** Measured wall times were 433.5 s (main) and 39.7 s (bug check) on
+  CPU, under Python 3.12.10 with NumPy 2.4.6 in an ephemeral environment.
 
 ---
 

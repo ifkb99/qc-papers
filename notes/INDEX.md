@@ -7,7 +7,7 @@ they say what was believed at the time, so a note may contain a status
 later superseded. Where a note disagrees with a claim file, the claim
 file wins.
 
-**105 investigations**
+**111 investigations**
 
 | code | date | outcome | subject | claims |
 |---|---|---|---|---|
@@ -21,14 +21,17 @@ file wins.
 | [CH](notes/CH-coherent-histories-and-gate-by-gate-sampling.md) | 2026-09-11 | mixed | Coherent routes: a prefix-amplitude connection removes rejection, but not all its costs | C59 |
 | [CM](notes/CM-coherent-merging-and-reverse-walks.md) | 2026-09-11 | confirmed | Coherent route merging replaces history enumeration with a short backward walk | C56, C58, C59, C63, C68, C70, C71 |
 | [CP](notes/CP-carry-prefix-correlation.md) | 2026-09-12 | exact restricted implementation and independent checks; isolated-adder novelty closed; no-cut escape prediction refuted | Actual Cuccaro prefixes reach the known carry-correlation baseline | C85 |
+| [CR](notes/CR-exponent-cut-rank.md) | - | record | TODO 63. The exponent-prefix cut rank: a lower bound for linear representations, exact for commuting letters. | C106, C103, C48 |
 | [CT](notes/CT-finished-control-contraction.md) | 2026-09-09 | established | Exact finished-control contraction: bounded reduced support in both order branches and an idempotent β=1 tail | C45, C46, C42, C18 |
 | [CW](notes/CW-component-masses-and-weighted-rejection.md) | 2026-09-11 | confirmed | Component masses refine the work-first rejection envelope | C59, C78, C79, C80 |
 | [DB](notes/DB-differential-bridge.md) | 2026-09-14 | identity, counting theorem and APN extremality derived before measurement; all predictions and must-fail controls pass on dense, gate-level and a 14-qubit GPU dense reference that settled the out-of-sample F10 prediction | The differential bridge: DDT counts for off-diagonal Pauli pullbacks | C99 |
 | [DF](notes/DF-todo-12g-closed-negatively-there-cliff-and-os4.md) | - | retracted | TODO 12g CLOSED NEGATIVELY: there is no cliff, and §OS4's CLIFF OBSERVATION is RETRACTED | C1, C7, C21, C30 |
 | [DM](notes/DM-explicit-carry-dimers.md) | 2026-09-12 | nonzero exact arithmetic family and grid minor proved; direct dimer reduction removes generic gadgets; independent verifier defects retained and corrected | Explicit growing carry graphs expose a stronger dimer baseline | C87 |
+| [DN](notes/DN-dd-native-pps-and-the-turn.md) | - | mixed | DD-NATIVE PPS (TODO 13 rounds, 2026-09-15/17). A decision diagram of the propagated operator: ~2x fewer nodes than a matched null, 12-41x more bytes, … | C102, C103, C104 |
 | [DS](notes/DS-dirty-prefix-symmetries.md) | 2026-09-12 | exact three-macro full-space discriminator found; growing disabled sector reduced; enabled closure remains open | Dirty-prefix reversal symmetry redirects the scalar; the disabled sector has a polynomial construction | C92 |
 | [DW](notes/DW-disjoint-mask-weights.md) | 2026-09-13 | width-independent coefficient bound proved for disjoint masks; the fixed-q word-width memory campaign was designed, found nondiscriminating and withdrawn without execution | Disjoint-mask coefficient sizes and the withdrawn width study | C98 |
 | [ER](notes/ER-earlier-phases-and-binary-residue-cycles.md) | 2026-09-11 | confirmed | Earlier-phase progression covers now support an opt-in sampler and long-row validation | C59, C77, C78, C79 |
+| [ES](notes/ES-exponent-slices-todo55.md) | - | record | EXPONENT SLICES (TODO 55). The Heisenberg peak above a streamed output is removable at fixed N; memory alone does not separate methods. | C104 |
 | [F10](notes/F10-scope-the-walsh-identity-exactly-where-stops.md) | - | record | scope of the Walsh identity (exactly where it stops) | - |
 | [F11](notes/F11-truncation-error-non-monotonic-aggressive.md) | - | record | truncation error is NON-MONOTONIC in δ (aggressive beats mild) | C5 |
 | [F12](notes/F12-the-adic-dichotomy-function-level-superseded.md) | - | superseded | the 2-adic dichotomy at function level (superseded by C15 above) | C15 |
@@ -85,10 +88,13 @@ file wins.
 | [SE](notes/SE-scratch-extension-equivalence.md) | 2026-09-10 | established | Same physical computation with different Walsh cost; same Walsh cost with different physical computation | C50 |
 | [SG](notes/SG-shift-generating-functions.md) | 2026-09-12 | literal convex sign-cell compression is obstructed by reachable native witnesses; exact all-shift recurrence and fixed-dimensional atoms derived, with repeated closure unproved | Final-shift lifting isolates the missing generating-function closure | C95 |
 | [SK](notes/SK-qsim-research-skill-validation.md) | 2026-09-10 | validated | QSim research skill: task-specific workflow and isolated behavioral smoke tests | - |
+| [SL](notes/SL-slate-round-peak-memory.md) | - | record | SLATE ROUND 1. Peak memory of exact PPS on Toffoli modexp: the output contract decides. | C24, C45, C101, C103 |
+| [SN](notes/SN-slate-round-2-after-c104.md) | - | record | SLATE ROUND 2. After C104: the unlookup gap, the exponent-cut rank, and TODO 56 closed on its contract. | C52, C99, C103, C104 |
 | [SR](notes/SR-sector-routing-and-physical-phases.md) | 2026-09-10 | mixed | Physical phases expose a broader shortcut: route a sector rather than conserve it | C58 |
 | [T](notes/T-does-c15-survive-truncation-todo-step-peak.md) | - | record | DOES C15 SURVIVE TRUNCATION? (TODO step 7). Peak cost: yes. Accuracy: to a point. | C5, C15, C24 |
 | [TR](notes/TR-walsh-tensor-memory.md) | 2026-09-09 | mixed | Walsh support versus tensor rank: tiny ideal functions, substantially larger scratch-space tensors | C48 |
 | [UG](notes/UG-uniform-gap-and-checkpoint-baseline.md) | 2026-09-11 | confirmed | A uniform mixing certificate and a more useful exact checkpoint baseline | C64, C65, C66, C67 |
+| [UL](notes/UL-measurement-unlookup-clear-rule.md) | - | record | TODO 62. Measurement-based unlookup of the lookup register under diagonal PPS: the clear rule. | C105, C37, C38 |
 | [UP](notes/UP-uniform-prefixes-from-orbit-support.md) | 2026-09-11 | confirmed | Exactly uniform output bits survive dense sector mixing, but suffix conditioning remains | C53, C57, C76, C77 |
 | [UT](notes/UT-unitary-transfer-and-output-objectives.md) | 2026-09-11 | confirmed | The best joint-state transfer loses to omission on the measured output | C53, C76 |
 | [VP](notes/VP-verified-prefix-arithmetic.md) | 2026-09-11 | mixed | Verified exact-input prefix arithmetic and finite-bit sampling, with precision costs exposed | C60, C61 |

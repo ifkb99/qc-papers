@@ -7,7 +7,7 @@ frontmatter; the claim file is the single source of truth for its own
 status. Retracted claims are in `claims/retracted/` and **may not be
 cited as support**.
 
-**103 live · 19 retracted**
+**106 live · 19 retracted**
 
 ## Live
 
@@ -113,6 +113,9 @@ cited as support**.
 | [C101](claims/C101.md) | A | proven | The X-X OTOC of a basis permutation equals its boomerang connectivity entry; Cuccaro adders have the exact carry butterfly F = 1 - 2^(i-j); in … |
 | [C102](claims/C102.md) | A | established | For two compiled-arithmetic fixtures the PPS object has far smaller canonical decision diagrams: Cuccaro top sum bit, Walsh 3*2^(m-1)-2 against 3m+4 … |
 | [C103](claims/C103.md) | B | established | In one exponent-first order, the ROBDD of C15's full-space modexp pullback has exponent-level widths at most 2^alpha D_mu(k-alpha), with mu(beta) the … |
+| [C104](claims/C104.md) | - | established | For ToffoliModExp at fixed N, exponent qubits are only first controls of Toffolis in their own block, so the exact full-space Walsh spectrum of x0 … |
+| [C105](claims/C105.md) | B | proven | Measurement-based unlookup of the lookup register (X-measure, diagonal fixup, reset or deallocate) acts on diagonal PPS as the pullback that clears … |
+| [C106](claims/C106.md) | B | proven | The exponent-prefix cut rank of the full-space modexp pullback lower-bounds the bond of every representation linear across that cut (TT/MPO, weighted … |
 | [F12](claims/F12.md) | B | narrowed | At function level, β=1 gives selected-bit width independence; β>1 has no universal density claim because minimal scalar periods vary |
 | [dictionary-biased-product-input-state-ma](claims/dictionary-biased-product-input-state-ma.md) | B | established | Dictionary: a biased product input state makes ⟨O⟩ = Σ_z c_z ∏_{i∈z} δ_i, i.e. exactly the p-biased WHT of Gangopadhyay et al. (JAMC 2023) with δ_i = … |
 | [superseded-the-residual-ladder-the](claims/superseded-the-residual-ladder-the.md) | B | established | Superseded (§RS): the residual ladder is 1 − 2^−(k+1) in the conditioning depth k |

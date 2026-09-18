@@ -412,9 +412,17 @@ swap(a, b)` emits a physical swap exactly when the block count is odd.
 **Two caveats belong in any statement of this.** For the lookup construction the
 cost is **bounded and 2-periodic** in the number of tail windows rather than
 exactly constant, because the tail applies its involution unconditionally rather
-than under a live control. And the analysis assumes a **unitary** unlookup;
-Gidney's measurement-based uncomputation is genuinely outside it, and that is the
-one real remaining gap.
+than under a live control. And the unlookup may be unitary or measurement-based.
+For a computational-basis observable, measuring the lookup register in the X basis,
+applying the diagonal phase fixup and returning the register to |0⟩ act in the
+Heisenberg picture as the pullback by the map that clears that register. Propagation
+stays diagonal and branch-free, and Lemma 1 holds with the basis permutation replaced
+by this non-injective population map. The two circuits compute the same full-space
+function on every input whose lookup register starts clean, a set that contains the
+valid subspace, and the dead tail holds for both. Off that set the two functions
+need not agree, and do not at an instance traced by hand; the sizes reported in this section are for the unitary unlookup, and the
+measurement-based sizes are not reported. The activation
+ancillae are still uncomputed unitarily here.
 
 ---
 
@@ -693,7 +701,10 @@ replacement work state for arbitrary later operations.
 - **Constructions.** The proof of Theorem 2 uses the multiply–swap–unmultiply
   form, so it covers both compilations here and Vedral/Beauregard-style
   constructions, plus anything satisfying the corrected criterion of §7.2. It
-  does not transfer automatically to a modexp built otherwise.
+  does not transfer automatically to a modexp built otherwise. The dead-tail
+  statement of §7.3, and its 2-periodicity under the same involution hypothesis,
+  hold with either a unitary or a measurement-based unlookup of the lookup register;
+  the sizes in §7.3 are for the unitary unlookup.
 - **Observables.** The full-support theorems concern computational-basis work
   observables before the inverse QFT. The conditional baseline of §11.2 is a
   different, state-aware sampling calculation, not a non-diagonal PPS theorem.
@@ -768,9 +779,12 @@ in this paper, discussed in §7.1.
    perturbed-circuit question, not ideal Shor order finding. Larger ideal-orbit
    runs alone do not resolve it; the broader compressed-prediction problem
    remains open.
-3. **Measurement-based uncomputation.** Gidney's unlookup is not unitary, so Lemma 1
-   does not apply to it as written (§7.3). This is the one real gap in the
-   windowed analysis.
+3. **Measurement-based uncomputation beyond the lookup register.** The
+   measurement-based unlookup of the lookup register is covered (§7.3). The same
+   Heisenberg rule applies to a measurement-based uncomputation of the activation
+   ancillae, which would change the full-space function again and is not modelled or
+   measured here, and the support sizes under the measurement-based unlookup are
+   not reported.
 4. **Whether the MPS correspondence extends** to other contraction orders and
    tensor-network methods, or is specific to these two.
 
@@ -838,7 +852,7 @@ kept out of the prose; this table is the mapping. Identifiers prefixed
 | 6. The proved threshold and measured first-lock rows | C21 |
 | 7.1 The parity reduction | C23, C24, C43 |
 | 7.2 The criterion, and a correction to it | C29 (narrowed) → C36 |
-| 7.3 Windowed arithmetic | C36, C37, C38, C39 |
+| 7.3 Windowed arithmetic | C36, C37, C38, C39, C105 |
 | 8. Robustness to truncation | C27, C28 |
 | 9. The generic case, and what sets its constant | C7, C30, C31, C32 |
 | 10.1 N = 15 is degenerate by construction | C20, C22 |
