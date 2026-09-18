@@ -54,6 +54,20 @@ class EvidenceLintTests(unittest.TestCase):
         lint.lint_text('bad.py', BAD, self.findings)
         self.assertTrue({'HARNESS-NO-FINISH', 'UNCONDITIONAL-SUCCESS'} <= self.codes())
 
+    def test_controls_registered_in_a_loop_are_not_missing(self):
+        """must_fail ids built at run time are controls; the report resolves them."""
+        src = ("from lab.harness import Experiment\ne=Experiment('fixture')\n"
+               "for pid in ('C1', 'C2'):\n    e.must_fail(pid, 'c')\n"
+               "for pid in ('C1', 'C2'):\n    e.fail_check(pid, True)\ne.finish()\n")
+        lint.lint_text('loop.py', src, self.findings)
+        self.assertNotIn('HARNESS-NO-CONTROL', self.codes())
+        self.assertIn('HARNESS-DYNAMIC-IDS', {x['code'] for x in self.findings.items})
+
+    def test_a_script_with_no_must_fail_call_still_fails(self):
+        src = GOOD.replace("e.must_fail('C1','c')\n", "").replace("e.fail_check('C1',True)\n", "")
+        lint.lint_text('nocontrol.py', src, self.findings)
+        self.assertIn('HARNESS-NO-CONTROL', self.codes())
+
     def test_unreadable_submission_is_not_a_pass(self):
         lint.lint_submission({'_error': {'code': 'candidate_changed', 'message': 'changed'}},
                              self.root, self.findings)
@@ -105,6 +119,73 @@ class EvidenceLintTests(unittest.TestCase):
         lint.lint_submission(self.submission([item, meta]), self.root, self.findings, 'roles.json')
         self.assertFalse(self.findings.errors, self.findings.items)
         self.assertTrue(any(x['code'].startswith('PRESERVED:') for x in self.findings.items))
+
+    def test_frozen_preservation_is_found_without_being_named(self):
+        """The submission carries the author's intent; the referee need not retype it."""
+        item = self.entry('reference_v1.py', BAD)
+        meta = self.entry('roles.json', json.dumps(dict(schema_version=1, preserved=[
+            dict(source=item['source'], sha256=item['sha256'], reason='superseded')])))
+        lint.lint_submission(self.submission([item, meta]), self.root, self.findings)
+        self.assertFalse(self.findings.errors, self.findings.items)
+        self.assertTrue(any(x['code'].startswith('PRESERVED:') for x in self.findings.items))
+
+    def test_discovered_preservation_is_reported_not_silent(self):
+        item = self.entry('reference_v1.py', BAD)
+        meta = self.entry('roles.json', json.dumps(dict(schema_version=1, preserved=[
+            dict(source=item['source'], sha256=item['sha256'], reason='superseded')])))
+        lint.lint_submission(self.submission([item, meta]), self.root, self.findings)
+        applied = [x for x in self.findings.items if x['code'] == 'PRESERVATION-APPLIED']
+        self.assertEqual([x['where'] for x in applied], ['roles.json'])
+        self.assertIn('1 artifact', applied[0]['message'])
+
+    def test_naming_one_manifest_rejects_another_that_also_preserves(self):
+        item = self.entry('reference_v1.py', BAD)
+        other = self.entry('other_v1.py', BAD)
+        named = self.entry('roles.json', json.dumps(dict(schema_version=1, preserved=[
+            dict(source=item['source'], sha256=item['sha256'], reason='superseded')])))
+        extra = self.entry('roles_extra.json', json.dumps(dict(schema_version=1, preserved=[
+            dict(source=other['source'], sha256=other['sha256'], reason='superseded')])))
+        lint.lint_submission(self.submission([item, other, named, extra]),
+                             self.root, self.findings, 'roles.json')
+        self.assertIn('PRESERVATION-UNNAMED', self.codes())
+
+    def test_two_manifests_disagreeing_on_one_source_is_an_error(self):
+        item = self.entry('reference_v1.py', BAD)
+        a = self.entry('roles_a.json', json.dumps(dict(schema_version=1, preserved=[
+            dict(source=item['source'], sha256=item['sha256'], reason='superseded')])))
+        b = self.entry('roles_b.json', json.dumps(dict(schema_version=1, preserved=[
+            dict(source=item['source'], sha256='f' * 64, reason='superseded')])))
+        lint.lint_submission(self.submission([item, a, b]), self.root, self.findings)
+        self.assertIn('PRESERVATION-CONFLICT', self.codes())
+
+    def test_malformed_preservation_metadata_is_loud_not_ignored(self):
+        item = self.entry('reference_v1.py', BAD)
+        meta = self.entry('roles.json', json.dumps(dict(schema_version=1, preserved=[
+            dict(source=item['source'], reason='no hash')])))
+        lint.lint_submission(self.submission([item, meta]), self.root, self.findings)
+        self.assertIn('PRESERVATION-INVALID', self.codes())
+        self.assertIn('HARNESS-NO-FINISH', self.codes())   # and nothing was downgraded
+
+    def test_a_report_json_is_not_mistaken_for_preservation(self):
+        report = self.entry('report.json', json.dumps(dict(ok=True, checks=[
+            dict(id='P1', ok=True, kind='check')])))
+        lint.lint_submission(self.submission([report]), self.root, self.findings)
+        self.assertFalse([x for x in self.findings.items
+                          if x['code'].startswith('PRESERVATION')], self.findings.items)
+
+    def test_archive_tampering_is_reported_once(self):
+        item = self.entry('reference_v1.py', GOOD)
+        (self.root / item['archive']).write_text(GOOD + '# tampered\n')
+        lint.lint_submission(self.submission([item]), self.root, self.findings)
+        self.assertEqual([x['code'] for x in self.findings.errors], ['ARCHIVE-TAMPERED'])
+
+    def test_discovered_preservation_cannot_excuse_a_successful_check(self):
+        log = self.entry('run_v1.log', 'Traceback (most recent call last):\n')
+        meta = self.entry('roles.json', json.dumps(dict(schema_version=1, preserved=[
+            dict(source=log['source'], sha256=log['sha256'], reason='superseded')])))
+        lint.lint_submission(self.submission([log, meta], checks=[
+            dict(log=log['source'], exit_code=0, command='x')]), self.root, self.findings)
+        self.assertIn('EXIT-CONTRADICTS-LOG', self.codes())
 
     def test_check_path_cannot_choose_last_archive(self):
         old = self.entry('reused.log', 'Traceback (most recent call last):\n')

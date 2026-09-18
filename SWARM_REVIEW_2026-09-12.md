@@ -447,6 +447,159 @@ says nothing either way. That is weak evidence for scoping a version review
 rather than repeating a full audit, and none of it measures referee quality,
 which stays unmeasured.
 
+### Live-round addendum, 2026-09-15/16 (DD-native PPS pilot; not blinded)
+
+This text is not given to a trial referee. The coordinator (Claude) built a
+decision-diagram propagator in its scratchpad, froze it as
+`out/agent-board/artifacts/dd-pilot-20260915/`, and delegated two falsifier
+tasks. Details beyond this summary are in the board records.
+
+- **Asymptotics, task `T563881b120674641`.** `V363d85ff08bf423f` requested
+  changes on `S27bdd315c0464768`; `Vb2484fd40baa44bf` accepted
+  `S18ba76c1588945c1` with four binding integration corrections I1-I4, two of
+  which corrected the coordinator: I1, a byte comparison the coordinator had
+  quoted with numerator and denominator taken at different steps (like for like
+  it is 0.423 / 0.736 / 0.868, not 0.886 / 1.260 / 1.440); I2, a claimed β = 1
+  contradiction that C103's text already resolves. The referee also reproduced
+  the author's gc-forced byte reading to 64 B in 795 MB where the coordinator's
+  shadow measurement had not reproduced it; the coordinator's structural
+  explanation for the difference was refuted and its own tracemalloc window was
+  invalid (it charged only allocations made inside the window).
+- **Promotion, task `T163d291c2cdd4cd0`.** `Ve1184d5cbe894e91` and
+  `V046e1ab41cac48fd` requested changes on `Sda7d71f98dd244ed` and
+  `Sfc9b3c964fd64b7a`; `V0c95e8735e50477a` accepted `S4279919efc104d37`.
+  A referee on this task refuted the worker's prefix-saturation proposition
+  (invalid induction) with a hand counterexample, which the coordinator then
+  executed; the corrected lemma needs saturation through position k inclusive.
+  The worker caught a coordinator over-generalization (order insensitivity
+  that was instance-specific). The coordinator's frozen pilot validator was
+  print-only and exited 0 regardless (`M841349bedd124e52`). The integration
+  is held because the accepted submission's registered prediction P5
+  ("the ratio deteriorates") is refuted by the accepted six-point asymptotics;
+  the hold is recorded in `M889892e48cad42b9`.
+- **Dispatch:** the coordinator spawned a second referee without reassigning
+  the task's reviewer, and `review.create` correctly refused with
+  `reviewer_required`.
+
+Shadow review added no catch the referees missed; the coordinator was the
+source of three of the defects above. Token usage for these reviews was not
+recorded before the session context was compacted and is unknown.
+
+### Live-round addendum, 2026-09-16/17 (slate round SL and TODO 55; not blinded)
+
+This text is not given to a trial referee. First use of the revised loop:
+METHOD.md "Where ideas come from" and SWARM.md phases 0 and 2. Defective
+submissions: `Sc90d08b3801742c1`, `Sec74297d42184c28`. Corrected:
+`Sc4c99b9dd0c14e6c`. `S5d39eb493d264070` is a correctly stopped run, not a
+defect. All agents ran Claude Opus 5 with the role files' `effort: xhigh`.
+
+- **Phase-0 slate, tasks `Tacd03ed3d05e4f06` (surveyor, `See53b1157d2844cd`) and
+  `T378365558d11492f` (deriver, `Sc7408765323745c1`).** Accepted as deliveries
+  by the coordinator (`V5cbaab9fa9bc45b4`, `Va97c2888763248ab`); merged into
+  note SL. Both generators independently ranked exponent slicing first, and
+  both found the unstated output contract (materialized vs streamed vs
+  compressed) that decides the ranking. The coordinator's blinding leaked
+  through examples it had just added to METHOD.md; the surveyor disclosed it.
+  The coordinator's reproduction of a slate script nearly overwrote the
+  worker's evidence (hard-coded output path) and was stopped before the write.
+  Usage: surveyor 226,756 tokens / 50 tool calls / 18.5 min; deriver 331,226 /
+  87 / 38.2 min.
+- **TODO 55 derivation and plan, task `Ta86889efd4b24683`.**
+  - The author refuted two statements in the coordinator's brief: a proposed
+    must-fail control (an exponent qubit as a gate target) that could not fail,
+    and "blocks with multiplier 1 are identity permutations" (they apply the
+    involution V of C23).
+  - `V947329feabd540ad` (changes_requested on v1): the derivation held. Plan
+    defects: PD1, an existing-code route (per-slice C45 runs) already delivered
+    the streamed output at lower memory than the planned implementation; PD2, a
+    must-fail control whose guard was empty by construction; PD6, an unnamed
+    degeneracy in the main series (only t+1 distinct operators); PD7, a
+    cross-process digest built on per-process-salted hashes, which would have
+    failed at t = 7, 8 for no scientific reason; PD4, an engine refactor with
+    no bitwise golden outputs. 256,040 tokens / 35 / 22.4 min.
+  - `Vc95cba7568944751` (changes_requested on v2, fresh context): PA-1 repeated
+    PD2's class in a different control (positions from the clean circuit landed
+    on the inserted gate) although v2 marked PD2 fixed; PA-2, a byte-ledger
+    slack (120 KB) larger than the numpy pitfalls it had to catch (32 and
+    64 KB at N = 7). 250,114 / 36 / 20.9 min.
+  - The coordinator then required every control's construction to be built and
+    asserted before submission. v3's assertions caught a ledger mutant that
+    could not fail at one planned point before review, and a slack measurement
+    found an unledgered 33,912 B allocation in v2's specification.
+  - `Vaa6ee566b4454a47` (accept on v3, scoped to changed sections with unchanged
+    proofs confirmed by diff): nine execution-time corrections, three mandatory.
+    EC-1 caught a regression from v2's ±3 KB tolerance to "exactly 4S", which
+    array headers make impossible; the review also found a defect in deferred
+    text (W's push count) present since v2 and missed by `Vc95cba7568944751`.
+    284,336 / 48 / 25.0 min.
+  - Author usage across three versions (cumulative context tokens reported):
+    330,911, then 494,916, then 678,147.
+- **Phase A, task `Tc70e07bf09c54b3e`.** The falsifier stopped at gate G1 on a
+  2.2 KB overshoot of a precision band (26,228 B against 24,000 B, N = 11,
+  t = 3) and attributed it, in a registered bug check, to CPython tuple-freelist
+  residue. 361,750 / 103 / 39.7 min. The user chose a proportionate fix. The
+  focused review `V2d55fc6b31404ef2` confirmed the stop and the diagnosis and
+  found two defects in the coordinator's amendment: R1, a self-contradictory
+  collection point whose literal reading would have released the M-w mutant's
+  retained array before the reading meant to detect it; R5, a positive arm
+  citing a control that involved no collection. 202,729 / 34 / 15.7 min.
+
+Coordinator shadow review raised none of PD1-PD11, PA-1-PA-7, EC-1-EC-9 or
+R1-R7 before the referees did; it confirmed PD1, PD2, PD7, PA-1, PA-2 and R1
+against source afterwards. Its catches were process ones (the blinding leak's
+cause, the re-run hazard, the design-review scoping). Two patterns are worth a
+calibration trial: a control that cannot fail at one of its planned points
+(PD2, PA-1 and v3's self-caught mutant), and a precision tolerance tightened to
+an exact equality between versions (EC-1). As before, a live round cannot
+count misses, so shadow review stays.
+
+### Calibration trial 1, 2026-09-17 (packet mode, blinded): latent verifier fault -- MISS
+
+The first blinded trial actually run. Packet:
+`out/agent-board/reviews/calibration-2026-09-17-latent-verifier/`. Case
+`S52fc7675ddec4ca6`, whose original verdict `V87ef380ebaa34da8`
+(`changes_requested`) is section 5's "latent verifier sign bug not exercised by
+fixtures". The defect is described in `notes/DS`, so `claims/`, `notes/`, the
+generated aggregates and `HANDOFF.md` were held out; the reviewer had the frozen
+bytes, the repository's code and `todo/open/`, no board access and no IDs. Claude
+Opus 5, the role file's `effort: xhigh`, fresh context.
+
+**The seeded defect.** `outside_sign` (packet script lines 67-71) accumulates a
+*count* -- `popcount(t&t_mask) + h*h_mask + popcount(x&x_mask) + u*u_mask` --
+and hands it to `parity_sign`, which returns `-1 if int(value).bit_count() & 1`:
+the parity of the count's binary representation rather than the count mod 2. The
+two agree at 0 and 1 and diverge from 2 upward. The tested fibers reach only
+phases 0 and 1, so no reported number is wrong and the fault is latent.
+
+**Result: missed; disposition `accept`.** The review reached the helper and
+cleared it. It quotes the phase expression correctly, calls it "the correct outer
+character" (review.txt lines 87-90), and never asks what `parity_sign` does with
+a count. It verified the expression that builds the phase, not the function that
+consumes it.
+
+**What it did instead, recorded and not counted against it.** An independent
+gate-replay recomputation of both triples and all 512 fibers (no mismatch in
+3072 values), a byte-identical re-run from a repointed copy, a 16384-point WHT
+probe, and five execution-time corrections. One is stronger than anything in the
+original verdict: the omitted-carry control's zero is parity-forced, because the
+wrong reference vanishes identically on every mask containing the h wire and
+every carry-sensitive mask contains h, so the control's discrimination comes from
+the nonzero true coefficient and not from the zero. It also named two hypotheses
+the author had inherited unchecked and verified them itself.
+
+**Reading, and what not to read into it.** One case does not calibrate a class.
+What it does show is structural: a referee that establishes independence by
+recomputing the reported numbers cannot find a latent fault that way, because
+latency is precisely the property of agreeing on the tested inputs -- the
+reviewer's own limits call gate replay "the independent leg". This class has to
+be caught by reading a helper's domain, which is how the original catch was made,
+by the coordinator. The brief change the protocol requires after a failed trial
+is now in the "Referee" role duty; repeat this class after that change before
+concluding anything about referee quality.
+
+**Usage.** 102,312 tokens, 23 tool calls, 11.6 minutes -- roughly half a live
+round's review for a submission a fraction of the size.
+
 ---
 
 ## 6. Findings: arb 0.1.0 (for `~/Workspace/agent-research-board`)
@@ -625,3 +778,217 @@ Calibration will require a separately budgeted blinded mix of defective and
 corrected evidence; keep its answer key out of referee inputs. The new protocol
 applies when future assignments or scientific revisions are opened, without
 retroactively restarting the active swarm.
+
+---
+
+## 10. Adoption notes, 2026-09-17 (Claude coordinator, user-authorized)
+
+The user asked for these process changes in the coordinating session and for
+this record so that Codex coordinators and workers have the same information.
+Section 9 remains the record of 2026-09-12 and is not edited; where it says
+preservation metadata must be supplied with `--preserved-manifest`, the change
+below supersedes it.
+
+### Shared protocol and method (both hosts)
+
+| Change | Where |
+|---|---|
+| The loop gains IDEATE (a slate of candidates) before observation and a DESIGN REVIEW before any compute; "test only what the derivation could not settle" | METHOD.md, "The loop, as actually run here" |
+| Seven idea generators, a candidate format, and the rule to build a slate after three residual items in a row | METHOD.md, "Where ideas come from" |
+| Exploration is not a test: a numerical match is not a mechanism; a cited result must be about the same object; every run states its decision value | METHOD.md, "Exploration is not a test" |
+| Failure modes: testing a coincidence as a mechanism; a confound visible from arithmetic alone | METHOD.md failure-mode table |
+| Coordinator's own runs follow the same rules as assignments; exploration is labelled and cannot support a claim | SWARM.md, "Choose work that can change the result" |
+| Phase 0 divergent slate; phase 2 design review before compute; phases renumbered 0-6 | SWARM.md, "Independence and phase order" |
+| Blinding covers examples in permitted files | SWARM.md, phase 3 |
+| Gate stops and proportionate amendments | SWARM.md, after the phase order |
+| Role duties for every worker, deriver, surveyor, falsifier and referee, and the worker return block, stated host-neutrally | SWARM.md, "Role duties (host-neutral)" |
+| A referee who must execute gets its own experiment task; `stale_attempt` on a submitted attempt is correct | SWARM.md, "Scientific review and referee calibration" |
+| Re-running an author's script only from a copy with repointed outputs | SWARM.md, same section |
+| Board practicalities: inline `--data` JSON, 16,000-character review bodies, 30 evidence entries, subagent `.md` refusal | SWARM.md, "Board fields and evidence lifecycle" |
+
+### Mechanical lint
+
+`tools/evidence_lint.py` now discovers preservation metadata among a
+submission's frozen evidence (any JSON object with a `preserved` key) instead of
+requiring the referee to name it. It reports each manifest applied as
+`PRESERVATION-APPLIED` with the number of artifacts it covers, rejects two
+manifests that disagree about one source (`PRESERVATION-CONFLICT`), and treats a
+malformed manifest as an error rather than ignoring it. `--preserved-manifest`
+remains for a pre-submission file list and, on a submission, pins one manifest
+and rejects any other that also preserves (`PRESERVATION-UNNAMED`). The
+exit-zero rule is unchanged: preservation never excuses a successful check
+citing a failure. `tools/swarm.py review-start` needed no change. Regression
+tests went from 19 to 27; five of the new tests fail against the previous
+implementation. First live use: `Sc4c99b9dd0c14e6c`, where `review-start`
+applied `preserved_v3.json` without a flag.
+
+### Host adapters
+
+- **Claude** (`~/.claude/agents/`, `~/.claude/skills/qsim-swarm/references/briefs.md`):
+  deriver gains the same-object check, match-is-not-mechanism, decision value
+  and coincidences per prediction, optional uncalibrated Lean, slate
+  assignments and the instantiate-every-control rule; surveyor gains slate
+  assignments; referee gains design review; the derivation brief includes the
+  experiment plan. These bodies now duplicate parts of SWARM.md "Role duties";
+  SWARM.md is canonical, and reducing the Claude bodies to pointers is an open
+  decision.
+- **Codex** (`~/.codex/skills/`): `qsim-luna-coordinator` requires every role
+  brief to name the role, its phase, SWARM.md "Role duties" as binding and the
+  return block, and forbids assigning an experiment before its design review;
+  `qsim-research/references/board.md` points to the role duties, `sweep`,
+  `review-start` and the preservation change. Codex has no role files, so the
+  brief is the only carrier of a role.
+
+### Validation
+
+Documentation gate 10/10 and indexes current; swarm citation sweep with no
+unresolved IDs; lint regressions 27/27; swarm tooling tests 7/7; Claude hook and
+forwarder tests pass; skill-creator validation passes for both modified Codex
+skills. None of this has been exercised by a Codex-coordinated round, and
+referee quality remains uncalibrated.
+
+
+### Later on 2026-09-17: generated role bodies and a lint false positive
+
+- **Role bodies are generated.** The duplication listed as open under "Host
+  adapters" is closed. SWARM.md "Role duties" is expanded to carry everything the
+  Claude role bodies said (a 47-phrase coverage check found no gaps) and is
+  delimited by `<!-- role:NAME -->` markers. `tools/gen_role_bodies.py` writes
+  each `~/.claude/agents/qsim-ROLE.md` body as a short Claude header plus the
+  "Every worker" and role blocks, preserving frontmatter byte for byte.
+  `tools/check.py` gains check 8b, which fails on a stale body and reports
+  "skipped" when the agents directory is absent (a Codex-only host). Edit
+  SWARM.md and run the generator; never edit an agent body. The applied bodies
+  equal the reviewed draft except for the generator path in their header line.
+- **Lint false positive fixed.** `HARNESS-NO-CONTROL` fired on a harness script
+  that registered its must-fail controls in a loop (`exp.must_fail(pid, ...)`),
+  because only literal ids were counted; the same script's report resolved all
+  seven controls. The error now requires the absence of any `must_fail()` call;
+  dynamic ids remain reported as `HARNESS-DYNAMIC-IDS`, and the harness report's
+  declarations stay the resolution check. Found on `S0077516c27884295`. A new
+  test fails against the previous implementation; a second guards that a script
+  with no `must_fail()` call still errors. Lint regressions 29/29.
+- Validation after both changes: documentation gate 11/11, indexes current,
+  generator `--check` exit 0, Claude hook tests pass, citation sweep with no
+  unresolved IDs, swarm tooling tests pass.
+
+---
+
+## 11. Adoption notes, 2026-09-17 (second pass: authorship, revisions, calibration)
+
+A fresh Claude session reviewed this record end to end at the user's request and
+proposed five improvements. The user took three; the other two (evidence living
+outside git, and `HANDOFF.md` having re-grown past a thousand lines) were
+deferred deliberately, not rejected. Section 10 stands; this section adds to it.
+
+### Authorship is not a coordinator duty
+
+**Observation.** P1 separated the reviewer from the integrator and left the
+author where it was. In every round in section 5 the coordinator wrote most
+submissions, and the addenda record it as the source of a large share of the
+referees' findings — including both inaccuracies found inside one submission's
+own limitations text, a byte ratio quoted from two different steps, and a
+print-only validator that exited 0 regardless. The one round that delegated
+derivation (2026-09-16/17) produced a worker that refuted two statements in the
+coordinator's own brief before any review.
+
+**Change.** SWARM.md, "Choose work that can change the result": the coordinator
+owns dispatch, integration and the ledger; scientific authorship is not one of
+those. Derivation, implementation and measurement go to a worker whenever one
+can be assigned. When the coordinator must author, the task records that, its
+shadow review does not occupy the review slot, and the submission goes to the
+same fresh referee a worker's would get.
+
+### Revisions and corrections
+
+**Observation.** Version 2 has been this project's most defective version.
+C100's v2 added a wrong justification to an already proven claim and a false iff;
+TODO 55's v2 was marked as fixing PD2 and repeated its class in a different
+control (PA-1); EC-1 caught a ±3 KB precision band tightened into an equality
+that array headers make unreachable. Separately, the α + μ threshold entered a
+canonical claim verbatim from an *accepted* review and was wrong by one level,
+and the fix for it landed in two of the fact's four homes.
+
+**Change.** SWARM.md gains a "Revisions and corrections" section: re-derive
+rather than transcribe (an accepted review is not a source); ship with every fix
+the check that would have caught the original, or say why none exists; a fix
+touching a control, bound, tolerance or precision band re-states and instantiates
+that object at every planned point; re-read the neighbourhood, because the
+defects revisions introduced here sat beside the correction rather than in it;
+correct a fact in its one home, and if it has several, remove one. The revision
+lists per correction what changed, what was re-checked and the detector, and the
+referee verifies that list against the bytes. The "Every worker" and "Referee"
+role duties carry the author-side and review-side halves, so the generated Claude
+role bodies carry them too. METHOD.md's failure-mode table gains three named
+modes: correction by patch, a referee's formula used as a source, and a tolerance
+tightened between versions.
+
+### Calibration: what shadow review is, and what would end it
+
+**Observation.** "Keep shadow review until blinded calibration" had no end
+condition and no procedure cheap enough to run, so it had run for six rounds
+without a single trial, while the addenda kept identifying new classes to test.
+Over those same six rounds shadow review originated no scientific finding; its
+real catches were process ones.
+
+**Change.** SWARM.md now calls coordinator shadow review what the evidence says
+it is — author-side edit hygiene and process control, which does not satisfy the
+independent-review requirement for any submission — and specifies the trial that
+would discharge it: packet mode built from the read-only `review-start` output
+and the frozen blobs, no board access and no submission or task ID for the
+reviewer, defective cases paired with their corrected versions, grading on the
+returned reasoning rather than the verdict word, and a stated discharge
+condition (the seeded defect returned on every defective packet of a class, no
+blocking false alarm on its corrected pair, at least three classes).
+
+### Initial research uses the best model available
+
+The user's decision, recorded in SWARM.md's team paragraph: the phase-0 slate and
+the phase-1 derivation run on the best model available, because that is where the
+direction is chosen and a candidate nobody generated is invisible for the rest of
+the round. A cheaper model stays confined to bounded reference or provenance work
+where that has been validated, and is barred from ideation and derivation. This
+closes the question of using a cheaper generator for the slate.
+
+### HANDOFF is a mirror; its state block is now generated
+
+**Observation.** At 2026-09-17 `HANDOFF.md` was 1034 lines in 64 checkpoint
+blocks reaching back to 2026-08-08. The current checkpoint was 33 lines; the
+other 996 were history. It carried 172 claim references over 67 distinct claims,
+162 TODO references and 44 distinct board record IDs, each with an owning record,
+while the "do not re-run this" warnings worth keeping came to 12 lines. It is a
+hand-maintained mirror of the board and the ledger -- the 2026-08-08 failure mode
+-- and it regrew because nothing said who owns a round's state.
+
+**Change.** The board owns live assignments, owners and lease freshness
+(`CLAUDE.md`'s facts table and `SWARM.md`'s ownership list now say so).
+`tools/handoff.py` generates HANDOFF's state block between
+`<!-- generated:state -->` markers from the board, git and `todo/open`, including
+lease freshness, so a resuming session can see whether another session is
+actually running rather than inferring it from processes. `tools/check.py` gains
+check 8c, which bounds the hand-written part at 60 lines and the file at 200 and
+reports "skipped" until the markers exist. Freshness is deliberately not gated:
+the block reports live state, carries its own timestamp and is regenerated at
+round boundaries and on resumption. The migration -- auditing the 64 blocks,
+moving the surviving warnings to the todos and claims that own them, archiving
+the rest -- is `todo/open/61`, to be done between rounds, since a HANDOFF that
+drifts mid-review invalidates its own freeze.
+
+**For Codex.** `AGENTS.md`, `CLAUDE.md`'s generated-files table, the Luna
+coordinator skill and both hosts' `references/board.md` carry the rule and the
+command; Codex changes HANDOFF's state the same way, by rerunning the tool.
+First run reported all four open TODO-55 assignments holding leases that expired
+6 to 8 hours earlier, with no actor live.
+
+**A constraint found while building the first trial.** The obvious cases are
+leaked by the repository's own honesty. `S6e92d733a8074097`'s vacuous fixtures
+are described in `notes/DM`; `S52fc7675ddec4ca6`'s latent `outside_sign` defect
+is described in `notes/DS`. A referee doing what it is told — read the ledger —
+would be handed the answer. Trials therefore leak-check the case first and hold
+out `claims/`, `notes/`, the aggregates and `HANDOFF.md` when it is leaked,
+which narrows what a trial measures to detection from the construction and the
+bytes. Packet mode also cannot hide from the reviewer that it is a trial. Both
+limits are now in the protocol rather than discovered again later. The trial
+itself was then run: its entry sits with section 5's addenda as "Calibration
+trial 1", it missed its seeded class, and the brief change it produced is in the
+"Referee" role duty.

@@ -66,6 +66,7 @@ concluding something is broken.
 | how something was found | `notes/<CODE>-*.md` | restated in a claim body |
 | what to do next | `todo/open/*.md` | tracked anywhere else |
 | current state, pointers | `HANDOFF.md` | facts that belong in a claim |
+| live assignments, leases, who is running | the `arb` board | restated by hand in `HANDOFF.md` |
 | how the work is conducted | `METHOD.md` | — |
 
 Board assignments link to the existing research questions and record temporary
@@ -73,8 +74,22 @@ execution, ownership, discussion, submissions, and review. They do not duplicate
 the scientific ledger or replace the research backlog. A submission accepted on
 the board does not itself promote a scientific claim.
 
-**`INDEX.md` files and `CLAIMS.md` are GENERATED. Never hand-edit them.**
-Run `uv run python tools/reindex.py` after changing any claim, note or todo.
+**Generated files. Never hand-edit them.** Each has a tool, and the tool is the
+only way to change it:
+
+| generated | tool | run it after |
+|---|---|---|
+| `INDEX.md` files, `CLAIMS.md`, `NOTES.md` | `tools/reindex.py` | changing any claim, note or todo |
+| `~/.claude/agents/qsim-*.md` bodies | `tools/gen_role_bodies.py` | changing SWARM.md "Role duties" |
+| `HANDOFF.md` between `<!-- generated:state -->` markers | `tools/handoff.py` | a round opens or closes, and on resumption |
+
+`tools/handoff.py` reports live state, so it is stale as soon as anything moves
+and its freshness is not gated; regenerate it at those boundaries rather than on
+every commit. What `check.py` enforces is HANDOFF's size, because that is the
+failure that happened: it reached a thousand lines of history the board, claims,
+notes and todos already owned. That history is in
+`archive/HANDOFF-2026-08-to-09.md` (TODO 61); keep the hand-written part to the
+current direction, standing decisions and dead ends.
 
 A hand-maintained mirror is the single failure mode this repo has actually
 suffered: a 2026-08-08 audit found sixteen defects, essentially all of them a

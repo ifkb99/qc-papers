@@ -14,7 +14,9 @@ Usage (from the research root):
   evidence_lint.py --submission S...      lint a frozen submission via arb
   evidence_lint.py FILE [FILE ...]        lint working files before submitting
   --json                                   machine-readable output
-  --preserved-manifest FILE                 explicit hash-bound historical artifacts
+  --preserved-manifest FILE                hash-bound historical artifacts, for a file
+                                           list; a submission's own frozen metadata
+                                           is found without it, and naming it pins
 Exit 1 when any ERROR is found, else 0.
 No scientific code is executed. AST checks establish presence, not reachability;
 dynamic checks and mathematical validity still require a reviewer.
@@ -86,13 +88,16 @@ def lint_python(path: str, text: str, f: Findings):
     controls = {s for c in calls if _call_name(c) == "must_fail" and (s := _first_str(c))}
     checked = {s for c in calls if _call_name(c) == "check" and (s := _first_str(c))}
     fail_checked = {s for c in calls if _call_name(c) == "fail_check" and (s := _first_str(c))}
+    # A must_fail() whose id is built at run time (e.g. in a loop) still registers a
+    # control; only a script with no must_fail() call at all lacks one.
+    registers_control = any(_call_name(c) == "must_fail" for c in calls)
     dynamic_ids = any(_call_name(c) in {"check", "fail_check"} and _first_str(c) is None for c in calls)
 
     if uses_harness:
         if not any(_call_name(c) == "finish" for c in calls):
             f.add("ERROR", path, "HARNESS-NO-FINISH",
                   "uses Experiment but never calls finish(): no verdict, no warnings, exit code is not the result")
-        if not controls:
+        if not registers_control:
             f.add("ERROR", path, "HARNESS-NO-CONTROL",
                   "no must_fail() control registered; a test only every case passes proves nothing")
         if not dynamic_ids:
@@ -236,6 +241,19 @@ def _blob(root: Path, entry: dict, f: Findings) -> str | None:
     return blob.decode("utf-8", "replace")
 
 
+def looks_preservation(text: str) -> bool:
+    """Whether an artifact is offering itself as preservation metadata.
+
+    Any JSON object carrying a `preserved` key counts, so a malformed manifest
+    reaches `preservation_records` and is reported rather than silently ignored.
+    """
+    try:
+        data = json.loads(text)
+    except ValueError:
+        return False
+    return isinstance(data, dict) and "preserved" in data
+
+
 def preservation_records(text: str, where: str, root: Path, f: Findings) -> dict:
     """Return source/sha identities with an explicit reason, without trusting names."""
     try:
@@ -321,22 +339,45 @@ def lint_submission(result: dict, root: Path, f: Findings, preserved_manifest: s
         f.add("ERROR", "submission", "NO-LIMITATIONS", "empty limitations: every submission states what was not checked")
     if not sub.get("runs") and any(e["source"].endswith(".py") for e in evidence):
         f.add("WARN", "submission", "NO-RUN-RECORDS", "script evidence without run records: execution order is unrecorded")
-    preserved = {}
-    if preserved_manifest:
+    # Read each archived blob once: _blob reports tampering and working-copy
+    # drift, and those findings must not be duplicated by a second pass.
+    texts = [(e, _blob(root, e, f)) for e in evidence]
+    # Preservation metadata is frozen evidence (SWARM.md), so it is discovered
+    # here rather than named on the command line: the submission already
+    # carries the author's intent, and a name supplied later can disagree
+    # with it. Discovery is reported, never silent.
+    preserved: dict[str, str] = {}
+    claimed_by: dict[str, str] = {}
+    found: list[str] = []
+    for e, text in texts:
+        if text is None or not looks_preservation(text):
+            continue
+        found.append(e["source"])
+        for src, sha in preservation_records(text, e["source"], root, f).items():
+            if src in preserved and preserved[src] != sha:
+                f.add("ERROR", src, "PRESERVATION-CONFLICT",
+                      f"{claimed_by[src]} and {e['source']} preserve this source at different hashes")
+                continue
+            preserved[src] = sha
+            claimed_by[src] = e["source"]
+    if preserved_manifest:      # explicit pin: this artifact, and no other, supplies preservation
         wanted = str((root / preserved_manifest).resolve())
-        entries = [e for e in evidence if str((root / e["source"]).resolve()) == wanted]
-        if len(entries) != 1:
-            f.add("ERROR", preserved_manifest, "PRESERVATION-NOT-FROZEN", "preservation metadata must name one frozen evidence artifact")
-        else:
-            text = _blob(root, entries[0], f)
-            if text is not None:
-                preserved = preservation_records(text, preserved_manifest, root, f)
+        named = [s for s in found if str((root / s).resolve()) == wanted]
+        if not named:
+            f.add("ERROR", preserved_manifest, "PRESERVATION-NOT-FROZEN",
+                  "named preservation metadata is not frozen preservation evidence of this submission")
+        for other in sorted(set(found) - set(named)):
+            f.add("ERROR", other, "PRESERVATION-UNNAMED",
+                  f"also supplies preservation, but --preserved-manifest named {preserved_manifest}")
+    for src in sorted(found):
+        covered = sum(1 for k, v in claimed_by.items() if v == src)
+        f.add("INFO", src, "PRESERVATION-APPLIED",
+              f"frozen preservation metadata; downgrades findings for {covered} artifact(s)")
     all_entries = evidence + [log for log, _ in run_logs]
     for src, sha in preserved.items():
         if not any(str((root / e["source"]).resolve()) == src and e.get("sha256") == sha for e in all_entries):
             f.add("ERROR", src, "PRESERVATION-HASH-MISMATCH", "historical identity is absent from frozen evidence")
-    for e in evidence:
-        text = _blob(root, e, f)
+    for e, text in texts:
         if text is not None:
             historical = bool(e.get("sha256")) and preserved.get(str((root / e["source"]).resolve())) == e["sha256"]
             lint_text(e["source"], text, f, exit_by_ref.get((e["source"], e.get("sha256"))), preserved=historical)
@@ -354,7 +395,8 @@ def main(argv=None):
     ap.add_argument("files", nargs="*")
     ap.add_argument("--submission")
     ap.add_argument("--project")
-    ap.add_argument("--preserved-manifest", help="hash-bound historical artifact metadata; must be frozen for submission review")
+    ap.add_argument("--preserved-manifest", help="hash-bound historical artifact metadata for a file list; "
+                                                 "a submission's frozen metadata is discovered, and naming it pins that one artifact")
     ap.add_argument("--exit-code", type=int, help="claimed exit code for a single log file")
     ap.add_argument("--json", action="store_true")
     ns = ap.parse_args(argv)

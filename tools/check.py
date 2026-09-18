@@ -206,6 +206,27 @@ def _():
     return [] if r.returncode == 0 else [l for l in r.stdout.strip().split("\n") if l]
 
 
+@check("8b. Claude role-agent bodies match SWARM.md Role duties (skipped without ~/.claude/agents)")
+def _():
+    r = subprocess.run([sys.executable, str(ROOT / "tools" / "gen_role_bodies.py"), "--check"],
+                       capture_output=True, text=True)
+    if VERBOSE and "skipped" in r.stdout:
+        print(f"      {r.stdout.strip()}")
+    return [] if r.returncode == 0 else [l for l in (r.stdout + r.stderr).strip().split("\n") if l]
+
+
+@check("8c. HANDOFF.md stays within its size budgets")
+def _():
+    """HANDOFF is for where things stand. It reached 1034 lines, 96% of it history
+    that claims, notes, todos and the board already owned, so the budget -- not
+    freshness, which cannot be gated on live state -- is what is enforced."""
+    r = subprocess.run([sys.executable, str(ROOT / "tools" / "handoff.py"), "--check"],
+                       capture_output=True, text=True)
+    if VERBOSE and "skipped" in r.stdout:
+        print(f"      {r.stdout.strip()}")
+    return [] if r.returncode == 0 else [l for l in (r.stdout + r.stderr).strip().split("\n") if l]
+
+
 @check("9. prose suite count matches ls test_*.py")
 def _():
     n = len(list(ROOT.glob("test_*.py")))
