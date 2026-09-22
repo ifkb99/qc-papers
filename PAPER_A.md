@@ -1,77 +1,46 @@
-# Walsh–Hadamard Sparsity Exactly Determines Pauli-Path Simulation Cost for Reversible Quantum Arithmetic
+# Walsh–Hadamard Sparsity Exactly Determines the Pauli-Path Representation of Reversible Quantum Arithmetic
 
 **Ian Baker**
 
 ifkb99@gmail.com
 
-*Working consolidation, 2026-09-10. This file is the Paper A manuscript and
-tracking document: representation cost, its arithmetic applications, and its
-operational limits. The new scratch-equivalence and tensor-rank results are
-integrated in §6.4–6.5; state-aware contraction and conditional sampling belong
-in Paper B. Detailed evidence and open tasks remain in the linked research
-ledger, not in a second manuscript copy. The limitations and withdrawn-claims material in §10 is
-load-bearing and should survive to submission. Claim identifiers have been moved
-out of the prose into Appendix A; the working ledger `CLAIMS.md` is supplementary
-material. Numbers here are post-bugfix (see §10.2).*
+*Draft, 2026-09-22. Scope: the size of the Pauli-path representation for
+permutation circuits, its arithmetic applications and its limits. State-aware
+contraction and conditional sampling are in Paper B. Claim identifiers are kept
+out of the prose and mapped in Appendix A; the research ledger `CLAIMS.md` is
+supplementary material. All numbers are post-bugfix (§10.2).*
 
 ---
 
 ## Abstract
 
-Pauli Path Simulation (PPS) — also called sparse Pauli dynamics or Pauli
-propagation — has become a leading method for classically simulating
-utility-scale quantum circuits. Its practical deployment depends on predicting,
-before committing to an expensive run, how many Pauli terms a circuit will
-require: a question currently answered by empirical power-law extrapolation
-calibrated on brickwork and Trotterised circuits with generic rotation angles.
+Pauli-path simulation (PPS), also called Pauli propagation or sparse Pauli
+dynamics, is a leading method for classically simulating large quantum
+circuits. Whether a run fits in memory depends on how many Pauli terms it must
+carry, and that number is currently predicted by extrapolating power laws fitted
+to random-like circuits.
 
-We show that for circuits implementing a permutation of the computational basis
-— all reversible arithmetic, and hence the arithmetic core of Shor's algorithm
-and similar algorithms — this quantity is not merely predictable but
-*exactly characterized by a Walsh transform*, with no extrapolation and no fitting. For a
-circuit implementing basis permutation π, the Heisenberg pullback π†Z_jπ is the
-diagonal operator (−1)^{g(y)} with g(y) = bit j of π(y); expanding a diagonal
-operator in the Pauli basis is precisely the Walsh–Hadamard transform of
-(−1)^g. The Pauli support of the full pullback is therefore *exactly* the Walsh
-spectrum of g, and its size is the Walsh sparsity of that Boolean function.
+For circuits that permute the computational basis, which includes all reversible
+arithmetic and hence the arithmetic core of Shor's algorithm, we show the number
+is exact rather than extrapolated. If a circuit implements the permutation π,
+the Heisenberg-evolved observable π†Z_jπ is diagonal with entries (−1)^{g(y)},
+where g(y) is bit j of π(y). Its Pauli expansion is the Walsh–Hadamard transform
+of (−1)^g, so the final number of Pauli terms equals the Walsh sparsity of g.
 
-Four consequences follow. **(i)** PPS cost for reversible arithmetic is a
-property of the **full-space basis permutation implemented** — including its
-action on ancillas — and not of the gate set implementing it. We verify exact
-Z-closure for both Toffoli-compiled and Fourier-compiled (Beauregard) modular
-exponentiation; the supplied implementations agree on the valid arithmetic
-subspace but have different scratch layouts and therefore are not a matched
-same-permutation comparison.
-**(ii)** The tractability of linear arithmetic is explained rather than observed
-— a ripple-carry adder's low output bit is XOR-affine, Walsh sparsity 1
-characterises affineness, and PPS collapses to a single term. **(iii)** Peak
-memory is a distinct and larger quantity than final support; Clifford+T
-decomposition can enlarge the peak, but the gap is not entirely a compilation
-artifact. Propagating X, CNOT and Toffoli as atomic
-permutations keeps the expansion Z-type at every step and makes the peak itself a
-Walsh quantity. For the tested arithmetic rows, the measured relation is:
-N_max^rot = 2·N_max^perm − |B|, where B is the set of peak-time Pauli strings
-missing the target qubit of the Toffoli gadget in which the peak falls. B is
-empty for ripple-carry adders, giving exactly 2; for modular exponentiation with
-the standard observable it has two elements, and those two are precisely the
-dominant Walsh coefficients of the pulled-back function. **(iv)** Walsh sparsity
-and nonlinearity are the same object linear cryptanalysis studies, giving a
-transfer: any published nonlinearity lower-bounds PPS cost for *every* circuit
+Four consequences follow. (i) The cost depends on the full permutation,
+ancillas included, and not on the gates that implement it. (ii) Adders collapse
+to a single term because their low output bit is affine, which is exactly
+Walsh sparsity 1. (iii) Peak memory differs from the final count. Propagating
+X, CNOT and Toffoli as whole permutations keeps every intermediate expansion
+diagonal and makes the peak a Walsh quantity too; on the tested arithmetic this
+roughly halves the peak relative to a Clifford+T decomposition. (iv) Walsh
+sparsity is governed by nonlinearity, the central quantity of linear
+cryptanalysis, so a published nonlinearity bounds the PPS cost of every circuit
 computing that function, with no simulation.
 
-The quantity the model computes is the size of the **Heisenberg representation
-PPS maintains** — its memory footprint — not the difficulty of the expectation
-value it is used to estimate; §1.1 states the target task and input-state regime
-explicitly, since for some inputs the expectation is obtainable by other means
-entirely.
-
-These results are diagnostic, not a simulation speedup. The Walsh transform is
-itself exponential, and nothing here bears on the classical hardness of
-factoring. Same-layout circuits that agree on the entire clean logical code
-can have different full Walsh support, while equal support counts can accompany
-different measured output distributions. Moreover, Walsh support is not tensor
-rank: local Walsh transforms preserve every fixed-cut singular spectrum. These
-distinctions delimit the representation cost being characterized.
+These results describe the representation PPS stores, not the difficulty of
+the expectation value it estimates. They are diagnostic: the Walsh transform is
+itself exponential, and nothing here bears on the hardness of factoring.
 
 ---
 
@@ -119,12 +88,9 @@ larger circuits that are not permutations — Shor's algorithm surrounds its
 arithmetic with Hadamards and an inverse QFT. A full-operator PPS implementation
 carries intermediate expansions until they cancel or are contracted with the
 input. Their peak size is a memory cost of that implementation, not a lower
-bound on all contraction schedules. Paper B, §10.2, distinguishes terms that
-contribute to the pre-QFT work observable from terms eliminated by the actual
-exponent input. Naive within-block pruning is unsafe because exponent support
-is not monotone, but exact completed-control contraction is possible and changes
-the width scaling of that reduced task in both order branches. Non-diagonal
-observables introduced by an inverse QFT require a separate analysis.
+bound on all contraction schedules; Paper B treats contraction with the actual
+input, and non-diagonal observables introduced by an inverse QFT need a
+separate analysis.
 
 Readers who want a sharper "so what" should read §5 (peak memory, where the model
 changes what one should actually do), §7 (truncation, where it exposes a
@@ -310,9 +276,10 @@ exact only at δ = 0; under truncation the relationship is more subtle (§7).
 
 ### 4.4 The instances
 
-Every claim in this paper is measured on the following set. Walsh sparsity is
-computed by the identity; the peak columns come from propagation; the three
-timing columns are wall-clock on one core.
+The circuit-level measurements use the following instances (§6.2 and §8 use
+planted functions and published S-boxes instead). Walsh sparsity is computed
+by the identity; the peak columns come from propagation; the three timing
+columns are wall-clock on one core.
 
 **Table 1 — instances, exact costs, and wall-clock.**
 
@@ -341,10 +308,10 @@ function.
 
 The largest instance reached by the Walsh route elsewhere in this work is **30
 qubits** (|S| = 536,271,623 for N = 143, exactly counted); propagation stalls
-near 17, which is why the table's rot-PPS column stops there. The asymmetry is
-noted in §10.1 rather than dressed up: the structural results are proved and do
-not depend on instance size, and the circuit series now spans a 32768-fold
-range of Hilbert-space dimension.
+near 17, which is why the table's rot-PPS column stops there. §10.1 discusses
+this asymmetry; the structural results are proved and do not depend on instance
+size, and the circuit series spans a 32768-fold range of Hilbert-space
+dimension.
 
 ---
 
@@ -394,10 +361,11 @@ rotation-level peak 10, whereas the former proposed formula predicts 6 (and its
 implied 2× upper bound predicts at most 8). A dense-matrix check confirms the
 rotation peak, and the final Walsh and atomic coefficients agree exactly.
 
-The arithmetic rows retain a useful empirical statement: in 9/9 tested cases
-(six modular exponentiations, three ripple-carry adders), folding the
-X_c/Y_c partners at the observed peak recovers the atomic peak set with the
-measured multiplicities, and `N_max^rot = 2·N_max^perm − |B|`. This is a
+The arithmetic rows retain a useful empirical statement. Let
+B = {z ∈ S : z_c = 0} be the peak-time strings that do not carry the target
+qubit. In 9/9 tested cases (six modular exponentiations, three ripple-carry
+adders), folding the X_c/Y_c partners at the observed peak recovers the atomic
+peak set with the measured multiplicities, and `N_max^rot = 2·N_max^perm − |B|`. This is a
 family-specific observation, not a universal proposition. The exact general
 statement that survives is that the atomic peak equals the maximum Walsh
 sparsity over the corresponding circuit suffixes.
@@ -604,6 +572,22 @@ residues, sharpening the bound to min(2^k, 2^(t−k), r/gcd(r,2^k)). The scalar
 period can be smaller than the multiplicative order. These are upper bounds,
 not claims of minimal realizations or efficient period discovery.
 
+For the modular-exponentiation output bit the order bound is close to
+attained whenever the orbit of the base is equidistributed. Let H = ⟨a⟩ in
+Z_N^*, let κ(H) be the largest nontrivial normalized exponential sum
+|E_{c∈H} e^{2πi cu/N}| over u ≠ 0, and suppose the exponent register has at
+least log₂|H| bits. If κ(H) ≤ N^{−2η} with 0 < η ≤ 1/6, then in every variable
+order the low work bit, on the clean code or on the full space, has an OBDD of
+at least N^η/(435 ln N) nodes and a prefix cut of rank at least
+N^η/(870 ln N). The second bound applies to every tensor-train, MPS, MPO or
+weighted-automaton bond at that cut. The mechanism is that fixing the exponent
+turns the bit into the indicator of an interval evaluated at c·x mod N, and
+equidistribution of the dilates forces many distinct rows. For Shor's moduli
+N = pq, κ(H) is controlled by the orbit sizes modulo p and q. For balanced
+N with gcd(p−1, q−1) ≤ N^{1/4−θ}, all bases outside a set of density
+N^{−θ+o(1)} give η = 1/8 − θ/2 − o(1). So both quantities are
+exponential for this family, although neither determines the other.
+
 The controlled measurements exhibit growing ideal-function Walsh support at
 constant small cut rank, but substantially larger ranks for the full
 scratch-space pullback. Selected intermediate suffixes also have larger ranks
@@ -696,14 +680,14 @@ and independent of compilation.
 
 ## 9. Related work, and what is prior art
 
-**The ingredient is standard and we do not claim it.** That a diagonal
-operator's Pauli-Z expansion is the Walsh–Hadamard transform of its diagonal is
-stated outright by Welch et al., *Efficient Quantum Circuits for Diagonal
-Unitaries Without Ancillas* (arXiv:1306.3991): "the diagonals of Pauli basis
-operators correspond to Walsh functions". The Pauli-spectrum ↔
-Boolean-Fourier-spectrum *analogy* is likewise established (*On the Pauli
-Spectrum of QAC0*, arXiv:2311.09631). Our claim is the specialisation in which
-the analogy becomes an identity, and its use as a cost model.
+**The ingredient is standard and we do not claim it.** Montanaro and Osborne
+(Proposition 9, below) identify the Pauli expansion of a diagonal Boolean
+operator with its classical Fourier expansion. Welch et al., *Efficient Quantum
+Circuits for Diagonal Unitaries Without Ancillas* (arXiv:1306.3991), state that
+"the diagonals of Pauli basis operators correspond to Walsh functions", and the
+Pauli-spectrum/Boolean-Fourier correspondence is used for QAC0 circuits
+(arXiv:2311.09631). Our claim is the application to permutation pullbacks as a
+PPS cost model.
 
 **Adjacent, must be distinguished:**
 
@@ -785,7 +769,7 @@ arithmetic constructions used.
   diagnostic, not an algorithm.
 - **No implication for factoring.** Efficient classical simulation of Shor's
   algorithm on general inputs would be a classical factoring algorithm. Nothing
-  here bears on that, and the standing constraint bounds the whole programme.
+  here bears on that, and any exact method for the full output must respect it.
 - **Scope stops at the diagonal.** X/Y observables are not covered (§3.3). Real
   Shor's measurement follows an inverse QFT and is outside this exact diagonal
   model. Paper B includes a separately validated conditional-sampling baseline;
@@ -817,13 +801,11 @@ recorded because the reasons are instructive.
 
 3. **"Permutation-native propagation halves peak memory exactly."** The factor
    is 2.000000 for adders but 1.9997 for modular exponentiation; the phrase was
-   written from a table rounded to one decimal place. Corrected in §5. The
-   `rot = 2·perm − 2` regularity in 3/3 modexp instances was recorded here as
-   unexplained through several revisions of this paper remains a measured,
-   family-specific regularity. The local Toffoli argument does not prove the
-   global peak relation; the four-qubit counterexample in §5 disproves that
-   universal derivation. The exact atomic-peak/Walsh-suffix characterization
-   remains valid.
+   written from a table rounded to one decimal place. Corrected in §5. A later
+   draft derived `rot = 2·perm − |B|` from the local Toffoli gadget as a
+   universal peak formula; the four-qubit counterexample in §5 disproves that
+   derivation. The relation remains a measured, family-specific regularity,
+   and the exact atomic-peak/Walsh-suffix characterization remains valid.
 
 A further correction is methodological and worth stating: the collapse of adders
 was originally explained by permutation-ness. That conclusion was right and the
@@ -867,9 +849,9 @@ collapse and general arithmetic does not, an exact suffix-Walsh characterization
 of permutation-native peaks (with decomposition gaps measured, not universally
 fixed), structural caps on achievable density with a
 parity condition governing when they apply, a transfer from published
-cryptanalytic constants to simulation cost with no simulation, and — developed
-separately — an arithmetic criterion for modular exponentiation that a fitted
-power law cannot see.
+cryptanalytic constants to simulation cost with no simulation, and a
+number-theoretic lower bound showing that ordered compressed representations of
+the modular-exponentiation output bit are exponential too.
 
 The clean-code and tensor comparisons sharpen the central limitation: full
 Walsh support is neither a physical-equivalence invariant nor a bound on every
@@ -940,7 +922,7 @@ was withdrawn and not as support for anything.
 | 6.2 A conditional generalisation | Paper B: C40, C41 |
 | 6.3 A compilation choice with a real cost | Paper B: C32 |
 | 6.4 Same physical computation, different full-space support | C50 |
-| 6.5 Walsh sparsity is not tensor memory | C48; Paper B: C52 |
+| 6.5 Walsh sparsity is not tensor memory | C48, C107, C108, C109; Paper B: C52 |
 | 7. Truncation: what the model does and does not say | C5, C14, C16 |
 | 8. The cryptanalytic bridge | C12, C25, C26 |
 | 9. Related work, and what is prior art | C1, C6 |
