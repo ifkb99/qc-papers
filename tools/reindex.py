@@ -1,4 +1,4 @@
-"""Regenerate every INDEX.md, and CLAIMS.md, from frontmatter.
+"""Regenerate every INDEX.md (claims, notes, todo, transfers), and CLAIMS.md, from frontmatter.
 
 These outputs are DERIVED. Never hand-edit them -- a hand-maintained mirror is
 the failure mode this layout exists to remove (see RESTRUCTURE.md).
@@ -171,6 +171,43 @@ def build_todo_index() -> str:
     return "\n".join(L) + "\n"
 
 
+TRANSFER_STATUSES = {
+    "imported": "applies here and was used; its consequence is in the cited claims",
+    "obstruction": "applies here and rules out a class of methods",
+    "escaped": "an obstruction whose hypotheses this construction escapes",
+    "barrier": "a reduction that any success must respect (METHOD.md, the barrier check)",
+    "open": "candidate transfer; hypotheses not yet checked against the construction",
+    "not-applicable": "hypotheses checked and fail; kept so it is not re-proposed",
+}
+
+
+def transfer_key(meta: dict) -> int:
+    i = str(meta.get("id", ""))
+    return int(i[2:]) if i[2:].isdigit() else 10**6
+
+
+def build_transfers_index() -> str:
+    rows = sorted(load(ROOT / "transfers"), key=lambda r: transfer_key(r[0]))
+    L = [
+        BANNER, "", "# Transfer register", "",
+        "One imported theorem, obstruction or barrier per file: which field has a",
+        "theorem about our object, the dictionary between the two, whether its",
+        "hypotheses hold here, and what it does to the exponential. The row owns the",
+        "transfer; the claims it cites own every result. METHOD.md, \"The goal and",
+        "the barrier check\", says how rows are used.", "",
+        "Status: " + "; ".join(f"**{k}** {v}" for k, v in TRANSFER_STATUSES.items()) + ".", "",
+        f"**{len(rows)} rows**", "",
+        "| id | status | effect | field | transfer | claims |",
+        "|---|---|---|---|---|---|",
+    ]
+    for m, p in rows:
+        cl = m.get("claims") or []
+        L.append(f"| [{m.get('id')}]({rel(p)}) | {m.get('status','-')} | {m.get('effect','-')} "
+                 f"| {m.get('field','-')} | {summarise(m.get('one_line',''))} "
+                 f"| {', '.join(cl) if cl else '-'} |")
+    return "\n".join(L) + "\n"
+
+
 def build_claims_aggregate() -> str:
     """CLAIMS.md, kept as a generated aggregate because both papers cite it as
     supplementary material."""
@@ -225,6 +262,7 @@ TARGETS = [
     (ROOT / "notes" / "INDEX.md", build_notes_index, ROOT / "notes"),
     (ROOT / "CLAIMS.md", build_claims_aggregate, ROOT / "claims"),
     (ROOT / "NOTES.md", build_notes_aggregate, ROOT / "notes"),
+    (ROOT / "transfers" / "INDEX.md", build_transfers_index, ROOT / "transfers"),
 ]
 
 

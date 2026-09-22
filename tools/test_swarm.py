@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import swarm
 
@@ -124,6 +125,72 @@ class OfflineTests(unittest.TestCase):
         (self.root / "out/gate/check.log").write_text("old")
         with self.assertRaises(SystemExit):
             swarm.main(["--project", str(self.root), "doc-gate", "out/gate"])
+
+    def test_log_created_during_setup_is_preserved_and_command_not_run(self):
+        log = self.root / "out/race.log"
+        mkdir = Path.mkdir
+
+        def concurrent_mkdir(path, *args, **kwargs):
+            mkdir(path, *args, **kwargs)
+            if path == log.parent:
+                log.write_text("another writer's evidence\n")
+
+        with patch.object(Path, "mkdir", concurrent_mkdir), patch.object(swarm.subprocess, "run") as run:
+            with self.assertRaises(SystemExit):
+                swarm.run_check(self.root, "out/race.log", ["true"])
+            run.assert_not_called()
+        self.assertEqual(log.read_text(), "another writer's evidence\n")
+
+    def test_existing_symlink_is_not_followed_when_opening_a_log(self):
+        (self.root / "out").mkdir()
+        target = self.root / "out/missing.log"
+        (self.root / "out/link.log").symlink_to(target)
+        with patch.object(swarm.subprocess, "run") as run:
+            with self.assertRaises(SystemExit):
+                swarm.run_check(self.root, "out/link.log", ["true"])
+            run.assert_not_called()
+        self.assertFalse(target.exists())
+
+    def test_review_start_requires_readable_consistent_lint_results(self):
+        submission = dict(task="T1", author="worker", manifest=dict(
+            summary="bounded", limitations="one case", outcome="result", evidence=[], checks=[], runs=[]))
+        task = dict(task=dict(state="submitted", submission="S1", spec=dict(
+            mode="read", kind="research", title="Review", reviewer="referee", independent_review=True,
+            source_ref="todo/open/50-carry.md", acceptance=["Evidence"])))
+        error = dict(level="ERROR", code="BROKEN", where="report", message="bad evidence")
+        info = dict(level="INFO", code="NO-HARNESS-SUMMARY", where="lint.log", message="mechanical check")
+        advisory = dict(level="ADVISE", code="NOVELTY-ASSERTION", where="report", message="check scope")
+        cases = (
+            ("not JSON", 0, 2),
+            ("null", 0, 2),
+            ('{"error": "could not read evidence"}', 0, 2),
+            ('{"errors": 0}', 0, 2),
+            ('{"errors": 0, "findings": [null]}', 0, 2),
+            (json.dumps(dict(errors=0, findings=[error])), 0, 2),
+            (json.dumps(dict(errors=1, findings=[error])), 0, 2),
+            (json.dumps(dict(errors=0, findings=[])), 0, 0),
+            (json.dumps(dict(errors=0, findings=[info, advisory])), 0, 0),
+            (json.dumps(dict(errors=1, findings=[error])), 1, 1),
+            (json.dumps(dict(errors=1, findings=[error, info])), 1, 1),
+            ("not JSON", 7, 7),
+        )
+        for stdout, lint_exit, expected in cases:
+            for presentation in ([], ["--verbose"], ["--json"]):
+                with self.subTest(stdout=stdout, lint_exit=lint_exit, presentation=presentation):
+                    with patch.object(swarm, "arb", side_effect=[{"record": submission}, {"record": task}]), \
+                            patch.object(swarm.subprocess, "run", return_value=subprocess.CompletedProcess(
+                                args=[], returncode=lint_exit, stdout=stdout, stderr="")), \
+                            redirect_stdout(io.StringIO()) as output:
+                        code = swarm.main(["--project", str(self.root), "review-start", "S1"]
+                                          + presentation)
+                    self.assertEqual(code, expected, output.getvalue())
+                    if presentation == ["--json"]:
+                        packet = json.loads(output.getvalue())
+                        self.assertEqual(packet["lint_exit"], lint_exit)
+                        if expected == 2:
+                            self.assertIn("lint_error", packet)
+                    elif expected == 2:
+                        self.assertIn("lint result invalid", output.getvalue())
 
 
 @unittest.skipUnless(shutil.which("arb"), "arb CLI not installed")

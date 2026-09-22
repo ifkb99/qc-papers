@@ -125,6 +125,13 @@ def lint_python(path: str, text: str, f: Findings):
 
 
 def lint_log(path: str, text: str, f: Findings, claimed_exit: int | None = None):
+    # swarm.py check writes the child's actual exit as the last line. Earlier
+    # markers can be child output (including nested checks), so only bind the
+    # terminal marker. Plain logs need not use this wrapper format.
+    marker = re.search(r"^\[exit (-?\d+)\][ \t]*(?:\r?\n)?\Z", text, re.M)
+    if marker and claimed_exit is not None and int(marker.group(1)) != claimed_exit:
+        f.add("ERROR", path, "EXIT-MARKER-MISMATCH",
+              f"recorded exit_code {claimed_exit} but terminal log marker records {marker.group(1)}")
     failure = LOG_FAILURE.search(text)
     warnings = LOG_WARNING.findall(text)
     summary = re.findall(r"=== .*?: (\d+)/(\d+) checks pass(, (\d+) FAILED)? ===", text)

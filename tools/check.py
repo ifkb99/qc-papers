@@ -274,6 +274,53 @@ def _():
     return bad
 
 
+@check("11. transfer register rows are well formed and cite real records")
+def _():
+    """The register is where imported theorems live (METHOD.md, the barrier check).
+    A row whose status is outside the vocabulary, whose hypotheses are not
+    written down, or which cites a record that does not exist is the same
+    mirror defect the other checks catch, one directory over."""
+    tdir = ROOT / "transfers"
+    if not tdir.exists():
+        return []
+    sys.path.insert(0, str(ROOT / "tools"))
+    from reindex import TRANSFER_STATUSES, load, parse
+    live, dead = claim_ids()
+    extra = {p.stem for p in (ROOT / "claims").glob("*.md")}
+    note_codes = {str(m.get("code")) for m, _ in load(ROOT / "notes")}
+    todo_ids = {str(m.get("id")) for m, _ in load(ROOT / "todo")}
+    bad, seen = [], {}
+    for meta, path in load(tdir):
+        name = path.name
+        tid = str(meta.get("id", ""))
+        if not re.fullmatch(r"TX\d+", tid) or not name.startswith(f"{tid}-"):
+            bad.append(f"{name}: id {tid!r} must be TX<n> and prefix the file name")
+        if tid in seen:
+            bad.append(f"{name}: duplicate id {tid} (also {seen[tid]})")
+        seen[tid] = name
+        for key in ("field", "status", "effect", "one_line", "source"):
+            if not str(meta.get(key, "")).strip():
+                bad.append(f"{name}: missing {key}")
+        if meta.get("status") not in TRANSFER_STATUSES:
+            bad.append(f"{name}: status {meta.get('status')!r} not in {sorted(TRANSFER_STATUSES)}")
+        body = parse(path)[1]
+        for head in ("## Dictionary", "## Hypotheses", "## Consequence for the goal"):
+            if head not in body:
+                bad.append(f"{name}: no {head!r} section")
+        for cid in meta.get("claims") or []:
+            if cid in dead and meta.get("status") == "imported":
+                bad.append(f"{name}: imports retracted claim {cid}")
+            elif cid not in live | dead | extra:
+                bad.append(f"{name}: cites claim {cid}, which has no file")
+        for code in meta.get("notes") or []:
+            if code not in note_codes:
+                bad.append(f"{name}: cites note {code}, which does not exist")
+        for key in meta.get("todo") or []:
+            if key not in todo_ids:
+                bad.append(f"{name}: cites TODO {key}, which does not exist")
+    return bad
+
+
 # ------------------------------------------------------------------ main --
 
 if __name__ == "__main__":

@@ -105,13 +105,16 @@ class PermPPSResult:
         self.frame_cnot_updates: int = 0
         # (reverse steps completed, qubit mask, terms before, terms after).
         self.trace_events: list[tuple[int, int, int, int]] = []
+        # Same layout, for `reset_before` clears.
+        self.reset_events: list[tuple[int, int, int, int]] = []
 
 
 def propagate_perm(circuit, zmask: int, delta: float = 0.0,
                    max_terms: int = 4_000_000,
                    max_weight: int | None = None, *,
                    trace_plus: Iterable[int] = (),
-                   affine_frame: bool = False) -> PermPPSResult:
+                   affine_frame: bool = False,
+                   reset_before: Mapping[int, int] | None = None) -> PermPPSResult:
     """Back-propagate the Z-type observable Z^zmask through a classical
     reversible circuit, keeping only Z-strings (keys are z bitmasks).
 
@@ -148,6 +151,18 @@ def propagate_perm(circuit, zmask: int, delta: float = 0.0,
                   The frame stores O(n^2) bits plus Python containers. It does
                   not reduce support cardinality or nonlinear-gate allocations.
                   max_weight still scans physical keys after each CNOT.
+
+    `reset_before`: {k: mask} inserts a reset to |0> of the qubits in `mask`
+                  immediately before forward op k (0 <= k <= len(logical); k = 0
+                  is the input boundary, k = len(logical) the output). Its
+                  adjoint on a diagonal observable is C105's clear rule:
+                  Z^z -> Z^(z & ~mask), colliding keys summed, then the usual
+                  coefficient filter. A unitary circuit whose qubits in `mask`
+                  are |0> at that point on some input set computes, on that set,
+                  the same expectation with or without the reset (a "virtual
+                  reset", TODO 66); off that set it computes a different
+                  function. Counts are recorded in n_terms before each clear.
+                  Not supported with affine_frame; masks may not meet trace_plus.
     """
     if not circuit.is_classical():
         bad = next(op[0] for op in circuit.logical
@@ -164,13 +179,38 @@ def propagate_perm(circuit, zmask: int, delta: float = 0.0,
                     q < 0 or q >= circuit.n for q in op[1:]):
                 raise ValueError("affine frame requires distinct in-range gate qubits")
 
+    resets = dict(reset_before or {})
+    if resets:
+        if frame is not None:
+            raise ValueError("reset_before is not supported with affine_frame")
+        full = (1 << circuit.n) - 1
+        for k, mask in resets.items():
+            if not 0 <= k <= len(circuit.logical) or mask < 0 or mask & ~full:
+                raise ValueError("reset_before step or mask out of range")
+
+    def clear(terms: dict[int, float], mask: int, step: int) -> dict[int, float]:
+        new: dict[int, float] = {}
+        for z, c in terms.items():
+            zz = z & ~mask
+            new[zz] = new.get(zz, 0.0) + c
+        floor_ok = ((lambda v: abs(v) >= delta) if delta > 0
+                    else (lambda v: abs(v) > 1e-13))
+        new = {z: v for z, v in new.items() if floor_ok(v)}
+        res.reset_events.append((step, mask, len(terms), len(new)))
+        return new
+
     terms: dict[int, float] = {zmask: 1.0}
     res = PermPPSResult()
     coefficients_filtered = False
+    if resets.get(len(circuit.logical)):
+        terms = clear(terms, resets[len(circuit.logical)], 0)
 
     trace_qubits = {index(q) for q in trace_plus}
     if any(q < 0 or q >= circuit.n for q in trace_qubits):
         raise ValueError("trace_plus contains a qubit outside the circuit")
+    trace_mask_all = sum(1 << q for q in trace_qubits)
+    if any(mask & trace_mask_all for mask in resets.values()):
+        raise ValueError("reset_before masks may not contain trace_plus qubits")
     trace_at: dict[int, int] = {}
     unseen = set(trace_qubits)
     if unseen:
@@ -248,6 +288,9 @@ def propagate_perm(circuit, zmask: int, delta: float = 0.0,
                 terms = {z: v for z, v in terms.items()
                          if not any((z & row).bit_count() & 1 for row in constraints)}
             res.trace_events.append((len(res.n_terms), mask, before, len(terms)))
+        rmask = resets.get(forward_step, 0)
+        if rmask:
+            terms = clear(terms, rmask, len(res.n_terms))
 
     res.n_max = max(res.n_terms) if res.n_terms else 0
     res.final_terms = FramedTerms(terms, frame) if frame is not None else terms

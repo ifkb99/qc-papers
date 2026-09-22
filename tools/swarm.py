@@ -157,6 +157,23 @@ def cmd_todo(ns) -> int:
     return 0
 
 
+def lint_result_error(result, exit_code: int) -> str | None:
+    """Require the evidence linter's complete result before reporting success."""
+    if not isinstance(result, dict) or type(result.get("errors")) is not int or not isinstance(result.get("findings"), list):
+        return "expected an object with integer errors and a findings list"
+    items = result["findings"]
+    if any(not isinstance(item, dict) or
+           any(not isinstance(item.get(key), str) for key in ("level", "code", "where", "message")) or
+           item["level"] not in {"ERROR", "WARNING", "WARN", "ADVISE", "INFO"} for item in items):
+        return "malformed lint finding"
+    errors = sum(item["level"] == "ERROR" for item in items)
+    if result["errors"] != errors:
+        return "error count disagrees with lint findings"
+    if (exit_code == 0) != (errors == 0):
+        return "lint exit code disagrees with lint findings"
+    return None
+
+
 def cmd_review_start(ns) -> int:
     submission = arb(ns.project, "show", ns.submission)["record"]
     manifest = submission["manifest"]
@@ -166,11 +183,17 @@ def cmd_review_start(ns) -> int:
                            "--submission", ns.submission, "--json"], capture_output=True, text=True, timeout=300)
     try:
         findings = json.loads(lint.stdout)
+        lint_error = lint_result_error(findings, lint.returncode)
     except json.JSONDecodeError:
-        findings = {"error": (lint.stdout + lint.stderr).strip()[-500:]}
+        findings = None
+        lint_error = "unreadable JSON: " + (lint.stdout + lint.stderr).strip()[-500:]
+    exit_code = lint.returncode or (2 if lint_error else 0)
     if ns.json:
-        print(json.dumps({"submission": submission, "task": task["task"], "lint": findings, "lint_exit": lint.returncode}, indent=2))
-        return lint.returncode
+        packet = {"submission": submission, "task": task["task"], "lint": findings, "lint_exit": lint.returncode}
+        if lint_error:
+            packet["lint_error"] = lint_error
+        print(json.dumps(packet, indent=2))
+        return exit_code
     current = task["task"]["submission"] == ns.submission and task["task"]["state"] == "submitted"
     print(f"Submission {ns.submission} by {submission['author']} for {submission['task']} ({spec['mode']}/{spec['kind']})")
     print(f"  title: {spec['title']}")
@@ -193,10 +216,10 @@ def cmd_review_start(ns) -> int:
     if submission.get("candidate_changed"):
         print(f"  WARNING canonical candidates changed since submission: {', '.join(submission['candidate_changed'])}")
     print(f"Evidence lint exit {lint.returncode}:")
-    if isinstance(findings, dict) and "error" in findings:
-        print(f"  lint output unreadable: {findings['error']}")
+    if lint_error:
+        print(f"  lint result invalid: {lint_error}")
     else:
-        items = findings.get("findings", []) if isinstance(findings, dict) else findings
+        items = findings["findings"]
         grouped: dict[tuple[str, str], list[dict]] = {}
         for item in items:
             if ns.verbose or item["level"] in ("ERROR", "WARNING", "WARN"):
@@ -211,7 +234,7 @@ def cmd_review_start(ns) -> int:
             print("  (grouped; --verbose lists each line)")
         if not items:
             print("  no findings")
-    return lint.returncode
+    return exit_code
 
 
 def output_path(project: Path, value: str, suffix: str) -> Path:
@@ -227,11 +250,17 @@ def output_path(project: Path, value: str, suffix: str) -> Path:
 
 
 def run_check(project: Path, log: str, command: list[str]) -> dict:
-    path = output_path(project, log, ".log")
-    if path.exists():
-        raise SystemExit(f"{log} already exists; give each run its own log (SWARM.md) rather than overwriting evidence")
+    output_path(project, log, ".log")  # validate the resolved destination
+    requested = project / log
+    # Resolve parents, but retain the leaf so exclusive creation also refuses
+    # a dangling symlink instead of following it to a new file.
+    path = requested.parent.resolve() / requested.name
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w") as stream:
+    try:
+        stream = path.open("x")
+    except FileExistsError:
+        raise SystemExit(f"{log} already exists; give each run its own log (SWARM.md) rather than overwriting evidence") from None
+    with stream:
         stream.write(f"$ {shlex.join(command)}\n")
         stream.flush()
         try:

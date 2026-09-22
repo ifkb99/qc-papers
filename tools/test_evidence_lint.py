@@ -106,6 +106,45 @@ class EvidenceLintTests(unittest.TestCase):
                        self.findings, 0, preserved=True)
         self.assertIn('EXIT-CONTRADICTS-LOG', self.codes())
 
+    def test_check_wrapper_exit_must_match_the_recorded_exit(self):
+        for actual, claimed in ((3, 0), (0, 3), (-9, 0), (3, 4)):
+            with self.subTest(actual=actual, claimed=claimed):
+                findings = lint.Findings()
+                lint.lint_text('run.log', f'$ command\nquiet result\n\n[exit {actual}]\n',
+                               findings, claimed)
+                self.assertIn('EXIT-MARKER-MISMATCH', {x['code'] for x in findings.errors})
+
+    def test_matching_wrapper_exit_and_ordinary_logs_remain_valid(self):
+        for text, claimed in (('$ command\n\n[exit 0]\n', 0),
+                              ('$ command\n\n[exit 3]\n', 3),
+                              ('$ command\n\n[exit -9]\n', -9),
+                              ('$ command\n[exit 3]\nmore output\n\n[exit 0]\n', 0),
+                              ('child output\n[exit 3]\nmore output\n', 0),
+                              ('ordinary output\n', 0),
+                              ('$ command\n\n[exit 3]\n', None)):
+            with self.subTest(text=text, claimed=claimed):
+                findings = lint.Findings()
+                lint.lint_text('run.log', text, findings, claimed)
+                self.assertFalse(findings.errors, findings.items)
+
+    def test_preservation_cannot_hide_a_falsely_successful_wrapper_exit(self):
+        lint.lint_text('run.log', '$ command\n\n[exit 3]\n', self.findings, 0, preserved=True)
+        self.assertIn('EXIT-MARKER-MISMATCH', self.codes())
+
+    def test_frozen_wrapper_exit_is_checked_in_evidence_and_run_only_logs(self):
+        report = self.entry('report.md', 'bounded result\n')
+        log = self.entry('run.log', '$ command\n\n[exit 3]\n')
+        (self.root / 'run.log').write_text('$ command\n\n[exit 0]\n')
+        cases = (
+            self.submission([report, log], checks=[dict(command='command', log='run.log', exit_code=0)]),
+            self.submission([report], runs=[dict(id='R1', state='finished', exit_code=0, log=log)]),
+        )
+        for case in cases:
+            with self.subTest(case=case):
+                findings = lint.Findings()
+                lint.lint_submission(case, self.root, findings)
+                self.assertIn('EXIT-MARKER-MISMATCH', {x['code'] for x in findings.errors})
+
     def test_metadata_for_review_must_itself_be_frozen(self):
         item = self.entry('reference_v1.py', BAD)
         lint.lint_submission(self.submission([item]), self.root, self.findings, 'roles.json')

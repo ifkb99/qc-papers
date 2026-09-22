@@ -115,5 +115,45 @@ except ValueError:
 else:
     check("reject an out-of-range contracted qubit", False)
 
-print("\n" + ("ALL TESTS PASSED" if not FAILED else f"FAILURES: {FAILED}"))
+print("\n[E] reset_before: the clear rule equals classical replay with a reset")
+rng = np.random.default_rng(20260918)
+max_error, changed = 0.0, 0
+for _ in range(24):
+    n = 5
+    qc = Circuit(n)
+    for _ in range(12):
+        kind = rng.integers(3)
+        qs = [int(q) for q in rng.choice(n, size=kind + 1, replace=False)]
+        (qc.x, qc.cnot, qc.toffoli)[kind](*qs)
+    k = int(rng.integers(len(qc.logical) + 1))
+    mask = int(rng.integers(1, 1 << n))
+    tq = int(rng.integers(n))
+    got = propagate_perm(qc, 1 << tq, reset_before={k: mask})
+    head, tail = Circuit(n), Circuit(n)
+    head.logical, tail.logical = qc.logical[:k], qc.logical[k:]
+    ids = np.arange(1 << n, dtype=np.int64)
+    y = walsh.classical_images(tail, walsh.classical_images(head, ids) & ~mask)
+    exact = walsh.wht(np.where((y >> tq) & 1, -1.0, 1.0)) / (1 << n)
+    v = np.zeros(1 << n)
+    for z, c in got.final_terms.items(): v[z] = c
+    max_error = max(max_error, float(np.max(np.abs(v - exact))))
+    changed += not np.allclose(exact, walsh.pullback_coefficients(qc, tq))
+check("24 random circuits: reset clears match replay-with-reset + WHT",
+      max_error < 1e-12 and changed > 0,
+      f"max error {max_error:.2e}; {changed} cases where the reset changed the function")
+full = walsh.pullback_coefficients(split, 2)
+got = propagate_perm(split, 4, reset_before={0: 0b011}).final_terms
+check("reset at the input boundary is subcube restriction (sum over cleared bits)",
+      set(got) == {4} and abs(got[4] - full[[4, 5, 6, 7]].sum()) < 1e-12)
+for kwargs in ({"affine_frame": True, "reset_before": {0: 1}},
+               {"trace_plus": [0], "reset_before": {0: 1}},
+               {"reset_before": {5: 1}}):
+    try:
+        propagate_perm(split, 4, **kwargs)
+    except ValueError:
+        check(f"reject {sorted(kwargs)} {kwargs['reset_before']}", True)
+    else:
+        check(f"reject {sorted(kwargs)} {kwargs['reset_before']}", False)
+
+print("\n" +("ALL TESTS PASSED" if not FAILED else f"FAILURES: {FAILED}"))
 raise SystemExit(bool(FAILED))

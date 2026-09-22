@@ -108,7 +108,8 @@ def tree_lines() -> list[str]:
     untracked = [ln[3:] for ln in status if ln.startswith("??")]
     branch = git("rev-parse", "--abbrev-ref", "HEAD").strip()
     lines = [f"- Branch `{branch}`: {len(modified)} modified, {len(untracked)} untracked. Nothing here is committed."]
-    for label, prefix in (("claims", "claims/"), ("notes", "notes/"), ("experiments", "experiments/"),
+    for label, prefix in (("claims", "claims/"), ("notes", "notes/"), ("transfers", "transfers/"),
+                          ("experiments", "experiments/"),
                           ("lab modules", "lab/"), ("tools", "tools/")):
         new = [p for p in untracked if p.startswith(prefix)]
         if new:
