@@ -28,6 +28,65 @@ Three further differences from lab science shape everything:
 
 ---
 
+## The goal and the barrier check
+
+**Goal (user, 2026-09-18; scoped 2026-09-22).** Search existing mathematics for
+anything that removes an exponential from these simulations, except where
+complexity theory forbids it, by derivation and transfer rather than by
+calculation. The papers and the many smaller optimizations are
+what the path produces along the way; the search is the point. Open questions
+(BPP vs BQP, the classical complexity of factoring) mean something may have
+been overlooked, and an LLM can read far more of the corpus than was practical
+before.
+
+Three consequences for how work is chosen:
+
+1. **Derivation and reading first.** A round's default output is a derivation,
+   an imported theorem or an obstruction. Compute exists to check a derived
+   prediction cheaply (the rules below still apply in full) or to settle a
+   hypothesis a derivation cannot. A run whose outcome would not change which
+   mathematics we pursue next is not worth scheduling.
+2. **The transfer register.** `transfers/` holds one row per imported theorem,
+   obstruction or barrier: the field, the dictionary between their object and
+   ours, the hypotheses checked against the construction (quoted from the
+   source body, not an abstract), and what it does to the exponential. Read
+   `transfers/INDEX.md` before proposing a transfer; most "new" ideas are
+   already a row under another name (TODO 67 was). A proposed transfer
+   becomes an `open` row; its hypothesis check moves it to `imported`,
+   `obstruction`, `escaped` or `not-applicable`. Rows cite claims for results
+   and never restate them.
+3. **The barrier check.** For Shor's family, removing the exponential from an
+   accurate sampler of the output distribution is a classical order-finding
+   algorithm (TX15). That is allowed, but it raises the bar: a candidate that
+   claims it must name the number-theoretic structure it exploits. If it
+   cannot, treat the claim as your own bug or a changed contract (full space
+   vs clean code, expectation vs sampling), which is where every such result
+   here has come from. Results that respect the barrier (noise thresholds,
+   restricted families, lower bounds, classifications) need no such
+   justification.
+4. **Complexity triage, before a round opens.** The goal is to remove
+   exponentials *except where complexity theory forbids it*. For every
+   candidate, write one line: "if this succeeds, it computes ___". If that
+   task is already known to be hard (factoring or order finding, discrete
+   log, exact amplitudes of universal circuits, which are #P-hard), the
+   candidate is an instance of a known barrier and not a research question.
+   Record it in one line against the barrier's register row (TX15, TX42) and
+   do not open a round. The exception is a candidate that names the specific
+   structure it would exploit, as in check 3. C118–C125 are the cautionary
+   case: each took a full round to arrive at "equivalent to factoring", which
+   triage would have predicted at the outset. Targets that pass triage are
+   those whose success implies nothing known to be hard: properties of the
+   method itself (why a circuit is cheap or expensive to simulate this way),
+   restricted families, inputs with no cryptographic structure, and
+   quantities that do not reveal the factors.
+
+**Obstructions are results.** A theorem showing that a whole family of methods
+cannot work prunes the search faster than any experiment. Every slate carries
+at least one obstruction-first candidate, and an obstruction whose hypotheses
+we escape is recorded as `escaped`, because it names where to look.
+
+---
+
 ## The loop, as actually run here
 
 ```
@@ -116,8 +175,12 @@ So before committing to a direction, build a **slate**. Generators:
    sampling, clean code vs full space. The same construction often has an easy
    and a hard version, and knowing which is which is a result.
 
+Before a slate, read `transfers/INDEX.md`; after it, every transfer or
+obstruction candidate, chosen or killed, becomes or updates a register row.
+
 **Choosing from the slate.** One line each: the goal it serves, what is true if
-it succeeds, its strongest known obstruction, and the cheapest step whose
+it succeeds (and whether that is complexity-forbidden: the triage above), its
+strongest known obstruction, and the cheapest step whose
 outcome would change the ranking. Keep at least three candidates from at least
 two generators alive until one has survived its obstruction check and its
 cheapest step. Record killed candidates with the reason, as with retractions.

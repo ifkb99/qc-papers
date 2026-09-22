@@ -108,9 +108,15 @@ submission to the same fresh referee a worker's would get.
    inventory and exact symmetries at tiny sizes. Each returns candidates in the
    METHOD.md format (goal, consequence if true, strongest obstruction, cheapest
    deciding step), with no experiments beyond seconds-scale exact
-   enumeration. The coordinator merges, removes duplicates, keeps the
+   enumeration. A coordinator's sealed candidate is kept where workers cannot
+   list it (not the shared session scratchpad; note TL) and only its hash is
+   posted. Both read `transfers/INDEX.md` first, and every slate carries
+   at least one obstruction-first candidate (METHOD.md, "The goal and the
+   barrier check"). The coordinator merges, removes duplicates, keeps the
    attribution, and ranks. Chosen candidates become `todo/open` items; killed
-   ones are recorded with the reason in the round's note.
+   ones are recorded with the reason in the round's note; every transfer or
+   obstruction candidate, chosen or killed, becomes or updates a `transfers/`
+   row, which only the coordinator writes.
 1. **Contract and derivation.** Freeze the mathematical object and candidate
    predictions before their test. Give each assignment a concrete acceptance
    condition, sufficient exact technical inputs and a budget. A numerical
@@ -224,8 +230,12 @@ output directory (a referee: its review directory), and make every program you
 run write there too. No canonical edits, git changes, spawning or widening of
 scope. Claim, and heartbeat before the lease can expire (a running process does
 not renew it); register predictions and `run.start` before authorized execution;
-keep actual exits and failed evidence; lint before submitting; never edit a
-submitted version. A brief's summary is not evidence: read the sources, and when
+keep actual exits and failed evidence; lint before submitting, gate
+`submission.create` on that exit, and run `evidence_lint --submission` after it;
+never edit a submitted version. Report a must-fail control that behaved as
+required without the token FAILED (as `lab.harness` `fail_check` does): the
+submission lint reads FAILED in an exit-0 log as a contradiction (note TL). Write
+long files in appended sections, never one response over the output cap (note ST). A brief's summary is not evidence: read the sources, and when
 the brief is wrong say so with the evidence rather than following it. A
 revision states, per correction, what changed, what was re-checked and which
 check would have caught the original ("Revisions and corrections"). Return:
@@ -288,21 +298,27 @@ smallest instance, predictions and controls with the next step under each
 outcome, what would falsify it, open gaps. Prefer an honest obstruction or "not
 reached" over a stretched theorem.
 
-Optional and uncalibrated: a purely mathematical lemma (group words, GF(2)
-linear algebra, counting recurrences) may be formalized in Lean 4 with Mathlib
-when the brief supplies a project; write the `.lean` file in the output
-directory, never build inside the shared project, and report the formal
-statement, whether it compiled without `sorry`, and what it does not cover,
-above all the link to the circuit in source. A Lean proof of the wrong statement
-is still the wrong statement.
+Optional: a purely mathematical lemma (group words, GF(2) linear algebra,
+number theory, counting recurrences) may be formalized in Lean 4 with Mathlib.
+The built project is `out/lean/qsim_lean` (worked example:
+`QsimLean/C107LemmaP.lean`). Write the `.lean` file in the output directory and
+check it with `cd out/lean/qsim_lean && ~/.elan/bin/lake env lean /abs/path/file.lean`
+(exit 0, no `sorry`); never build or add files inside that project. Report
+the formal statement, whether it compiled without `sorry`, and what it does not
+cover, above all the link to the circuit in source. Include a must-fail
+control that Lean proves false. A Lean proof of the wrong statement is still
+the wrong statement: in the worked example, the obvious control (even N) turned
+out to satisfy the lemma too.
 
 In a phase-0 slate the deriver proposes rather than proves. Its generators are
 the structure inventory (every structure the construction carries, file:line,
 the standard questions for its kind), exact symmetry tests at the smallest sizes
 where every case is seconds of enumeration (inverse base, variable reversal,
 complement, equal-order moduli), and exact integer sequences turned into a
-conjectured recurrence or closed form with its predicted next term. It returns
-3–8 candidates in METHOD.md's format as `slate.md`, each graded honestly.
+conjectured recurrence or closed form with its predicted next term. It reads
+`transfers/INDEX.md` first, names any row a candidate matches, and includes one
+obstruction-first candidate. It returns 3–8 candidates in METHOD.md's format as
+`slate.md`, each graded honestly and each with its complexity-triage line.
 <!-- /role -->
 
 <!-- role:surveyor -->
@@ -333,10 +349,17 @@ In a phase-0 slate the surveyor's generators are transfer and
 obstruction-first: adjacent fields where the object has a name and theorems,
 and the strongest known result that would rule the goal out, with every
 hypothesis checked against the construction, since an obstruction whose
-hypotheses we escape is itself a candidate. It returns 3–8 candidates as
-`slate.md`, each with generator, dictionary or theorem (cited), goal served,
-consequence if true, strongest obstruction and cheapest ranking-changing step,
-marking any candidate whose premise it could not check.
+hypotheses we escape is itself a candidate. Read `transfers/INDEX.md` first
+and say which existing row a candidate extends or duplicates. It returns 3–8
+candidates as `slate.md`, each with generator, dictionary or theorem (cited),
+goal served, consequence if true, strongest obstruction and cheapest
+ranking-changing step, marking any candidate whose premise it could not check,
+plus a proposed register row per transfer (field, status, dictionary,
+hypotheses with source locations, consequence). For Shor-family candidates,
+apply METHOD.md's barrier check and name the number-theoretic structure a
+success would exploit. Give every candidate METHOD.md's complexity-triage line
+("if this succeeds, it computes ___") and mark any candidate that would solve a
+known-hard problem as a barrier instance rather than ranking it.
 <!-- /role -->
 
 <!-- role:falsifier -->
@@ -496,7 +519,12 @@ uv run python tools/evidence_lint.py --project /absolute/research/root RUN.log -
 Use the actual exit code. `uv run python tools/swarm.py check LOG -- COMMAND`
 runs a command into a project log and prints the `{command,exit_code,log}`
 object that `checks` expects; `tools/swarm.py doc-gate OUTDIR` does this for the
-documentation gate (`--reindex` regenerates indexes, coordinator only). With
+documentation gate (`--reindex` regenerates indexes, coordinator only). Log files
+are created exclusively: an existing path, including one another writer creates
+during setup, is refused before the command runs. The final `[exit N]` line
+records the child's actual exit; evidence lint compares it with the recorded
+check/run exit when supplied. Earlier markers from child output are ignored;
+ordinary logs do not need a marker. With
 `--append FILE` both collect a list to pass as `checks:=@FILE`. Include
 all source, report and log paths used by checks/runs. Submit once the complete version is ready; after submission do
 not edit or rename its files. Revisions and new material get new filenames and
@@ -512,6 +540,11 @@ uv run python tools/swarm.py --project /absolute/research/root review-start S_ID
 This prints task acceptance, reviewer and candidate status, the frozen
 manifest with archive paths, and grouped `tools/evidence_lint.py --submission`
 findings (`--verbose` lists every line). It replaces the separate lint call.
+Unreadable or malformed lint output, or disagreement between its findings,
+error count and exit status, blocks this gate. If lint exited zero despite an
+invalid result, `review-start` exits 2; otherwise it preserves lint's nonzero
+exit. JSON output retains the actual `lint_exit` and adds `lint_error` for an
+invalid result. Neither presentation treats missing findings as a clean review.
 
 Errors block mechanical acceptance until corrected or explicitly established
 as historical with the provenance mechanism below. Warnings need a disposition.

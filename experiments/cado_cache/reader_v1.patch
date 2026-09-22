@@ -1,0 +1,21 @@
+--- a/linalg/bwc/matrix_u32.cpp
++++ b/linalg/bwc/matrix_u32.cpp
+@@ -8,6 +8,7 @@
+ 
+ #include <string>
+ #include <memory>
++#include <utility>
+ 
+ #include <sys/stat.h>
+ 
+@@ -91,8 +92,8 @@
+      */
+ 
+     if (!transpose) {
+-        return { m, { rwsize, cwsize}, ncoeffs };
++        return { std::move(m), { rwsize, cwsize}, ncoeffs };
+     } else {
+-        return { m, { cwsize, rwsize}, ncoeffs };
++        return { std::move(m), { cwsize, rwsize}, ncoeffs };
+     }
+ }

@@ -1,0 +1,338 @@
+{
+  "name": "grover71_control_preconditions_v1",
+  "ok": true,
+  "predictions": {
+    "P1": "Real edge lists and coefficient construction instantiate every scheduled control.",
+    "P2": "Zero and rare prefixes have exact declared preconditions."
+  },
+  "controls": {
+    "C1": "Omitted oracle disagrees at y=1 at every resource width.",
+    "C2": "Dephasing disagrees at y=0 at every resource width.",
+    "C3": "Dropped edge0 changes witness and P(0) at every resource width.",
+    "C4": "Removing cross terms changes exact normalization."
+  },
+  "checks": [
+    {
+      "id": "P1",
+      "kind": "check",
+      "ok": true,
+      "detail": "n=4; actual original/broken edge lists and nonzero coefficient"
+    },
+    {
+      "id": "C1",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=4; exact positive P(1)"
+    },
+    {
+      "id": "C2",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=4; exact nonuniform P(0)"
+    },
+    {
+      "id": "C3",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=4; x=3 distinguishes actual clauses; P(0) distinguishes outputs"
+    },
+    {
+      "id": "C4",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=4; omitted coherent term is nonzero"
+    },
+    {
+      "id": "P2",
+      "kind": "check",
+      "ok": true,
+      "detail": "n=4; t0 impossible prefix and t3 positive y0=1"
+    },
+    {
+      "id": "P1",
+      "kind": "check",
+      "ok": true,
+      "detail": "n=8; actual original/broken edge lists and nonzero coefficient"
+    },
+    {
+      "id": "C1",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=8; exact positive P(1)"
+    },
+    {
+      "id": "C2",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=8; exact nonuniform P(0)"
+    },
+    {
+      "id": "C3",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=8; x=3 distinguishes actual clauses; P(0) distinguishes outputs"
+    },
+    {
+      "id": "C4",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=8; omitted coherent term is nonzero"
+    },
+    {
+      "id": "P2",
+      "kind": "check",
+      "ok": true,
+      "detail": "n=8; t0 impossible prefix and t3 positive y0=1"
+    },
+    {
+      "id": "P1",
+      "kind": "check",
+      "ok": true,
+      "detail": "n=16; actual original/broken edge lists and nonzero coefficient"
+    },
+    {
+      "id": "C1",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=16; exact positive P(1)"
+    },
+    {
+      "id": "C2",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=16; exact nonuniform P(0)"
+    },
+    {
+      "id": "C3",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=16; x=3 distinguishes actual clauses; P(0) distinguishes outputs"
+    },
+    {
+      "id": "C4",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=16; omitted coherent term is nonzero"
+    },
+    {
+      "id": "P2",
+      "kind": "check",
+      "ok": true,
+      "detail": "n=16; t0 impossible prefix and t3 positive y0=1"
+    },
+    {
+      "id": "P1",
+      "kind": "check",
+      "ok": true,
+      "detail": "n=32; actual original/broken edge lists and nonzero coefficient"
+    },
+    {
+      "id": "C1",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=32; exact positive P(1)"
+    },
+    {
+      "id": "C2",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=32; exact nonuniform P(0)"
+    },
+    {
+      "id": "C3",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=32; x=3 distinguishes actual clauses; P(0) distinguishes outputs"
+    },
+    {
+      "id": "C4",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=32; omitted coherent term is nonzero"
+    },
+    {
+      "id": "P2",
+      "kind": "check",
+      "ok": true,
+      "detail": "n=32; t0 impossible prefix and t3 positive y0=1"
+    },
+    {
+      "id": "P1",
+      "kind": "check",
+      "ok": true,
+      "detail": "n=64; actual original/broken edge lists and nonzero coefficient"
+    },
+    {
+      "id": "C1",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=64; exact positive P(1)"
+    },
+    {
+      "id": "C2",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=64; exact nonuniform P(0)"
+    },
+    {
+      "id": "C3",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=64; x=3 distinguishes actual clauses; P(0) distinguishes outputs"
+    },
+    {
+      "id": "C4",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=64; omitted coherent term is nonzero"
+    },
+    {
+      "id": "P2",
+      "kind": "check",
+      "ok": true,
+      "detail": "n=64; t0 impossible prefix and t3 positive y0=1"
+    },
+    {
+      "id": "P1",
+      "kind": "check",
+      "ok": true,
+      "detail": "n=128; actual original/broken edge lists and nonzero coefficient"
+    },
+    {
+      "id": "C1",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=128; exact positive P(1)"
+    },
+    {
+      "id": "C2",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=128; exact nonuniform P(0)"
+    },
+    {
+      "id": "C3",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=128; x=3 distinguishes actual clauses; P(0) distinguishes outputs"
+    },
+    {
+      "id": "C4",
+      "kind": "must-fail",
+      "ok": true,
+      "detail": "n=128; omitted coherent term is nonzero"
+    },
+    {
+      "id": "P2",
+      "kind": "check",
+      "ok": true,
+      "detail": "n=128; t0 impossible prefix and t3 positive y0=1"
+    },
+    {
+      "id": "P2",
+      "kind": "check",
+      "ok": true,
+      "detail": "n=128; rare positive prefix below1e-8"
+    },
+    {
+      "id": "P1",
+      "kind": "check",
+      "ok": true,
+      "detail": "n4 hand coefficients"
+    },
+    {
+      "id": "P2",
+      "kind": "check",
+      "ok": true,
+      "detail": "n=2; three-step delta degeneracy excluded from controls"
+    },
+    {
+      "id": "P2",
+      "kind": "check",
+      "ok": true,
+      "detail": "n=3; three-step delta degeneracy excluded from controls"
+    },
+    {
+      "id": "P1",
+      "kind": "check",
+      "ok": true,
+      "detail": "n=4; t=1; exact tiny predicate has x0=1,x1=0"
+    },
+    {
+      "id": "P1",
+      "kind": "check",
+      "ok": true,
+      "detail": "n=4; t=3; exact tiny predicate has x0=1,x1=0"
+    },
+    {
+      "id": "P1",
+      "kind": "check",
+      "ok": true,
+      "detail": "n=5; t=1; exact tiny predicate has x0=1,x1=0"
+    },
+    {
+      "id": "P1",
+      "kind": "check",
+      "ok": true,
+      "detail": "n=5; t=3; exact tiny predicate has x0=1,x1=0"
+    }
+  ],
+  "warnings": [],
+  "rows": [
+    {
+      "n": 4,
+      "p0": "13225/16384",
+      "p1": "729/16384",
+      "rare_prefix_mass": "243/2048",
+      "zero_prefix_t0": "0",
+      "rare_y1_conditional": "1/2"
+    },
+    {
+      "n": 8,
+      "p0": "8059191529/274877906944",
+      "p1": "23843374569/274877906944",
+      "rare_prefix_mass": "1135398789/2147483648",
+      "zero_prefix_t0": "0",
+      "rare_y1_conditional": "1/2"
+    },
+    {
+      "n": 16,
+      "p0": "42333033681093231203903689/77371252455336267181195264",
+      "p1": "535759220594864002689225/77371252455336267181195264",
+      "rare_prefix_mass": "542815826337248229675/2361183241434822606848",
+      "zero_prefix_t0": "0",
+      "rare_y1_conditional": "1/2"
+    },
+    {
+      "n": 32,
+      "p0": "6018719476792146449974098737242469236153970518317925129/6129982163463555433433388108601236734474956488734408704",
+      "p1": "56458519734948768249395709520614615409254596150025/6129982163463555433433388108601236734474956488734408704",
+      "rare_prefix_mass": "25918508225852607802380520633488919803964725/2854495385411919762116571938898990272765493248",
+      "zero_prefix_t0": "0",
+      "rare_y1_conditional": "1/2"
+    },
+    {
+      "n": 64,
+      "p0": "38477724925902346781734257246275942936788201381343386479723625953006111990688596322688369793017298595664217702025/38478521676166483605741250097796497856523182881313912761668255277583712667477744737709244389536050430475222646784",
+      "p1": "458275581604468516150421586971999151659259236418310577061955606017469503279875597932691368998951911049/38478521676166483605741250097796497856523182881313912761668255277583712667477744737709244389536050430475222646784",
+      "rare_prefix_mass": "43191943208446262611063352420570351011030607991237910487286471843359071850366228716231563/4171849679533027504677776769862406473833407270227837441302815640277772901915313574263597826048",
+      "zero_prefix_t0": "0",
+      "rare_y1_conditional": "1/2"
+    },
+    {
+      "n": 128,
+      "p0": "1516130949472034193035193011693906050942775504608207407753600335008111914183842313400940821852903306333730473147595098018669024814764933690919729734077435481774619418286542117132570956243327450287269696278563606269177087341610889/1516130949512411069481425281701662651618052751090524034315480505884815383482789928057498446121725076123523174508917063677901933636830873429144811792032403456254350562520361235888930942999607856274670897650113739014543795755679744",
+      "p1": "29869381080650753736904277883339885214982700056462406100044467465458548316667345770689075257035754584282628338158818034254533928687165311875753204028139662822895748550370514528235587315515942225580487067529/1516130949512411069481425281701662651618052751090524034315480505884815383482789928057498446121725076123523174508917063677901933636830873429144811792032403456254350562520361235888930942999607856274670897650113739014543795755679744",
+      "rare_prefix_mass": "118656975416076561457622779158178712936782589138889660043482977228998697397834644864291225390480246081547487407751572816838010382104590221993568384138046350874352085634249672230389/8911016831293350036408538292383381493932086928219843614412485386522021810954448020519360959604241015192660760885926576778688876408936402340337229140082449586429677098359892480630613656731648",
+      "zero_prefix_t0": "0",
+      "rare_y1_conditional": "1/2"
+    }
+  ],
+  "metadata": {
+    "scope": "control preconditions only; no sampler, dense reference or resource code executed",
+    "grades": "exact finite assertions plus derivation; no candidate validation"
+  },
+  "python": "3.14.0 (main, Oct 10 2025, 12:47:49) [Clang 20.1.4 ]",
+  "platform": "Linux-6.8.0-139-generic-x86_64-with-glibc2.39",
+  "elapsed_seconds": 0.003258532000472769
+}

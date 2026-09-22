@@ -1,0 +1,36 @@
+--- a/linalg/bwc/matmul-bucket.cpp
++++ b/linalg/bwc/matmul-bucket.cpp
+@@ -2025,7 +2025,10 @@
+         for(auto & S : D.sub) {
+             // fmt::print("save dispatch({}), sum={}\n", S.x.size(), idiotic_sum((void*) ptrbegin(S.x), S.x.size() * sizeof(uint16_t)));
+             mm->t16.insert(mm->t16.end(), S.x.begin(), S.x.end());
++            size_t const qsim_x_before = S.x.capacity();
+             S.x.clear();
++            if (std::getenv("QSIM_DIAGNOSTIC"))
++                fprintf(stderr, "QSIM X %zu %zu\n", qsim_x_before, S.x.capacity());
+         }
+         /* Now the combining data */
+         for(unsigned int l = 0 ; l < V->steps.size() ; l++) {
+@@ -2058,7 +2061,10 @@
+             // fmt::print("save combine({}), sum={}\n", S.c.size(), idiotic_sum((void*) ptrbegin(S.c), S.c.size()));
+             // fmt::print("m={}\n", *max_element(S.c.begin(), S.c.end()));
+             append_compressed(mm->t8, S.c, defer);
++            size_t const qsim_c_before = S.c.capacity();
+             S.c.clear();
++            if (std::getenv("QSIM_DIAGNOSTIC"))
++                fprintf(stderr, "QSIM C %zu %zu\n", qsim_c_before, S.c.capacity());
+             mm->headers.push_back(*chdr);
+         }
+     }
+@@ -2127,6 +2133,11 @@
+     if (methods.vsc && main_i0 < fence) {
+         vsc_slice V[1];
+         mb.prepare_vsc_slices(V, main_i0, fence);
++        if (std::getenv("QSIM_DIAGNOSTIC")) {
++            fprintf(stderr, "QSIM RAW %zu\n", mb.data.capacity());
++            for (auto const & step : V->steps)
++                fprintf(stderr, "QSIM STEP %u %u\n", step.defer, step.nrows);
++        }
+         scratch3size = MAX(scratch3size, V->tbuf_space);
+         builder<Arith>::push_vsc_slices(this, V);
+         main_i0 = fence;

@@ -1,7 +1,9 @@
 # CLAUDE.md — read this before touching anything
 
 Research repo: Pauli-path simulation (PPS) of reversible quantum arithmetic.
-Two papers are drafted; the experimental backlog is largely closed.
+Two papers are drafted. The research goal is to search existing mathematics for
+anything that removes an exponential from these simulations, by derivation and
+transfer rather than calculation: METHOD.md, "The goal and the barrier check".
 
 **One coordinating session and one canonical source writer at a time.**
 Authorized delegated workers coordinate through the local `arb` board configured
@@ -65,6 +67,7 @@ concluding something is broken.
 | what is known, and its status | `claims/<ID>.md` | duplicated into prose elsewhere |
 | how something was found | `notes/<CODE>-*.md` | restated in a claim body |
 | what to do next | `todo/open/*.md` | tracked anywhere else |
+| an imported theorem, obstruction or barrier, and whether its hypotheses hold here | `transfers/TX<n>-*.md` | restating the claims it cites |
 | current state, pointers | `HANDOFF.md` | facts that belong in a claim |
 | live assignments, leases, who is running | the `arb` board | restated by hand in `HANDOFF.md` |
 | how the work is conducted | `METHOD.md` | — |
@@ -79,7 +82,7 @@ only way to change it:
 
 | generated | tool | run it after |
 |---|---|---|
-| `INDEX.md` files, `CLAIMS.md`, `NOTES.md` | `tools/reindex.py` | changing any claim, note or todo |
+| `INDEX.md` files (incl. `transfers/INDEX.md`), `CLAIMS.md`, `NOTES.md` | `tools/reindex.py` | changing any claim, note, todo or transfer |
 | `~/.claude/agents/qsim-*.md` bodies | `tools/gen_role_bodies.py` | changing SWARM.md "Role duties" |
 | `HANDOFF.md` between `<!-- generated:state -->` markers | `tools/handoff.py` | a round opens or closes, and on resumption |
 
@@ -138,12 +141,15 @@ uv run python tools/check.py      # must pass
 support, appendix maps that disagree with real headings, dangling `§`
 references, lab notation in paper prose, duplicate or non-sequential
 Theorem/Proposition numbering, reproducibility commands naming files that do
-not exist, stale indexes, and a wrong suite count.
+not exist, stale indexes, a wrong suite count, and malformed transfer-register
+rows (status outside the vocabulary, missing hypotheses section, or citing a
+claim, note or TODO that does not exist).
 
 ---
 
 ## Orientation
 
 `HANDOFF.md` for current state · `claims/INDEX.md` for what is known ·
+`transfers/INDEX.md` for which mathematics has been imported or ruled out ·
 `todo/INDEX.md` for what is next · `METHOD.md` for how the work is conducted ·
 `RESTRUCTURE.md` for why the repo is laid out this way.

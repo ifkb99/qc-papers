@@ -602,6 +602,31 @@ round's review for a submission a fraction of the size.
 
 ---
 
+### Live-round addendum, 2026-09-21 (CADO cache pilot and recurrence audit; not blinded)
+
+Scientific authorship was delegated; the coordinator integrated the resulting
+C120/C121 records. The recurrence author supplied a counterexample to a naive
+run shortcut and explicitly stopped the unsupported performance direction.
+The cache author implemented the reviewed allocation-lifetime change and kept
+reader/builder ablations separate. Claim records own the scientific outcomes.
+
+Author and coordinator independently noticed that the first elapsed readings
+were quantized by timeout polling. This was found before the results referee,
+so it is not a blinded referee catch. Review Vf4eac155b56c4dd5 independently
+confirmed the mechanism in the interpreter source, retained valid child RSS
+and exact-output evidence, and prescribed a focused timing amendment. All
+completed v1 runs kept their real zero exits and original evidence. The precise
+elapsed conclusion was withheld until the corrected same-workload run.
+
+A fresh focused context checked the revision against raw records, fixed input
+and runtime identities, the complete prescribed sequence and all reported
+summary arithmetic. The slower combined-arm observation was retained, and
+prior setup CPU was not converted into a certified total by an administrative
+allowance. Scope remains CADO-child measurements on synthetic matrices, with
+shared diagnostics/backend limitations disclosed. These live reviews are
+substantive checks, not evidence that reviewer defect-detection ability has
+been calibrated by blinded trials. Note FE owns the full evidence sequence.
+
 ## 6. Findings: arb 0.1.0 (for `~/Workspace/agent-research-board`)
 
 - **A1. The `not_initialized` hint invites a second board.** It is returned
@@ -992,3 +1017,53 @@ limits are now in the protocol rather than discovered again later. The trial
 itself was then run: its entry sits with section 5's addenda as "Calibration
 trial 1", it missed its seeded class, and the brief change it produced is in the
 "Referee" role duty.
+
+
+## 12. Evidence-gate hardening, 2026-09-21 (Codex, user-authorized)
+
+The user requested a brief review of the recommendations and implementation of
+useful suggestions. Most of P1–P7 and S1–S5 already have shared-protocol or tool
+implementations. This pass strengthens P4 and P6 at the executable boundary;
+it does not start research, delegate work or change historical board records.
+
+### Applied changes and detectors
+
+- **Recorded exit versus log exit.** A quiet command ending with `[exit 3]`
+  could be recorded as exit zero without a lint error. `evidence_lint.py` now
+  compares the terminal wrapper marker with the recorded check/run exit,
+  including signed signal exits. Tests cover both mismatch directions,
+  changed working copies versus frozen logs, logs present only in run records,
+  and preservation metadata's inability to excuse a false success. Matching
+  failures and logs without wrapper markers remain valid.
+- **An unreadable lint result was not a successful check.** `review-start`
+  previously returned zero for malformed JSON if its lint subprocess returned
+  zero; some malformed structures instead crashed the text formatter. It now
+  validates the finding structure, error count and process status, returning a
+  failure with a diagnostic in text and JSON modes. Tests feed malformed and
+  contradictory results as well as clean results and genuine nonzero exits.
+- **Freeze protection starts at file creation.** `swarm.py check` previously
+  checked existence and then opened a log for truncating write. It now creates
+  logs exclusively, refusing an intervening writer or an existing leaf symlink
+  before executing the command. The regression creates another writer's log
+  during setup and checks that its bytes survive and no command runs. This is
+  protection against accidental evidence replacement, not a worker sandbox.
+
+Six new regression methods reproduced defects against the prior code; another
+covers valid log cases. After the fixes, evidence-lint tests pass 33/33 and
+swarm-helper tests 10/10, including the disposable-board test that read commands
+leave board records unchanged. No scientific suites were needed.
+
+### Judgment on the wider recommendations
+
+Keep fresh referees, dependencies that bind the actual accepted inputs, frozen
+artifacts, one shared protocol, and mechanical checks that remove routine work
+from review. The existing calibration limits are also appropriate: a clean lint
+or an agreeable live round does not establish scientific reviewer quality.
+
+Do not adopt the original P3 wording that surviving mutants automatically make
+fixtures vacuous; equivalence and unexercised domains need investigation. The
+shared protocol already qualifies this. Likewise, adding a reviewer pool does
+not establish independence, and mandatory extra phases for trivial references
+would spend latency without necessarily improving evidence. Keep the existing
+scoped exceptions. Evidence retention outside git and broader referee
+calibration remain useful separate work, not prerequisites for these fixes.

@@ -7,7 +7,7 @@ frontmatter; the claim file is the single source of truth for its own
 status. Retracted claims are in `claims/retracted/` and **may not be
 cited as support**.
 
-**106 live · 19 retracted**
+**125 live · 19 retracted**
 
 ## Live
 
@@ -116,6 +116,25 @@ cited as support**.
 | [C104](claims/C104.md) | - | established | For ToffoliModExp at fixed N, exponent qubits are only first controls of Toffolis in their own block, so the exact full-space Walsh spectrum of x0 … |
 | [C105](claims/C105.md) | B | proven | Measurement-based unlookup of the lookup register (X-measure, diagonal fixup, reset or deallocate) acts on diagonal PPS as the pullback that clears … |
 | [C106](claims/C106.md) | B | proven | The exponent-prefix cut rank of the full-space modexp pullback lower-bounds the bond of every representation linear across that cut (TT/MPO, weighted … |
+| [C107](claims/C107.md) | - | proven | Every OBDD of the modexp x0 bit, in every variable order, has >= N^eta/(435 ln N) nodes when kappa(<a>) <= N^(-2 eta), 2^t >= r, 0 < eta <= 1/6 (odd … |
+| [C108](claims/C108.md) | - | proven | The rank of any 0/1 matrix of arc translates sampled on point sets of Z_N equals E - beta_1(gap graph) + eps over every field; hence, under C107 … |
+| [C109](claims/C109.md) | - | proven | For Shor's N = pq, kappa(<a>) = max(unit, mod-p, mod-q families) <= max(sqrt(N)/r, sqrt(p)/r_p, sqrt(q)/r_q); balanced N give eta <= 1/8 + o(1) … |
+| [C110](claims/C110.md) | - | derived | Every Pauli-LIMDD of the post-modexp state sum_e |e>|a^e mod N> in an exponent-first order has > r/(2 sqrt(2N)) nodes at the level of the last … |
+| [C111](claims/C111.md) | - | derived | In every order reading all x qubits before the exponent, the reduced Pauli-LIMDD of the post-modexp state has at most ceil(beta/2) nodes at the first … |
+| [C112](claims/C112.md) | - | derived | At the level of the last exponent qubit of ANY qubit order, the Pauli-LIM classes of the post-modexp state number exactly #{phi(c) : c in C_j, … |
+| [C113](claims/C113.md) | - | proven | At the fixed two-exponent/one-work-bit interleaving of the clean post-modexp state, squared fidelity >= 1-epsilon^2 requires MPS bond D >= … |
+| [C114](claims/C114.md) | - | derived | For the explicit path predicate x0 AND no adjacent 11, uniform-start Grover followed by H admits exact selected-probability evaluation by a two-state … |
+| [C115](claims/C115.md) | - | measured | The certified clean-block two-buffer inverse-QFT sampler passes bounded validation but at N=31, width=6 and 128 samples uses more total traced memory … |
+| [C116](claims/C116.md) | - | derived | The clean modular-power state shares a low-exponent template under multiplicative work permutations; low-register unitaries preserve the sharing, … |
+| [C117](claims/C117.md) | - | derived | The explicit path-predicate Grover family admits exact output sampling by a bond-three contraction with a rolling Fibonacci environment; … |
+| [C118](claims/C118.md) | - | derived | Explicit low-bit multiplication residual construction retains Omega(sqrt(N)) syntactic states under primitive normalization, operand swap and … |
+| [C119](claims/C119.md) | - | derived | A compact final factor state does not supply its construction; complete modular inverse graphs have flat register-cut Schmidt spectra, and … |
+| [C120](claims/C120.md) | - | measured | Releasing dead raw and staging buffers reduces peak CADO VSC cache-builder child RSS on the tested synthetic matrices, with identical serialized … |
+| [C121](claims/C121.md) | - | derived | Actual Harvey--Hittmeir giant steps have an exact ratio with lattice and rounding terms; one congruence class need not form one unit-step geometric … |
+| [C122](claims/C122.md) | - | derived | Uniform-start Grover output at any iteration count reduces to one angle coin plus a predicate interface: prefix counts (computational basis) or … |
+| [C123](claims/C123.md) | - | derived | Hadamard-basis Grover output of the two-orientation semiprime predicate is Simon's law for p xor q; O(m) exact samples at t with non-negligible … |
+| [C124](claims/C124.md) | - | derived | Phase-labelled subgroup sectors of clean modexp are twisted d-cycles with d=r/|<a> cap H|; any interface that runs them yields d by a quotient walk … |
+| [C125](claims/C125.md) | - | derived | C124's open conjecture implies factoring is not in BPP (under weak phases; under point phases, that factoring and F_p^* discrete logs are not both in … |
 | [F12](claims/F12.md) | B | narrowed | At function level, β=1 gives selected-bit width independence; β>1 has no universal density claim because minimal scalar periods vary |
 | [dictionary-biased-product-input-state-ma](claims/dictionary-biased-product-input-state-ma.md) | B | established | Dictionary: a biased product input state makes ⟨O⟩ = Σ_z c_z ∏_{i∈z} δ_i, i.e. exactly the p-biased WHT of Gangopadhyay et al. (JAMC 2023) with δ_i = … |
 | [superseded-the-residual-ladder-the](claims/superseded-the-residual-ladder-the.md) | B | established | Superseded (§RS): the residual ladder is 1 − 2^−(k+1) in the conditioning depth k |

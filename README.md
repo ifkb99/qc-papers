@@ -4,6 +4,11 @@ Research code for two related results about Pauli Path Simulation (PPS, also
 called sparse Pauli dynamics) applied to reversible arithmetic and Shor's
 algorithm.
 
+The research goal behind them is broader: search existing mathematics for
+anything that removes an exponential from these simulations. `METHOD.md` ("The
+goal and the barrier check") gives the rules, and `transfers/INDEX.md` lists
+what has been imported or ruled out.
+
 **Paper A — `PAPER_A.md`** (full draft; `ABSTRACT.md` is now the abstract workshop and prior-art dossier). For any circuit implementing a permutation of the
 computational basis, the Pauli support carried by PPS with a computational-basis
 observable is *exactly* the Walsh–Hadamard spectrum of the corresponding output

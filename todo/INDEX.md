@@ -5,7 +5,7 @@
 One item per file. State is the directory it lives in: moving a file
 between `open/` and `done/` is how state changes.
 
-**15 open · 68 done**
+**21 open · 71 done**
 
 ## Open
 
@@ -24,6 +24,12 @@ between `open/` and `done/` is how state changes.
 | [60](todo/open/60-omitted-carry-control-parity-forced.md) | Is the omitted-carry wrong reference a discriminating control, or is its disagreement forced by parity? |
 | [64](todo/open/64-one-noncommuting-insertion-exact-cost.md) | Queued: exact Heisenberg term count of the modexp pullback with one Rx(theta) between blocks, and its growth factor R(q) |
 | [65](todo/open/65-handoff-tool-small-fixes.md) | Small fixes to tools/handoff.py, check 8c and HANDOFF pointers carried from the TODO 61 reviews |
+| [66](todo/open/66-clean-scratch-virtual-reset.md) | Clean-scratch virtual reset: apply C105's clear rule at every point where a unitary circuit returns scratch to |0>, and measure what it removes |
+| [68](todo/open/68-non-prefix-cuts.md) | Cut rank and bond at cuts that are not exponent prefixes: interleaved and work-first orders of the modexp pullback |
+| [69](todo/open/69-limdd-interleaved-orders.md) | Pauli-LIMDD width of the post-modexp state in orders that interleave exponent and x qubits |
+| [72](todo/open/72-factor-state-construction.md) | Can the compact divisor state be constructed from the composite alone? |
+| [73](todo/open/73-factoring-memory-and-aggregation.md) | Factoring memory after the cache and recurrence audits |
+| [74](todo/open/74-memory-scaling.md) | Attack memory scaling through Grover precision, streamed counting and sampled symmetries |
 | [hk3](todo/open/hk3-experiment-experiment2-and-all-experiment3.md) | experiment.py §3, experiment2.py §§2–3 and all of experiment3.py |
 | [hk7](todo/open/hk7-six-more-dependencies-are-also-unused.md) | Six more dependencies are also unused |
 
@@ -92,6 +98,9 @@ between `open/` and `done/` is how state changes.
 | [61](todo/done/61-handoff-is-generated.md) | Migrate HANDOFF.md to a generated state block plus a bounded hand-written intent section | HANDOFF.md migrated 2026-09-18: 56 hand-written lines (direction, C103 headline caveat, standing instructions, paper decisions, do-not-redo list) plus the generated state block; the 1034-line history archived verbatim in archive/HANDOFF-2026-08-to-09.md; tools/handoff.py now reads open tasks from board.read (task.list's first page missed every task after the hundredth) |
 | [62](todo/done/62-measurement-unlookup-diagonal-pps.md) | Does Gidney's measurement-based unlookup keep diagonal PPS exact and branch-free, closing the unitary-unlookup gap in the windowed analysis? | C105/UL: measurement-based unlookup of the lookup register acts on diagonal PPS as the pullback that clears it (reset or deallocate; drop is measure-and-leave); same full-space function as the unitary circuit on every input with a clean lookup register; dead tail proved, 2-periodicity derived; off that set the functions differ (witness traced by hand) and the channel-model support sizes are not reported; Paper B 7.3 / 12.1 / 13 item 3 updated |
 | [63](todo/done/63-exponent-cut-rank-lower-bound.md) | Does the exponent-prefix cut rank of the full-space modexp pullback equal C103's |S_k|, making C103's widths a lower bound for every representation linear across that cut? | C106/CR: the cut rank lower-bounds every representation linear across the exponent-prefix cut and is at most |S_k|; for beta=3, alpha=0, where the letters commute, rank = min(k+1, d), and at N=7, a=2 d = 1936 exactly (certified over Z), so C103's widths are the minimal linear bond at every reachable t (<= 1935) and exceed it only beyond; the non-commuting case is not reached (verified at listed sizes only) |
+| [67](todo/done/67-quadratic-cell-sum-representation.md) | Store the Heisenberg operator as a sum of affine-support quadratic-sign cells instead of Walsh keys: how many cells does modexp need? | Closed at the premise check (2026-09-18): the ledger already answers it. C102/HD measure affine pieces on u_a (a constant factor below Walsh, beaten by the ROBDD), C83/C84 and TODOs 45-47 identify quadratic cells with known stabilizer decomposition, and DN shows diagram-native propagation loses in bytes |
+| [70](todo/done/70-approximate-bond-from-arithmetic-collisions.md) | Can arithmetic collision counts force a large MPS bond even when the clean post-modexp state is approximated? | Completed by proof and independent review (2026-09-21): C113 gives a fidelity-robust bond obstruction at the specified mixed cut; no numerical diagnostic needed |
+| [71](todo/done/71-structured-grover-sampling.md) | Structured Grover: extend coherent selected probabilities to exact output sampling | Completed (2026-09-21): exact coherent sampler, rare128 validation and bounded rolling-versus-cached comparison in C117 |
 | [hk1](todo/done/hk1-yao-backend.md) | Yao.jl backend | - |
 | [hk2](todo/done/hk2-decide-whether-env-should-tracked.md) | Decide whether .env should be tracked | - |
 | [hk4](todo/done/hk4-organize-experiments-into-proper-file-structure.md) | Organize experiments into a proper file structure, with a general | - |

@@ -851,6 +851,103 @@ certification. The broader user goal remains active.
 
 ---
 
+# CJ — Working on C124's open conjecture (2026-09-22)
+
+## Why and how
+
+The user asked to work on C124's open conjecture. It says that no N-only subgroup
+with cheap membership and phases has |<a> cap H| super-polynomially larger than
+the B-smooth part of r, for typical RSA N. Phase 0 followed SWARM. The coordinator sealed a candidate
+(SHA256 68ff3ce3..., posted in M3a47c1cec8894393, never on the shared filesystem)
+and revealed it after both slates froze (out/memory74c/coordinator_reveal_v1.md,
+hash verified). A fresh deriver and a fresh surveyor worked independently from
+the frozen contract out/memory74c/contract_v1.md. Task inputs were only claims
+and that contract, and the TODO/transfer text went in source_ref. This avoided
+note GR's stale-input cycle.
+
+## Outcome
+
+* **C125 (deriver, accepted).** Under weak phases the conjecture implies
+  factoring is not in BPP. Under point phases it implies that factoring and
+  F_p^* discrete logs are not both in BPP. Either way it cannot be proved
+  unconditionally.
+  - For typical N it concerns |H|_R alone.
+  - For factored-multiple phases it reduces to the new named assumption
+    REA_fact: equivalent under weak phases, sufficient under point phases.
+  - Its oracle and all-N strengthenings fail conditionally.
+  - Lemma P is the central open gap.
+
+  **The deriver's framing is the decisive one.** The sealed candidate and the
+  surveyor both found the factored-order split-or-balanced dichotomy, but neither
+  saw that no unconditional proof can exist.
+* **Comparison with the sealed candidate.** The candidate's dichotomy (saving
+  <= gcd(p-1,q-1) given a basis with factored orders) holds only for such a held
+  basis. As a comparator for C124's setting it is wrong: C124's G[k] saves
+  gcd(r,k), which can exceed gcd(p-1,q-1) (N=35, a=2, k=6), and G[k] supplies no
+  factored basis. Review V40b63e1546734ad5 found this in the survey, which had
+  independently made the same claim. The candidate made it too.
+
+## Parked survey (task Ta19ae1ee98b24b1f, cancelled at the user's direction)
+
+Four revisions (S09a0152534d74e2c through Sc78326c4b7914d83) were reviewed in
+V40b63e1546734ad5, V993dde7d6a7f44d2, Vdf7bff3ef0324e65 and V0909a684370d49e0.
+Each review verified the mathematics. Each wording round introduced new
+defects. Some were sentences copied from the previous review's wording without
+re-derivation, and one review miscounted a control's coverage (21 against the
+correct 9: Vdf7bff3ef0324e65, corrected in V0909a684370d49e0 N17). The user chose to stop.
+
+The results below are **leads, not claims**. Each was re-derived by the review
+named. None is in the ledger:
+
+| lead | re-derived in |
+|---|---|
+| Split-or-balanced for a held pair (g, m) with m = ord(g) factored: gcd(g^(m/l)-1, N) splits N unless ord_p g and ord_q g agree at every l (Seres-Burcsi 2020/402 Theorem 4 mechanism; GLMS arXiv 1511.04385 section IV.B) | V40b63e1546734ad5 |
+| gcd(m, N-1) divides D=gcd(p-1,q-1) for every m dividing lambda, and gcd(lambda, N-1)=D | V993dde7d6a7f44d2 |
+| For balanced N (p<2q), delta = p+q-2 sqrt(N) < (3/sqrt 2 - 2) sqrt(N), about 0.121320 sqrt(N). A known element order m divides phi, so p+q = N+1 (mod m). Whether the survey's rule L5a recovers p+q depends on m against that rule's own ambiguity window, as checked in V0909a684370d49e0; no simpler sufficient condition is recorded here | V40b63e1546734ad5, V0909a684370d49e0 |
+| p+q is known mod c^2 from (N-1)/c for c dividing D. This fixes p+q when c^2 > delta, which holds for p<2q once c > sqrt(3/sqrt 2 - 2) N^(1/4), about 0.348311 N^(1/4); re-derived here, and "0.3483" is the unsafe rounding (counterexample in V0909a684370d49e0) | V993dde7d6a7f44d2, V0909a684370d49e0 |
+| Under factoring hardness, an H with point (H3) and polynomial (H2) has super-polynomial index on typical N (V993dde7d6a7f44d2); and delta/ord(h) is super-polynomial for every polynomially produced h in H (Vdf7bff3ef0324e65) | V993dde7d6a7f44d2, Vdf7bff3ef0324e65 |
+| \|G[N-1]\| = D^2; Pr[D >= y] <= 16 (ln X)^2/(y-1) + o(1) for uniform primes in [X,2X] | V40b63e1546734ad5 |
+
+To promote any lead, give it a claim of its own and a fresh review, and derive
+the text from the construction. Do not copy it from the survey or its reviews.
+
+## Edits made and deferred
+
+* TX50 gains C125 and one sentence. Note GR's deferred O1/O2 wording fixes are
+  applied in the same edit.
+* TODO74's TX50 paragraph records the reduction. GR's deferred N2 is applied: C124
+  proves sufficiency of d <= poly(log N), not necessity.
+* **Deferred:** C124's conjecture paragraph needs a pointer to C125. C124 is a
+  sealed input of the accepted deriver task T86e85c8c9a484988, so it is not
+  edited here. Apply at C124's next edit. GR's TX49 one_line fix also remains
+  deferred.
+* REA_fact is named in S6c07b6b839fd452a. No prior-art search for it was done.
+
+## Process lessons
+
+* Review wording is a recurring source of defects. Note GR records two instances
+  (C117's row (0,B,0); "never, at any M"). A third came from applying a review's
+  correction list incompletely (V68797b01a59844f2 RC1, on submission
+  Se0c7fe1a42cf475a). In this round it happened again in the survey revisions,
+  including an unsafely rounded constant (V0909a684370d49e0 B11), and in this
+  integration, where three C125 sentences taken from the accepting review's
+  correction text were wrong (V7f9024351f81417b R2-R4). Reviews also err on their
+  own, as the miscount recorded above shows.
+* Cap wording-only revision loops. After two wording rounds that each introduce
+  new defects, park the text and record the verified content as leads, rather
+  than polishing indefinitely.
+
+## Evidence pointers
+
+* **Deriver:** S6c07b6b839fd452a; review Vf59b4285e64444e4.
+* **Survey:** S09a0152534d74e2c, Sc7b5189d23a54129, S8834db9e6b7f4c90,
+  Sc78326c4b7914d83; reviews as listed above.
+* **Board:** topic:memory74 messages M3a47c1cec8894393 (seal) and
+  M44427a5189834009 (reveal).
+* **Integration:** task T53a3660437144474.
+
+---
+
 # CM — Count reached states, not paths to those states
 
 C71 owns the mathematical support, accepted-law and resource statements.
@@ -2293,6 +2390,72 @@ and the superseded v1 files in attempt A31e305c5e8c44063.
 
 ---
 
+# EF — Round after TL (2026-09-18): integration of C107–C109, and slate 4 on the escapes
+
+The user chose all three items proposed at the end of note TL: the author's revision of
+TX8 Theorem 1, fresh referees for the rank identity and the composite-modulus bounds,
+and a slate on the remaining escapes.
+
+## Integration: C107, C108, C109
+
+* Revision v2 of the TX8 derivation (`S6252c91848bd4c90`) applied R1–R9; a fresh referee
+  accepted it (`V6a01bd7d375d4b39`, Q1–Q7 at integration). The rank identity was accepted
+  with D1–D6 (`Sd4b9709071a34341`); the composite-modulus propositions were accepted,
+  their restatements corrected (`S57b82692609045c0`, D1–D8).
+* Integration task `T49262ab09c0845b0` took six submissions and five reviews before
+  acceptance. Every blocking finding was in the coordinator's integration prose, never
+  in a proof:
+  * v1: a referee's finding rewritten into a different finding (twice), an undefined
+    constant that parsed as a claim ID ("C1"), dropped hypotheses, an unconditioned
+    title, a one_line repeating a defect its own body fixed.
+  * v2–v4: the same class recurred next to each fix (B6 → N1 → R1): sentences stating
+    the status ("open", "small") of an unproved class, each false just past the previous
+    detector's fixtures; the last came from transcribing an earlier review.
+  * v4–v5: provenance: a wording that misdescribed a sample, an unarchived check cited
+    as evidence.
+  * The fix that converged: state only proved examples and an explicit no-claim, and
+    detectors that sweep all files (status words; every "checked/measured/verified"
+    resolves to a run, a log or a proof; every evidence cell quotes its source line).
+* The board refused closure after an "execution-time" correction changed accepted
+  bytes; the correction went through as v6 on a reopened task. Integrated bytes equal
+  accepted bytes.
+
+## Slate 4 (surveyor `S757c3612601d4a6a`, deriver `Se2325ec074c0487a`)
+
+* **Premise corrections.** The bounds cover ordered *linear* representations; Pauli-LIMDDs
+  and diagrams over GF(2)-transformed variables are outside the rank argument. Ponzio and
+  Bollig–Woelfel do not apply to f as theorems (two free operands); only their methods
+  transfer. The formula equals the circuit's clean bit only where x ⊕ 1 < N (C107's
+  object states this).
+* **Candidates (unrefereed).** Surveyor S1: a DNNF / rectangle-cover bound
+  Ω~((r²/N)^(1/3)) under a hypothesis H-eq (would cover d-DNNF, FBDD, SDD); S2: a
+  sign-rank bound at every balanced cut (vtrees, binary tree tensor networks); S3/S4:
+  LTOBDDs and LIMDDs open, no lower bound known. Deriver S1: a digit identity
+  (parity(2^j y mod N) = bit_{−j mod m}(D_N y)) and a cofactor-escape family; S2: every
+  exponent-first diagram has ≥ r nodes and every x-first one ≥ the largest prime power
+  dividing r, so escapes in those order classes would give order finding; S3: small order
+  is not sufficient (order-3 multipliers, a = 2 at unstructured N, measured n ≤ 20).
+* **Baseline caution.** Every derived exponent (1/3, 1/6, η ≤ 1/6) sits below the √r cost
+  of baby-step giant-step: these bounds rule out polynomial size, not beating the generic
+  group baseline.
+
+## The sealed candidate
+
+Hash posted before dispatch (`Mba07396fce81467b`), text revealed in `M97896ec01279459`.
+K0 conjectured "polynomial representation iff small r". The "only if" direction matches
+the deriver's S2 in exponent-first and x-first orders; the "if" direction is refuted by
+its S3. Half survived, the first coordinator candidate to do so in three rounds.
+
+## Process
+
+* Integration prose is where errors entered this round, not the proofs; see above.
+* The v4 referee disclosed that it proposed the v5 wording it then re-checked; a fresh
+  referee was not used for that focused step.
+* A surveyor's downloads landed in the session's tool-results directory, outside its
+  write area, and the guard blocked the cleanup.
+
+---
+
 # ER — Test the gate-schedule boundary of work-first conditioning
 
 After implementing C78, main chose a changed-schedule experiment instead of
@@ -3403,6 +3566,345 @@ TODO 38 owns its still-unfinished scalable implementation/comparison.
 
 ---
 
+# FC — Compact answers and the cost of discovering them
+
+The user asked to continue the structured-Grover direction toward the public
+RSA Factoring Challenge. This round tested the mathematical premise of the
+first constructive route, before scheduling a large factorization. C118 owns
+the exact residual-constructor result; C119 owns factor-state access, modular
+rank and extraction-accuracy statements. Neither is a generic factoring bound.
+
+## Independent slate and selection
+
+Two fresh contexts produced slates without reading each other's output.
+The coordinator sealed a candidate in session-private storage and posted only
+SHA256 76adc1dc6c897dbd950edc85bf1d59198d52096108e6d4dfc6bac7092ac40cb4.
+It independently proposed examining low-bit modular inverses, retained operand
+history and interval pruning. The revealed text and merged ranking are in
+out/rsa72/merged_slate_v1.md. This was procedural separation, not a filesystem
+sandbox. The selected direction and alternatives were shown to the user before
+the phase-1 assignment.
+
+| Candidate | Attribution | Decision and owning record |
+|---|---|---|
+| N-specialized carry/residual contraction | structural D1, survey A | selected; C118 and TX39 settle the specified simple quotient/pruning rule |
+| Interval-aware inverse aggregation | structural D3, survey B; coordinator independent overlap | complete-register materialization excluded by C119/TX40; symbolic aggregation remains open |
+| Word-level zero extraction | survey C | compact arithmetic is established; missing constructive zero-set operation retained in TX41 |
+| Fourier reconstruction | survey D | missing arithmetic amplitude access identified by C119/TX42; do not treat a basis change as that routine |
+| Near-square coordinates | structural D2 | known restricted-family baseline in TX43; generic RSA extension lacks its needed promise |
+| Construction/access audit | structural D4 and survey | acceptance criterion C119/TX42, not a standalone algorithm |
+
+Carry-only merging was explicitly refuted, not silently replaced and reported
+as a success. The richer residual scheme was then independently derived and
+reviewed. Its scoped obstruction settled the selected decision without an
+experiment; running a sweep solely to rediscover that growth would not change
+the next mathematical step. No science benchmark, new solver or challenge
+factorization was run. The core gate was run before potential scientific
+execution and exited zero (out/rsa72/core.log).
+
+## Sources and benchmark context
+
+The survey checked primary bodies: Bryant (1991), section 5/Theorem 4;
+Bryant--Chen (1995), section 3.1/Figure 4 and section 5; Markov--Shi,
+Theorems 1.1/4.6; Stoudenmire--Waintal, IV.B/VI.C. TX39--TX43 record the
+object dictionaries and applicable hypotheses. In particular, an unrestricted
+multiplier output-bit lower bound was not transferred to fixed-product equality.
+Graph-width simulation bounds motivate an elimination strategy, but a future
+cost argument must also charge index dimensions and arithmetic precision.
+
+The [RSA administrator's archived list](https://www.ontko.com/pub/rayo/primes/rsa_fact.html)
+is the primary source for original decimal-digit labels and composites.
+RSA-100 is an eventual already-solved reproducibility target, not an attempted
+run here. out/rsa72/rsa100_metadata_v1.json verifies the copied composite's
+published checksum and bit length without supplying its factors.
+Current challenge context was checked against the authors' announcements for
+[RSA-260](https://cognition.com/blog/factoring-rsa-260) and
+[RSA-896](https://saweis.net/posts/rsa-896.html); their performance was not
+reproduced or independently audited. out/rsa72/challenge_context_v1.md gives
+the checked context. No challenge-size capability follows from this round.
+
+## Evidence and independence
+
+| Work | Submission | Review |
+|---|---|---|
+| Independent structural slate | Se58d9b2a8c4b45ee | Vefe60c16abb4432b |
+| Independent source slate | S223c34ac78c04b3e | Vb01765ac126e4835 |
+| Selected residual derivation | Se2262af415d64eed | Vbd35984bf8b64b02 |
+
+The phase-0 referee was fresh for the structural slate and disclosed that
+exposure when reviewing the source slate. Phase 1 reused the structural author
+after both slates were frozen and accepted. Its mathematical referee was a
+new context; the coordinator authored integration prose only. A separate
+fresh referee checks canonical integration. No blind numerical reference is
+claimed, since no scientific execution took place.
+
+Pre-submit and frozen evidence lint exited zero; informational findings concern
+mechanical lint logs having no scientific harness summary. The initial phase-1
+claim was refused while its survey dependency awaited acceptance; work began
+after the dependencies were accepted. These administrative events changed no
+scientific result. Raw out/ evidence and local board state are gitignored; the
+canonical claims include the full mathematical arguments, so their substance
+does not depend on resolving board IDs. No commit or publication was requested.
+
+TODO72 owns the remaining question. The next route must supply a concrete
+N-only aggregation or box-selection routine and charge all of its work;
+supplying unknown factor bits or enumerating every box does not meet it.
+
+Canonical scientific integration is Td9315843d6814c2a. Generated indexes are
+refreshed after scientific task closure, since the phase-0 transfer index is
+a frozen upstream input; the final documentation gate follows those generated
+updates. Existing dirty scientific files are checked against the recorded
+pre-integration hashes. No science suite is used as evidence for the new proof.
+
+---
+
+# FD — Three directions and their interfaces
+
+The user requested preservation of the factor-state direction on arb, deeper
+brainstorming of three alternatives and possible interleaving. Decision
+M8c90bbdf49a94689 in topic:rsa72 preserves TODO72 and its C118/C119 boundaries.
+This round produced reviewed proposals, with no solver, experiment, measured
+saving, factoring attempt or claim promotion. A moderate slowdown for lower
+memory is acceptable; no numerical tradeoff has been selected.
+
+## Independent slate
+
+Two fresh contexts generated candidates without seeing each other's output.
+The coordinator sealed a candidate privately (Me5a4c8b3dfdc48d1), revealing it
+only after both froze (M6cbe829568884f55). Exact text, hash convention and merged
+ranking are in out/rsa73/coordinator_sealed_reveal_v1.md and
+out/rsa73/merged_slate_v1.md. This is procedural independence, not sandboxing.
+
+| Candidate | Attribution | Assessment and owning record |
+|---|---|---|
+| Build one GNFS matrix cache with less temporary storage | surveyor G; deriver A2 | first practical source audit; TX44 |
+| Schedule smooth-part batches under a memory cap | deriver A1; surveyor G+A; coordinator overlap | secondary target if this stage is the relevant peak; TX44 |
+| Block arithmetic collision aggregation | surveyor A; deriver B baseline | established-mathematics memory baseline; TX45 |
+| Generate actual giant steps through short recurrences | deriver B | concrete algebraic bet; run-cover/seed lemmas missing; TX45 |
+| Jointly dissect neighboring hyperbolas to count factor intervals | surveyor C | speculative upside; cancellation/region bound missing; TX46 |
+| Use progression-product gcd certificates | deriver C; surveyor C+A independently | sound interface, not a branch-count oracle; TX47 |
+
+The coordinator independently emphasized typed arithmetic services, construction
+cost and practical baselines. The workers supplied the specific cache-build,
+shift-recurrence and paired-strip proposals. Keep all three broad directions
+alive. Their ranking was shown to the user before any follow-on derivation or
+experiment assignment; none was dispatched. TODO73 owns the deciding steps.
+
+## Combinations and rejected shortcuts
+
+Practical interleaving shares memory/recompute accounting and, where operations
+match, product/remainder-tree scheduling. Smooth parts consume explicit integer
+norms and a prime set; collision search consumes polynomials and evaluation
+points modulo N. Neither replaces GF(2) matrix-cache construction.
+
+The strongest speculative combination is certified geometric rejection followed
+by bounded-memory arithmetic search in disjoint unresolved intervals. Charge
+total unresolved work, repeated queries and gcd=N recovery. Positive product
+gcd can find a global factor without certifying a nonempty local factor branch
+(TX47). Arithmetic progressions are not geometric runs: TX45's identity cannot
+be copied to the interval interface without a new derivation.
+
+A complete arithmetic or GNFS factorization can construct the tiny final factor
+state afterward; C119 owns the discovery/access bill. Partial GNFS relations
+are not conditional factor counts. Combining methods gives no automatic product
+of speedups, and a speculative prefilter needs a cutoff charging failed work.
+
+Generic compression, ordinary product trees and sequential cache building are
+already available. Checkpoint deletion does not automatically save RAM. Compact
+final states, easy pointwise multiplication and cheap modular-inverse sampling
+do not supply efficient interval-conditioned construction. C118's settled
+low-bit frontier is not scheduled again. These are scoped rejections, leaving
+new recurrences, certificates and allocation schedules open.
+
+## Evidence and review
+
+| Work | Frozen submission | Review |
+|---|---|---|
+| Structural slate | S7e2bdedf5f784fed | V9975e0f543ff4ce1 |
+| Source slate | S3f12499d0ee74a57 | Vfbc3ad231e824150 |
+
+The referee was fresh for the first slate and disclosed that exposure for the
+second. Acceptance is for proposals, including explicitly open lemmas, not
+evidence of savings. Coordinator integration prose is a separate write task,
+Td9a65c91cfe94de8, with a fresh integration referee.
+
+Frozen reports contain primary-source body locations; TX44-TX47 retain the
+dictionaries and hypotheses. The coordinator additionally inspected CADO tree
+70354d7a8d54e985e46ca0fb6fb64d10716ba8bc; snapshots/hashes and limitations are
+in out/rsa73/primary_manifest_v1.json and coordinator_source_audit_v1.md.
+Upstream README estimates are not measurements. Newer balanced-semiprime and
+order-finding preprint leads remain in TX45; the 2021 deterministic baseline
+is not called the latest result or a practical GNFS competitor.
+
+Only evidence lint, generated indexes and documentation checks apply. The
+initial transfer index was frozen byte-for-byte before adding rows; existing
+scientific input records remain unchanged. Unrelated dirty files are checked
+against out/rsa73/preintegration_hashes_v1.json. Board/out evidence is local
+and gitignored; canonical records retain the substance independently of board
+resolution. No science suite, commit or publication occurs in this round.
+
+---
+
+# FE — Follow-through on the factoring slate
+
+The user approved FD's recommendation: audit practical cache-construction memory
+and actual arithmetic giant-step recurrences in parallel, then measure a useful
+cache change. C120 owns the measured outcome and limits; C121 owns the exact
+symbolic result and missing lemma. TODO73 owns the residual decisions. This
+round did not revisit the preserved factor-state constructor or run challenge
+factoring, Shor simulation or the speculative paired-hyperbola proposal.
+
+## Authorship and sequence
+
+Separate workers authored the CADO source audit/design and the arithmetic
+recurrence audit. A fresh referee accepted both, with exposure to the first
+review disclosed for the second. The cache author retained responsibility for
+implementation and measurement; the coordinator integrated only supported
+results. The existing upstream cache was the exact-format reference and direct
+sparse XOR the independent semantic reference. Their shared fixture generation
+and upstream loader/backend limitations remain explicit in C120; no independent
+complete CADO implementation was claimed.
+
+| Work | Frozen submission | Review |
+|---|---|---|
+| Cache ownership audit and experiment design | S7fd475c348924f82 | V9eeecdb5c24e4253 |
+| Exact recurrence audit | S9aed30d3c93b421d | Vee36cf7331cd4f55 |
+| Initial actual-CADO implementation and observations | S3d85e0672aa747a2 | Vf4eac155b56c4dd5 (timing revision required) |
+| Corrected same-workload timing | S5abdf8a4b01c4834 | V06175d0782df4152 |
+
+The core science gate passed before scientific execution. Cache validation run
+R5fc0653ee9f34f90 preceded performance R85217ea3166749c8; both exited zero.
+Corrected run Rb23e784ec68644ac also exited zero. Every run had its prediction
+and board record before execution. The recurrence audit used hand algebra and
+needed no numerical sweep. Its counterexample rejects one proposed shortcut,
+not all short covers or factoring algorithms.
+
+## Timer correction and retained limits
+
+Author and coordinator independently noticed coarse clusters in the first
+elapsed readings. Python's timeout-mode process wait polls with a sleep ceiling;
+the fresh referee checked that source mechanism. Existing RSS and rounded CPU
+readings remained valid, but their accompanying launcher intervals could not
+resolve a modest slowdown. The completed runs were preserved with exit zero;
+they were not retrospectively called failed arithmetic gates.
+
+The focused revision replaced polling with blocking wait and a separate watchdog,
+kept the same compiled programs, matrices, allocator and exact-output checks,
+and reran only the prescribed sequence. The final report retains every row,
+including the slower combined-arm default-policy observation. It does not pool
+old coarse elapsed values with corrected measurements. A fresh second context
+reviewed amendment conformance and the corrected raw records.
+
+Core/validation, builds, fixture generation, hashing and reporting are outside
+each timed builder process. All are separately identified in the frozen reports.
+The initial configure failure was an uninstalled build dependency, resolved in
+an attempt-local pinned environment before science. Prior interpreter setup CPU
+was not measured; the correction's prior-work allowance is administrative,
+not a certified bound. Child caps and the accounting ledger were respected.
+The corrected watchdog's timeout branch was not exercised by these fast runs.
+
+## Reproducibility and integration
+
+The portable package is experiments/cado_cache/README.md, with the exact patches,
+build scripts, validation driver, corrected timer and explicit input-manifest
+helpers. Canonical measurements_v2.json retains all corrected observations.
+The unchanged executable/fixture reports, individual logs and frozen bundles
+remain local under the two experiment attempt directories and in arb archives;
+they are gitignored. No rebuild or fresh reproduction at the canonical path was
+performed merely for integration; installed executable code matches reviewed
+bytes. The README separates replay from a new environment with new hashes.
+
+C121 preserves the accepted worker derivation; its source is Harvey--Hittmeir's
+Algorithm 4.3 and exact symbolic arithmetic, not a referee's wording. C120's
+table comes from the frozen corrected measurements. The integration report
+maps every review-related scope correction back to code, report, raw row or
+algebra. TX44/TX45 cross-references are updated only after scientific integration
+closes, preserving its transitive input identities. This is administrative
+sequencing, not a replacement of the accepted scientific evidence.
+
+The useful practical outcome is a smaller construction peak on the tested CADO
+path. It does not interleave into an extra multiplicative speedup with C121;
+that branch supplies an exact diagnosis and an unproved constructive lemma.
+No commit, publication or upstream patch submission is included.
+
+---
+
+# FG — A fresh slate aimed at the exponential
+
+The user asked to preserve the strategic interpretation of the recent results
+and brainstorm further. Arb decision Me931853bead14405 in topic:memory74
+records it: C120 is a scoped cache-construction engineering side result, while
+C121 did not supply the required generic short cover. The main scaling goal
+remains open. C118/C119's construction and access barriers are scoped, not
+proofs that every factoring or representation approach fails. TODO72/73 remain
+available; no further cache cleanup was dispatched in this round.
+
+## Independent generation and ranking
+
+Two fresh contexts worked without seeing one another's slate. The coordinator
+sealed a candidate outside the shared filesystem, posting only its hash in
+M94fcb32198784025; Mee1f501d14ba4a80 revealed it after both submissions froze.
+Exact text and source audit: out/memory74/coordinator_reveal_v1.md. This is
+procedural independence, not a filesystem sandbox. The slate includes
+obstruction-first proposals and separates output contracts before comparison.
+
+| Rank | Candidate and provenance | Assessment / owning transfer |
+|---|---|---|
+| 1 | Grover angle coin and fixed output shape (deriver D1); certified short coefficients (surveyor S3, coordinator independently) | Cheapest targeted precision lemma; TX48 |
+| 2 | Multiplicity-preserving four-list subset-sum counts (surveyor S1) | Broader nonlocal Grover family; potential memory-exponent reduction, still exponential; TX49 |
+| 3 | Sample phase-labelled character sectors (deriver D2) | Higher-risk representation research; needs a constructible subgroup interface and reachable-orbit saving; TX50 |
+| 4 | Fully charged low-space order discovery (surveyor S2, deriver D3) | Stronger known-method baseline for C52, not a new factoring algorithm; TX51 |
+
+All six worker candidates and the coordinator candidate map to these four
+rows. Separate open rows preserve TX38's established exact fixed-t result and
+TX15's barrier without changing their status. No new claim, implementation,
+measurement or generic memory/time guarantee was promoted. TODO74 owns the
+outcome-dependent derivations; the recommendation is to start with TX48.
+
+## Combinations and ideas to drop
+
+The first two directions can share certified scalar probability calculations,
+but their output laws differ: TX48 retains C117's final Hadamards; TX49 uses
+ordinary Grover measurement. Exact multiplicity counts do not automatically
+supply coherent Fourier probabilities. TX51 can reuse suitable numerical
+certification only after paying for order discovery. TX50 could reduce a
+reachable work representation if its subgroup and phase interfaces are cheap;
+no multiplication of savings is implied by combining these methods.
+
+Keep exact lazy sampling separate from a bounded-error surrogate. The former
+has an expected-cost target and unbounded worst-case refinement; the latter
+needs an explicit global error budget and does not certify rare postselection.
+Do not treat materialized denominator size as a lower bound for every sampler.
+Do not merge cosets without phases, call unknown orders/discrete logarithms
+free, import a decision algorithm as an exact counter, or accept exponential
+recomputation as an established moderate slowdown. Generic low-bond truncation
+still faces TX34's stated obstruction; these proposals change its object or
+hypotheses rather than refute it.
+
+## Evidence and review
+
+| Slate | Frozen submission | Review |
+|---|---|---|
+| Structure | S549670183e1d429d | V2ef62c9fe5824fb2 |
+| Sources | S54f550b273624245 | Vafcd783f564442a2 |
+
+The initial scientific referee was fresh from authorship and disclosed exposure
+to the first slate before reviewing the second. Reviews accept proposals with
+open lemmas; they are not complexity proofs. Source bodies and relevant local
+claims were inspected. The coordinator additionally checked the amplitude
+rotation, four-list mechanism, published order routine and FLINT inclusion
+semantics; their precise scope lives in TX48-TX51, not in a novelty claim.
+
+Integration is T4e78dd34784e4e62, with a separate fresh referee. Its report maps
+review-derived qualifications back to the frozen slates, existing claim
+arguments and source body. The old transfer index was frozen before extension;
+prior claim/transfer/TODO inputs are preserved. Documentation and evidence
+checks apply; no science suite was needed or run. Board/out evidence is local
+and gitignored; these records retain the substantive interpretation. Nothing
+was committed or published.
+
+---
+
 # FM — Forgetting one side of the contraction is not forgetting both
 
 C66 owns the mathematical approximation contract, its proof, the finite
@@ -4160,6 +4662,133 @@ LAB_GPU=1 uv run python -m experiments.<name>     # that is the whole interface
 
 ---
 
+# GR — Deciding the memory74 slate (2026-09-21/22)
+
+## Why
+
+The user asked for an assessment of topic:memory74 (note FG), then to "continue
+with the research and see this bit through", trying promising ideas and
+interleavings along the way. The assessment (arb message M717c24d46b0c413d and
+earlier in the topic) argued that FG's ranking was by tractability rather than by
+distance to the goal:
+
+* TX48 and TX49 looked like one elementary fact about Grover's two-dimensional
+  subspace.
+* TX50 looked obstructable.
+* TX51 is where the factoring bar actually sits.
+
+## What was decided
+
+* **C122** (coordinator-authored): uniform-start Grover output at any t reduces to
+  a coin plus a predicate interface. TX48 is imported, for the coin only. TX49
+  stays open and deprioritized. Four review rounds.
+* **C123** (coordinator-authored experiment): Contract-B output of the
+  two-orientation semiprime predicate is Simon's law for p xor q, and known
+  branch-and-prune then factors heuristically on average. P4 failed and was left
+  failing.
+* **C124** (memory74_tx50_deriver): TX50 is an obstruction under its interface
+  hypotheses.
+
+  My brief stated a wrong premise, that the sector method "saves at most
+  |<a> cap H| over a charged baseline that walks the quotient". The referee
+  corrected it: the saving is relative to the explicit orbit, and there is none
+  relative to the quotient walk.
+
+  The deriver also corrected my sketch in two places. (d, |H|) gives a multiple
+  of r, not r. And the reduction is polynomial only for polynomial d.
+* **TX51** splits into two bars. Review V641e3fc372634f78 showed that my first
+  bar (a rho order walk at sqrt(r), about N^(1/2)) is weaker than ECM and Pollard
+  rho, which already factor with polynomial memory.
+
+## Observation, not in a claim
+
+This is review V5f7a0852665441d9's K5, re-derived here. Take Contract B over the
+*restricted* factor predicates f_N AND [x extends w].
+* If N_1(w)=0, the output is y=0 at every t.
+* Otherwise, choosing t for M_w in {1,2} makes P(y!=0) a constant, and any y!=0
+  certifies N_1(w)>0.
+
+The C119 descent therefore factors N with no p xor q step. So C123's p xor q
+question concerns only the unrestricted predicate.
+
+## Process lessons
+
+* Twice, a sentence taken from a review without re-derivation was wrong:
+  - v2 used C117's row (0,B,0); it must be (0,1,0).
+  - v3 said "masses never fix prefix counts at any M", which is false at M in
+    {0,D}.
+
+  SWARM's "re-derive; do not transcribe" names exactly this. Each fix now
+  carries an exact detector with a mutant (revision_detectors_v2/v3/v4 in
+  attempt A5df10f8d3a234159).
+* Detector bugs of my own occurred in three runs:
+  - a loose approximate identity;
+  - a missing p,q>=2 bound;
+  - the environment applied to the empty prefix.
+
+  All logs are kept. The v3 run-1 source was overwritten, so from v4 on no
+  source is overwritten.
+* C123's first run executed without a board run record: run.start needs message
+  IDs, errored, and was not gated. The identical seeded rerun was recorded. A
+  design review would probably have caught C123's weak controls (C0, C2).
+
+* The first integration submission was refused as stale. The upstream tasks had
+  sealed todo/open/74 and transfers/TX48-TX51 as inputs, and the integration
+  rewrites exactly those files. SWARM already says to keep backlog text in
+  source_ref. The recovery took three provenance rounds (reopen, re-claim,
+  byte-identical evidence plus a revalidation note, focused review), because the
+  integration's own row text needed correcting each round:
+  - TX48 wrongly said polynomial t needs no M;
+  - TX48 said "equivalent to factoring" for Contract B;
+  - TX50 scoped dominance and factoring wrongly;
+  - TX50 omitted "known" subgroups;
+  - TODO74 had an escape overstatement;
+  - C122 dropped a "given H_elem" while condensing v4.
+
+  For future tasks, list only claims and frozen contracts as inputs.
+* Text detectors (out/memory74b/fix2-fix5) evolved under review. fix5 asserts
+  qualifiers and t-conditions and logs the hash of every file it reads. It is a
+  phrase sweep, and paraphrases can evade it.
+* Deferred edits to sealed files, not applied so that the accepted dependencies
+  stay fresh. Apply at the next edit of each file:
+  - TODO74 (V915f0d1a57704024 N2): "only with polynomial d" should read
+    "d <= poly(log N) ... suffices". C124 proves sufficiency, not necessity.
+  - TX49 one_line (V68797b01a59844f2): add "given H_elem at binary t", and say
+    that sampling *reduces to* prefix counting plus the coin. It is not "is":
+    C122 gives only sampling <= counting.
+  - TX50 (V5d5f994666f34906 O1, O2): "the family" in the factoring sentence has no
+    antecedent (say "an N-family with these properties"); lines 68 and 72 break
+    the line wrapping.
+  - TX50 O3 and O4 are detector and scope remarks, needing no text change. O3:
+    fix5 checks phrase presence plus four specific absent phrases; it cannot
+    detect arbitrary unscoped statements or paraphrases. O4: G is not listed among
+    the outside-the-hypotheses subgroups, and the list is not claimed exhaustive.
+
+## Evidence pointers
+
+* **Submissions:**
+  - C122: Sc377b4ddf8aa4d5c, S0519269042584d57, Sb0f23b23c1e544d7,
+    S76412a5b408a486a.
+  - C123: S3ad6a279f9f2462c.
+  - C124: S3c167ac49a4b4e0a.
+* **Reviews:**
+  - C122: V641e3fc372634f78, Vcae2d0a4cfb1407b, V7b25dbcb654749ac,
+    V5f7a0852665441d9.
+  - C123: Va27665ae402a41b6.
+  - C124: Vbe013aaa5e46408d.
+* **Provenance revalidations** (after the stale refusal, finding M17a80c3977074b49):
+  - Tb3cbc3840a654e12: S8e1ae27e09824eec, S61145e55c01c4d2b, S316fde06fd7643d0,
+    S13eaf10b46fe45fd (accepted); reviews V83636ade0dc549a1, V9393387257274f16,
+    Vae659f0ae0524d0d, V915f0d1a57704024.
+  - T1a9534f62e444d80: S1b2fa9711c7c4341, Sa49251a7220148eb, S203b13f214304f03
+    (accepted); reviews Va76dac65b8b341bc, V2ba70051548746c8, V5d5f994666f34906.
+* **Integration:** task T0b6b947664694fc3; reviews V68797b01a59844f2 and later.
+
+Board and out/ evidence is local and gitignored. The claims carry the
+interpretation.
+
+---
+
 # GS — Additive characters test the representation, not just gate complexity
 
 C76 owns the physical rotation identity, exact prime-field nonzero proof,
@@ -4314,6 +4943,103 @@ omission bound is trivial for an extensive additive phase. The next bounded
 question, including the stronger exponent-unitary transfer test, lives only
 in TODO 36. Neither a hardness claim nor a new efficient sampler follows;
 the open-ended research goal remains active.
+
+---
+
+# GS — From selected probabilities to complete samples (2026-09-21)
+
+The user asked whether C114's structured Grover memory remained exponential,
+what 128 qubits would cost, and to start the proposed sampling computation.
+The accepted prior authorization for parallel agents remained in force.
+One independent author audited scaling and primary sources while another
+derived the sampler. The coordinator proposed investigating a reversible
+homogeneous suffix recurrence; the sampler author proved the explicit
+Fibonacci environment and retired quadratic recomputation before testing.
+C117 owns the scientific results and measured scope; TX38 owns the transfer.
+
+The useful distinction was fixed iterations versus an amplification-length
+schedule, and a compact state versus an explicitly returned probability vector.
+The 128-qubit final-H distribution at three iterations is extremely concentrated
+at zero. Thus ordinary samples alone would be a vacuous correctness test.
+Exact rare-prefix formulas became a mandatory check before resource runs.
+
+## Evidence and independence
+
+| Work | Submission | Review | Author directory |
+|---|---|---|---|
+| Scaling/source audit | S624b8a7794754d79 | V1f6b5670d61a4a81 | out/agent-board/workers/A352551992a344206/ |
+| Sampler derivation/design | Sdb1dac2311534d02 | Vcaf3cc1759ff4737 | out/agent-board/workers/A4f3325ebc5bf49f7/ |
+| Execution | S76be296197df4469 | V0039c2164aaa4b59 | out/agent-board/workers/A6d1656f712ec4b6b/ |
+
+The design referee was initially fresh, a non-author, and reviewed scaling
+before the sampler design; this context reuse was disclosed. A separate fresh
+results referee inspected the execution. The existing dense reference received
+a reviewed direct-reference exemption: it builds the predicate clauses, applies
+phase-oracle and mean-reflection updates, and uses the existing Walsh transform.
+It is algorithmically independent of the sampler recurrence, but its author
+had seen it, so the reference was not blind. C114 scalar checks share algebra
+and are supplementary rather than independent validation. The reference report
+was recorded and frozen before candidate validation, and the successful
+candidate report before resource cases.
+
+The audit's first arithmetic script printed an unconditional success line after
+assertions. The shared lint flagged that display; a preserved second version
+removed it, and a third added the requested exact nonzero probability. A lint
+CLI misuse and the design author's 44-versus46 check-count transcription were
+also preserved and explicitly corrected. These were tooling/reporting issues,
+not silently replaced scientific outcomes. The frozen submissions record them.
+
+## Reproduction and measurement contract
+
+From research/, with fresh output paths:
+
+```sh
+uv run python test_core.py
+export LAB_GPU=0 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1
+mkdir -p out/grover_sampling_repro
+flock out/grover_sampling_repro/science.lock timeout 120s uv run python -m experiments.experiment_grover_sampling --stage reference --report out/grover_sampling_repro/reference.json
+flock out/grover_sampling_repro/science.lock timeout 120s uv run python -m experiments.experiment_grover_sampling --stage validate --reference out/grover_sampling_repro/reference.json --preconditions experiments/grover_sampling_preconditions.json --report out/grover_sampling_repro/validation.json
+```
+
+Stop after any nonzero exit. These commands reproduce correctness checks,
+not the resource timings. The runner's case stage accepts --n, --method
+rolling|cached, --mode time|allocation, --validation and --report. A resource
+replication must preserve the recorded 24-case grid, separate instruments and
+accepted 1GiB sampled-RSS/120-second guard; see the frozen resource_batch_v1.py
+and resource_bundle_v1.json in the execution directory. The reusable fixture
+is a byte-for-byte copy of the accepted design precondition report.
+
+Resource cases use lightweight standard-library imports; dense/reference stages
+also import NumPy, Walsh and the lab harness. Whole-process RSS is therefore
+not directly comparable with the earlier query pilot's eager common imports.
+The memory claim concerns the measured call and the stated process, not a
+ratio obtained by mixing those import environments. Calls include construction,
+coefficient and suffix work, RNG and retained Python integer outputs. Imports,
+launch, lock acquisition and report serialization are outside timed/traced
+calls; raw process RSS includes interpreter/import overhead. All-zero integer
+outputs may share objects and are not fixed-width strings in memory.
+
+The fixed resource case order was not randomized; timing values are exploratory
+host measurements. A derived dense128 payload is not an empirical benchmark,
+and explicitly stored exact rationals have different precision from real64 or
+complex128 arrays. The strongest baseline here is the same structured
+contraction, not exhaustive enumeration. No paper or generic oracle claim is
+promoted. Raw evidence under out/ remains gitignored; no commit was requested.
+
+Canonical integration is Tc85b9015e04b40ac. The helper module docstring was
+updated and the result review's inaccurate quantile-extremes comment corrected;
+no executable code changed. Exact allowed-text transformations and AST identity,
+including an executable-mutation detector, accompany the integration evidence.
+The reference and validation stages run again under canonical package imports;
+resource numbers are reused from the frozen accepted execution, not remeasured.
+The coordinator authored integration prose only. A fresh integration referee
+checks it separately. The original dirty worktree is preserved outside these
+new records, TODO closure and generated indexes/handoff.
+
+Integration evidence lint caught check objects labeled with name instead of id.
+The mechanical checker was versioned with that schema correction, preserving
+its original reports and failed lint log. All conditions were unchanged; the
+scientific source and resource results were not rerun for this format repair.
 
 ---
 
@@ -5768,6 +6494,208 @@ The last command is expected to exit 1 for the recorded P2 falsification.
 The others should pass. Timestamped reports preserve prior runs; the progression
 script has a fixed final report path, so preserve that file before rerunning
 if investigating a changed prediction or implementation.
+
+---
+
+# LM — Pauli-LIMDDs of the post-modexp state (2026-09-19)
+
+**Origin.** An open session the user gave to free research ("use it as you see fit").
+A single coordinator session did the derivation and the check. The user then approved
+the next steps, and fresh referees reviewed the results; each claim's heading records
+what its referees confirmed. TX29 was chosen because it names a real simulator family with no lower bound,
+and because the ordered-linear bounds (C107, C108) do not reach it.
+
+**Object choice.** TX29's dictionary speaks of subfunctions of the Boolean bit f. A LIMDD
+simulator holds a state, though, so the object here is the state after modexp,
+Σ_e |e⟩|a^e mod N⟩. That is a different object from C107's f, and it is what a
+gate-by-gate LIMDD run of `build_shor` passes through before the inverse QFT.
+
+**Route.** Prior art first: the knowledge-compilation map (Vinkhuijzen–Coopmans–Laarman,
+arXiv:2401.01322, appendix Lemmas 4 and 23) proves LIMDD lower bounds by counting LIM
+classes at one level. It says nothing about modexp, periodic or coset states. The
+same counting applies here. At the last exponent qubit of an exponent-first order, the
+sub-states are two-point states, and LIM equivalence reduces to the XOR invariant
+φ(c) = c ⊕ Ac. The fibre bound came from writing c ⊕ d in two ways, as
+c + d − 2(c∧d) and as 2(c∧¬d) + d − c, so that c is pinned by a submask of d or of ¬d.
+C110 owns the statements.
+
+**What the measurements say.** The derived bound gives up √N, but on random semiprimes
+the class count is 0.79–1.00 of the prefix count D_j (⌈r/2⌉ ≤ D_j ≤ r; 255 cases that
+meet C110's hypothesis, out of 320 drawn, at n ∈ {10, 12, 14, 16}, j ∈ {0, t − 1}). On
+those samples a LIMDD is within a factor 1.27 of the plain QMDD width at that level.
+Sweeping every base under the hypothesis takes the ratio down to 0.22, and outside the
+hypothesis it collapses (C110, Evidence). A constant lower bound under the hypothesis is
+C110's conjecture. Run 2
+first reported "0.77–0.96". Its scan used {a^e : e < r} instead of the level's prefix
+set, and the upper figure was a median. The referee found both (review Va10c9887fa3f4116, B1). TX29's register text says an escape would need
+multiplication by an element of ⟨a⟩ to act as an XOR translation. Lemma 1 makes that
+exact: classes = #φ(prefix set), and an escape needs φ to collapse on the level's
+prefix set C_j ⊆ ⟨a⟩ (⟨a²⟩ at j = 0 for even r).
+
+**x-first orders (claim C111).** After every x qubit is read, the sub-states are
+indicators of {e < 2^t : e ≡ ℓ mod r}. Take r = β·2^α. Complementing e (XOR by 2^t − 1)
+maps ℓ to (2^t − 1 − ℓ) mod r. For t ≥ α it induces q ↦ (2^(t−α) − 1 − q) mod β on
+q = ⌊ℓ/2^α⌋. For t < α every nonempty set is a singleton.
+* Upper bound: at most ⌈β/2⌉ classes (the referee re-derived it).
+* Lower bound: in the first version it was measured only. C111 now derives it:
+  carry-free pairs force any XOR shift to hold all or none of each window m + supp(β),
+  and the Fine–Wilf periodicity lemma then leaves only 0 and all-ones when the set-bit
+  positions of β have gcd 1 and t − α ≥ 3·bitlen(β) − 1.
+* Measured, and extended by a persistence lemma: C111 owns the range and the statement.
+
+This is the project's β = 1 / β > 1 split (Paper B) appearing again. At the level below
+the last x qubit, a LIMDD collapses when the odd part of r is small (at most ⌈β/2⌉
+classes). That it does not collapse when β is large is C111's derived statement, whose
+hypotheses are given there.
+
+**Reading for the goal.** Both extreme order classes cost about r (or β/2) nodes at one
+level. For e-first this is derived up to a √N factor under C110's hypothesis on a: it
+fails at every j when 3 | N, and for large j when N has a Fermat-prime factor. For
+x-first it is derived (C111) under its hypotheses. So Pauli-LIM merging does not remove
+the exponential from modexp states in these orders, within those hypotheses. A small-size
+search over interleaved orders found none better than about 0.3·r (TODO 69; exploratory). Interleaved orders
+and non-Pauli LIM groups remain open (C110 limits). Every result is a lower bound
+(TX15).
+
+**C112 (the interleaved-order count).** The last-exponent level of a *general* order was
+first written into TODO 69 with ⟨a⟩ in place of the prefix set C_j, which a referee
+refuted with the instance C112 records. The corrected count is
+exact, was derived twice independently, and now lives in C112; TODO 69 keeps only the
+question it feeds.
+
+**Process.**
+* The P1 docstring first said brute force ran to n ≤ 9; the code does n ≤ 7. This was
+  corrected after run 1, with the correction noted in the docstring.
+* P6 was added after scratch scans had been seen. It is labelled post-hoc and not graded.
+* Claim status lives in the claim files, and live review state on the board.
+* **What the round cost, and where.** Twelve submissions and twelve scientific reviews
+  over three claims: five on C110, two on C111, and five across the three follow-up
+  tasks (board history of T4d562bcf23374072, Td6d62de660cb4ba3, Td25d387835d241f1,
+  T69a2353121af4979, T642367af3d7549a2). No review refuted a proof. Two referees
+  re-derived C110's lemmas, two re-derived C111's, the second of those also re-deriving
+  Lemma P, which is new in v2, and two re-derived C112's count. One review did refute a
+  statement: the ⟨a⟩ form of the interleaved-order count, which C112 records.
+* **Where the defects were.** Mostly in prose, with two exceptions, both in the first
+  review: P6a measured over ⟨a⟩ instead of the level's prefix set, a defect in the
+  experiment script that forced a fourth run and moved the reported range from 0.77–0.96
+  to 0.79–1.00, and the whole sweep ran a single base. The recurring prose defects were a
+  hypothesis dropped from a sentence next to the one that fixed it, an extremal number
+  quoted without its sample or branch, a fact given a second home, and an exact node
+  count asserted of every diagram where only the reduced one earns it. The last had sat
+  in C110 since its first version and survived five referees, because the detector
+  written for it was pointed at the two newer claims only.
+* **The rule that would have saved most of it.** METHOD.md already says a review is a
+  correction list, not a source. Version 2 asserted it had re-derived its wording and had
+  not: three transcribed sentences each carried a defect, one of them an error the review
+  did not contain. Version 3 reintroduced the dropped-hypothesis class in the very
+  sentences written to close it. Version 4 asserted a clean detector sweep it had not
+  run. Each was caught by the next referee reading the bytes. A detector named in a
+  revision is worth nothing until it is run and its output pasted — and this note's own
+  first draft claimed every blocking finding was in prose, which the record above refutes.
+* **Referee evidence and the lint token.** A referee's own logs tripped
+  `EXIT-CONTRADICTS-LOG`, because its must-fail controls print an upper-case FAILED token
+  in an exit-0 log. Note TL records the same collision twice. The referee prepared
+  reworded copies, its host refused to run them, and it left its attempt blocked with
+  two options for the coordinator; the coordinator declined to re-run them and
+  cancelled the task, citing the three recorded runs the review rests on. The fix belongs in
+  `tools/evidence_lint.py` or in the harness's lower-case token, not in reworded evidence.
+
+---
+
+# MC — Exploiting structure without hiding evaluation cost (2026-09-21)
+
+The user asked for lower simulator memory, accepting moderate extra runtime,
+and authorized parallel tests. Three authors investigated clean arithmetic
+blocks, structured Grover, and modular branch sharing. A provisional 2x runtime
+ceiling guided engineering comparisons; it was not a universal user requirement.
+The slate used construction inventory, weighted counting and an interference
+obstruction. TX35–TX37 own the transfers and their hypotheses.
+
+## What the investigation changed
+
+[C114](../claims/C114.md) owns the structured Grover derivation and measurements.
+The useful pattern is bounded-width weighted counting: it keeps interference
+and charges count construction. This does not improve on the strongest
+structured classical method, which is the same counter. A small-solution
+representation was rejected as the explanation for this exponentially large
+marked set; TX35 records the primary-source boundary.
+
+[C115](../claims/C115.md) owns the clean-block pilot. Its result reverses the
+initial engineering preference for this branch: certification cost and existing
+logical baselines determine practical memory, not scratch-wire count or the
+number of amplitude buffers. The code remains an experiment. TODO 66 keeps
+the separate work-domain-closure question open; TODO 64 is not solved.
+
+[C116](../claims/C116.md) owns the modular-sharing identity and collision
+limitation. Arbitrary modular labels are more expressive than tensor-product
+Pauli labels, but their compact notation does not evaluate coherent sums.
+The optional order-discovery benchmark was retired before performance runs
+after review exposed an incomplete baseline set and contaminated RSS plan.
+No unmeasured win or domination is inferred.
+
+## Evidence, review and reproduction
+
+| Branch | Accepted submission | Review | Frozen author directory |
+|---|---|---|---|
+| Clean-block design | S201e0d2f9f8143ad | V7b2c6529bcbe41d5 | out/agent-board/workers/A62e7672e917644f4/ |
+| Clean-block result | Sc26366f437c64436 | V63b15412bfc14257 | out/agent-board/workers/Abb5d0b5e50f146c8/ |
+| Grover design | S3e65b1839e1249c7 | Vebc23ee2300242b8 | out/agent-board/workers/Afeed8b6ed1b5458c/ |
+| Grover result | Sce91c456c4f9491f | V6d8d445de2cf48b2 | out/agent-board/workers/A8f0f133336a24990/ |
+| Modular sharing | S11674161eb334aa0 | V0b1b235da1504034 | out/agent-board/workers/A7aad0be0fc144816/ |
+
+Clean-block sources/results: clean_block_v1.py, experiment_v1.py,
+resource_summary_v1.json and reports_exact_bundle_v1.json. The bundle contains
+all reports, finished run records and sealed logs, including those beyond the
+board's per-submission list limit. Sharing sources: derivation.md,
+disposition_v2.md and reports_bundle_v2.json. The disposition supersedes stale
+execution/status text in the preserved first derivation and retired pilot.
+Grover final evidence: results_v2.md, comparison_v2.json,
+result_bundle_v2.json, guard_frozen_bundle_v2.json and science_identity_v2.json.
+Canonical integration is Tf77dcd85e9d54484; exact source-equivalence detectors,
+validation logs and reviewer-prompted statement provenance accompany its
+submission. Raw board evidence under out/ is gitignored; the canonical helper
+and experiment sources below are retained in the worktree.
+
+For a fresh bounded validation run from research/, after the core gate:
+
+```sh
+uv run python test_core.py
+export LAB_GPU=0 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1
+mkdir -p out/memory_repro
+flock out/memory_repro/science.lock timeout 120s uv run python -m experiments.experiment_clean_block validate --reviewed --report out/memory_repro/clean_validation.json
+flock out/memory_repro/science.lock timeout 60s uv run python -m experiments.experiment_grover_queries --stage validate --report out/memory_repro/grover_validation.json
+```
+
+Use fresh report paths; do not continue after a nonzero exit. To inspect a
+single resource case, the clean runner accepts measure --reviewed --backend
+candidate|logical-dense|logical-sparse --a 2|3 --width 6 --samples 128
+--instrument timing|allocation --report PATH; the Grover runner accepts
+--stage case --method compact|streaming|dense --mode time|allocation --n 12..20
+--report PATH. Those are argument choices, not literal shell commands. Preserve
+separate processes/instruments and the accepted RSS guards for a resource
+replication. The archived case manifests specify the full sweep/repetitions;
+validation commands alone do not reproduce its timing numbers.
+
+The host permitted three worker contexts but rejected additional fresh-context
+spawns. Non-authors cross-reviewed the designs/results, with context reuse
+recorded explicitly. These were not blind or fresh-context reviews. References
+used existing/direct methods under reviewed exemptions, with shared constructors
+and libraries disclosed. Every science run followed the core gate. Cases used
+single-thread CPU execution, sampled RSS guards and serialized measurements;
+parallel authorship did not mean overlapping timed workloads.
+
+An initial sharing diagnostic stopped on an address-space cap because eager
+imports reserve far more virtual space than resident memory. A reviewed sampled
+RSS guard replaced that cap; the unchanged six-check diagnostic then passed.
+Grover's first resource batch stopped on a /proc process-exit race. Its failed
+case and late output were excluded, seven successful cases preserved by hash,
+and the guard-only repair independently reviewed before continuation. Original
+failures and superseded evidence remain in the board archive.
+
+New scoped records C114–C116 own the derived/measured findings; no existing
+claim or paper is promoted, no preferred backend is changed, and no generic
+Shor/Grover speedup is asserted. The next proposed step is the exact structured
+sampler in TODO 71; it needs its own derivation and comparison contract.
 
 ---
 
@@ -7960,6 +8888,100 @@ alone would not test it.
 
 ---
 
+# QB — From the swarm API check to an approximation obstruction
+
+The user asked to verify familiarity with the current arb API and ideate a
+useful, feasible research task. At the ideation stage this was a single-session proposal, not an
+independent phase-0 swarm slate or an execution round: no claims or board
+assignments were created then. The subsequently authorized round is recorded
+below; no scientific code was run in either stage.
+
+## Candidates retained
+
+| Candidate and generator | Goal and consequence if successful | Strongest obstruction or limitation | Cheapest deciding step |
+|---|---|---|---|
+| Approximate MPS bond from arithmetic collisions; change the question plus obstruction first (TX34, TODO 70) | Determine whether approximation changes representation cost, using the actual physical state | Exact scalar rank and Pauli-LIMDD node counts do not bound the relevant Schmidt tail; general efficient output sampling faces TX15 | Derive the purity rectangle identity at one specified mixed cut and identify the arithmetic estimate it needs |
+| Clean-block compression with interference; subspace structure (TX9, TODO 66 and TODO 64) | Remove the scratch-related exponential from a useful reduced representation | Already proposed in VR; a noncommuting kick can leave the x<N domain on which clean return holds | Check invariance/leakage of the exact kick fixture before adopting a reduced block |
+| Interleaved Pauli-LIMDD obstruction; extend the known classification (TX29, TODO 69) | Close the gap between the two extreme register orders | C112's last-exponent count can become small; another level must carry the cost | Pair its invariant with a second cut and seek a counterexample to a proposed tradeoff |
+
+The first is recommended for its combination of a new output-accuracy question
+and an exact, bounded mathematical entry point. The second is a practical
+fallback but should not be repackaged as a new proposal. The third remains
+valuable, but an all-order classification is a less bounded first target.
+No candidate is declared refuted by this ranking. TODO 70 owns the recommended
+contract and stopping rules; TX34 owns the proposed external transfer.
+
+The distinction between exact rank and approximation was checked against the
+source bodies linked in TX34, rather than inferred from the rank headlines.
+The key scope choice is the normalized clean state: an average error over the
+truth table of a free work input would not certify Shor's fixed-input output.
+Even a full-state approximation obstruction would cover only that simulation
+route, not every possible output sampler.
+
+## arb API verification
+
+The installed executable reports 0.1.0 and is an editable installation of
+`/home/djneko/Workspace/agent-research-board`. Live operation schemas and its
+`docs/AGENT_GUIDE.md` were checked for task creation, claiming, heartbeat,
+closure, submissions, review, run start/finish and inbox/resume/ack. Source
+inspection confirmed recursive dependency freshness, frozen reads with
+`candidate_changed`, and the stronger checks on accepting a review.
+
+`arb call` currently supports `--file` (including `--file -`), inline `--data`,
+`key=@file` and `key:=@file`; `--data @file` is not file loading. Resume and inbox
+create delivery receipts, while acknowledgment advances the consumed cursor.
+`run.start` records intent and does not execute a command. These are observations
+of the installed API, not new protocol rules.
+
+`uv run python tools/test_swarm.py` passed all ten tests against that executable,
+including the disposable-board lifecycle and read-only-state checks. Live
+board observation showed no open assignments, questions or held resources;
+this dated observation does not replace the board as the owner of live state.
+
+## Authorized derivation round (2026-09-21)
+
+After the user approved the proposal, two independent workers received its
+fixed contract: a derivation and a primary-source/hypothesis audit. Neither worker
+received the other's results before both reports were frozen. Both independently
+found the same simplification. Maximum row and column degrees bound the largest Schmidt weight,
+so the proposed fourth-order estimate was unnecessary. A separate interval
+Fourier argument connected the existing full-frequency character-sum hypothesis
+to this state. C113 owns the theorem, proof, constants and all scope limits.
+
+The derivation additionally explained the arithmetic rectangle structure using
+a multiplicative determinant and the sizes of the low/high work coordinates.
+The source audit checked approximation conventions and identified the printed
+source-equation caveat now recorded in TX34. Neither worker ran numerical
+science. Independent fresh referees reviewed the frozen mathematical reports;
+the canonical claim then received a separate integration review.
+
+The useful choice was to ask about approximation of the actual normalized
+state at one explicit mixed cut. The initially anticipated character-sum
+calculation and optional spectrum sweep were unnecessary once the simpler proof
+settled the bounded question. An all-order theorem, or an inference from exact
+rank to approximation cost, would have outrun the evidence. No claim of novelty,
+a general sampling obstruction, or measured simulation performance is made.
+
+TODO 70 is complete at its proof stopping point. The optional diagnostic was
+not launched because it would not change the mathematical decision. Further
+Schmidt-tail optimization or different orders would be separate research, not
+unfinished work in this round.
+
+Evidence and independent review:
+
+| Deliverable | Frozen submission | Accepting fresh review |
+|---|---|---|
+| Derivation, including rectangle structure and degree/Fourier proofs | `Sefc89aee03564e66` | `Vf26584b6f448426a` |
+| Independent primary-source audit and degree/Fourier proofs | `S11c34596ca6840e6` | `V5da1f5062b2b4693` |
+| Canonical C113 integration | `Sc4aa448e3fc04871` | `V6e531a1c9f834029` |
+
+The claim contains the self-contained proof and report hashes. These three
+reviews required no scientific corrections. Board acceptance and canonical
+promotion were separate steps, and the proposal records were updated only
+after the producer and dependency-bound integration tasks had closed.
+
+---
+
 # QC — Compressing the observable after the CNOT frame
 
 This goal turn follows C82/CF's allocation result. It made concrete progress:
@@ -9948,6 +10970,121 @@ The broader goal stays active; TODO 23 owns the next discriminating question.
 
 ---
 
+# ST — Slate round 3 (2026-09-18): the register's open rows TX14, TX13, TX8
+
+First round under the goal written into METHOD.md on 2026-09-18 ("The goal and the
+barrier check"). Three mutually blind fresh contexts, one per open row, each asked for
+a premise verdict, a slate and proposed register rows: surveyor 3a on TX14
+(`S9be0b75bf1f64536`, v2 of `S3502a0f10bdc43c8`), surveyor 3b on TX13
+(`S9c60f8dce5194cf7`), deriver on TX8 (`S0434232124d846c6`). The coordinator sealed a
+candidate before dispatch (`Me8495d4c440247ea`, sha256 f780d725…ad50).
+
+## Premise verdicts (all three rows were mis-framed)
+
+* **TX14.** Its obstacle (anticoncentration) is not the binding one; the fixed-input,
+  fixed-circuit contract is. Every published polynomial-time noisy Pauli-path result
+  read in the body needs random gates or an input ensemble (sources and locations in
+  3a §2). Row → `not-applicable`.
+* **TX13.** The dictionary holds, but "#P-hard closes every holographic route" is
+  wrong: the hardness is worst-case over the gate language and closes only
+  gate-uniform methods; C86 is itself a gadget-level escape. Row → `obstruction` with
+  that scope.
+* **TX8.** Sound question, wrong tool. The deriver's route needs no embedding of
+  Bryant's middle bit: bit x0 of z mod N (N odd) is a half-interval test on z·2⁻¹,
+  and a direct fooling-set count follows. Row stays `open` pending review (below).
+
+## Results offered (graded by their authors; none reviewed yet)
+
+* **Dephasing lemma (3a S2, proved given Pauli noise with a dephasing part).** Every
+  operation touching an exponent qubit is block-diagonal on it (C104 Roles; checked at
+  rotation level in run `R7ace5f08b1564841`), so a dephasing event commutes back to the
+  start; if every exponent qubit has one, the output is exactly uniform.
+  TV ≤ 1 − Π_j(1 − (1−λ)^{g_j}), 13n ≤ g_j ≤ 12n²+n. The coordinator re-read the
+  argument and found no gap; it is not refereed and likely folklore (decoherence in
+  Shor, Miquel–Paz–Zurek, not searched).
+* **Low-noise edge (3a S3).** With a fault-free run of probability ≥ n^−c, a classical
+  sampler would give classical order finding: TX15 binds for γ ≤ c ln n / Θ(t n²).
+  Only a window of width Θ(t·n) (worst case) remains between the two, where published
+  run times are superpolynomial.
+* **Gate-language hardness (3b §1.2–1.3).** T4/CCZ lie outside affine, product and
+  Hadamard-matchgate classes (Cai–Fu Thm 1.1, 2.31; CFGW Thm 8.1; membership checked
+  exactly in run `Rc5b7bf01443648f7`); exact full-space Walsh coefficients of general
+  Toffoli circuits are GapP-hard by an explicit dirty-register compiler.
+* **Treewidth (3b K3, derived by reading code).** One `cmult_mod` has an m × 5n grid
+  minor, so every contraction order of the native network costs 2^Θ(n).
+* **Theorem 1 (deriver; proved modulo the Erdős–Turán inequality).** If
+  κ(⟨a⟩) ≤ N^(−2η), η ≤ 1/6, every OBDD agreeing with the clean x0 bit on clean inputs
+  has ≥ N^η/(C log N) nodes in every variable order; this covers the full-space
+  pullback. Restricting e after the order is fixed selects the constant. For prime N,
+  r ≥ N^(1/2+2η) suffices (Gauss sums), and typical bases qualify. The coordinator
+  re-read the proof (Lemmas R, C, S, G, steps 1–4) and found no gap. Composite N = pq,
+  Shor's case, is conjecture.
+* **Theorem 2 (deriver; proved, checked n = 3..7).** N = 2^n − 1, a = 2 escapes:
+  Σ_{k<t} min(2^k, n) + n + 2 nodes. **The ledger's N = 7 fixtures with a = 2, 4 are in
+  this family**, so N = 7 diagram data cannot speak to growth in n. A registered bound
+  failed first (run `R43578ea35a36407b`, exit 1, kept) because the script reduced the
+  invalid input mod N; v2 (`Rabfa584eb4674c5a`) held.
+* **Single block (deriver K3, proved for c = 2).** On the clean code the x0 bit of
+  u_a(ctrl, 2) is a comparison, O(n) nodes: C102's single-block growth is all dirty
+  inputs, matching note VR.
+
+## Candidates, ranked for the next phase
+
+| rank | candidate | kind | cheapest deciding step |
+|---|---|---|---|
+| 1 | TX8 Theorem 1, and its composite-N extension | obstruction | referee the proof; surveyor verifies Erdős–Turán, Gauss sums, BGK, and composite-modulus sums |
+| 2 | Deriver K4: rank at x-internal cuts ≥ distinct rows | obstruction (TX17) | seconds: exact rank of the arc matrices, n ≤ 11 |
+| 3 | Deriver K5: word-level diagrams (*BMD) escape Theorem 1? | the one escape in the diagram family | survey modular-reduction lower bounds for *BMD |
+| 4 | 3a S2 dephasing lemma | noise threshold | referee plus decoherence-in-Shor literature check |
+| 5 | 3b K3 grid minor | obstruction | seconds: mechanical minor and min-fill bound at N = 7, 11 |
+| 6 | 3a S3 fault window | noise | minutes: single-fault enumeration at N = 15, t = 8 |
+| 7 | 3b K2 gadget-level holography for `cc_add_mod` | escape (TODO 50) | as TODO 50 |
+| 8 | Deriver K2: which ⟨a⟩ escape (N = 2^n + 1, a = 2 next) | escape | derivation |
+
+Killed, with reasons in the submissions: embedding Bryant's MUL (not needed; ⟨a⟩ need
+not contain its constants); every published noisy algorithm for fixed-input Shor;
+GCT's worst-case theorem (dominated, p ≳ 0.25 is already trivial); gate-uniform
+holographic methods; modular counting (3b K6); Montanaro's hitting set (duplicates TX5).
+
+## The sealed candidate
+
+Coordinator K0: under depolarizing noise, weight concentration of the reduced
+observable near q/2 would put the truncation threshold at p* ~ 1/(n² t). Surveyor 3a
+found a different and sharper mechanism (exponent dephasing, independent of Pauli
+weight, per-qubit g_j) and proved it; K0's weight argument is unnecessary and its t
+dependence does not appear. The coordinator's sealed candidate lost for the third round
+running.
+
+## Reading
+
+The round produced obstructions, which METHOD.md now counts as results. Under growth in
+n: no published noisy algorithm helps; gate-uniform holography is dead; every graph
+contraction order is 2^Θ(n); and, if Theorem 1 survives review, no ordered bit-level
+diagram of the modexp bit is polynomial for typical prime N, even on the clean code.
+What escapes: word-level diagrams (K5), gadget/value-level algebra (TX6, K2), and
+explicit small-order structure (Theorem 2), which TX15 says must be named.
+
+## Process
+
+* **Output cap.** The deriver's first turn ended on an API error: one response over the
+  64k output-token cap, nothing saved after 45 minutes. Resumed with the instruction
+  to append files in sections of ≤ 150 lines; it finished in 63 minutes more. Briefs
+  for long derivations should say this up front.
+* **Lint gating.** 3a listed its submission JSON as evidence and ran lint in the same
+  command as `submission.create`; a provenance-only `changes_requested` and v2 (same
+  scientific hashes, verified) fixed it. Gate creation on the lint exit.
+* **"Changed on disk."** 3b saw its slate.md altered after a write; no formatting hook
+  exists and the frozen hash equals the file, so the reviewed bytes are intact.
+* **Coordinator ordering slip.** The coordinator edited six register files that were
+  snapshotted task inputs before closing the slate tasks, against SWARM.md ("close
+  read/proposal tasks before editing their inputs"); the board refused acceptance with
+  `stale_inputs`. Recovery: the merged versions were stashed, the archived input bytes
+  restored, the reviews and closures recorded (closure notes name the edited rows), and
+  the merged versions reapplied; the regenerated index is byte-identical to the stash.
+  Detector for next time: merge into a draft outside `transfers/`, close, then apply.
+
+---
+
 # T — DOES C15 SURVIVE TRUNCATION? (TODO step 7). Peak cost: yes. Accuracy: to a point.
 
 Every C15 figure was δ=0, and nobody runs PPS at δ=0 — so the practical claim
@@ -10046,6 +11183,93 @@ The practical claim stands, with a stated boundary:
 
 So "period-finding precision is free" is true for *memory* and true for
 *accuracy up to moderate δ*, and must not be stated unqualified.
+
+---
+
+# TL — Phase 1 after slate round ST (2026-09-18): lower bounds for ordered representations
+
+The user chose items 1–3 of note ST's ranking. Four fresh, mutually blind contexts:
+a referee of TX8's derivation (task `T1e74d6a66ec34037`, review filed as submission
+`S86f11aef594648bd`, since the author's task was closed and its register inputs renamed);
+surveyor 4a on the exponential-sum inputs (`Sf8eb4afd15a84c9e`, v2 of `S67f4791a54ad4dac`);
+surveyor 4b on word-level diagrams (`S20cdcbcfcbcf4547`, v2 of `S6f97e76d496b417f`);
+deriver 4k on rank at x-internal cuts (`S11b9708e34d14abe`). No claim is promoted here.
+
+## Object
+
+f(e, x) = bit x0 of `ToffoliModExp(N, a, n_exp=t).build()`: on clean inputs,
+bit_0(a^e (x XOR 1) mod N); the full-space pullback restricts to it. Every result below
+is about representing this Boolean function, not about sampling Shor's output.
+
+## Results and their status
+
+* **Theorem 1 (TX8): refereed, accept with corrections R1–R8.** Every OBDD of f, in every
+  variable order, has ≥ N^η/(C log N) nodes when κ(⟨a⟩) ≤ N^(−2η), η ≤ 1/6. The referee
+  re-derived every step and found nothing refuted. Required before integration: R1 add
+  the proof that the circuit's clean bit equals the formula for all N (the referee
+  proved it; the author verified 7 instances); R2–R3 constants (N0 justification; the
+  1/K term is 2N^(−η)); R4 Theorem 2's "exactly" needs 2^t ≥ n (n = 7, t = 2: 9, not
+  12); R5–R6 scope wording (v1's mod-N statement refuted; clean code vs full space for
+  the N = 7 fixtures); R7 the single-block "O(n)" holds in MSB-first order only (7 → 37
+  over n = 4..14 in evens-then-odds); R8 K3's proposed step is not to be scheduled as
+  written.
+* **External inputs (surveyor 4a): verified.** Erdős–Turán with C0 = 6
+  (Kuipers–Niederreiter Thm 2.5, p. 112, read from the page image). The √p bound
+  follows from Parseval, |Σ_{c∈H} e(cu/p)| ≤ √(p − r), so Gauss sums are not needed.
+  Bourgain–Konyagin 2003 Thm 2.1 read in the body; BGK 2006 only as restated.
+* **Shor's moduli (surveyor 4a, proved there, unrefereed).** For N = pq,
+  κ ≤ max(√N/r, √p/r_p, √q/r_q), and κ ≥ (p−1)^(−1/2) unless a is a primitive root mod p.
+  So for balanced N, η ≤ 1/8 unless a is a primitive root modulo both factors; typical a
+  get η = 1/8 − θ/2 when gcd(p−1, q−1) ≤ N^(1/4−θ); primitive roots of both get η → 1/6 only
+  when gcd(p−1, q−1) ≤ N^(1/6) (corrected 2026-09-18; C109 owns the statement).
+  The hypothesis fails exactly when some order r_p or r_q is small.
+* **Rank identity (deriver 4k, proved, unrefereed).** For any 0/1 matrix whose rows are
+  cyclic translates of one arc sampled on point sets S, T ⊂ Z_N:
+  rank_Q = E − β₁(G) + ε, with G the gap graph (one edge per distinct nonconstant row).
+  Hence (D − 2)/4 ≤ rank ≤ D, and Theorem 1's fooling-set rows have rank ≥ ⌈K'/2⌉.
+  1_I has no DFT zero for odd N, so rank loss comes from sampling (corrected: a general
+  arc of length ℓ has one iff gcd(ℓ, N) > 1; C108).
+  Checked at 148,678 instances (corrected 2026-09-18: the evidence brackets the rank where a
+  full row and a winding cycle coexist; C108 owns the statement).
+* **Consequence (4k, modulo Theorem 1).** In every order, the cut after half of x's low
+  bits has rank ≥ N^η/(870 ln N) (corrected; C108): every tensor train/MPS, MPO or weighted automaton
+  reading that order has at least that bond there. This is TODO 68's missing lower
+  bound, in every order, for prime N.
+* **Word-level diagrams (surveyor 4b).** Scholl–Becker–Weis ICCAD'98 Thm 1, Lemma 1,
+  Thm 2 (pp. 674–675, read in the body): every ordered MTBDD, EVBDD, *BMD, HDD, K*BMD or
+  *PHDD maps into a WLCD with no more nodes, and WLCD size ≥ Q-rank at each prefix cut.
+  With 4k's consequence, every ordered word-level diagram of f is exponential in n in
+  every order (prime N, κ regime). Independently, exponent-first or exponent-last
+  orders need ≥ 1 + r/2 nodes (derived modulo two recalled L-function facts; measured
+  for primes 11..113). The known division lower bound does not apply (variable divisor).
+  EVBDD/MTBDD also inherit Theorem 1 via Becker–Drechsler–Enders ASP-DAC'97 p. 463.
+
+## Reading
+
+For typical prime moduli, and for typical bases of Shor's N = pq, **no ordered linear
+representation of the modexp output bit is polynomial in n in any variable order**
+(corrected 2026-09-18: Pauli-LIMDDs and GF(2)-frame diagrams are outside this; see C107, C108):
+OBDD (refereed), and, pending review of 4k's identity, every ordered word-level
+diagram and every tensor-network bond at some cut. This covers the diagram and
+tensor-network directions the register listed as escapes (TX7, TX9, TX17, TX26). It
+respects TX15 (a lower bound). What it does not cover: unordered or free diagrams
+(FBDD, free BMDs, SDDs), representations in a GF(2)-transformed frame, non-linear
+representations, sampling contracts, and small-order families (Theorem 2's
+N = 2^n − 1, a = 2, which contains the ledger's N = 7 fixtures).
+
+## Process
+
+* **Lint false positive, twice.** 4a and 4b printed "FAILED as intended/required" for a
+  control that behaved correctly; submission lint reads FAILED in an exit-0 log as a
+  contradiction (EXIT-CONTRADICTS-LOG). Both fixed by provenance-only v2 runs. The
+  working-file lint does not compare logs with exits, so only the submission lint
+  catches it. Protocol fix: report a correct must-fail outcome without that token (as
+  `lab.harness.fail_check` does).
+* **Seal location.** 4b listed the session scratchpad and saw the sealed-candidate file
+  name (not its content; it was already revealed). The scratchpad is shared with
+  workers; seals belong somewhere workers cannot list.
+* **Closed-task review.** A review of a closed submission whose inputs were renamed goes
+  through a separate referee task, as here.
 
 ---
 
@@ -10810,6 +12034,84 @@ recorded in `out/verified_prefix_docs.log`. No commits were made.
 Impact: this closes an implementation gap for a narrow exact-input family;
 it does not establish a broadly faster classical simulator. The remaining
 research question is specified only in TODO 24, not duplicated here.
+
+---
+
+# VR — Clean-scratch virtual reset (TODO 66, 2026-09-18)
+
+**Origin.** A 2026-09-18 discussion with the user on "the exponential memory of
+entangled CNOT gates". The premise was corrected first: a CNOT is one term to one
+term in atomic PPS (`perm_pps.py` rule table; C82 removes even the relabel), so
+the growth comes from Toffoli branching (C8, C25). The exponent register is already
+handled (C45, C104); what remains is the work width q_w = 3n + 4. Three TODOs came
+out of it (66, 67, 68); this note is 66. In-session work, no board task and no
+referee yet.
+
+## Mechanism
+
+C105's clear rule Z^z ↦ Z^(z & ~mask) is the adjoint of a reset. Where a unitary
+circuit returns scratch to |0> on an input set, inserting that clear leaves the
+expectation on that set unchanged. `propagate_perm(..., reset_before={k: mask})`
+implements it (opt-in; `test_perm_pps.py` [E] checks it against classical replay
+with a reset on 24 random circuits, 15 of which the reset changes).
+
+For `ToffoliModExp`, reading `toffoli_arith.py`: t, c0, anc are clean at every
+cc_add_mod boundary; b is clean at every u_a block boundary when x at block entry
+is < N (the inverse cmult returns b = x_orig to 0 only then). Block 0 sees
+x_in XOR 1 because `build()` applies X(x0) first, a slip caught before the run.
+
+## Result (`experiments/experiment_scratch_reset.py`, 46/46, `out/scratch_reset/`)
+
+N ∈ {5, 7}, a = 2, t = 1..3 (one parameter varied). All six predictions and both
+must-fail controls behaved as derived:
+* R0 (input clear only) equals the WHT of f restricted to clean scratch, exactly.
+* R1 (block-boundary clears) equals the WHT of the replay-with-resets function g,
+  exactly, and agrees with f on every x < N input. Disagreements with f|S occur only
+  at x ≥ N with ≥ 2 exponent bits set (1, 3 at N = 7, t = 2, 3; 3, 10 at N = 5).
+* With C45, every block-boundary clear leaves ≤ 2^n terms (8, or 5 at N = 5, t = 1).
+* Controls: a clear in the middle of a `b -= N` ladder disagrees on 4–16 x < N
+  inputs; R1 differs from f|S at t ≥ 2.
+
+**Exploration (not derived).** Peak retained terms, N = 7, a = 2:
+
+| t | baseline | C45 | R1 + C45 | R2 + C45 | final C45 | final R1 + C45 |
+|---|---|---|---|---|---|---|
+| 1 | 6522 | 6522 | 6522 | 3936 | 1424 | 8 |
+| 2 | 16386 | 8194 | 11443 | 7852 | 1596 | 8 |
+| 3 | 48784 | 12197 | 11515 | 8338 | 3876 | 8 |
+
+The output collapses about 500×, but the peak moves only ~1.46× beyond C45. The
+peak locator (`out/scratch_reset/peak_locate.py`) shows why: per-segment peaks within
+one block, forward order, are [7412, 4397, 1527, 29, 8, 8, 8] at N = 7, t = 2
+(cmult's three cc_add_mods, the cswap, the inverse cmult's three). The inverse cmult
+is nearly free. The growth happens while reverse propagation climbs back through the
+forward cmult, where b is **live** (a partial sum of a·x), so no clean promise
+applies. At the peak every b, t, x, c0 and anc sub-key occurs.
+
+## Reading
+
+* Virtual reset removes what C50/C106 Theorem C attributed to dirty inputs from the
+  **output**, not from the **peak**. The peak is the Walsh expansion of a live
+  modular multiplication in mid-computation, which is the arithmetic nonlinearity
+  itself (C25's regime), not scratch junk.
+* That points to a block-level Schrödinger/Heisenberg split, not finer clears:
+  on clean inputs one block is the permutation (x, ctrl) ↦ (a^ctrl·x mod N, ctrl)
+  on n + 1 bits. Its clean-return property can be **certified** by replaying the
+  2^(n+1) clean inputs of the block, and its action on an operator supported on x
+  computed from that permutation, in memory ~2^(n+1) instead of ~2^(q_w). For
+  diagonal permutation circuits this only restates (e, x) ↦ a^e x mod N; its use is
+  TODO 64 (Rx insertions between blocks, where X on clean scratch is dropped by the
+  same promise) and TODO 14. Standard reduced-subspace simulation; no novelty claim.
+* No claim is promoted from this note. P1 is a standard identity and P2 is C105's
+  rule on a new circuit; a claim would need referee review first.
+
+## Follow-up (2026-09-21)
+
+The proposed block transfer was tested on a domain-preserving inverse-QFT
+sampling contract. C115 owns its validation and negative total-resource
+comparison; note MC records discovery and evidence. The work-Rx suggestion
+above requires a separate domain-closure argument and is not covered by the
+clean-subspace promise. TODO 66 records that residual.
 
 ---
 

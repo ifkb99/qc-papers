@@ -6,7 +6,7 @@
 Edit the individual claim file, not this. It exists so the papers can
 ship one self-contained supplementary document.
 
-106 live claims, 19 retracted.
+125 live claims, 19 retracted.
 
 ---
 
@@ -9670,6 +9670,2528 @@ Consequences, stated at their reach:
   and a planted dependency.
 * **Environment.** Measured wall times were 433.5 s (main) and 39.7 s (bug check) on
   CPU, under Python 3.12.10 with NumPy 2.4.6 in an ephemeral environment.
+
+---
+
+## C107 — Every OBDD of the modexp x0 bit, in every variable order, has >= N^eta/(435 ln N) nodes when kappa(<a>) <= N^(-2 eta), 2^t >= r, 0 < eta <= 1/6 (odd N >= 5), on the clean code and the full space; prime N with r >= N^(1/2+2 eta) qualifies; N = 2^n - 1, a = 2^j (gcd(j, n) = 1) escapes on the clean code in e-first order
+
+*status: proven · paper: -*
+
+# C107 — OBDDs of the modular-exponentiation output bit are exponential in every order when κ(⟨a⟩) is small
+
+Object: f = bit x0 of `ToffoliModExp(N, a, n_exp=t).build()` (`toffoli_arith.py`),
+(a) on the clean code (scratch b, t, c0, anc = 0, x ⊕ 1 < N; variables e and x), (b) on all 2^q
+inputs (the full-space pullback), and (c) the single block u_a(ctrl, c) on the full dirty
+space (C102's fixture). H = ⟨a⟩ ≤ Z_N^*, r = |H|,
+κ(H) = max_{u ≠ 0 mod N} |E_{c∈H} e(cu/N)|. Counts are OBDD nodes, not bytes. How it was
+found and reviewed: notes ST and TL.
+
+## Proved
+
+Derivation v2 `S6252c91848bd4c90` (deriver-slate-3), accepted by a fresh referee in
+`V6a01bd7d375d4b39` after a first review `S86f11aef594648bd` (accept with R1–R9);
+external inputs verified in the body by `Sf8eb4afd15a84c9e`, whose propositions were
+refereed in `S57b82692609045c0`.
+
+* **Clean-bit identity (G2), every odd N.** On clean inputs f(e, x) =
+  bit_0(a^e (x ⊕ 1) mod N), the ⊕ 1 from build()'s initial X. Traced through
+  `cc_add_mod`, `cmult_mod`, `u_a` and `build` (`toffoli_arith.py:49-128`): each
+  modular addition keeps b < N with constants < N, and the sign flag is uncomputed.
+  The Cuccaro adder's correctness at every width is the MAJ/UMA induction (Cuccaro et
+  al., quant-ph/0410184; re-derived by the referee); `test_toffoli_arith.py` [A] checks
+  one width only.
+* **Lemma P.** For odd N and 0 ≤ z < N, bit_0(z) = 1 iff z·2⁻¹ mod N ∈ [(N+1)/2, N−1].
+* **Theorem 1.** Let N be odd, N ≥ 5, 2^t ≥ r, and κ(H) ≤ N^(−2η), 0 < η ≤ 1/6. In every
+  variable order of (a) or (b), every OBDD agreeing with f on the clean inputs with
+  x_{n−1} = 0 has at least N^η/(435 ln N) nodes. No threshold N0; the constant does not
+  depend on η. Mechanism: after the order is fixed, restrict e to choose
+  c ∈ 2⁻¹H (possible because 2^t ≥ r), making the function 1_I(c·x' mod N); a balanced
+  cut of x's remaining bits then has at least ⌊N/(2L)⌋ distinct rows once the dilates
+  cV_A, cV_B have discrepancy below L/N, which a second moment over the coset (Lemma G)
+  and the Erdős–Turán inequality (Kuipers–Niederreiter Thm 2.5, p. 112, eq. (2.33),
+  constant 6) supply for some c.
+* **Corollary 1 (prime N).** By C109 Prop. A, κ < √p/r, so r ≥ p^(1/2+2η) suffices. For a primitive root, κ = 1/(p−1) (the sum over
+  Z_p^* is −1), so η = 1/6: at least N^(1/6)/(435 ln N) nodes. All but a
+  p^(−1/2+2η+o(1)) fraction of bases qualify (divisor count).
+* **Theorem 2 (escape).** N = 2^n − 1, a = 2^j with gcd(j, n) = 1, 2^t ≥ n, exponent-first
+  order: every OBDD agreeing with f on the clean code has at least
+  S(n, t) = Σ_{k<t} min(2^k, n) + n + 2 nodes (2n + 1 when n is a power of 2), and the
+  rotation extension attains it. The mod-N extension (value 0 at x ⊕ 1 = N) is larger (26 > 20 at n = 3) and at
+  most Σ_k min(2^k, n) + 2n² + 2; the v1 bound tn + n + 3 for it is refuted (run
+  `R43578ea35a36407b`). This family contains the ledger's N = 7, a = 2 and a = 4
+  fixtures: C103's N = 7 data concern the full-space object (b), C102's the single block
+  (c), and Theorem 2 gives no upper bound for either.
+* **Single block (c).** On the clean code, x is only a control inside `cmult_mod`, and
+  the x0 bit of u_a(ctrl, c) is ctrl ? (c_0 ∧ x_0) ⊕ (⌊cx/N⌋ mod 2) : x_0 (N odd, so
+  N⌊cx/N⌋ has the parity of ⌊cx/N⌋), with O(c·n) nodes in MSB-first order (the order C102's
+  order induces once scratch is fixed); for c = 2 it is ctrl ? [x ≥ (N+1)/2] : x_0. The
+  order matters: in evens-then-odds order a referee exploration measured 7, 11, 16, 22,
+  29, 37 nodes for [x ≥ (N+1)/2] (c = 2, maximum over N) at n = 4, 6, …, 14 (measured).
+  The block constants a^(2^k) mod N are generally not small, and a bound for one generic c
+  in every order is not reached. So C102's single-block growth needs inputs outside the
+  clean code (proved, by restriction); that it needs dirty scratch rather than x ≥ N with
+  clean scratch is measured (ROBDD 3n − 1, maximum over odd N, with scratch 0 and x ≥ N kept, n = 3..7), not
+  proved here.
+
+## Conditional
+
+* **Corollary 2.** With Bourgain–Konyagin, CRAS 337 (2003) Thm 2.1, p. 78 (read in the
+  body by the surveyor): for prime N with r ≥ p^δ, κ ≤ p^(−ε(δ)), and Theorem 1 gives
+  2^(Ω(ε n)); the constants of that theorem are unspecified.
+* **Composite N (Shor's moduli).** Theorem 1 does not need primality, only its κ
+  hypothesis (with 2^t ≥ r); C109 states
+  when it holds for N = pq and when it fails. Where it fails, Theorem 1 does not apply
+  and the clean-code OBDD can be small: a = 1 gives f = ¬x_0; Theorem 2's family contains
+  semiprimes (N = 2047 = 23·89, a = 2, e-first order; κ ≥ 0.22 there by C109 Prop. L,
+  since ord_23(2) = 11); and N = 15, a = 4 (≡ 1 mod 3) gives f = e_0 ? x_2 : ¬x_0 on the
+  clean code for every t (by G2: 4² ≡ 1 mod 15, so 4^e ≡ 4^(e_0), and 4y mod 15 rotates
+  the 4-bit y = x ⊕ 1 by two places, so its bit 0 is y_2 = x_2). Beyond these examples,
+  this claim makes no statement about which bases with failing κ have small OBDDs.
+
+## Limits
+
+* A lower bound on OBDDs of the function; it says nothing about sampling, unordered or
+  free diagrams, representations over transformed variables, or bytes.
+* The constant 435 is loose: the bound is below 1 at every measured size and first
+  exceeds 1 near n ≈ 89 bits at η = 1/6, later for smaller η (estimate). It is an asymptotic statement.
+* Barrier (register TX15): a lower bound, consistent with it.
+
+---
+
+## C108 — The rank of any 0/1 matrix of arc translates sampled on point sets of Z_N equals E - beta_1(gap graph) + eps over every field; hence, under C107 Theorem 1's hypotheses, every variable order of the modexp x0 bit has a prefix cut of rank >= N^eta/(870 ln N), bounding every TT/MPS/MPO/weighted-automaton bond there
+
+*status: proven · paper: -*
+
+# C108 — Rank of arc-translate matrices, and exponential bond at some cut in every order when κ(⟨a⟩) is small
+
+Object: M[s, j] = 1_J(s + t_j) for s ∈ S, t_j ∈ T = {t_0 < … < t_{m−1}} ⊂ Z_N in cyclic
+order (m ≥ 2), J an arc of length 1 ≤ ℓ ≤ N − 1, N ≥ 3. The modexp case is S = cV_A,
+T = cV_B, J = I = [(N+1)/2, N−1] (C107's Lemma P). How it was found: note TL.
+
+## Proved
+
+Derivation `S11b9708e34d14abe` (deriver-4k), refereed in `Sd4b9709071a34341` (accept
+with corrections D1–D6, applied here).
+
+* **Theorem A.** Rows are cyclic intervals of column positions (Lemma A1). With the
+  cyclic difference operator, a nonconstant row with tail u and head v maps to
+  e_u − e_v (Lemma A2). Let E be the number of distinct nonconstant rows, G the
+  multigraph on positions with one edge per such row, β₁ its cycle rank, and ε = 1 iff
+  the all-ones vector lies in the row space over that field (in characteristic 0, a
+  winding condition). Then
+  rank M = E − β₁(G) + ε, over every field.
+* **Corollary B.** With D distinct rows, (D − 2)/4 ≤ rank ≤ D.
+* **Corollary C.** The K' = ⌊N/(2L)⌋ rows of C107's fooling set (spacing > L) have rank
+  ≥ ⌈K'/2⌉; in characteristic ≠ 2 the ±1 matrix J − 2M has rank ≥ ⌈K'/2⌉ as well, since
+  Δ(1 − 2r) = −2Δ(r).
+* **Proposition D.** 1_I (length (N−1)/2) has no zero DFT coefficient for odd N (an arc
+  of length ℓ has one iff gcd(ℓ, N) > 1), so in the modexp case rank loss comes from
+  sampling on S and T, not from spectral zeros. Propositions E
+  (c = 1 is a staircase, rank = D − [zero row]) and F (N = 2^n − 1, a = 2: D ≤ 2 and
+  rank ≤ 1) also hold.
+* **Cut theorem.** Under the hypotheses of C107 Theorem 1, in every variable order of
+  the clean or full-space x0 bit, the shortest prefix containing ⌊(n−1)/2⌋ of the bits
+  x_0 … x_{n−2} has a truth matrix of rank ≥ N^η/(870 ln N) across it (half C107's bound:
+  where C107's proof builds its K' fooling rows, K' ≥ N^η/(435 ln N) and ⌈K'/2⌉ ≥ K'/2;
+  otherwise N^η ≤ 348 ln N, so the bound is at most 0.4, and the cut matrix is nonzero,
+  since f = 1 at e = 0, x = 0). Restricting e, x_{n−1} and scratch on either side
+  selects a submatrix, which cannot raise rank. So at that cut the bond of every tensor
+  train or MPS read in that order, the operator Schmidt rank of U†Z_{x0}U, and the state
+  count of every weighted automaton (over any field, including GF(2)) are at least that.
+  Primality is not needed: it enters C107 only through its Corollary 1; C109 gives the
+  composite cases.
+
+## Evidence and its limits
+
+* Run `R11052603613c47e1` checks Theorem A at 148,678 instances. The mod-p ranks are
+  lower bounds and the explicit null vectors give rank ≤ formula + min(f, w), so where a
+  full row and a winding cycle coexist (referee D1: 1,336 such instances of the 47,610 at
+  n = 5..9; n = 10, 11 not counted) the run's evidence brackets the rank in
+  {formula, formula + 1}, and equality there rests on Theorem A's proof. In the prime sweep, exact
+  Bareiss ranks were computed 983 times with no mismatch: at 976 instances picked at random
+  within each swept cut, and at the seven A0 headline instances, one per n, added
+  deliberately (`rank_arc_v1.py` l.347-355, l.431; log l.54). The n = 6 headline is an
+  f = w = 1 instance. The referee's own run `Re2f259fd4cda432f`
+  checks Theorem A at 28,108 further instances, including even N and other arcs.
+* The random-matrix and shifted-arc controls are null or sanity comparators and cannot
+  detect a fault in the formula or the gap-graph code: the first was registered only at
+  n = 10, 11, where its outcome was essentially fixed; the second fires at entry (0, 0) by
+  construction. The discriminating check is the formula's agreement with the modular
+  ranks across varied β₁, ε, components, z and f, which the referee's formula mutants
+  confirm (referee D5). N = 31 and 127 are Mersenne primes, so
+  those sweeps contain C107's escape family (D6).
+* Measured, not proved: the D − O(1) form fails at the measured sizes (deficits up to 15
+  at n = 5..11), and
+  rank ≥ D/2 is a post-hoc conjecture.
+* Bond, not bytes; cuts in a GF(2)-transformed frame are not splits of x's bits and are
+  not covered. Barrier (TX15): a lower bound.
+
+---
+
+## C109 — For Shor's N = pq, kappa(<a>) = max(unit, mod-p, mod-q families) <= max(sqrt(N)/r, sqrt(p)/r_p, sqrt(q)/r_q); balanced N give eta <= 1/8 + o(1) unless a is a primitive root mod both, eta = 1/8 - theta/2 - o(1) for typical a when gcd(p-1, q-1) <= N^(1/4 - theta), and, for a primitive modulo both, eta = min(1/6, 1/4 - gamma/2) - o(1) with ceiling eta <= (1 - gamma)/4 + o(1) (gcd = N^gamma)
+
+*status: proven · paper: -*
+
+# C109 — The exponential-sum hypothesis of C107 for Shor's moduli
+
+Object: κ(H) = max_{u ≠ 0 mod N} |E_{c∈H} e(cu/N)| for H = ⟨a⟩ ≤ Z_N^*, N = pq with
+p ≠ q odd primes; r = |H|, r_p, r_q the orders of a mod p, q; g = gcd(p−1, q−1) = N^γ.
+κ_unit is the maximum over unit frequencies u; κ_p(H_p) = max_{u' ≢ 0 mod p}
+|E_{c∈H_p} e(cu'/p)|, fed by the frequencies divisible by q (likewise κ_q).
+"Balanced" means p, q = N^(1/2+o(1)). C107 Theorem 1 and C108's cut theorem take
+κ ≤ N^(−2η) as their κ hypothesis (their other hypotheses are in C107). How it was
+found: note TL.
+
+## Proved
+
+Survey propositions `Sf8eb4afd15a84c9e` §2 (surveyor-4a), refereed in
+`S57b82692609045c0`: every proposition correct as stated there; defects D1–D8 lie
+outside §2's propositions, those bearing on this file are corrected here, and these
+statements live only in this file.
+
+* **Prop. A.** For every unit b mod m, |Σ_{c∈H} e(cb/m)| ≤ √(m − |H|) (Parseval over the
+  coset bH). For m = p prime: κ < √p/r.
+* **Prop. K.** A nonzero u reduces to a unit modulo m/gcd(u, m); for N = pq,
+  κ = max(κ_unit, κ_p(H_p), κ_q(H_q)) exactly, and
+  κ ≤ max(√N/r, √p/r_p, √q/r_q).
+* **Prop. L.** κ ≥ κ_p ≥ 1/(p−1) (since (p − r_p)(p − 1) ≥ r_p); if a is not a primitive
+  root mod p, κ_p ≥ √((p − r_p)/((p−1) r_p)) ≥ (p−1)^(−1/2). Likewise for q.
+* **Consequence.** For balanced N, η ≤ 1/8 + o(1) unless a is a primitive root modulo
+  both p and q.
+* **Prop. T (typical a).** Outside a set of density N^(−θ+o(1)),
+  κ ≤ C·max(N^(2θ+γ−1/2), N^(θ−β/2)) with min(p, q) ≥ N^β, C = 4; for balanced N with
+  γ ≤ 1/4 − θ this gives η = 1/8 − θ/2 − o(1).
+* **Prop. P (primitive root modulo both).** r = (p−1)(q−1)/g and
+  κ ≤ max(g√N/((p−1)(q−1)), 1/(min(p,q) − 1)); for balanced N this gives
+  η = min(1/6, 1/4 − γ/2) − o(1), so this bound gives η → 1/6 when g ≤ N^(1/6+o(1)). Such a have
+  density ≫ 1/(log log N)².
+* **Ceiling (referee derivation, re-derived at integration).** For a primitive modulo
+  both, r = φ(N)/g and Parseval gives Σ_u |S(u)|² = N r, with S(u) = Σ_{c∈H} e(cu/N).
+  The zero frequency contributes r²; the p − 1 frequencies divisible by q each give
+  S = −r/(p−1) (H maps onto Z_p^* with fibres of size r/(p−1)), total r²/(p−1); likewise
+  r²/(q−1). Since 1 + 1/(p−1) + 1/(q−1) = (N−1)/φ(N), averaging over the φ(N) units gives
+  κ_unit² ≥ (N(g−1)+1)/φ(N)² > (g−1)/N for every N = pq. So κ ≤ N^(−2η) forces
+  η ≤ (1 − γ)/4 + o(1). The unconditioned "η → 1/6 for primitive roots of both" is
+  therefore unproved for γ > 1/6 (Prop. P's bound is the only one) and false for
+  γ > 1/3 (this ceiling).
+* **Safe primes.** For balanced N = pq with p = 2p'+1, q = 2q'+1 (g = 2), every a except
+  those ≡ ±1 modulo p or q (an O(N^(−1/2)) fraction) has κ ≤ 2N^(−1/4+o(1)), so
+  η = 1/8 − o(1); a ≡ 1 mod p gives κ = 1.
+* **Only if.** κ ≤ N^(−Ω(1)) requires p, q, and (for non-primitive a) r_p, r_q to be
+  N^(Ω(1)). The converse for unit frequencies rests on Bourgain's composite-modulus
+  results read only secondarily; not claimed.
+
+## Evidence and limits
+
+* Runs `R8d02003d827b4013` (nine (N, a), N ≤ 2537; the unit-only bound is violated at
+  N = 143, a = 67 as required), the referee's `Rcae7cf0461d44ca3` (P1: 156 moduli
+  N ≤ 800, 4380 subgroups; P2–P5, including safe primes below 3000; 0 violations) and `R903210b7d6d34656` (8520 primitive-both
+  cases, N ≤ 800, zero violations; at N = 7957, g = 36, a = 11, κ = 0.10761 > N^(−1/3) =
+  0.05009). Measured in float64 at toy
+  sizes; the statements rest on the proofs.
+* In the check run, Prop. L(2) was exercised at only 3 of 9 cases, on the p side (D7).
+* That infinitely many balanced N have γ > 1/3 is not established here. That the range
+  1/6 < γ < 1/4 is populated rests on the kappa referee's Bombieri–Vinogradov remark
+  (S57b82692609045c0, §3 D2 and §7), which is unchecked here.
+* The Konyagin–Shparlinski monograph was not accessible; sharper explicit bounds may
+  exist. Barrier (TX15): these are conditions for a lower bound.
+
+---
+
+## C110 — Every Pauli-LIMDD of the post-modexp state sum_e |e>|a^e mod N> in an exponent-first order has > r/(2 sqrt(2N)) nodes at the level of the last exponent qubit when a^(2^(j+1)) is not 1 mod any prime factor of N (j that qubit's index) and 2^t >= r; LIM classes there equal the distinct values of c XOR (Ac mod N), measured (post-hoc) at 0.79-1.00 of the prefix count D_j on random semiprimes
+
+*status: derived · paper: -*
+
+# C110 — Pauli-LIMDDs of the post-modexp state in exponent-first orders
+
+Object: |Ψ⟩ = Σ_{e < 2^t} |e⟩|a^e mod N⟩|0…0⟩, the clean-code output of
+`ToffoliModExp(N, a, n_exp=t).build()` on inputs |e⟩|0⟩ (`toffoli_arith.py`; P0 of the
+experiment replays the gates at n ≤ 5). N is odd and ≥ 5, n = bitlen(N), r = ord_N(a), and
+2^t ≥ r. The Pauli-LIMDD is as defined by Vinkhuijzen–Coopmans–Laarman, arXiv:2401.01322
+§2. Edge labels are λP with λ ≠ 0 and P ∈ {I, X, Y, Z}^⊗k acting on the node's qubit and
+those below it; there is no node skipping. The order reads all t exponent qubits before
+all n x qubits; scratch qubits may sit anywhere. j is the exponent qubit read last,
+A = a^(2^j) mod N, and φ(c) = c ⊕ (Ac mod N). How it was found: note LM.
+
+## Derived (re-derived and confirmed by the v1 and v2 referees; the Lemma 3 tightness remark, the strict-inequality step and the 3 | N and Fermat-prime statements are new in v2, so only the v2 referee re-derived them; later revisions changed wording here, except that the plain-QMDD comparison was corrected for quantifiers and given its non-proportionality step)
+
+* **Level count.** Nodes at a level ≥ LIM classes of the nonzero sub-states ⟨p|Ψ⟩ over
+  prefixes p of the qubits above it. The sub-state along p is λP|v⟩ for some node v at
+  that level, reached along the path as modified by the LIMs' X parts. The argument is
+  the one in Lemma 4 of 2401.01322's appendix.
+* **Sub-states.** At e_j's level they are ψ_c = |0⟩|c⟩ + |1⟩|Ac mod N⟩ (⊗ the scratch
+  |0…0⟩), with c = a^e′ and bit j of e′ clear. A Pauli on the scratch factor must map it
+  to a multiple of itself, so that factor contributes only a scalar.
+* **Lemma 1 (exact criterion).** ψ_c ~ ψ_c′ iff φ(c) = φ(c′). λP maps a vector with
+  support S to one with support S ⊕ s, where s is P's X part, so the supports must match.
+  * With s_e = 0: c′ = c ⊕ s_x and Ac′ = Ac ⊕ s_x.
+  * With s_e = 1: c′ = Ac ⊕ s_x and Ac′ = c ⊕ s_x.
+  * Either way φ(c′) = φ(c). Conversely, s = (0, c ⊕ c′) with λ = 1 works.
+* **Lemma 2 (fibres).** If gcd(A − 1, N) = gcd(A + 1, N) = 1, then for every d,
+  #{c ∈ [0, N): φ(c) = d} ≤ 2^min(w, n − w), where w = wt(d). φ(c) = d means
+  Ac mod N = c ⊕ d.
+  * From c ⊕ d = c + d − 2(c ∧ d): (A − 1)c ≡ d − 2(c ∧ d), so c is fixed by the submask
+    c ∧ d of d.
+  * From c ⊕ d = 2(c ∧ ¬d) + d − c: (A + 1)c ≡ d + 2(c ∧ ¬d), so c is fixed by a submask
+    of ¬d (n bits).
+* **Lemma 3.** D_j := #{a^e′ mod N : e′ < 2^t, bit_j(e′) = 0} ≥ ⌈r/2⌉. At least ⌈r/2⌉
+  of the integers in [0, r) ⊆ [0, 2^t) have bit j clear, and distinct e′ < r give distinct
+  powers. The bound is tight: for j = 0 and even r the prefix set is ⟨a²⟩, with r/2
+  elements.
+* **Theorem.** If A ≢ ±1 mod p for every prime p | N, then every such LIMDD has at least
+  ⌈⌈r/2⌉ / 2^⌊n/2⌋⌉ > r/(2√(2N)) nodes at e_j's level. The strict inequality uses
+  N > 2^(n−1).
+  * A ≡ ±1 mod p implies a^(2^(j+1)) ≡ 1 mod p. So it suffices that ord_p(a) is not a power
+    of 2 for any p | N.
+  * For r ≥ N^(1/2+δ) the bound is at least N^δ/(2√2).
+  * The hypothesis fails at every j when 3 | N, since every unit mod 3 is ±1.
+  * If a Fermat prime p divides N (the known ones: 3, 5, 17, 257, 65537), ord_p(a) divides p − 1, a power
+    of 2. The hypothesis then fails once j is large enough, so orders that read such a
+    j last are not covered.
+* **Comparison with a plain QMDD.** In the same order a reduced QMDD has exactly D_j nodes
+  at that level and r at the next, and every QMDD at least that many: the sub-states are
+  0/1 vectors with distinct supports, so no two are proportional. A reduced LIMDD has one
+  node at the next level, since every basis state is an X-translate of every other. By the
+  theorem it cannot do the same at e_j's level wherever the Theorem's bound
+  ⌈⌈r/2⌉ / 2^⌊n/2⌋⌉ exceeds 1. At small N that bound is 1 and says nothing: at N = 7,
+  a = 2, j = 0 it is ⌈2/2⌉ = 1.
+
+## Evidence and its limits
+
+* **Author runs.** `experiment_limdd_modexp` run 4 (`R6e9d4a1041f84478`, log
+  `out/agent-board/workers/Afe63fb9aa02e4233/run4.log`, script sha256 b284f6c0…) is the
+  v2 script after review. Its P0–P4 counts and controls equal those of runs 2 and 3
+  (runs 2 and 3 are byte-identical; logs in the same directory).
+  * Lemma 1 against orbit canonicalisation: 506 cases (n ≤ 7).
+  * Lemma 1 against an explicit λP search on dense vectors: n ≤ 3.
+  * Lemma 2: 42,176 (N, A) pairs.
+  * Theorem: 1,330 cases under its hypothesis.
+  * Must-fail controls, both failed as required: at N = 17, a = 3, j = 5 (A = 1) there is
+    1 class against a claimed ≥ 4; the integer-sum mutant invariant disagrees in 329 cases.
+  * Every P0, P1, P3, P4 and P5 case uses base a = 2. Those sections take the smallest
+    unit of order > 2, which is 2 for every odd N ≥ 5. Run 4 logs the bases for P1, P3
+    and P5, the sections whose rows it records; P0 and P4 draw from the same helper. This
+    is disclosure, not a check: a change of base would fail nothing. P2 is base-free: it
+    runs over odd N in [5, 2^9) and every A in [2, N) with gcd(A ∓ 1, N) = 1. P4 covers
+    N = 5 and 7 only. The script's docstring still says "P0-P5". It is left unchanged so
+    that run 4's script hash stands.
+  * The experiment builds the pair states from the derivation, so the sub-state step is
+    derived there, not tested.
+* **Referee runs** (`referee-c110-1`, review `Va10c9887fa3f4116`, logs in
+  `out/agent-board/reviews/referee-c110-1/`), written independently from the definitions:
+  * `Rd0d6622395984338` reads the sub-states off build()'s actual output in random
+    exponent-first orders with scratch placed anywhere. At every unit base of odd
+    N < 32 (1,564 cases) every sub-state has support 2 and the LIM classes equal #φ.
+    A wrong prefix set is detected in 813 cases.
+  * `R57ddf0a4776642a3` checks Lemma 2 at 169,090 (N, A) pairs: odd N < 2^10 and every
+    A ∈ [0, N) with gcd(A ∓ 1, N) = 1 (log line F1).
+  * The same run checks Lemma 3 at 902,922 (N, a, t, j) cases: every unit base a ≠ 1,
+    odd N < 2^9, t ∈ {⌈log2 r⌉, n + 2}. It checks the Theorem at the 515,340 of those
+    cases under its hypothesis (log line T1). There are 0 violations.
+* **Measured, not proved: the bound is loose by about √N.**
+  * P6a in run 4 (post-hoc; 40 random semiprimes per n ∈ {10, 12, 14, 16}; j ∈ {0, t − 1};
+    prefix set C_j) gives classes/D_j between 0.789 and 1.000, with medians 0.955–0.965.
+    The sample is filtered by the Theorem's hypothesis: 320 (N, a, j) draws give the 255
+    measured cases, and the 65 that fail the hypothesis are skipped, not measured.
+  * In P6a, D_j/r is 0.5 or 1. It must be, for j ∈ {0, t − 1} with 2^(t−1) ≥ r.
+    Since D_0 = r/2 for even r, the class count at j = 0 with even r is about r/2
+    (logged minimum of classes/r: 0.438, to three decimals).
+  * In run 2 this measurement used the wrong prefix set (review B1). Run 4's P6a replaces it.
+  * The lowest ratio in the a = 2 sweep over odd N < 2^9 (t = n + 2, under the hypothesis;
+    run4.log l.18) is 0.416, at N = 467, j = 4. With one base, the sweep cannot tell
+    whether this comes from a ∈ ⟨2⟩ (TX31's structure).
+  * Over every unit base of odd N < 2^9, still under the hypothesis, the lowest ratio in
+    the referee's run is 0.222 on its t = n + 2 branch, at N = 127, a = 6, j = 2
+    (6 ∉ ±⟨2⟩; re-computed at integration: 28 classes of 126). On its t = ⌈log2 r⌉ branch
+    the lowest is 0.3125, at N = 127, a = 45, j = 5 (20 classes of 64). Outside the hypothesis the ratio goes lower still: the C1
+    control (N = 17, a = 3, j = 5, A = 1) has 1 class with D_j = 16.
+  * That the reduced diagram's width is Θ(r) at this level, under the Theorem's
+    hypothesis, is a conjecture. Outside it the width can collapse, as the C1 control shows.
+* **Scope.**
+  * Exponent-first orders only. When an x qubit precedes the last exponent qubit,
+    sub-states can be single basis states, which all merge; x-first orders are C111 and
+    interleaved orders are TODO 69.
+  * The state after modexp only. The semiclassical one-control-qubit circuit and the
+    state after the inverse QFT are not covered.
+  * Pauli LIMs only.
+* Barrier (TX15): a lower bound, consistent with it.
+
+---
+
+## C111 — In every order reading all x qubits before the exponent, the reduced Pauli-LIMDD of the post-modexp state has at most ceil(beta/2) nodes at the first exponent level (r = beta 2^alpha), and every Pauli-LIMDD has at least ceil(beta/2) there when t - alpha >= 3 bitlen(beta) - 1 and the nonzero set-bit positions of beta have gcd 1 (e.g. beta = 3 mod 4); a persistence lemma plus run 2's shift counts extend this to every t - alpha >= T(beta) <= 2 bitlen(beta) for every odd beta in [3, 64), g > 1 included
+
+*status: derived · paper: -*
+
+# C111 — Pauli-LIMDDs of the post-modexp state in x-first orders
+
+Object: the post-modexp state and LIMDD model of C110. The order reads all n x qubits
+before any exponent qubit (scratch anywhere, exponent qubits in any order among
+themselves). Notation:
+* r = ord_N(a) = β·2^α with β odd; t′ = t − α (2^t ≥ r gives 2^t′ ≥ β).
+* L = bitlen(β), and g = gcd of the nonzero positions of β's set bits (g = 0 for β = 1).
+* Q_k = {e < 2^t′ : e ≡ k mod β}.
+* V(t′) = the set of shifts s < 2^t′ with Q_k ⊕ s = Q_k′ for some k, k′.
+
+A reduced LIMDD is one in which all isomorphic nodes are merged (arXiv:2401.01322 §2).
+Its nodes at a level are exactly the LIM classes there: every node lies on a root path
+and edge labels have λ ≠ 0, so each node realises a class, and merging leaves distinct
+nodes inequivalent. Any LIMDD has at least that many (C110, level count).
+
+## Derived (re-derived and confirmed by the v1 and v2 referees; Lemma P, the small-β corollary and the ⌈β/2^g⌉ form of the g > 1 bound are new in v2 and were re-derived by the v2 referee)
+
+* **Sub-states.** After x = y is read, the sub-state over the exponent qubits is 0 if
+  y ∉ ⟨a⟩, and otherwise the indicator of P_ℓ = {e < 2^t : e ≡ ℓ mod r}, with y = a^ℓ,
+  0 ≤ ℓ < r. As in C110 Lemma 1, two such 0/1 states are Pauli-LIM equivalent iff their
+  supports differ by an XOR shift. The Z part and λ can only fix phases, and the order of
+  the exponent qubits does not matter.
+* **Lemma R (odd part).** e ≡ ℓ (mod r) iff e's low α bits equal u = ℓ mod 2^α and
+  ⌊e/2^α⌋ ≡ k = ⌊ℓ/2^α⌋ (mod β). So P_ℓ = {u} × Q_k, an XOR shift acts on the two
+  factors separately, and P_ℓ ~ P_ℓ′ iff Q_k ~ Q_k′. The low-bit shifts therefore merge
+  the 2^α values of u, and the classes are the XOR-shift classes of Q_0, …, Q_{β−1} in t′ bits.
+* **Lemma U (upper bound).** e ↦ 2^t′ − 1 − e (XOR by all ones) maps Q_k onto
+  Q_{(2^t′−1−k) mod β}. On Z_β this is an involution with exactly one fixed point (β odd).
+  So there are at most (β + 1)/2 classes, and the reduced LIMDD has at most (β + 1)/2
+  nodes at that level. Both 0 and 2^t′ − 1 always lie in V(t′).
+* **Lemma X (only trivial shifts).** Suppose Q_k ⊕ s ⊆ Q_k′.
+  1. From e ⊕ s = e + s − 2(e ∧ s) and 2 invertible mod β, (e ∧ s) mod β is constant on Q_k.
+  2. Take a window m and an e₁ ∈ Q_k whose bits vanish on m + supp(β). Then
+     e₂ = e₁ | (β·2^m) = e₁ + β·2^m lies in Q_k, and (e₂ ∧ s) − (e₁ ∧ s) = 2^m·Σ_{b∈B′} 2^b
+     with B′ = {b ∈ supp β : m + b ∈ supp s}.
+  3. 2^m is a unit, and the sum lies in [0, β]. It is ≡ 0 mod β only when B′ = ∅ or
+     B′ = supp β. So s holds all or none of the positions m + supp β.
+  4. Such an e₁ exists for every m ∈ [0, t′ − L] when t′ ≥ 3L − 1. For m ≥ L, take e₁ < 2^m,
+     whose values cover Z_β since 2^m > β. For m ≤ t′ − 2L, take e₁ = z·2^(m+L),
+     z < 2^(t′−m−L), which covers Z_β since 2^(m+L) is a unit mod β.
+  5. So s_x = s_{x+d} for all x ≤ t′ − L and all nonzero d ∈ supp β. With d = L − 1 the
+     whole t′-bit word has period L − 1. On the prefix [0, t′ − L + d_min], of length
+     t′ − L + d_min + 1 ≥ 2L + 1, it has every such period d. Fine–Wilf, applied
+     repeatedly (each pairwise requirement p + q − gcd(p, q) is at most 2L − 4), gives
+     period g on that prefix. Period L − 1, a multiple of g, then extends it to the whole
+     word.
+  6. If g = 1, s is constant: s ∈ {0, 2^t′ − 1}.
+* **Lemma P (persistence).**
+  * Restriction: let 2^t′ ≥ β and s = σ·2^t′ + s′ ∈ V(t′ + 1) with Q_k ⊕ s = Q_k′. XOR by s
+    maps the low half of Q_k (width t′ + 1) into the σ-half of Q_k′, and the high half
+    into the other half. The map is a bijection, so both inclusions are equalities.
+    Shifting the σ-half down by σ·2^t′ gives Q_k ⊕ s′ = Q_{(k′ − σ·2^t′) mod β}, both
+    sets taken at width t′. Hence s′ ∈ V(t′).
+  * Persistence: suppose V(t₀) = {0, 2^t₀ − 1} with 2^t₀ ≥ β. Then V(t₀ + 1) ⊆
+    {0, 2^t₀, 2^t₀ − 1, 2^(t₀+1) − 1}. Each half of [0, 2^(t₀+1)) contains an element of
+    every Q_k. Under s = 2^t₀ the two halves' images have residues k + 2^t₀ and k − 2^t₀.
+    Under s = 2^t₀ − 1 they have residues 2^t₀ − 1 − k and 2^(t₀+1) − 1 − k + 2^t₀. In both
+    cases the images differ by 2^(t₀+1) ≢ 0 mod an odd β > 1, so neither shift lies in
+    V(t₀ + 1).
+  * Hence once V is trivial it stays trivial for every larger t′, and the class count is
+    exactly (β + 1)/2 from then on.
+* **Theorem.** If t′ ≥ 3L − 1 and g = 1, every Pauli-LIMDD has at least (β + 1)/2 nodes
+  at the first exponent level, and the reduced one has exactly (β + 1)/2. A reduced QMDD
+  has r nodes there, and every QMDD at least r, since the r indicator sub-states are
+  pairwise non-proportional. g = 1 holds, for example, whenever β ≡ 3 (mod 4), since bit 1 is then set.
+  For g > 1 and t′ ≥ 3L − 1 the argument gives only g-periodic shifts, hence at least
+  ⌈β/2^g⌉ classes.
+* **Small β (Lemma P with a finite check).** For every odd β in [3, 64), V(T) is trivial at
+  some T(β) ≤ 2L, taken from run 2's report rows (nshifts = 2), and every such T lies in
+  [L + 1, 2L], so 2^T > β and Lemma P applies. By Lemma P, every
+  Pauli-LIMDD then has at least (β + 1)/2 nodes, and the reduced one exactly (β + 1)/2, at
+  every t′ ≥ T(β). This includes the g > 1 betas 5, 9, 17, 21 and 33, where T = 5, 7, 9,
+  7 and 11.
+
+## Evidence and its limits
+
+* `experiment_limdd_xfirst` run 2 (`R136d3e099f5d4874`, log
+  `out/agent-board/workers/A4e4043cb93d54b66/run2.log`; run 1 predates the task and is
+  copied there), 6/6 checks.
+  * P0 reads the sub-states off build()'s output for every unit base of odd N in [5, 32),
+    at t = bitlen(r) + 1 in one order: 196 circuits over 29 bases. Each set is exactly
+    {e : e ≡ ℓ mod r}, and the class counts agree. P0 does not assert that the exponent
+    register is preserved. The v1 referee's run `R9adb5ecbab81409d` (check PA: 434
+    circuits, two random x-first orders each, scratch anywhere, odd N < 64) checks that
+    as well; that run exited 1 on a separate exploratory prediction of its own (β = 127
+    keeps 64 nontrivial shifts at t′ = 2L − 1), not on PA.
+  * P1: the class counts of Lemma R agree (P_ℓ in t bits, Q_k in t′ bits) at 8 values of
+    r. This compares counts, not the set identity.
+  * At t′ = 3L − 1, all 26 odd β < 64 with g = 1 have only the shifts 0 and all-ones, and
+    exactly (β + 1)/2 classes.
+  * At 289 (β, t′) points (t′ from L + 1 to 3L − 1) there is never more than (β + 1)/2.
+  * Both must-fail controls failed as required. The count falls short below the threshold
+    (34 points), and "classes = β" is false.
+  * The brute force enumerates shifts directly and does not use Lemma X.
+  * T(β), the first t′ from which nshifts = 2 at every tested larger t′, was read from
+    report_run2.json at v2 integration. It is at most 2L for all 31 betas, and equals 2L
+    for β = 7, 15, 31 and 63.
+* **Measured, not proved.**
+  * Exactness holds at every tested t′ from 2L − 1 to 3L − 1, for every odd β in [3, 64).
+    Some β are exact earlier; β = 5 and 21, for instance, are exact from L + 1.
+  * The last shortfall (the largest t′ with fewer than (β + 1)/2 classes) is at
+    t′ = 2L − 2 for L = 4, 5 and 6. Between 2L − 1 and T(β) − 1, exactness is measured
+    only (e.g. β = 7, 15, 31, 63 at t′ = 2L − 1).
+  * Conjecture: T(β) ≤ 2L for every odd β. With Lemma P this would give (β + 1)/2 at every
+    t′ ≥ 2L.
+* **Scope for Shor.** Shor's register has t = 2n. The proved threshold t ≥ α + 3L − 1
+  holds for β ≲ 2^((2n−α+1)/3), and always at t = 3n. Since α + L = bitlen(r) ≤ n, the
+  conjectured threshold t′ ≥ 2L would always hold at t = 2n. The claim concerns the first
+  exponent level of x-first orders only, and says nothing about interleaved orders
+  (TODO 69).
+* Barrier (TX15): a lower bound for β large, and a small diagram only when β is small,
+  which is the classically easy case (r mostly a power of 2).
+
+---
+
+## C112 — At the level of the last exponent qubit of ANY qubit order, the Pauli-LIM classes of the post-modexp state number exactly #{phi(c) : c in C_j, phi(c)_F = 0} plus one if some c in C_j has phi(c)_F != 0, where F is the set of x qubits read earlier, C_j is C110's prefix set and phi(c) = c XOR (Ac mod N); F empty recovers C110's exponent-first count
+
+*status: derived · paper: -*
+
+# C112 — The exact Pauli-LIM class count at the last exponent level, in any order
+
+Object, model and notation as in C110: |Ψ⟩ = Σ_{e < 2^t} |e⟩|a^e mod N⟩|0…0⟩ from
+`ToffoliModExp(N, a, n_exp=t).build()`, Pauli-LIMDDs as in arXiv:2401.01322 §2. Here the
+qubit order is arbitrary. j is the index of the exponent qubit read last, A = a^(2^j) mod N,
+φ(c) = c ⊕ (Ac mod N), and C_j = {a^e′ mod N : e′ < 2^t, bit j of e′ clear} is C110
+Lemma 3's prefix set. F is the set of x qubits read before that exponent qubit, G the rest;
+c_F and c_G are the corresponding bits of c.
+
+## Derived
+
+At e_j's level a prefix is (e′, y_F), and its sub-state is
+
+  [c_F = y_F]·|0⟩|c_G⟩ + [(Ac)_F = y_F]·|1⟩|(Ac)_G⟩,  c = a^e′.
+
+* It has two points iff c_F = (Ac)_F = y_F. For a given c that happens at some prefix iff
+  φ(c)_F = 0, and then y_F = c_F, so every such c is realised by a prefix.
+* Two two-point sub-states are LIM equivalent iff φ(c)_G = φ(c′)_G, by C110 Lemma 1
+  applied to the remaining qubits. When φ_F = 0 on both, that is φ(c) = φ(c′).
+* The one-point sub-states are single basis states, so they are all X-translates of one
+  another and form one class. One exists iff some c ∈ C_j has φ(c)_F ≠ 0.
+
+So the classes number exactly
+
+  #{φ(c) : c ∈ C_j, φ(c)_F = 0} + [∃ c ∈ C_j with φ(c)_F ≠ 0],
+
+and a reduced LIMDD has exactly that many nodes at that level, every LIMDD at least that
+many (C110's level count; for the reduced diagram, C111's header). With F = ∅ this is
+C110's count, and with F the whole x register the level is degenerate (one class).
+
+**Reading.** The count falls as F grows, so an order that reads x qubits early makes this
+particular level cheap. That is why C110's bound is stated for exponent-first orders and
+why interleaved orders need a different level to carry the cost (TODO 69).
+
+## Evidence and its limits
+
+* Derived by the coordinator on 2026-09-19, from C110 Lemma 1, in the round that note LM
+  records. LM does not state this count; this claim is its home.
+* Independently derived, and verified in 332 cases (210 of them genuinely interleaved), by
+  the C111 v2 referee in review `V8a1dd4ee28904b08`, run `R84c49299f5414dc5` (exit 0),
+  reading the LIM classes off build()'s output, at every unit base a ≠ 1 of odd N in
+  [5, 21] with t ≤ 6 and |F| ≤ 5. Its controls K3 (⟨a⟩ in place of C_j),
+  K4 (dropping the +1 indicator) and K5 (an F-blind count) each disagreed with the
+  measured count somewhere, as required.
+* The earlier form of this statement, in TODO 69 v1, used ⟨a⟩ in place of C_j and was
+  refuted by the C111 v1 referee (review `V0398215814f94f80`): at N = 11, a = 2, j = 0 the
+  level has 5 classes while ⟨2⟩ gives 9 values (C_0 = ⟨a²⟩ there). Its run
+  `R9adb5ecbab81409d`, check PF, found the C_j form off by 0 or 1 in 2,775 cases and the
+  ⟨a⟩ form overstating in 404 of them. Those cases are 216 (N, a) pairs: for each odd
+  N < 64 the first eight units of N, keeping those of order ≥ 3. Each pair is taken at
+  the j in {0, t − 1, one random j} — three distinct j for 123 pairs, two for the other
+  93, where that set collapses — and at five draws of F, drawn once per pair and reused
+  across its j. So 123·15 + 93·10 = 2,775.
+* This is a count at one level, not a lower bound on the whole diagram in a general
+  order. It says nothing about which level carries the cost when F is large.
+* Barrier (TX15): an exact count feeding lower bounds, consistent with it.
+
+---
+
+## C113 — At the fixed two-exponent/one-work-bit interleaving of the clean post-modexp state, squared fidelity >= 1-epsilon^2 requires MPS bond D >= (1-epsilon^2)/U, where U=min(1,ceil(K^2/r)/K,omega*(K/N+kappa*h_N)); this is exponential for primitive-root prime families or fixed positive small-kappa exponents
+
+*status: proven · paper: -*
+
+# C113 — Approximate MPS bond at a fixed interleaved clean-state cut
+
+## Object and accuracy
+
+Let N >= 5 be odd, gcd(a,N)=1, n=bitlen(N), t=2n, Q=2^t, and
+r=ord_N(a). On the all-zero input, `ToffoliModExp(N,a,n_exp=t).build_shor()`
+in `toffoli_arith.py` initializes x0 once, applies the exponent Hadamards and
+controlled modular powers, and then the inverse QFT. Immediately before that
+QFT its normalized state, up to a global phase, is
+
+    |Psi> = Q^(-1/2) sum_{0<=e<Q} |e>|a^e mod N>|0_scratch>.
+
+The clean multiplication invariant is C107's G2, traced through `cc_add_mod`,
+`cmult_mod` and `u_a`; the actual state is the normalized version of C110's
+object. Do not prepend another X(x0). The 2n+4 scratch bits are a fixed product
+factor and do not affect the Schmidt spectrum.
+
+All qubit indices below are LSB based. Fix the physical-bit order
+
+    e0,e1,x0, e2,e3,x1, ..., e_(2n-2),e_(2n-1),x_(n-1)
+
+and cut after m=floor(n/2) triples. Set K=2^m, L=K^2, R=Q/L and write
+
+    e=s+Lh,  0<=s<L, 0<=h<R;
+    x=y+Kz,  0<=y<K, 0<=z<2^(n-m).
+
+The left side has coordinates (s,y), the right side (h,z). The approximant
+|Phi> is normalized and has squared fidelity F=|<Psi|Phi>|^2 >= 1-epsilon^2,
+where 0<=epsilon<1. Let D bound its Schmidt rank across this cut; in particular
+an **open-boundary MPS** with bond at most D there qualifies.
+
+This full-state accuracy suffices for total-variation error <=epsilon after
+the same exact inverse QFT and measurement: the half trace distance of two
+pure states is sqrt(1-F), a common unitary preserves it, and measurement or
+marginalization cannot increase it. It is not a necessary contract for an
+output-only sampler.
+
+## Theorem
+
+Let H=<a> in the unit group modulo N, and define
+
+    kappa = max_{1<=u<N} |(1/r) sum_{c in H} exp(2*pi*i*u*c/N)|,
+    h_N = sum_{j=1}^{(N-1)/2} 1/j,
+    b = ceil(L/r),       omega = r*b/L,
+    U = min(1, b/K, omega*(K/N+kappa*h_N)).
+
+The maximum defining kappa includes nonunit frequencies when N is composite.
+If lambda_max is the largest squared Schmidt coefficient of |Psi>, and
+P_A=Tr(rho_A^2), then
+
+    P_A <= lambda_max <= U,
+    D >= (1-epsilon^2)/U,
+    D >= (1-epsilon^2)^2/P_A.
+
+Integer bonds obey the ceilings of these real bounds. The order-only bound
+uses U_r=min(1,b/K) and needs no character-sum hypothesis. A bound below one
+leaves only the trivial D>=1; neither estimate is claimed tight.
+
+Two consequences:
+
+* For every prime N=p>=5 and every primitive root a, r=p-1. If n is odd,
+  b=1; if n is even, b=2. Thus D >= (1-epsilon^2)K for odd n and
+  D >= (1-epsilon^2)K/2 for even n: Omega_epsilon(sqrt(p)). This is an
+  unbounded family, not a claim that a fixed base is a primitive root infinitely
+  often or that finding primitive roots is free.
+* If kappa<=N^(-2eta), 0<eta<=1/6 as in C107, then
+
+      D >= (1-epsilon^2)*N^(2eta)/(3*(sqrt(2)+h_N)).
+
+  For fixed positive eta and fixed epsilon<1 this grows exponentially in n.
+  It applies to odd composite N whenever the full-frequency hypothesis is
+  established, for example under the applicable conditions in C109. No claim
+  that every semiprime or every base satisfies those conditions is made.
+
+At epsilon=0.01, the fidelity factor in the spectral bound is 0.9999; the
+factor in the purity-only bound is 0.99980001. These are exact derived factors,
+not measurements. The order r is a theorem parameter, not an algorithmic input
+supplied at zero cost.
+
+## Proof
+
+Define the binary support matrix
+
+    B[(s,y),(h,z)] = 1{[a^(s+Lh)]_N = y+Kz},
+
+where [.]_N is the representative in [0,N). Every exponent yields one supported
+work string, so B has Q ones and the coefficient matrix is B/sqrt(Q). Thus
+rho_A=BB^T/Q. Its purity is exactly the ordered rectangle count
+
+    P_A = Q^(-2) sum_{u,u',v,v'} B[u,v]B[u',v]B[u',v']B[u,v'].
+
+Repeated rows and columns are included. Equal positive amplitudes are part of
+this identity; a state with arbitrary phases needs conjugated weights.
+
+For any normalized rank-at-most-D approximant, let Pi project onto its left
+Schmidt support. Cauchy-Schwarz gives
+
+    F <= ||(Pi tensor I)Psi||^2 = Tr(Pi*rho_A)
+      <= sum_{j<=D}lambda_j <= min(D*lambda_max, sqrt(D*P_A)).
+
+Here lambda_j are the decreasing eigenvalues of rho_A; the middle inequality
+follows by expressing Pi in that eigenbasis. This proves both fidelity-to-bond
+inequalities. Also sum_j lambda_j=1 gives P_A<=lambda_max.
+
+Every row of B has at most R ones, since fixed (s,y) and h determine at most
+one z. At a column (h,z), the possible work values lie in
+I_z=[Kz,K(z+1)) intersect [0,N), an interval with at most K integers. The powers
+a^s have period r and distinct values within each period; a given work value
+has at most b=ceil(L/r) preimages among s=0,...,L-1. Multiplication by a^(Lh)
+is invertible. Hence every column has at most bK ones. For any vector v,
+
+    ||Bv||_2^2 <= R sum_u sum_{v':B[u,v']=1}|v[v']|^2
+               <= R*b*K*||v||_2^2.
+
+Consequently lambda_max=||B||_2^2/Q <= b/K. Normalization adds lambda_max<=1.
+The count keeps the ceiling even when r does not divide L, or L<r.
+
+For the character-sum improvement, Fourier inversion on Z_N gives, for any
+interval I with at most K residues,
+
+    | |H intersect I|/r - |I|/N |
+      <= (kappa/N) sum_{u=1}^{N-1}|sum_{x in I}exp(2*pi*i*u*x/N)|
+      <= kappa*h_N.
+
+For the last inequality, pair frequencies u and N-u. A geometric sum has
+modulus at most 1/sin(pi*u/N) <= N/(2u) for 1<=u<=(N-1)/2. The paired,
+normalized sum is therefore at most h_N. This holds for composite N too.
+Multiplication by a^(Lh) permutes H, so a column degree is bounded more sharply
+by b*|H intersect I_z| <= b*r*(K/N+kappa*h_N). The same matrix-norm argument
+yields lambda_max<=omega*(K/N+kappa*h_N).
+
+Finally L>N/2 and r<N imply omega<1+r/L<3, while K<sqrt(2N). Under the stated
+kappa hypothesis, N^(-1/2)<=N^(-2eta). Substitution proves the displayed
+small-kappa corollary. For the prime family, r=p-1>=L when n is odd; when n
+is even, L/2<=r<L, giving exactly b=2. This proves the other corollary.
+
+## Arithmetic meaning of the rectangles
+
+The four exact equalities counted by the purity identity are
+
+    [a^(s+Lh)]_N   = y +Kz,
+    [a^(s'+Lh)]_N  = y'+Kz,
+    [a^(s'+Lh')]_N = y'+Kz',
+    [a^(s+Lh')]_N  = y +Kz'.
+
+All four right sides must lie in [0,N). Their multiplicative determinant
+vanishes modulo N, so N divides K*(y-y')*(z'-z). Since N is odd,
+N divides (y-y')*(z'-z). But its absolute value is at most
+(K-1)*floor((N-1)/K)<N. Hence y=y' or z=z'. In the first case a^s=a^s' mod N;
+in the second a^(Lh)=a^(Lh') mod N, because the other factor is a unit.
+Repeated modular factors need not mean repeated exponent labels.
+
+This explains why a general fourth-order correlation estimate is unnecessary
+here. The direct degree proof above is enough for the theorem. The small-product
+argument uses this contiguous low/high split of the work bits; it is not an
+all-order rectangle classification.
+
+## Manual controls and limitations
+
+* An all-ones 2x2 support matrix has Q=4 and 16 ordered rectangles, giving
+  purity 1. The 2x2 identity has Q=2 and two rectangles, giving purity 1/2.
+  Excluding degenerate rectangles would incorrectly give zero for the latter.
+* For the actual modular state N=5,a=2, K=2,L=4 and r=4. The low-exponent
+  residues are 1,2,4,3 and do not depend on h. The nonzero Schmidt weights are
+  1/2,1/4,1/4. The degree bound attains lambda_max=1/2 and forces D>=2 at
+  epsilon=0.01; the exact tail forces D>=3. A necessary bound is not sufficient.
+* For a=1 the state is a product and the clipped order bound permits D=1.
+* The normalized state sqrt(1-delta)|00> + sqrt(delta/J) sum_{j=1}^J |jj>
+  has exact rank J+1 for 0<delta<1, yet |00> has squared fidelity 1-delta.
+  Large exact rank alone therefore supplies no approximation obstruction.
+
+This is one cut of one specified physical-bit order, for normalized pure-state
+approximation with an open-boundary MPS. It does not establish a lower bound
+for every ordering, periodic-MPS displayed bonds, transformed coordinates,
+Pauli-LIMDDs, noisy or mixed-state representations, output-only samplers, or
+simulation time/allocated bytes. Small-order cases with weak bounds remain
+undecided. No numerical science was run, and no novelty claim is made.
+C108's exact scalar rank and C110-C112's exact equivalence-class counts were
+not substituted for Schmidt-tail estimates. The result respects TX15.
+
+## Evidence
+
+TODO 70's derivation and independent source audit supplied separate proofs of
+the degree and Fourier bounds:
+
+* Derivation `Sefc89aee03564e66`, report SHA-256
+  `60b165d9528b7be6b2006c79b9d76831701becd94e55b623d4b199b16313f1c7`,
+  sections 2-8 (state, fidelity, rectangles, degree bound, families, Fourier
+  transfer and manual controls); fresh review `Vf26584b6f448426a` accepted with no required corrections.
+* Independent audit `S11c34596ca6840e6`, report SHA-256
+  `9aede812bd6b06f60e5fd279e9c417d6e88dcec945482037591ff6e5394e6e79`,
+  sections 2-6; fresh review `V5da1f5062b2b4693` accepted with no scientific
+  corrections.
+
+The canonical claim receives a separate integration review under
+`T1e9de6c6753e45b0`. These are mathematical proofs and hand checks, not
+measurements or independent numerical implementations. TX34 records the external approximation framework; the source audit records
+its convention caveats. Note QB records the task rationale and round decision.
+
+---
+
+## C114 — For the explicit path predicate x0 AND no adjacent 11, uniform-start Grover followed by H admits exact selected-probability evaluation by a two-state signed counter; measured memory is bounded to the six-query pilot
+
+*status: derived · paper: -*
+
+# C114 — Structured Grover queries from a two-state signed counter
+
+## Derived object and recurrence
+
+The given oracle is f(x)=x0 AND no adjacent pair 11 on n bits. Start uniformly,
+apply three Grover iterations, then H on every bit. The measured output is six
+specified probabilities, not a search result, full probability vector or sampler.
+Intermediate reversible-oracle gates are outside this query-level contract.
+
+For D=2|s><s|-I, O|x>=(-1)^f(x)|x>, write amplitudes as
+(a+b f(x))/sqrt(2^n). Starting at (a,b)=(1,0), DO gives
+
+    a'=(1-4p)a-2pb,  b'=2a+b,  p=M/2^n,  M=sum_x f(x).
+
+The final amplitude at y is a*[y=0]+b*F(y)/2^n, where
+F(y)=sum_x f(x)(-1)^popcount(x&y). Build F directly from the predicate:
+initialize (z,o)=(0,(-1)^y0), then for each higher bit i update
+(z,o)=(z+o,(-1)^yi*z). Return z+o. Counts track valid prefixes ending in
+zero or one. This is a two-state automaton; adding the constant amplitude
+channel gives a constructive bond upper bound of three at physical prefix
+cuts in the natural path order x0,x1,...,x(n-1). Two Grover coefficients alone would not imply this bound for any oracle.
+
+The marked set has Fibonacci(n) elements and grows exponentially. The savings
+come from the local predicate, not from supplying a small solution list. For
+K masks and fixed iteration count, count construction takes O(Kn) additions
+on O(n)-bit integers; exact coefficient/result bit sizes also grow with n and
+iteration count. The strongest direct structured baseline is the same dynamic
+program. This is known weighted counting, with no new generic search advantage.
+
+For n=4, three iterations give a=-71/64, b=9/8, F(0)=3, F(1)=-3, and
+P(0)=13225/16384, P(1)=729/16384. Omitting the oracle gives P(1)=0;
+dephasing before the final H gives the uniform distribution. These controls
+expose destruction of interference. A missing adjacency clause is caught at x=3.
+
+## Measured pilot
+
+Independent dense validation passed 83/83 checks at n=2..8, all outputs and
+iteration counts 0,1,3,8, plus the registered controls at performance widths.
+Tiny dense-versus-rational discrepancies were zero on these dyadic fixtures.
+The resource sweep covered every n=12..20, three iterations and six masks
+(0,1,2,4,all bits,alternating even bits). All 54 successful isolated cases
+passed the unchanged 36-check comparison. Exact compact and streamed rational
+outputs agreed; maximum dense-versus-compact absolute discrepancy over these
+resource reports was 3.3306690738754696e-16, below the declared 1e-11 tolerance.
+
+Endpoint readings below are from the complete callable after common imports.
+Time is the median of five fresh calls in an untraced process. Allocation is
+the traced live peak of one call in a separate process; source-count construction,
+coefficient arithmetic, mask construction and retained outputs are included.
+Imports, launch/locking and report serialization are excluded from those call
+measurements. No supplied solutions, counts or precomputed DP cache are used.
+
+| n | method | median callable ms | traced peak bytes | raw process peak RSS bytes (time / allocation) |
+|---|---|---:|---:|---:|
+| 12 | compact signed counter | 0.027378 | 2,854 | 247,988,224 / 248,512,512 |
+| 12 | streamed exhaustive counts | 0.095003 | 103,584 | 248,512,512 / 248,774,656 |
+| 12 | dense vector | 0.160052 | 136,878 | 248,250,368 / 248,774,656 |
+| 20 | compact signed counter | 0.030457 | 3,626 | 248,250,368 / 247,988,224 |
+| 20 | streamed exhaustive counts | 13.281218 | 443,936 | 248,774,656 / 249,036,800 |
+| 20 | dense vector | 66.095874 | 34,604,718 | 287,944,704 / 287,686,656 |
+
+At all nine widths, compact has lower traced peak and lower callable time than
+both generic baselines. Raw RSS includes the interpreter and common imports;
+it shows much smaller whole-process differences than the allocation ratios.
+The two chronological batches were not randomized; timing ratios are
+exploratory readings, not precise crossover estimates. These are bounded host
+measurements. They do not establish a win over the
+strongest structured classical baseline, which is this same signed counter,
+or a new search algorithm. The output remains six selected probabilities.
+
+Original validation R3e89a66cb30a4e91 and seven successful first-batch cases
+were reused by hash after the guard repair. Continuation R7b38091322cb40c2
+contains the remaining cases and comparison. Result Sce91c456c4f9491f was accepted in V6d8d445de2cf48b2..
+
+
+## Scope and evidence
+
+The helper supports n=2..22 and iteration counts 0..8; the resource comparison
+only covers the stated narrower fixture. All requested amplitudes are real
+here. Arbitrary oracles, nonuniform input, noise, full sampling and native
+oracle-gate peaks are excluded. Finite validation is not a proof of the
+implementation for every supported call. This is applied known mathematics.
+
+Design: S3e65b1839e1249c7, accepted Vebc23ee2300242b8. The author's
+independent dense route builds predicate clauses separately, applies the
+phase oracle and mean reflection, then uses existing walsh.wht. Streaming
+counting shares the coefficient identity and is not an independent reference.
+Result provenance and guard-stop history are in note MC.
+
+---
+
+## C115 — The certified clean-block two-buffer inverse-QFT sampler passes bounded validation but at N=31, width=6 and 128 samples uses more total traced memory and complete-call time than existing logical dense and arithmetic sparse baselines
+
+*status: measured · paper: -*
+
+# C115 — Clean-block sampler: bounded validation and a negative resource pilot
+
+## Restricted object and implementation
+
+C105 and note VR motivated deleting scratch only at certified boundaries.
+The new adapter replays the actual u_a gate list on both controls and every
+valid clean work input x<N, separately for each distinct multiplier. It retains
+logical permutations and discards each gate list. Linearity then supports
+coherent amplitudes in that subspace. Modular multiplication preserves x<N;
+arbitrary work Rx does not, so TODO 64 is excluded.
+
+The sampled circuit has clean scratch, work initialized to |1> and uniform
+exponent input, followed by modular exponentiation and the terminating inverse
+QFT. For commuting modular maps, each sampling step applies
+(I+(-1)^b exp(i*phase)P)/2, using reversed multiplier order and feedback
+phase=-pi*p/2^s at step s with measured prefix p. The implementation
+uses two internal complex128 buffers, whose 32N-byte payload excludes maps,
+certification, RNG, output ownership and all other allocation. The existing
+logical dense and arithmetic sparse baselines already avoid physical scratch.
+
+Validation passed 30/30 checks: the actual Toffoli circuit statevector at
+(N,a,width)=(7,2,3), all exponent probabilities at N=31, a=2 and a=3,
+widths 3..8, and conditional work states above path probability 1e-12.
+Maximum probability and conditional-state norm discrepancies were
+1.9512169657787126e-13 and 9.258441701269963e-15. The statevector shares
+the constructor, not the classical replay or conditional kernel. These are
+bounded complex128 checks, not certified error bounds.
+
+The resource contract was 128 samples plus their path probabilities,
+N=31, width=6, seed=20260921, with three fresh-process repeats per method
+and instrument. All 36 resource runs passed; same-seed sample labels agreed,
+with maximum paired probability difference 2.7755575615628914e-17.
+Medians follow; every method already avoids dense scratch storage.
+
+| a | method | complete callable ms | total traced peak bytes |
+|---|---|---:|---:|
+| 2 | certified two-buffer candidate | 50.508166 | 4,421,235 |
+| 2 | existing logical dense | 8.247177 | 971,778 |
+| 2 | existing arithmetic sparse | 24.807216 | 1,796,536 |
+| 3 | certified two-buffer candidate | 65.799962 | 4,885,075 |
+| 3 | existing logical dense | 8.141529 | 972,282 |
+| 3 | existing arithmetic sparse | 26.304108 | 1,797,798 |
+
+Untraced time includes construction/certification, input/maps, RNG and output
+ownership; it excludes imports, launch/lock overhead, final reference checks
+and serialization. Tracemalloc ran separately. Candidate total peak equals
+setup peak in all six allocation runs. Its complete call is 6.1243x/8.0820x
+slower and its traced peak 4.5496x/5.0243x larger than logical dense.
+The sample loop alone is faster, but post-setup traced peak still exceeds
+logical dense. Raw whole-process RSS, including imports and checks, ranged
+255,328,256..267,124,736 bytes for candidate versus
+251,133,952..252,182,528 bytes for logical dense; it is distinct from traced
+allocation. This result does not exclude useful future amortized designs.
+
+
+## Evidence and limits
+
+Research-only code: experiments/clean_block.py and
+experiments/experiment_clean_block.py. No simulator default or lab API changes.
+Design S201e0d2f9f8143ad; result Sc26366f437c64436, accepted
+V63b15412bfc14257; validation run R0a07fd30bdfa4b76. Exact report/log/run
+bundle and reproduction pointers are in note MC. No wider resource sweep or
+optional compiled-sparse arm ran: the first-point stop rule fired.
+
+The identities use clean scratch, valid work labels and commuting modular
+maps. The validated complex128 implementation is not an error certificate or
+a general circuit propagator. These tiny fixtures on one host establish no
+asymptotic claim or exclusion of future amortized certification designs.
+
+---
+
+## C116 — The clean modular-power state shares a low-exponent template under multiplicative work permutations; low-register unitaries preserve the sharing, while full inverse-QFT probabilities require modular-power collision sums
+
+*status: derived · paper: -*
+
+# C116 — Modular permutation templates and coherent collision evaluation
+
+## Derived identity and limitation
+
+For odd N>=5, gcd(a,N)=1, initial work |1>, clean scratch and a uniform
+exponent register, take integers t>=0 and 0<=ell<=t. Let Q=2^t, e=s+Lh, L=2^ell, H=Q/L, b=a^L mod N, and
+v_L=L^(-1/2) sum_(s<L)|s>|a^s>, with all work labels read modulo N.
+The clean post-modexp state is
+
+    Psi=H^(-1/2) sum_(h<H)|h> P_(b^h) v_L,
+    P_c|x>=|cx mod N>, 0<=x<N.
+
+A unitary on the low exponent bits commutes with every work permutation, so
+one transformed template suffices. These labels are general modular
+permutations, outside the tensor-product Pauli-label model of C110–C112. They do not create a
+small-bond MPS contradicting the specific cut/fidelity contract of C113.
+
+Mixing high exponent bits forms coherent sums of labels. Full inverse-QFT
+output obeys
+
+    p(y)=Q^(-2) sum_x |sum_(e<Q:a^e=x) exp(-2*pi*i*y*e/Q)|^2.
+
+The collision condition is a^e=a^f, or ord_N(a) dividing e-f. The short
+expression leaves this arithmetic work to be evaluated; it is not a general
+memory lower bound or a demonstrated memory saving. A selected high branch
+can already be streamed without storing other branches. An optional classical
+baby/giant order-discovery benchmark was retired during design: the comparison
+set omitted fully charged factorization/Carmichael methods, and proposed RSS
+accounting included same-process references. No candidate performance was run.
+
+Six exact diagnostic checks passed on the tiny source-gate/QFT fixture and
+fixed arithmetic preconditions; they did not numerically test general
+template-sharing closure. At N=7,a=2,Q=4 the output probabilities are
+(3/8,1/4,1/8,1/4). Incoherent merging gives uniform output; replacing QFT
+feedback by independent H gates gives 1/8 instead of 1/4 at y=1. Merely
+reversing the QFT sign would not discriminate on this real orbit state.
+These tiny controls validate the named identity/fixture, not a generic sampler.
+
+
+## Derivation details and evidence
+
+The decomposition follows by a^(s+Lh)=a^s(a^L)^h. A low-register unitary
+acts on a different tensor factor from P_c, proving commutation. A high-bit
+Hadamard replaces a branch by (P_c+(-1)^y P_(c*b^(2^j)))/sqrt(2) acting
+on the template. Expansion may grow, but this gives no representation-independent
+lower bound. Before low-register mixing, <v_L|P_g v_L>=[g=1 mod N]:
+the s labels enforce equal s, and each a^s is a unit. The cancellation step
+requires that unit orbit; work |0> would instead make every work label coincide.
+The inverse-QFT formula follows by applying its matrix element and tracing
+work only after coherent addition; expanding the squared modulus gives the
+order-divisibility kernel.
+
+Derivation and exact diagnostic submission S11674161eb334aa0 was accepted
+in V0b1b235da1504034. Diagnostic Rc10cb2ae1042419f has six successful checks,
+including clean source-gate replay and integer cyclotomic probabilities; the
+last two checks concern fixed order/fixture preconditions for the retired
+benchmark, not sharing performance. No candidate performance comparison or
+full-state compression measurement was performed. Note MC owns discovery,
+source paths and the resource-guard correction history.
+
+---
+
+## C117 — The explicit path-predicate Grover family admits exact output sampling by a bond-three contraction with a rolling Fibonacci environment; fixed-iteration memory is polynomial in qubit count
+
+*status: derived · paper: -*
+
+# C117 — Exact structured Grover output sampling
+
+## Object and output contract
+
+The explicit oracle is f(x)=x0 AND no adjacent 11, with bits in natural
+least-significant-first order. Start uniformly, apply t iterations of DO,
+where O=(-1)^f and D=2|s><s|-I, then H on every bit. Return K complete
+measurement outcomes as Python integers interpreted at the known width n.
+This extends C114's six selected probabilities to samples of the same state.
+It does not simulate intermediate reversible-oracle gates or their ancillas.
+
+The new helper supports 2<=n<=128 and 0<=t<=8. Its exact-law guarantee assumes
+independent unbiased input random bits. Seeded PRNG runs are reproducible
+implementation fixtures, not an information-theoretic IID guarantee.
+
+## Derived coherent contraction
+
+Let N=2^n and M=F_n, with F_0=0,F_1=1. C114 gives amplitudes
+(a+b f(x))/sqrt(N) before the final H. Use integer coefficients a=A/Q,b=B/Q,
+initially (A,B,Q)=(1,0,1), and update
+
+    A'=(N-4M)A-2MB, B'=N(2A+B), Q'=NQ.
+
+The post-H amplitude numerator is AN*[y=0]+B*F(y), over QN, where
+F(y)=sum_x f(x)(-1)^popcount(x&y). A row (c,z,o), initialized to (AN,B,0),
+updates at the first bit s to (c*[s=0],0,(-1)^s*z), and thereafter to
+(c*[s=0],z+o,(-1)^s*z). The terminal sum c+z+o is the amplitude numerator.
+These transitions construct a bond-three representation; a small number of
+Grover coefficients alone would not establish a bond bound for another oracle.
+
+For l unassigned suffix sites put u=F_(l+2), v=F_(l+1), h=2^l. The exact
+suffix environment is
+
+    E_l = [[1,u,v],[u,h*u,h*v],[v,h*v,h*v]].
+
+E_0 is the all-ones matrix. The recurrence E_(l+1)=sum_s T_s E_l T_s^T,
+with T_s the row transitions above, proves the formula by induction. A
+nonempty prefix with row r has Born mass r E_l r^T/(QN)^2. The two child
+weights sum to the parent, retaining all coherent cross terms. Parseval,
+sum_y F(y)^2=NM and F(0)=M, gives root mass one under the coefficient update.
+
+Sampling advances l downward using (u,v)->(v,u-v) and h->h/2. Thus the
+rolling method retains one environment, while a conventional cached contraction
+retains every suffix environment. Both are the same known structured method.
+Quadratic suffix recomputation was retired during design because this family
+admits the reversible recurrence.
+
+Given nonnegative integer child weights W0,W1 and S=W0+W1>0, deterministic
+branches require no random bits. Otherwise draw k=(S-1).bit_length() unbiased
+bits as U, reject U>=S, and choose zero iff U<W0. Acceptance exceeds one half,
+so the expected number of proposals is below two. Multiplying the conditional
+probabilities proves the exact joint Born law. An impossible conditioning
+prefix raises an error. Samples with a forced prefix are conditional outputs,
+not unconditional samples; rejection has no finite worst-case runtime bound.
+
+The rolling construction and K samples take O(n+Kn+t) integer arithmetic
+operations and O((t+1)n+Kn) live integer bits, apart from runtime/container
+and RNG overhead. Cached suffix environments add O(n^2) bits. Arithmetic
+operations on growing integers are not constant-time. Outputs use Python
+integers, not materialized fixed-width strings; shared small integers can use
+less memory than the worst-case O(Kn) bit-space bound. At fixed t and K this
+representation therefore avoids exponential state-vector storage.
+
+## 128-qubit scaling and iteration-count boundary
+
+A dense complex128 vector has 16*2^128 bytes of payload, approximately 5.44e39;
+a real64 vector, sufficient for these real amplitudes, has half that payload.
+These are calculated array sizes, not attempted allocations or measured peaks.
+The state has Schmidt rank at most three and entropy at most log2(3) across
+each natural prefix/suffix cut; this is not a bound for arbitrary bipartitions.
+
+At n=128, M=251728825683549488150424261, p=M/2^128 is about 7.39765e-13.
+Near the first marked-success maximum before the final H,
+t is approximately pi/(4*asin(sqrt(p)))-1/2, about 913152. Such t grows
+exponentially with n. The fixed-three-iteration pilot is a different workload.
+
+For reduced p=m/2^d with odd m and d>=3, induction on C114's recurrence
+gives reduced denominator exponents t(d-2) for a_t and
+max(0,(t-1)(d-2)-1) for b_t. The leading numerators remain odd because
+the competing denominator exponents differ. At n=128, d=128, and adding
+b_t*p to a_t introduces one further denominator bit before squaring:
+
+    denominator(P_t(y=0)) = 2^(252t+2), t>=1.
+
+Its bit length is 759 at t=3, or 230114307 at t=913152 (about 28.76MB packed,
+for that denominator alone). This is growth of explicitly materialized exact
+rationals, not a lower bound for symbolic, approximate or lazy exact samplers.
+The helper does not implement the amplification-scale schedule.
+
+At t=3 the final-H off-zero probability is about 2.6631523127482824e-11.
+It was evaluated with exact Fractions as 1-(1-18p+48p^2-32p^3)^2, avoiding
+floating cancellation. Consequently ordinary all-zero samples at n=128 are
+expected and provide little correctness evidence. Rare branches require exact
+checks. This is distinct from marked-state success before the final H.
+
+## Validation and measured scope
+
+The existing dense phase/mean-reflection/Walsh reference passed 35 checks,
+including omitted-oracle, dephasing, dropped-edge and output-label controls.
+It was frozen before candidate validation. The sampler passed 140 checks:
+all 4036 prefixes over n=2..8,t=0,1,3,8; exact C114 selected probabilities
+through 22; parent/child normalization; branch thresholds, rejection, zero
+branches and invalid RNG values; and separate Fraction fixtures at 128. The
+largest dense prefix discrepancy was5.551115123125783e-17, within1e-11.
+
+The 128 fixtures check P(y0=1)=b^2 p/2, both y1 children at half that mass,
+P(1)=(bp)^2 and P(0)=(a+bp)^2. Each arm also generated16 conditional
+outputs with the rare positive prefix y0=1. These checks retain meaning when
+ordinary seeded outputs are all zero. The helper's arbitrary supported calls
+are not universally validated by these finite fixtures.
+
+All24 isolated resource cases and 34 comparison checks passed. The registered
+sweep used n=4,8,16,32,64,128, t=3 and K=16, with rolling/cached methods and
+separate timing/allocation processes. Every call includes count/coefficient
+construction, environments, seeded RNG and retained outputs. Imports, process
+launch, external locking and report serialization are excluded from callable
+measurements; Linux raw process RSS includes interpreter and imports.
+
+| n | method | median complete-call ms | traced peak bytes | allocation-process peak RSS bytes |
+|---|---|---:|---:|---:|
+| 32 | rolling | 1.399785 | 6,716 | 38,273,024 |
+| 32 | cached | 1.622728 | 18,580 | 38,797,312 |
+| 64 | rolling | 3.190076 | 7,264 | 38,273,024 |
+| 64 | cached | 3.699171 | 38,128 | 38,797,312 |
+| 128 | rolling | 9.374883 | 8,012 | 38,797,312 |
+| 128 | cached | 10.427403 | 80,396 | 39,059,456 |
+
+Time is the median of three fresh calls in an untraced process; allocation is
+one fresh call in a different process. Rolling used less traced allocation at
+all six widths and had lower observed callable time. At 128 the allocation
+reduction is about 10x; whole-process RSS is similar, not10x lower. Fixed case
+order and three timings do not establish a precise speed ratio. Both methods
+implement the same exact structured contraction; this is an engineering memory
+reduction within that method, not superiority to all structured samplers.
+
+At 64 and 128 the 16 ordinary seeded outputs were all zero, as predicted by the
+small tail. The O(Kn) output bound is worst-case; these integer outputs share
+small-value objects. Forced-prefix correctness probes were separate from the
+resource fixture. The lightweight case imports differ from C114's heavier
+reference environment; cross-round RSS differences do not measure algorithmic
+savings. Dense 128 memory is calculated, not measured; its fixed precision also
+differs from this sampler's exact integer arithmetic.
+
+Execution S76be296197df4469 was accepted in V0039c2164aaa4b59;
+original resource measurements are retained without rerunning for integration.
+
+## Sources and limitations
+
+TX38 records the transfer from known MPS Born sampling and its preparation
+costs. This explicit local predicate has exponentially many marked strings;
+the count and solutions are constructed implicitly, not supplied for free.
+No new simulation principle, generic search advantage, arbitrary-oracle
+compression, Shor result, or native oracle-gate peak bound follows.
+
+Scaling S624b8a7794754d79 was accepted in V1f6b5670d61a4a81. Derivation and
+design Sdb1dac2311534d02 were accepted in Vcaf3cc1759ff4737. Note GS records
+the result evidence and reference-independence limits.
+
+---
+
+## C118 — Explicit low-bit multiplication residual construction retains Omega(sqrt(N)) syntactic states under primitive normalization, operand swap and endpoint-product pruning on the stated factor bounds
+
+*status: derived · paper: -*
+
+# C118 — An obstruction for an explicit multiplication-residual constructor
+
+Derived in Se2262af415d64eed and independently accepted in Vbd35984bf8b64b02.
+All results below are elementary derivations; no scientific execution or
+performance measurements were used. The theorem is about the specified
+constructor, not the complexity of factoring or of the final factor state.
+
+## 1. Exact object and permitted simplifications
+
+Input is an odd integer N>=81 and positive integer bounds L<=U, fitting in
+m-bit operand registers. Consider all ordered pairs L<=p,q<=U satisfying
+pq=N. Use L>=2 and U<N for nontrivial factors. Nonempty support is required
+only when requesting a normalized state or sample; an empty relation remains
+a valid counting/construction input.
+
+The constructor expands both operands' low bits together. At depth k put
+R=2^k, p=u+Rx, q=v+Ry, with 0<=u,v<R. Keep only uv=N mod R and represent the
+residual by its exact integer polynomial and inherited integer intervals:
+
+    F(x,y) = Rxy+vx+uy-K = 0,       K=(N-uv)/R,
+    x in [ceil((L-u)/R), floor((U-u)/R)] = [a_x,b_x],
+    y in [ceil((L-v)/R), floor((U-v)/R)] = [a_y,b_y].
+
+At k<=m these intervals already lie within the remaining register ranges,
+when nonempty, because 0<=u,v<R and the original bounds fit the registers.
+The polynomial follows by expanding (u+Rx)(v+Ry)=N and dividing by R.
+Its coefficient and interval endpoints have O(log N + m) bits for the bounds
+used below. For those bounds m=O(log N).
+
+The allowed simplifications are precisely:
+
+1. Reject empty inherited intervals, and reject a branch whose low product
+   congruence fails.
+2. Divide the polynomial's integer coefficient tuple (R,v,u,-K) by its gcd,
+   choosing a positive leading coefficient. Merge identical normalized tuples
+   with identical domain data.
+3. Optionally identify the operand-swap images (u,v,x,y)<->(v,u,y,x), retaining
+   the orientation information needed for ordered counts/outputs. This can
+   save at most a factor two in the number of state classes. It does not
+   authorize blindly multiplying all counts by two at a self-symmetric node.
+4. For the remaining arithmetic progressions let
+
+       Pmin=u+R*a_x, Pmax=u+R*b_x,
+       Qmin=v+R*a_y, Qmax=v+R*b_y.
+
+   Reject if N<Pmin*Qmin or N>Pmax*Qmax. This is sound because operands are
+   positive and product is increasing in each. No sufficiency is asserted.
+
+The constructor explicitly generates/stores representatives of all surviving
+classes at a level before proceeding. A depth-first traversal of the same
+unpruned syntactic tree has a separate time conclusion below. The theorem
+allows the simple alternative normalization translating each interval to
+start at zero; it does not allow arbitrary algebraic/semantic equivalences,
+extra divisibility tests, iterative bound propagation, lookahead to solved
+suffixes, other bit orders, or a symbolic representation of many nodes at once.
+The restricted meaning of "endpoint-product pruning" is part of the theorem.
+
+## 2. Exact bit-conditioning recurrence
+
+Write x=e+2X and y=f+2Y, e,f in {0,1}. Substitution gives
+
+    4RXY + 2(v+Rf)X + 2(u+Re)Y = K-ve-uf-Ref.
+
+The child is impossible if its right side is odd. Otherwise define
+
+    R'=2R, u'=u+Re, v'=v+Rf,
+    K'=(K-ve-uf-Ref)/2.
+
+After dividing by two the child is exactly
+
+    R'XY+v'X+u'Y=K',
+
+and K'=(N-u'v')/R', so no incoming term or carry information was dropped.
+The child domains are
+
+    X in [ceil((a_x-e)/2), floor((b_x-e)/2)],
+    Y in [ceil((a_y-f)/2), floor((b_y-f)/2)].
+
+These are exactly the inherited domains obtained directly from (L,U,u',v',R').
+At k=0, u=v=0,R=1,K=N and odd N forces e=f=1. At every k>=1, u,v are odd,
+R is even, and the parity condition reduces to e+f=K mod 2. Exactly two of
+the four children survive this parity check before domain/product pruning.
+At k=m the inherited domains, if nonempty, consist of X=Y=0 in the residual
+coordinates; the leaf accepts exactly when K=0. Thus the construction is
+correct if fully expanded, with empty relations reported instead of normalized.
+
+## 3. Syntactic quotient lemma
+
+For any k>=1 there are exactly R/2 low-prefix pairs satisfying uv=N mod R:
+every odd u has a unique inverse modulo R, giving v=N*u^(-1) mod R; a solution
+cannot have an even factor. This uses odd N only, not its factorization.
+
+Every coefficient tuple is primitive already, since gcd(R,u)=1. Equality
+of two such tuples at the same depth forces equality of their linear
+coefficients u,v, hence equality of the prefixes. Primitive normalization
+therefore merges none. Operand swap has orbits of size at most two, so at
+least ceil(R/4) classes remain if all low-prefix pairs survive the interval
+filter. Fixed swap points, including square roots modulo R, only increase
+this lower bound; the proof makes no distinct-factor promise.
+
+Translating x=a_x+X,y=a_y+Y before normalization does not evade the lemma:
+the new linear coefficients are Qmin and Pmin. These are odd, determine v,u
+modulo R, and remain coprime to R. Thus equality of these translated tuples
+still forces equality of the low prefixes, up to the optional swap. This
+addresses an ordinary change of interval origin, not general affine changes.
+
+## 4. When endpoint products prune no prefix
+
+**Lemma.** Suppose
+
+    L+R-1 <= sqrt(N) <= U-R+1.                         (1)
+
+Then every low-prefix pair satisfying uv=N mod R has nonempty inherited
+intervals and passes the endpoint-product filter.
+
+**Proof.** Condition (1) implies U-L+1>=2R-1>=R, so every residue modulo R
+occurs in [L,U]. The least representative of any residue in that interval is
+at most L+R-1; its greatest representative is at least U-R+1. Therefore
+
+    Pmin*Qmin <= (L+R-1)^2 <= N,
+    Pmax*Qmax >= (U-R+1)^2 >= N.
+
+The filter cannot reject. Positivity is used in both inequalities. If (1)
+holds at R it also holds at each smaller dyadic modulus. Every ancestor of
+each surviving prefix consequently survives, so these are actually reached
+states, not merely congruence solutions absent from the construction. QED.
+
+This argument includes the strongest possible min/max product of the two
+inherited arithmetic progressions, since those extrema occur at their actual
+endpoints. It does not include stronger reasoning about gaps in the attainable
+integer products or further domain propagation.
+
+## 5. Exponential frontier theorem on two explicit bound choices
+
+Let s=floor(sqrt(N)) and choose R as the largest power of two at most s/2.
+For N>=81, s>=9 and
+
+    s/4 < R <= s/2.
+
+**Broad, factor-covering bounds:** take L=2,U=floor(N/3). These contain every
+nontrivial factor of an odd composite: both factors are at least 3 and hence
+at most N/3. The min-end inequality in (1) follows from R+1<=s. For the
+max-end inequality,
+
+    U-R+1 >= N/3-R >= N/3-s/2 >= sqrt(N),
+
+where the last inequality follows from t^2/3-t/2>=t for t=sqrt(N)>=9,
+and s<=t. Thus all R/2 modular prefixes survive to this reached depth.
+
+**Balanced-window bounds:** take L=ceil(s/2),U=2s, and declare that the intended
+factor pair must lie in this window. This is not a promise for arbitrary
+inputs. Here L+R-1<=s<=sqrt(N), while U-R+1>=3s/2+1>sqrt(N). The same
+frontier theorem applies whenever this is the chosen relation, including
+when it is empty; an actual factor-output contract also needs nonemptiness.
+
+For either bounds choice, the constructor has at least
+
+    ceil(R/4) > s/16 = Omega(sqrt(N))
+
+surviving syntactic classes at that depth after all stated simplifications.
+In input bit length n=bitlen(N), this is Omega(2^(n/2)). The obstruction is
+therefore exponential in n even though each individual residual is short.
+It does not depend on assuming that an RSA instance has a certain factor gap.
+The balanced-window form shows that broad register ranges alone do not cause
+this particular lower bound.
+
+An explicit level-wise constructor must create that many records; a depth-first
+exhaustive traversal with these pruning rules must visit that many distinct
+prefix classes but need not retain them simultaneously. No allocated-byte
+lower bound for arbitrary data structures follows. A straightforward record
+uses O(n) coefficient/domain bits and each arithmetic update, primitive-gcd
+normalization or endpoint comparison has polynomial bit cost (for example,
+O(n^3) is a conservative elementary Euclidean/schoolbook bound). Up to the
+specified depth there are O(R) raw tree nodes; a simple implementation costs
+O(R*poly(n)) bit operations there, with Omega(R) record visits unavoidable
+for the specified explicit construction. Hash-table assumptions are not
+needed for the lower bound; deterministic key handling adds polynomial factors.
+Any later contraction, exact counting, normalization or extraction is extra.
+A prefix-level discovery shortcut or different factoring algorithm is outside
+this exhaustive construction and is not lower-bounded here.
+
+## 6. Hand checks and boundaries
+
+**Same carry, distinct residuals.** At N=95, L=2,U=31,m=5,k=4, the prefixes
+(u,v)=(1,15),(3,5) each have low-prefix product 15 and actual multiplication
+carry c_4=0. They give the two residuals, with x,y in {0,1} before clipping,
+
+    16xy+15x+y=5,       16xy+5x+3y=5.
+
+The first has no solution: its four left sides are 0,1,15,32. The second
+accepts x=1,y=0, giving (19,5). Clipping the first x interval to respect
+p>=2 only removes x=0, so it remains empty. Thus equal carry cannot justify
+merging these suffix predicates.
+
+**Conditioning arithmetic.** In the second residual, the legal child e=1,f=0
+has R'=32,u'=19,v'=5,K'=(5-5)/2=0, and both remaining coordinates zero.
+The other parity-legal child e=0,f=1 has u'=3,v'=21,K'=(5-3)/2=1; its remaining
+coordinates are also zero, so it is rejected. Its completed product is 63,
+not 95. This checks signs, factor ordering, the division by two and the leaf
+condition without an executed program.
+
+**A surviving false prefix in the balanced window.** N=323=17*19 has s=17,
+[L,U]=[9,34], and the theorem selects R=8. The inverse pairs modulo 8 are
+(1,3),(3,1),(5,7),(7,5), forming two swap classes. For (1,3) the operand
+progressions have endpoints (9,33) and (11,27), with product range [99,891];
+its residual is 8xy+3x+y=40 and x=y=2 gives (17,19). For (5,7), endpoints
+are (13,29) and (15,31), with product range [195,899]; its residual is
+8xy+7x+5y=36. Both intervals contain 323. The latter node has no solution:
+17 and 19 are prime (trial divisors 2 and 3 suffice), so its residue class
+contains neither ordered factor pair. The endpoint rule nonetheless retains
+it. Primitive content is one for both tuples.
+
+**Boundary conditions.** The k=0 root is separate; the inverse-prefix formula
+starts at k=1. Equality at a product endpoint is retained. Empty integer
+domains are rejected before forming endpoint products. Square N and swap-fixed
+nodes need no exception to the class lower bound. The N>=81 condition is a
+convenient sufficient range, not a sharp threshold; the examples below that
+range check the recurrence, not the asymptotic theorem. Bounds that exclude
+all factors produce an empty final relation, not a normalized zero state.
+
+## 7. What is settled and what is outside the bound
+
+**Proved scoped decision:** primitive coefficient normalization, operand swap,
+interval-origin translation and endpoint-product rejection do not remove the
+exponential frontier of this explicit low-bit constructor on the stated
+bounds. No experiment is needed to decide that proposition. Do not benchmark
+it merely to rediscover its growth.
+
+**Not claimed:** an exponential semantic decision diagram for the final
+relation, a lower bound for all tensor networks or bit orders, an obstruction
+to output-only factoring, or an exponential final-state Schmidt rank. For a
+distinct semiprime the final relation has only two ordered basis strings;
+most nodes counted here are semantically zero, but the permitted rules cannot
+recognize those zeros before expanding them. Discovering those equivalences
+is the missing computation.
+
+TODO72 owns the remaining construction question. No efficient symbolic
+aggregation or semantic zero-set construction is established by this proof.
+
+C117 concerns a different path predicate with constructive suffix counts.
+Its lesson is the requirement to construct environments, not a transferable
+multiplication recurrence. No modular-exponentiation rank claim is used here.
+Note FC records the independent slate, attribution and review provenance.
+
+---
+
+## C119 — A compact final factor state does not supply its construction; complete modular inverse graphs have flat register-cut Schmidt spectra, and factor-output accuracy must survive extraction
+
+*status: derived · paper: -*
+
+# C119 — Factor-state construction and access barriers
+
+## Object and final representation
+
+The input is an odd composite N and explicit bounds 2<=p,q<=B<N.
+Let S be the nonempty set of ordered pairs satisfying pq=N in these bounds.
+Bounds must cover the intended factors; a semiprime promise does not guarantee
+that both fit below sqrt(N). The exact target is the uniform state on S.
+
+For a distinct-prime semiprime with both orientations admitted it is
+
+    (|p>|q> + |q>|p>)/sqrt(2).
+
+It has Schmidt rank at most two across every physical-bit bipartition, because
+each summand is a product basis string; across p|q its rank is exactly two.
+Canonical ordering p<=q leaves a single basis string. A prime square also has
+one string. These are representation-existence statements, with no N-only
+procedure for finding their unknown support implied.
+
+## Constructive access is a factoring algorithm
+
+Suppose an N-only classical constructor takes polynomial bit time, and its
+constructed representation permits sampling the target law in polynomial
+expected bit time. One sample gives a nontrivial factor. If the sampled law
+instead has total-variation distance at most epsilon<1 from the target, its
+valid-pair probability is at least 1-epsilon. Polynomial-time multiplication
+and bound checks verify each answer. Fixed epsilon bounded away from one
+therefore suffices for randomized factoring, with construction and rejected
+work charged. A quantum preparation circuit alone does not meet this premise.
+
+Exact suffix counts also suffice. With a nonempty solution promise, query the
+count after appending zero to the current p-bit prefix; choose zero if positive,
+otherwise one. At most m queries identify an m-bit factor p; division recovers
+q. The root count alone does not give those branch counts. This is a reduction,
+not a classical factoring lower bound or an impossibility theorem.
+
+## A different object: complete modular inverse graphs
+
+For M>=2 with gcd(N,M)=1, take both registers over all residues modulo M and
+let A(u,v)=[uv=N mod M]. Nonunit rows and columns vanish; on the units,
+v=N*u^(-1) is a bijection. The nonzero submatrix is thus a permutation matrix
+of order h=phi(M). The normalized equal-amplitude state has h equal squared
+Schmidt coefficients 1/h across the whole-u/whole-v cut. A normalized
+Schmidt-rank-D approximant has squared fidelity at most min(1,D/h): project
+onto its D-dimensional left support, which captures at most D/h of the target.
+For M=2^k, k>=1, N odd, h=2^(k-1).
+
+This obstructs a representation that materializes that intermediate state and
+crosses that register split, including fixed-fidelity truncation there. It
+does not bound every bit order, symbolic inverse maps, general tensor networks,
+the final bounded equality state, or output-only modular sampling. For M=2^k, uniformly
+choosing an odd k-bit residue and computing its partner samples the modular
+relation in polynomial bit time, without constructing the coherent state.
+Whole-register CRT relabeling preserves the stated Schmidt spectrum.
+
+If M>B^2 and M>N, bounded residues 2<=u,v<=B satisfying the congruence also
+satisfy uv=N as integers: both products lie below M. For a distinct semiprime
+with both factors within the bounds, rejection from the complete inverse graph
+accepts with probability 2/h. Knowing this normalization does not locate its
+two accepted rows. Example: N=15,B=7,M=64 gives h=32 and acceptance 1/16.
+
+## Fourier access and extraction accuracy
+
+For a d-bit encoding of a bounded factor relation R, put D=2^d and let
+|s> be uniform. A phase oracle gives |psi>=|s>-2/sqrt(D) sum_(R(x)=1)|x>.
+The amplitude after local Hadamards is
+
+    <z|H^d|psi> = [z=0] - 2 C_N(z)/D,
+    C_N(z) = sum_x R(x)(-1)^(z dot x).
+
+For a semiprime with a unique canonically ordered pair w, C_N(e_i)=(-1)^w_i.
+Thus exact access to these d signed counts already gives the factor pair.
+Cheap pointwise multiplication/equality tests do not supply these global sums.
+
+If there are s satisfying strings, replacing |psi> by |s> incurs state-vector
+norm error exactly 2*sqrt(s/D), yet removes the entire solution component from
+|s>-|psi>. A small error bound for the whole phase-oracle state therefore does
+not alone certify useful factor extraction after subtraction/normalization.
+The required exponentially small absolute error corresponds to O(d) accuracy
+bits for fixed s; this observation is not an exponential bit-complexity bound.
+
+## Evidence, sources and scope
+
+These are elementary exact arguments, independently reviewed in structural
+slate Se58d9b2a8c4b45ee / Vefe60c16abb4432b and primary-source survey
+S223c34ac78c04b3e / Vb01765ac126e4835. No measurement or challenge factorization
+is claimed. Note FC records the source checks and independence limits.
+
+[Stoudenmire and Waintal](https://journals.aps.org/prx/pdf/10.1103/PhysRevX.14.041029),
+IV.B equation (13) and VI.C equations (25)-(28), separates postoracle-state
+construction from extracting solutions and discusses Hadamard-basis amplitude
+access. The factor-specific reductions and modular rank proof above are given
+explicitly rather than imported as generic factoring bounds. C117's local
+predicate constructs its count environments; it does not construct these.
+C113's clean modular-exponentiation state is another object and its lower
+bound is not used here. No new factoring algorithm or universal simulation
+obstruction follows.
+
+---
+
+## C120 — Releasing dead raw and staging buffers reduces peak CADO VSC cache-builder child RSS on the tested synthetic matrices, with identical serialized caches
+
+*status: measured · paper: -*
+
+# C120 — CADO cache construction with shorter temporary lifetimes
+
+## Object and scope
+
+The object is one classical GF(2) sparse matrix cache in pinned CADO-NFS
+70354d7a8d54e985e46ca0fb6fb64d10716ba8bc, b64 bucket backend. The measured
+operation is the complete standalone child read/build/save process. This is
+neither a quantum-state representation nor a complete factoring run. Inputs
+are synthetic sparse matrices, not saved filtered GNFS relation matrices.
+
+Four variants isolate two changes: U is upstream behavior; R moves the
+standalone file reader's matrix into its return tuple; B releases dead raw
+and staging allocations in the terminal very-sparse-staircase (VSC) builder;
+RB combines them. All compiled variants share dormant diagnostic branches.
+They use static CADO backend libraries and the same inherited tcmalloc preload;
+source, executable and loaded-library identities are recorded. Thus U is not
+a byte-unmodified upstream executable, and these results are allocator-specific.
+
+## Allocation mechanism and implementation
+
+After prepare_vsc_slices finishes, the terminal VSC branch no longer reads the
+raw row vector. B nulls rowhead and swaps that vector with an empty one before
+pushing the prepared slices. Each staging x/c vector is similarly destroyed
+immediately after its elements have been copied into the final cache. Upstream
+clear() retained their capacities until the end of the build. Required c sizes
+are saved before release; later work uses headers, steps and copied values.
+The patch changes neither final encoding, append order, arithmetic nor workspace
+size. This last-use argument is source-derived; finite tests do not prove
+universal absence of implementation faults or identical allocation success.
+
+Let R be raw capacity in bytes, T the total staging capacity, C(t) final-cache
+capacity and C_old(t) a transient old destination during vector growth. The
+upstream push can retain R+T+C(t)+C_old(t) plus metadata/scratch. B's push
+retains only remaining staging plus destination allocations. Preparation still
+needs raw plus staging, and an earlier phase or allocator retention can set
+the process peak. This accounting predicts no universal savings percentage.
+
+R removes a distinct reader copy. The production dispatcher already moves its
+matrix into the builder, so standalone-reader savings cannot be transferred to
+that production path. Existing sequential construction and finer partitions
+are separate alternatives, not displaced by this within-submatrix change.
+
+## Measurements
+
+The corrected timing run uses an immediate monotonic timestamp after blocking
+wait, with a separate watchdog. Values below are medians; parenthesized ranges
+are minimum to maximum across the three large-P1 repeats. Single observations
+have no range. Signed changes compare each arm's median with U in that fixture.
+
+| Fixture | Arm | Peak child MiB | Launcher elapsed ms | RSS change | Elapsed change |
+|---|---|---:|---:|---:|---:|
+| P1 small | U | 134.50 | 80.480 | 0 | 0 |
+| P1 small | R | 134.25 | 82.876 | -0.19% | +2.98% |
+| P1 small | B | 105.00 | 78.187 | -21.93% | -2.85% |
+| P1 small | RB | 104.75 | 80.130 | -22.12% | -0.43% |
+| P1 large | U | 260.25 (260.00–262.25) | 164.618 (147.061–165.322) | 0 | 0 |
+| P1 large | R | 260.00 (260.00–260.00) | 150.876 (149.699–151.714) | -0.10% | -8.35% |
+| P1 large | B | 183.25 (182.50–184.75) | 138.362 (130.988–150.876) | -29.59% | -15.95% |
+| P1 large | RB | 183.00 (183.00–184.75) | 148.904 (134.837–149.426) | -29.68% | -9.55% |
+| P2 default | U | 77.25 | 50.499 | 0 | 0 |
+| P2 default | R | 77.75 | 55.878 | +0.65% | +10.65% |
+| P2 default | B | 63.50 | 50.065 | -17.80% | -0.86% |
+| P2 default | RB | 63.75 | 61.546 | -17.48% | +21.88% |
+
+These are observed elapsed differences, not a general speedup guarantee. The
+large-P1 U/B elapsed ranges overlap; P2 has one observation per arm. In
+particular the slower combined arm in P2 is retained. Original v1 observations
+remain preserved, but their polling-based elapsed readings are unsuitable for
+precise slowdown interpretation. They are not pooled with this corrected table.
+
+P1 fixes 1048576 columns and degree64, at131072 and262144 rows, with sorted
+columns (131*i+16381*k) mod1048576. It explicitly forces VSC. P2 uses2097152
+rows, the same column count, degree2 and default backend selection; diagnostics
+confirm that it reaches VSC. Small P1 and P2 use one observation per arm; large
+P1 uses three fresh serial processes per arm in the prescribed rotated order.
+No best-case fixture search or post-result repetition extension was performed.
+
+RSS means GNU time's CADO-child high-water value, not allocator live bytes,
+whole experimental harness RAM or host memory. The Python fixture/harness
+process is separately resident and is not part of that percentage. Corrected
+elapsed time remains launcher-inclusive; GNU-time elapsed and CPU are also
+recorded at0.01s printed resolution. Matrix reads and cache writes are included,
+with warm/unspecified OS page cache; no durable fsync completion is claimed.
+Global page-cache charge is outside process RSS. Compilation, fixtures,
+validation and hashing are outside each timed builder call and reported as
+preparation. The finished cache has identical bytes/size across all variants.
+
+## Correctness and controls
+
+The actual CADO builder, save/reload and consumer match upstream cache bytes
+and independent direct sparse-XOR products on F1/F2 in both orientations.
+The left direction uses explicitly transposed row data, not only swapped
+metadata. Packed vectors exercise basis lanes, all-ones and deterministic
+words; F1 includes empty rows, duplicate cancellation and strip boundaries.
+F2 exercises defer1/3/17 steps and the final partial defer3 group. F3 is a
+small-slice identity that never reaches the changed branch.
+
+Capacity diagnostics distinguish U/R retaining allocations from B/RB releasing
+them. Deleting the unique F1 coefficient at row3,column131072 in the actual
+CADO input is detected by comparison with the original independent product;
+the all-ones packed lane flips exactly. The original fixture also exercises
+the terminal basis lane. This is an input-omission control, not a deliberately
+faulted backend. Fixture generation and the upstream cache/backend code are
+shared; no blind independently implemented complete CADO reference or sanitizer
+coverage is claimed.
+
+## Limits and decision
+
+This supports retaining B as a concrete preparation-memory patch on the tested
+path. It does not demonstrate smaller final-cache/solver memory, lower whole
+GNFS peak, a useful production-matrix percentage, a new factoring exponent,
+RSA challenge progress or reduced Grover/Shor simulation memory. The reader-only median
+remains within the observed upstream RSS range in the repeated pilot; no
+material independent peak benefit is demonstrated. Generalization requires
+checking which allocation phase actually dominates the intended workload.
+
+Note FE owns derivation/design/results provenance and the timer correction;
+TODO73 owns subsequent applicability work. The separate arithmetic recurrence
+audit is C121 and supplies no extra measured saving to combine with this one.
+
+## Reproduction and evidence
+
+The pinned [CADO bucket source](https://github.com/cado-nfs/cado-nfs/blob/70354d7a8d54e985e46ca0fb6fb64d10716ba8bc/linalg/bwc/matmul-bucket.cpp)
+is the basis of the lifetime audit. Portable source patches and exact experiment
+scripts are in experiments/cado_cache/README.md; measurements_v2.json there
+contains all twenty corrected rows, including the original command provenance.
+The package was installed byte-for-byte from accepted submission
+S5abdf8a4b01c4834, reviewed in V06175d0782df4152. The preceding design is
+S7fd475c348924f82; v1 is preserved in S3d85e0672aa747a2. Note FE owns the
+amendment and review sequence. No fresh build was needed for this relocation.
+
+---
+
+## C121 — Actual Harvey--Hittmeir giant steps have an exact ratio with lattice and rounding terms; one congruence class need not form one unit-step geometric run
+
+*status: derived · paper: -*
+
+# C121 — Giant-step ratios and the missing short-cover lemma
+
+## Decision
+
+**Proved:** the consecutive ratio is (R) below, and a fixed lattice vector
+only simplifies it to (P), a variable power of the baby-step base. A compact
+exponent formula does not itself establish a short geometric-run cover.
+**Not reached:** a useful short run cover, cheap shared seeds, or a full
+factoring memory improvement for Algorithm 4.3. Stop numerical recurrence
+experiments for this candidate: there is no derived predictive mechanism to
+test. This is not a lower bound on all run covers, all recurrences, or factoring.
+
+The selected deciding step has been performed. The remaining problem is a
+specific constructive number-theoretic lemma, not a request to fit sequences.
+
+## Source and object contract
+
+Primary source [P]: Harvey--Hittmeir, arXiv:2105.11105v1,
+https://arxiv.org/html/2105.11105v1 (24 May 2021), sections 2--4, especially
+Proposition 3.3 and Algorithms 4.1/4.3 with Proposition 4.4. The source anchors were checked in the reviewed audit; TX45 retains later
+leads without importing their guarantees.
+
+Use N prime or N=pq with distinct primes p<q. Put M=m^2,
+alpha=beta^M, lambda=ceil(4 sqrt(N)/(m m0)^(3/2)), kappa=2 lambda+1.
+Require gcd(m,N)=1, beta a unit, and ord_N(alpha)>=kappa, not strictly greater.
+The prime/semiprime reduction and acquisition of beta are separate charged
+steps; beta and its order certificate are not free N-only input.
+
+Algorithm 4.3 checks gcd(alpha^i-1,N), 0<=i<kappa. Conditional on no factor
+return, it establishes ord_p(alpha),ord_q(alpha)>=kappa in the semiprime case.
+This stronger per-prime condition is used in deleting exact matches. It is
+incorrect to replace this pass by only the global order assumption.
+
+For each sigma in [1,m] coprime to m, the interval centers are
+s_0=1, s_(h+1)=ceil((1+1/m0)s_h), stopping at s_h>=sqrt(N).
+Every integer p<sqrt(N) is covered by exactly one half-open interval
+[s_h,(1+1/m0)s_h), and gcd(m,N)=1 guarantees its class sigma is visited.
+No classes or centers can be discarded merely because their ratios look
+unstructured: their union is what supplies factor coverage.
+
+At each center, Proposition 3.3 computes a nonzero lattice pair (a_h,b_h).
+With gamma=N sigma^(-2) mod m, the lattice is b=gamma a mod m, mapped to
+(c,d)=(Na, m0(-Na+s_h^2 b)). Its integer basis is
+(N,m0(-N+s_h^2 gamma)), (0,m0 s_h^2 m), determinant N m m0 s_h^2.
+Lagrange--Gauss shortest-vector selection is one admitted implementation.
+Its sign/tie choices need a fixed convention for any sequence claim.
+The proof guarantees the bounds
+
+    |-a_h N/s_h+b_h s_h| <= 2 sqrt(N m/m0),
+    |a_h N/s_h| <= 2 sqrt(N m m0).
+
+These conditions constrain each pair separately; they do not couple outputs
+at successive centers. Both the basis metric and reduction decisions change
+with s_h. For m,m0=O(N), generation costs O(n^3) bit operations per pair,
+n=bitlen(N), including the subsequent bounded-size arithmetic/exponentiation.
+This is a published time upper bound, not a measured allocation claim.
+
+## Exact consecutive ratios
+
+Keep sigma fixed. Define the integer/rational quantities explicitly:
+
+    T_h = floor((a_h N/s_h+b_h s_h)/M),
+    tau_h = (a_h N sigma^(-1)+b_h sigma) mod M,  0<=tau_h<M,
+    C_h = a_h N+b_h-tau_h,
+    E_h = C_h+M(lambda-T_h),
+    v_h = beta^E_h = beta^C_h alpha^(lambda-T_h) mod N.
+
+The inverse of sigma here is modulo M; it exists since gcd(sigma,m)=1.
+Negative E_h or differences cause no problem because beta is a unit; computing
+its inverse and modular exponentiation still costs time.
+
+Writing Delta for next-minus-current gives, without approximation,
+
+    v_(h+1)/v_h
+      = beta^(N Delta a+Delta b-Delta tau) alpha^(-Delta T).      (R)
+
+This is an identity in the unit group modulo N. The first factor is generally
+present. Reusing gamma for fixed sigma does not remove it.
+
+If the actual selected pair stays fixed, tau and C stay fixed, so
+
+    v_(h+1)/v_h = alpha^(-(T_(h+1)-T_h)).                       (P)
+
+Even this is not a unit-step geometric run unless the exponent difference is
++1 or -1 modulo ord_N(alpha). For fixed a,b and s'=s+delta,
+
+    (aN/s'+bs')-(aN/s+bs) = delta (b-aN/(s s')),
+    delta=ceil(s/m0).
+
+Consequently Delta T is the difference of floors of two rational numbers
+with this difference divided by M. Neither delta nor b-aN/(s s') is constant
+in general; knowing the real difference to within one does not give a fixed
+integer increment. Lattice-vector changes add all the other terms in (R).
+
+Equality of two such powers means divisibility by ord_N(beta), not equality
+of the displayed integers. That order is not supplied by the lower bound.
+A residue equality can be checked by modular exponentiation; it does not
+supply a cheap discrete logarithm or an amortized global run-cover algorithm.
+
+There is a transparent sufficient construction without logarithms. Divide
+E_h=M q_h+r_h, 0<=r_h<M, and write v_h=beta^r_h alpha^q_h. Sort the known
+integer pairs (r_h,q_h), handling multiplicities, and use consecutive integer
+q values as runs. This constructs some cover, at worst one singleton per
+candidate. It neither proves few runs nor discovers merges caused by unknown
+order wraparound. Generating all records costs O(T n^3), where T is the total
+number of unfiltered giant steps; ordinary in-memory sorting stores O(T n)
+bits. Thus even a favorable cover found afterward does not retroactively
+remove the construction peak. Streaming runs in generation order avoids
+that sort, but presently has only L<=T as a guaranteed bound.
+
+## Hand instance, including a falsified shortcut
+
+Take the permitted prime input N=101, m=1, m0=4, beta=2. Then M=1,
+alpha=2, lambda=6 and kappa=13. The computations 2^10=14,
+2^20=-6, 2^50=-1 modulo 101 show ord_101(2)=100: the possible proper orders
+divide either 50 or 20. Thus every preliminary nonzero-i gcd is 1; i=0 gives
+101 as expected. This instance reaches giant-step generation without an
+early factor return. It is an algebra example, not a factoring experiment.
+
+Choose the shortest lattice vector with a positive, or b positive when a=0.
+The centers visited before sqrt(101) are 1,2,3,4,5,7,9. The mapped lattice
+vectors are (101a,4(-101a+s^2 b)). For s<=5, (a,b)=(0,1) has norm 4s^2<=100,
+whereas any a!=0 has first-coordinate magnitude >=101, so it is shortest.
+At s=7, (1,2) maps to (101,-12), shorter than (0,1)=(0,196);
+any |a|>=2 has norm >=202, and b=2 minimizes the norm for a=1.
+At s=9, (1,1) maps to (101,-80), shorter than (0,1)=(0,324);
+|a|>=2 has norm >=202>sqrt(101^2+80^2), and b=1 is closest for a=1.
+These are actual shortest-vector choices allowed by the source algorithm,
+not arbitrarily chosen pairs that merely satisfy loose inequalities.
+
+| s | (a,b) | T_h | E_h |
+|---|---|---|---|
+| 1 | (0,1) | 1 | 6 |
+| 2 | (0,1) | 2 | 5 |
+| 3 | (0,1) | 3 | 4 |
+| 4 | (0,1) | 4 | 3 |
+| 5 | (0,1) | 5 | 2 |
+| 7 | (1,2) | floor(101/7+14)=28 | 81 |
+| 9 | (1,1) | floor(101/9+9)=20 | 88 |
+
+The first four increments are -1, followed by 79 and 7. At the switch
+s=5 to 7, (R) gives exponent 101+1-(28-5)=79 exactly. Neither 79 nor 7
+is -1 or +1 modulo 100. The shortcut 'one fixed congruence class is one
+unit-step run' is therefore false for this legitimate implementation.
+This single small instance proves no asymptotic lower bound on L and does
+not exclude reordering, merging, or a different deterministic lattice policy.
+The first five candidates are also exact baby matches and are removed;
+E=81 and E=88 remain. Ignoring cleanup would misdescribe the target product.
+
+## What a run recurrence would require
+
+Suppose the *cleaned* candidate multiset is already constructibly covered by
+L labeled runs gamma_l alpha^j, 0<=j<t_l, total t=sum t_l<=T. Count repeated
+roots with multiplicity; endpoints and lengths must carry a way to recover
+the original (a,b,j_sigma,s) witnesses or regenerate them when necessary.
+For H_l(z)=product_j(z-gamma_l alpha^j), shifting each factor gives
+
+    (z-gamma_l alpha^(t_l-1)) H_l(alpha z)
+       = alpha^t_l (z-gamma_l alpha^(-1)) H_l(z).                (S)
+
+For t_l=2 both sides equal
+alpha^2 (z-gamma_l/alpha)(z-gamma_l)(z-gamma_l alpha), a direct hand check.
+The polynomial identity holds even when denominators would be nonunits;
+only the evaluated division needs the gcd condition.
+
+More generally, for distinct formal exponents S in a fixed gamma orbit,
+H(alpha z) has shifted roots indexed by S-1. Cancellation removes S intersect
+(S-1). The uncancelled factors have indices (S-1) minus S and S minus (S-1).
+A union of L consecutive integer intervals has L factors on each boundary
+(before any additional modular coincidences). An arbitrary list can have t.
+Thus the relevant structural statistic is a small shift boundary, not merely
+a compact expression for each exponent or a small number of residue classes.
+The same statement with multiplicity follows by subtracting multiplicities.
+
+A constant ratio alpha^d with |d|>1 is insufficient for (S) at the baby-step
+shift alpha: spaced integer exponents need not overlap their unit shift.
+One may instead evaluate separate baby subsequences of stride d, but up to
+min(|d|,kappa) separate initial seeds are then required. That is another cost,
+not a free replacement of the common base.
+
+## Charged cost and exceptional branches
+
+Let Mmul(n) be modular-multiplication bit cost up to a constant-factor
+integer-multiplication bound, and Gcd(n) a gcd/inversion bit-cost bound.
+Let C_order, C_cover, C_clean be the full costs of obtaining/certifying beta,
+constructing the run representation including candidate generation, and
+removing exact matches with witness tests. For m=1 the modular-M residue
+expressions are simply zero; no modular inverse modulo 1 need be computed.
+
+1. Direct seeds H_l(1) visit all t roots: O(t) modular products, plus root
+   generation and L endpoint powers (O(L n) modular multiplications by binary
+   exponentiation). There is no constant-time product oracle. The summed
+   product may be seeded directly if only H=product_l H_l is required.
+2. Retaining run endpoints gives O(L) field/ring-sized objects. Combine (S)
+   over all runs and update total H along kappa baby steps: O(L kappa)
+   modular products plus O(kappa) gcd/inversions of denominator products,
+   and output gcds. A conservative normal-path bound is
+
+       C_order+C_cover+C_clean
+       + O((t+L n+L kappa) Mmul(n)+kappa Gcd(n)).
+
+   This is conditional on a supplied cleaned cover and its declared workspace.
+   It is not a proved cost for the full Algorithm 4.3. Run descriptor integers
+   are O(n) bits in the explicit exponent construction above. Normal evaluator
+   storage is O(L n) bits plus integer-arithmetic scratch, candidate-generator
+   and cover/cleanup workspace, and output. No allocated-byte bound is claimed.
+3. Before dividing by any denominator product compute its gcd with N. A proper
+   gcd finishes factor extraction. If it is N, scan its at most L endpoint
+   factors; because cleanup makes every root unequal to every evaluated baby
+   step modulo N, no individual endpoint difference is zero modulo N. Some
+   nonunit factor then has proper gcd and extraction succeeds. Bound this
+   terminating exceptional scan by O(L Gcd(n)) plus endpoint regeneration.
+4. If a seed or later total product H(alpha^i) has gcd N, scan the cleaned
+   t factors to locate a proper gcd; this costs O(t Gcd(n)) plus regeneration.
+   Once the scan reaches a nonunit leaf it cannot have gcd N, again by cleanup.
+   Charge at most one such terminating scan. Splitting/product-tree recovery
+   is an alternative with its own storage bill, not required for correctness.
+5. A gcd N from an individual difference means an exact match, not a proper
+   factor. If cleanup was omitted, the last two recovery arguments fail.
+   Algorithm 4.3 first processes every match v=alpha^i using its own stored
+   a,b,j to test u=M i+j via the quadratic y^2-u y+abN; it then removes matched
+   candidates. Duplicate residues can have different witnesses, so retaining
+   one arbitrary witness is not justified. The order pass proves that removing
+   a nonfactoring exact match cannot delete the uniquely covering candidate.
+6. Deleting d occurrences from a raw L-run cover can split it into up to
+   L+d runs. A cover for the unfiltered product therefore does not automatically
+   cover the cleaned product at the same cost. A different online exact-match
+   policy would need its own correctness and workspace proof.
+
+These bounds concern obtaining a factor/no-factor result. Materializing all
+kappa evaluation outputs costs additional Omega(kappa n) bits; streaming gcds
+avoids retaining that output array. For N-only factoring, include any initial
+prime/semiprime reduction, small-prime gcd pass, beta acquisition, coverage
+construction, exact-match work and witness recovery. Neither the order lower
+bound nor the clean input is an uncharged oracle.
+
+## Matched baselines and missing lemma
+
+The published collision subroutine is already structured aggregation:
+product-tree construction costs O(t n^3) and geometric multipoint evaluation
+costs O((t+kappa)n^2), giving O(t n^3+kappa n^2) including gcd work under its
+size hypotheses. It outputs explicit coefficients/values; their arrays alone
+occupy O((t+kappa)n) bits, with product/convolution workspace additional.
+This observation is an array-size statement, not a peak-RAM measurement or a
+space theorem for a specific implementation. The main generator has
+T=O(phi(m)m0 n) calls costing O(T n^3). Its sort-and-match step retains
+O((T+kappa)n) bits of records. Keeping that step unchanged already preserves
+a large memory peak, regardless of a smaller downstream evaluator.
+
+For an already cleaned replayable root stream, a constant-accumulator direct
+product at each baby point costs O(t kappa) modular products, kappa stream
+passes and O(kappa) output gcds, with a terminating recovery pass if needed.
+Let G be one complete regeneration cost: include O(kappa G), not merely the
+multiplication count. Keeping kappa accumulators instead allows one root pass
+at O(kappa n) bits. A same-factor-output constant-memory baseline directly
+compares each generated giant step to all baby powers, testing equality with
+its witness and gcds otherwise: O(T kappa) gcd/comparison arithmetic, one
+full giant-generator pass and streamed baby regeneration. The per-prime order
+pass and coverage proof make this exhaustive baseline correct. These schedules
+are elementary time-space tradeoffs, not a new exponent or practical GNFS claim.
+Blocking product trees likewise remains an existing baseline; it need not be
+replaced by pairwise gcds when sufficient workspace is available.
+
+For a useful version of the proposed recurrence one must prove, for a specified
+N-only choice of lattice vectors and all allowed inputs in the claimed family:
+
+* A constructive multiplicity-preserving cover of every required giant step
+  after exact-match processing by L runs in the *same* base alpha, or an
+  equally explicit small shift-boundary representation. State L as a bound
+  in N,m,m0,kappa, not a fitted count; at minimum improve on the guaranteed
+  singleton cover in the target time-space regime.
+* Construction, cleanup and witness access within the claimed memory budget,
+  without first storing the entire old list, and with full bit-time bounds.
+  Either prove controlled change of selected lattice pairs and floor jumps,
+  or use a different rigorous constructive invariant. Formula (R) alone is
+  not such a bound. Unknown orders/logarithms cannot be used for free merges.
+* Seeds and exceptional recovery whose total cost, added to L kappa updates,
+  improves the selected structured/blocking/streaming baseline at the actual
+  budget. An O(t) seed is allowed, but must be counted and may dominate.
+
+No one of these assertions was established here. The prime example refutes
+one naive shortcut only; it does not refute the missing lemma in general.
+The appropriate result is **selected symbolic audit complete; proposed generic
+few-run recurrence not reached; no recurrence sweep authorized by this result**.
+Retain the general telescoping identity for genuinely supplied structured
+families. Any later proposal needs the missing constructive lemma before a
+benchmark design. Later-source leads remain leads, not silently imported
+space guarantees or a novelty claim.
+
+## Evidence
+
+The symbolic audit was authored independently in submission S9aed30d3c93b421d,
+accepted in Vee36cf7331cd4f55. The derivation above preserves that report's
+object, hand counterexample, conditional costs and not-reached conclusion.
+No numerical recurrence experiment or factorization was run. Note FE records
+provenance; TODO73 owns any later constructive lemma.
+
+---
+
+## C122 — Uniform-start Grover output at any iteration count reduces to one angle coin plus a predicate interface: prefix counts (computational basis) or t-independent prefix Fourier masses (final H); for the semiprime factor predicate, Contract-A sampling with t in the input is, given H_elem, equivalent to factoring
+
+*status: derived · paper: -*
+
+# C122 — Grover output sampling reduces to predicate interfaces
+
+## Object and contracts
+
+f:{0,1}^n -> {0,1} is any predicate; D=2^n; M=|f^{-1}(1)|; theta=asin(sqrt(M/D)).
+Start in |s>=D^(-1/2) sum_x |x> and apply t>=0 iterations of G=(2|s><s|-I)O, with
+O|x>=(-1)^f(x)|x>. The output contracts are kept separate:
+
+* **Contract A:** computational-basis measurement.
+* **Contract B:** H on every bit, then measurement (C114/C117).
+
+Each returns K complete samples. Intermediate reversible-oracle gates are outside
+both contracts, as in C114. The two-dimensional form is known, and no novelty is
+claimed for it:
+
+* Brassard-Hoyer-Mosca-Tapp, quant-ph/0005055, section 2, equations (5)-(8) and
+  Theorem 2.
+* Stoudenmire-Waintal, arXiv:2303.11317 (PRX 14, 041029): the end of section
+  III.B, and section III.C, equation (10).
+
+For 0<M<D, G^t|s>=sin(phi)|g>+cos(phi)|b>, with phi=(2t+1)theta and |g>, |b> the
+uniform marked and unmarked states. For M=0 or M=D the state stays uniform up to
+sign. The laws below agree at theta in {0, pi/2}.
+
+## Contract A: class coin plus marked prefix counts
+
+P(x)=sin^2(phi)/M on marked strings and cos^2(phi)/(D-M) on unmarked ones. Draw
+the class c~Bernoulli(sin^2((2t+1)theta)), then a uniform element of f^{-1}(c)
+bit by bit, from the prefix counts N_1(w) with N_0(w)=2^(n-|w|)-N_1(w). Each step
+is one exact rational rejection draw (C117's procedure). This costs 1+Kn count
+calls: one root call gives M, then one child per level, with the sibling by
+subtraction.
+
+The exact-sampling cost is therefore at most:
+* the prefix counts;
+* K coins (see below);
+* Kn child draws, with fewer than two expected proposals each.
+
+The reverse direction (sampling => counting) is not claimed. TX49's remaining
+question concerns a classical counting algorithm.
+
+## Contract B: a different coin plus a t-independent law
+
+Let W(y)=sum_x f(x)(-1)^(x.y). Then
+
+    P(0)=cos^2(2t theta),   P(y!=0)=sin^2(2t theta),   P(y|y!=0)=W(y)^2/[M(D-M)].
+
+The conditional law does not depend on t. The coins of A and B differ; they share
+only theta (hence M) and the coin method. W^2 is the Walsh transform of the
+XOR-autocorrelation A(d)=#{x : f(x)=f(x xor d)=1}. So Contract B conditioned on
+y!=0 is Fourier sampling of the indicator of f^{-1}(1).
+
+**Interface.** Fix the first k bits of y to p, and write x=(v,u) with v the first
+k bits. Then
+
+    sum_{y extends p} W(y)^2 = 2^(n-k) sum_u ( sum_v f(v,u)(-1)^(v.p) )^2,
+
+and y=0 is excluded by subtracting M^2 along the all-zero path. This also costs
+1+Kn mass calls; the root mass is DM, which supplies M. For the path predicate
+this interface is C117's row transitions started from the t-independent row
+(0,1,0), whose terminal sum is W(y):
+* C117's environment gives r E_l r^T for *nonempty* prefixes only;
+* the root mass is the sum of its two children;
+* the M^2 subtraction is then applied.
+
+**Relation to counting.**
+* Polynomial M: counts give masses. Enumerate the M solutions, then sum signed
+  pairs that agree on the suffix.
+* The mass table of f alone fixes the prefix counts only at M in {0,D}. For
+  0<M<D it never does, because f(x xor c) has the same masses and some c changes
+  the full-depth counts (only constant f is invariant under every translation).
+  The argument guarantees a count difference at full depth, i.e. in the values
+  f(x). Translates can also differ earlier: f=[first bit 0] and its translate by
+  the first unit vector already differ at depth 1. Below full depth the masses can
+  still fix every count. For f(x)=x_n, with x_n the last bit in prefix order, W^2
+  is supported on {0,e_n}, so its mass class is exactly {x_n, 1-x_n}, and both
+  have depth-k counts 2^(n-k-1) for k<n.
+  This concerns the mass table alone. It says nothing about masses combined with
+  evaluations of f, or with N (C123).
+* Restriction-closed families: the root mass of f AND [x extends w] is D*N_1(w),
+  so restricted masses give every prefix count.
+* Exponential M: no reduction from counts to masses is known.
+
+## The coin
+
+Hypothesis **H_elem**: certified enclosures of theta and of the sine at k bits
+cost poly(k). Sources: Brent, JACM 23(2), 1976; Brent-Zimmermann, *Modern Computer
+Arithmetic*, chapter 4. Both are cited as standard and not body-audited. FLINT/Arb
+gives inclusion guarantees only.
+
+Given M, t in binary and H_elem, a lazy comparison of a uniform U against
+enclosures of q draws Bernoulli(q) exactly, for q=sin^2((2t+1)theta) or
+q=cos^2(2t theta). It terminates with probability one, at expected cost
+poly(n+log(t+1)).
+* At round j, theta needs j+log2(2t+1)+n/2+c working bits. The n/2 term is the
+  conditioning asin'(z)<=2^(n/2) for M<D; clamp z to [0,1], or use
+  atan2(sqrt M, sqrt(D-M)).
+* Round j is reached with probability at most 3*2^-(j-1).
+* No worst-case bound is claimed. Truncation at round R is a different contract,
+  with TV error at most 3*2^-R.
+
+At polynomial t, no H_elem is needed:
+sin^2((2t+1)theta)=(1-T_(2t+1)(1-2M/D))/2 and cos^2(2t theta)=(1+T_(2t)(1-2M/D))/2
+(Chebyshev) are exact rationals of poly(n t) bits. No coefficient is
+materialized, so the growth of C117's denominator (2^(252t+2)) disappears.
+
+## Factor predicates: a reduction, not a lower bound
+
+The object is C119's f_N(p,q)=[pq=N, 2<=p,q<=B]: ordered pairs, a distinct-prime
+semiprime, both factors within the bounds, M=2.
+
+* **Factoring => A and B, at every t.** The needed counts and masses are sums
+  over two solutions. This needs H_elem at binary t, and no hypothesis at
+  polynomial t.
+* **A => factoring, for t in the input.** At t*=floor(pi/(4 theta)) the marked
+  probability is at least 1-M/D (BHMT Theorem 2), and each output is verified by
+  multiplication. At t=0 the output is uniform. At t=1 the marked mass is
+  (M/D)(3-4M/D)^2, and no reduction is shown there.
+
+So, given H_elem, Contract-A sampling with t in the input (in particular t*) is
+polynomially equivalent to factoring for this family, and factoring => sampling
+holds at every t. This is an instance of TX42 (N-only factor-state sampling or
+conditional counting is factoring), not a new barrier. No compression of the
+Grover state changes it.
+
+**Contract B on this family.**
+* With canonical ordering (M=1), W^2=1: the law is a coin followed by a uniform
+  nonzero y, with no information about N.
+* With both orientations, W(y)^2=4[(y1 xor y2).s=0], s=p xor q. At t in the
+  input with sin^2(2t theta)>=1/poly, O(n) samples give s, since the annihilator
+  of the support is {0,(s,s)}. Conversely, s and M give a sampler (given H_elem
+  at binary t).
+* So Contract B at such t is, given H_elem, polynomially equivalent to computing
+  p xor q from N. C123 treats whether that factors N.
+
+## Evidence
+
+Coordinator-authored at the user's direction, and disclosed as such.
+* Submission versions: Sc377b4ddf8aa4d5c (v1), S0519269042584d57 (v2),
+  Sb0f23b23c1e544d7 (v3), S76412a5b408a486a (v4, accepted).
+* Reviews: V641e3fc372634f78, Vcae2d0a4cfb1407b, V7b25dbcb654749ac (each
+  changes_requested), then V5f7a0852665441d9 (accept). Its integration
+  corrections E1-E5 are applied here.
+
+Detector scripts and logs in attempt A5df10f8d3a234159 are exact small-size checks
+with mutants. They and the referee checks are sanity checks, not evidence:
+* v2: script 8f5e2b40, log 30e8a388; kept attempt-1 log c0574dd5.
+* v3: script 4a2acd97, log e1672fc8; kept attempt-1 log bdf8faa7.
+* v4: script b222ff53, log 10603d71.
+
+Two v2/v3 defects were review text transcribed without re-derivation; note GR
+records them. H_elem, ECM and Pollard/Brent bodies were not audited.
+
+---
+
+## C123 — Hadamard-basis Grover output of the two-orientation semiprime predicate is Simon's law for p xor q; O(m) exact samples at t with non-negligible nonzero mass give p xor q, and known branch-and-prune then factors N heuristically on average
+
+*status: derived · paper: -*
+
+# C123 — Contract-B factor-predicate output hands over p xor q
+
+## Object and law
+
+The predicate is C119's f_N(p,q)=[pq=N, 2<=p,q<2^m], where N=pq with distinct odd
+primes. Registers are x=p+(q<<m), n=2m, D=2^n. Both orientations are admitted, so
+the marked set is exactly {x1,x2} with x1=(p,q), x2=(q,p), and M=2; the bound
+p,q>=2 excludes (1,N). Contract B (C122) means: uniform start, t Grover iterations,
+then H on all n bits.
+
+The law is restated here so that this claim does not depend on C122's coin lemma.
+After t iterations the amplitude is sin(phi)/sqrt(M) on marked strings and
+cos(phi)/sqrt(D-M) on unmarked ones, with phi=(2t+1)theta and
+theta=asin(sqrt(M/D)). For y!=0 the unmarked sum of (-1)^(x.y) is -W(y), where
+W(y)=sum_x f(x)(-1)^(x.y). So the amplitude is proportional to W(y), and
+normalizing with sum_{y!=0} W^2=DM-M^2 gives P(y|y!=0)=W(y)^2/[M(D-M)]. Also
+P(y!=0)=sin^2(2t theta). Here
+
+    W(y)^2 = 2 + 2(-1)^((x1 xor x2).y) = 4[(y1 xor y2).s = 0],   s = p xor q,
+
+because x1 xor x2=(s,s). Conditioned on y!=0, the output is uniform on
+{y!=0 : (y1 xor y2).s=0}. This is Simon's law for (s,s). With canonical ordering
+p<=q (M=1), W^2=1, and the whole law depends only on (n,M,t). It carries no
+information about N.
+
+## Sampler => p xor q (derived)
+
+Every z=y1 xor y2 has 2^m preimages except z=0, which has 2^m-1. So z is uniform on
+s-perp apart from that one excluded point, and the bias only lowers the chance of
+landing in a proper subspace. The probability that k samples fail to span s-perp
+(dimension m-1) is at most 2^((m-1)-k). The kernel of a spanning set is {0,s},
+since s!=0. The reduction needs t in the input with sin^2(2t theta)>=1/poly, and
+here t is of order 2^m, given in binary; at t=0 the output is y=0 surely. It also
+needs every sample to lie in s-perp: an exact sampler, or per-sample TV error
+O(1/m). It does not hold at the fixed epsilon that C119 allows for factor-output
+sampling.
+
+## p xor q => factors (known method; heuristic, average case)
+
+LSB branch-and-prune tracks sorted pairs (p mod 2^k, q mod 2^k). For odd a,b and
+k>=2,
+
+    (a+al*2^(k-1))(b+be*2^(k-1)) = ab + (al xor be)*2^(k-1)  mod 2^k.
+
+So the level-k test of both xor-consistent children reads only the parent. This is
+C118 section 2's parity identity ("exactly two of the four children survive"),
+with the xor hint fixing al xor be. Whether a node's children survive the *next*
+level is the heuristic part. poncho's Math.SE answer
+(math.stackexchange.com/a/2087589) states it informally ("half the time, there will
+be 0 solutions ... half the time, there will be 2"). Formally it is the critical
+case of Heninger-Shacham, "Reconstructing RSA private keys from random key bits",
+CRYPTO 2009 (IACR ePrint 2008/510), section 4: Conjecture 4.3, with Theorem 4.4
+at E Zg=E Wb=1, giving expected tracked size linear in the depth. Their
+concentration argument needs E Wb<1 and does not apply here. The public
+implementation github.com/sliedes/xor_factor makes no complexity claim. No
+rigorous complexity result for factoring from (N, p xor q) is known to us.
+
+**Consequence.** An exact Contract-B sampler for this family, at t in the input
+with non-negligible sin^2(2t theta), yields s from O(m) samples, and then,
+*heuristically and for random balanced semiprimes (average case)*, the factors.
+Worst-case N is not covered. With p and q known, the converse is immediate: draw
+the coin (C122), then a uniform nonzero y in (s,s)-perp. Given C122's
+H_elem at binary t, Contract B on this family is therefore heuristically, on
+average, polynomially equivalent to factoring. The factoring barrier depends on the
+output contract *and* on the orientation convention. No quantum speedup is implied,
+since amplification needs about 2^m iterations.
+
+## Measurement (experiment_xor_simon, run Rf0b35178211640b5, exit 1)
+
+Predictions and controls are in the script header. Seed 20260921.
+
+* **P1, pass.** The dense Contract-B route (vector updates and walsh.wht, which
+  share no formula with the law) matches the law for M=2 and M=1 at m=4..7. The
+  24 runs are 20 distinct cases on 10 semiprimes; m=4 drew N=15 three times. Worst
+  discrepancy 4.4e-16 against a 1e-9 bound. P1's non-vacuity rests on the
+  comparison itself: wrong laws miss by O(1).
+* **C0**, the omitted oracle: y!=0 mass 0. The uniform state is a fixed point of
+  the diffusion, so y!=0 mass needs the oracle. That is all this control shows. It
+  would also "fail as required" with a wrong diffusion.
+* **P2, pass (80/80).** s was recovered from m+8 samples of the derived law at
+  m in {32,64,128,256}, 20 semiprimes each (fresh primes per width, unavoidably).
+  P2 and P3 draw from the derived law; only P1 compares it with the dense route.
+* **P3, pass (80/80).** Branch-and-prune with s factors N. This is also the check
+  that fails if the xor filter is disabled.
+* **P4, FAILED, left failing.** The per-instance bound max tracked <= 4m was
+  exceeded; the maxima were 352, 512, 1088 and 896 at the four widths.
+  mean(max tracked)/m was 2.000, 1.894, 2.116, 1.777. Three qualifiers:
+  - The critical model has variance of order m^2, so the per-instance bound never
+    followed from it.
+  - The registered growth criterion (<=2x from m=32 to 256) cannot separate linear
+    growth from m log m.
+  - "Critical" describes the heuristic's mean (0 or 2 children); the independence
+    assumption behind it is not established for this process.
+* **C1, failed as required.** Without the hint the set doubles every level, reaching
+  16384 at m=16. That is the 2^(k-2)=R/4 count of C118 section 3.
+* **C2**, a random wrong hint: 0/10 factored. The xor invariant guarantees this,
+  since the true pair is never tracked, so C2 does not discriminate. Its rows show
+  extinction of the wrong-hint trees (max tracked at most 16).
+
+**Provenance.** Run v1 executed without a board run record: run.start was given
+inline text instead of message IDs, errored, and was not gated. The unchanged
+seeded script was rerun under Rf0b35178211640b5. The logs are byte-identical, and
+the JSON reports differ only in elapsed_seconds. The board predictions for v2 were
+posted after v1 had run, so board preregistration is not established. The in-script
+ordering (lab.harness) and P4's surviving failure are the evidence against tuning.
+
+## Open: the tail
+
+The author's exploration (exploration_tail_v2.py; its numbers were not logged)
+tested only a v2(p+q) hypothesis, which was not supported. The symmetric valuation
+max(v2(p+q), v2(p-q)) was not tested in a registered way. Worst-case tracked size
+for this algorithm is unknown and may be super-polynomial. A possible combination
+with known-bits methods is recorded as a lead in TODO74, not claimed here.
+
+## Evidence
+
+Submission S3ad6a279f9f2462c; review Va27665ae402a41b6 (accept, with integration
+corrections R1-R9 applied here). Coordinator-authored, disclosed. Note GR records
+the round.
+
+---
+
+## C124 — Phase-labelled subgroup sectors of clean modexp are twisted d-cycles with d=r/|<a> cap H|; any interface that runs them yields d by a quotient walk and dominates the sector state, so known N-only H with cheap membership and phases save at most 2 or the smooth part of r
+
+*status: derived · paper: -*
+
+# C124 — Subgroup sectors do not beat the charged order baseline
+
+Derived by memory74_tx50_deriver in S3c167ac49a4b4e0a and accepted in
+Vbe013aaa5e46408d. That review's required corrections R1-R4 and minor
+corrections M1-M7 are applied here. Grades: proved; imported (theorem read
+in a primary source body); heuristic; conjecture.
+
+## Object
+
+C52/C115/C116's clean logical code at complete u_a block boundaries: work |1>,
+uniform exponent register of Q=2^(2n) >= N^2 > r^2 values, controlled
+multipliers a^(2^i) mod N, and any instrument acting only on the exponent
+register (inverse QFT and measurement, or C115's semiclassical steps).
+G=Z_N^*, A=<a>, r=ord_N(a), H <= G any subgroup, P_h|x>=|hx mod N>, and
+Pi_chi=|H|^-1 sum_h conj(chi(h)) P_h for chi in H^. Out of scope: dirty scratch
+inside blocks, other cuts, work-register operations, noise, and finite-precision
+phases (no TV budget is worked out).
+
+## Structure (proved)
+
+* **Quotient orbit.** d := ord_{G/H}(aH) = r/m with m=|A cap H|. A cap H=<g>
+  with g=a^d and ord g=m, so r=d*ord(a^d).
+* **Sectors.** Every whole-history Kraus operator commutes with I (x) Pi_chi,
+  because G is abelian and the instruments act only on the exponent register.
+  So Pr(y)=|H|^-1 sum_chi Pr_chi(y), with equal weights and no cross terms.
+* **Twisted cycle.** On the vectors |s;chi>=|H|^(1/2) Pi_chi|a^s>, s<d, P_a
+  acts as T_omega (a shift closed by omega=chi(g)). The reachable dimension is
+  exactly d, and the coherent pre-QFT sector state has exponent/work Schmidt
+  rank d. omega is uniform on the m-th roots of unity as chi varies, and
+  averaging over it recovers C52's law.
+* **What must be evaluated.** With canonical coset representatives, a
+  multiplier needs characters on the transition elements rep(cu)^-1 c u. These
+  lie in H but in general outside A cap H (discrete-log-type phases in H); at
+  most d*t are visited. With exponent-indexed representatives only chi(g) is
+  needed, but that presentation presupposes d. *Holonomy:* the transition
+  phases around one d-step loop multiply to chi(g), so even an oracle for the
+  sampler's own transitions yields chi(g).
+
+## What the interface gives away
+
+Hypotheses: (H2) a membership test for H; (H3) phase access for uniform chi,
+either point queries or only along transitions; (H3') a known multiple M of
+exp(H), for example |H|.
+
+* Under (H2), a walk a, a^2, ... gives d and g in d multiplications and d
+  membership tests, storing O(1) elements (proved).
+* d plus (H3') gives the exponent E=dM for a (proved). Imported (Sutherland
+  thesis section 2.3, Algorithm 2.1 and Proposition 2.5; Bach UCB/CSD-84-186
+  section 3, after Miller): for N odd and not a prime power, a uniform x and any
+  multiple of ord(x) give a factor with probability at least 1/2. The algorithm's
+  final y is the involution x^(ord(x)/2), which does not depend on the multiple
+  used, so the success event is exactly Shor's (proved). Computing r itself from
+  M needs M factored (cheap for smooth M).
+* d plus (H3) gives r exactly with O(1) expected phase queries, and needs no
+  |H| (proved): two independent sector phases generate the m-th roots with
+  probability at least 6/pi^2.
+* (H2) alone does not fix r (H=G, H=J_N give d<=2), but the method cannot run
+  without (H3), which gives r. So an unknown |H| is no escape.
+* *Per-sector TX15.* Any sampler of one sector's law, accurate enough for
+  Shor's post-processing, reveals d*ord(chi(g)), whether or not it computes d.
+  This uses Shor's continued-fraction analysis (Shor, section 5; imported).
+
+## Theorem (dominance; no hardness assumption)
+
+Under (H2)+(H3), after the one-time walk, a scalar sampler draws exact ideal
+exponent outputs with no work vector. With point queries, each sample needs one
+phase query, one uniform j in Z_d and C52's O(t) scalar updates. With
+transition-only phase access, two holonomy walks give r, after which C52 needs
+no queries at all. An explicit sector state has d reachable entries.
+
+So the sector representation saves exactly |A cap H| relative to the explicit
+orbit of dimension r. The same saving is open to the charged baseline, whose walk
+shortens from r to d. Relative to that quotient walk, TX50 gains nothing,
+because the walk stores O(1) elements.
+
+**Circularity.** Suppose poly-time (H2) together with (H3) or (H3'), and
+d <= poly(log N) on a set S of density delta >= 1/poly among a. That gives
+randomized polynomial-time factoring for the family. The density-1/2 bound
+alone does not give this, since S could lie inside Shor's failure event. It
+follows from a universal exponent (proved):
+
+* Sample a from S and collect the exponents E_a.
+* For a prime l dividing lambda(N), the subgroup K_l = {x : x^(lambda/l)=1}
+  has index at least l, and ord(a) has the full l-part of lambda exactly when
+  a is not in K_l. So for l > 2/delta, fewer than half of S lies in K_l, and
+  O(log log N) samples cover every such l with high probability.
+* Put E* = lcm(E_a) * prod_{l <= 2/delta} l^(ceil(log_l N)). This is a
+  multiple of lambda(N) with polynomially many bits, so Algorithm 2.1 on a
+  fresh uniform x succeeds with probability at least 1/2.
+
+A family with this property must name its number-theoretic structure (METHOD.md
+barrier check). For exponential d the operative statement is dominance, not
+factoring.
+
+## Survey of subgroups built from N alone (N=pq, large unknown primes)
+
+* **{+1,-1}.** Cheap membership and phases. Saves 2 exactly when -1 is in <a>,
+  which happens iff v2(ord_p a)=v2(ord_q a)>=1: probability 1/4 for Blum N and
+  at most 1/2 always, inside Shor's failure event (proved).
+* **Smooth torsion G[k]** (k B-smooth). Cheap membership. (H3') holds with M=k,
+  and the phases on A cap H follow by Pohlig-Hellman once d is known. It saves
+  gcd(r,k) (proved). That always divides the B-smooth part of r, and equals it when
+  k contains each prime l <= B to at least the power v_l(r). For example, B=3,
+  k=6 and v2(r)=3 give only 2 of the 2^3. The saving is at most 2 for safe primes
+  (proved), and heuristically poly(B) for random primes. The case where d is
+  polynomial (r B-smooth, with k covering each v_l(r)) is where classical order computation already succeeds
+  (Pollard p-1 structure; Pollard 1974 not read). Dominated, not an escape.
+* **J_N.** Cheap membership, d in {1,2}; the phases are circular.
+* **QR_N.** Membership is the quadratic-residuosity problem. Since G/QR_N has
+  exponent 2, |A cap QR_N| is r or r/2 and d divides 2. The phases are circular.
+  Likewise for G^k, where d divides k.
+* **<c> for small c.** Membership is not known to be polynomial. ord(c) is order
+  finding for c. Via the circularity argument this factors N given (H2) and
+  (H3') together, not (H3') alone. A heuristic alternative: ord(c) times a smooth
+  multiplier is a universal exponent whenever [lambda(N) : ord c] is smooth.
+* **Factor-base subgroups and G.** d is about 1, and the phases are discrete
+  logarithms mod N or order finding. Circular.
+* Explicit small subgroups beyond {+1,-1}: none is known from N alone. Under the
+  low-order assumption, Boneh-Buenz-Fisch (ePrint 2018/712) sections 3.1 and 6;
+  Seres-Burcsi (ePrint 2020/402) reduce factoring to breaking it, for classes of
+  RSA moduli given in their Theorems 4 and 5. Those theorems' parameter
+  intervals differ and are not conflated here.
+
+**Conjecture (open).** No N-only H with polynomial-time membership and phases
+has |A cap H| super-polynomially larger than the B-smooth part of r for typical
+RSA N. The generic-model bounds (Sutherland's Theorem 2.3; Babai-Szemeredi as
+reported by Shoup, applied here only by analogy) are worst case over black boxes,
+and Z_N^* is not generic. None of this affects the dominance theorem.
+
+## Evidence and limits
+
+Worked cases by hand: (7,3,{+-1}), (7,2,{+-1}), (91,2,G[6]), (253,32,J_N).
+
+* The deriver's sanity scripts are not evidence. v1 had a must-fail control
+  that could not fail (Q<r); it is kept, and v2 is fixed. Both logs end with an
+  "exit=N" line appended outside the recorded command (M7).
+* The referee's independent check built explicit projectors and propagated the
+  process. It confirmed the closing phase chi(a^d), the sector average against
+  the direct law, the holonomy product and QR_N's d in {1,2}, and it rejected
+  three mutants. It too is not evidence.
+* Bach's printed order formula is degenerate as quoted and is not load-bearing.
+  The correct form: v_q(ord) = v_q(phi(P)) - max{k <= v_q(phi(P)) :
+  a^(phi(P)/q^k)=1} (M3).
+* Not read by author or referee: Miller 1976, Pollard 1974, Goldwasser-Micali,
+  Babai-Szemeredi.
+
+---
+
+## C125 — C124's open conjecture implies factoring is not in BPP (under weak phases; under point phases, that factoring and F_p^* discrete logs are not both in BPP), so it cannot be proved unconditionally; for typical N it is a statement about |H|_R, reduces to the named assumption REA_fact for factored-multiple phases (equivalent under weak phases), and its oracle and all-N strengthenings fail conditionally
+
+*status: derived · paper: -*
+
+# C125 — C124's conjecture is an assumption, not a research target
+
+Derived by memory74c_deriver in S6c07b6b839fd452a. Accepted in Vf59b4285e64444e4,
+whose corrections C1-C5 are applied here. Grades: proved; imported (read in a
+primary-source body); standard (textbook, not re-read); heuristic; open.
+
+## Object and interfaces
+
+C124's object: clean modular exponentiation at u_a boundaries, G=Z_N^*, A=<a>,
+r=ord(a), H <= G, m=|A cap H|, d=r/m. N=pq with p != q odd primes and n bits.
+
+Notation:
+* x_S and x_R are the B-smooth and B-rough parts of x; s_B(r)=r_S.
+* G=G_S x G_R, the subgroups of B-smooth and B-rough order; H_R = H cap G_R.
+* e_H=|H|_R, and f_H=[G_R : H_R], the rough index.
+* G[k]={x : x^k=1}, and E_B = prod_{l<=B} l^floor(log_l N), a multiple of
+  exp(G_S).
+* Q_B(N,M)=gcd(M, phi(N))_R.
+* RC_B: gcd(p-1,q-1) is B-smooth.
+* "Typical": independent uniform primes in [X,2X], a uniform, B=(log N)^O(1).
+
+Interfaces, each with exact phases:
+* (H2): membership.
+* Point (H3): a hidden uniform character chi, evaluated at queried elements of H.
+* Weak (H3): samples of chi(g) at g=a^d reached by the walk, and the orders of
+  presented elements of H (with d=1 at a:=h). This is all the sector method uses.
+* (H3'): a known multiple M of exp(H); "factored" if M's factorization is known.
+
+## What the interfaces give away (proved unless marked)
+
+* **Point (H3).** After O(1) independent characters, point (H3) is an injective
+  homomorphism H -> (Q/Z)^3 on presented elements, because every subgroup of
+  Z_N^* has rank at most 2. So it is an order and discrete-log oracle for
+  presented elements. It yields no elements of H, and hence no |H|, exp(H),
+  basis or order factorizations unless such elements are presented.
+* **Fixed output modulus.** An implementation whose outputs live in
+  Z[zeta_Mout] reveals Mout, a multiple of exp(H).
+* **The sector method needs exactly m.** A phase sampler that knows only a
+  proper divisor m' of m outputs C52's law for order r m'/m, with TV at most
+  1 - m'/m. Only the inequality is proved.
+* **Standard route, not a proved necessity.** Exact orders use a factored M, and
+  uniform characters use the exact invariant factors. No alternative is known.
+
+## Structure and dichotomy
+
+* **Theorem S (proved).** Under RC_B, the B-rough part G_R of Z_N^* is cyclic.
+  Every H therefore satisfies H cap G_R = G_R[e_H], and
+  |A cap H| = m_S * gcd(r, e_H) with m_S | s_B(r). For typical a the rough
+  part of m is e_H, so C124's conjecture concerns |H|_R alone.
+* **RC_B is typical (proved; standard PNT interval input).**
+  Pr[not RC_B] <= 8 ln^2 X (1/B + 2/X). So B >= ln^3 X gives
+  Pr[RC_B] = 1 - O(1/ln X). Any number quoted from this is the value of the
+  upper bound, not an estimate.
+* **Theorem D, (F).** If exp(G/H) divides a known poly-bit K, then (H3) or
+  (H3') factors N in randomized polynomial time, without (H2). Under RC_B,
+  C124's circularity hypothesis (d <= D_c = poly on a set of a of density
+  delta >= 1/poly) implies (F)'s:
+  - G_R/H_R is cyclic of order f_H, and the image of a is uniform in it;
+  - that cyclic group has at most D_c^2 elements of order <= D_c, so
+    delta <= D_c^2/f_H, i.e. f_H <= D_c^2/delta = poly;
+  - so K = E_B * lcm(1..floor(D_c^2/delta)) is a known poly-bit multiple of
+    exp(G/H).
+* **Theorem D, (Q).** Under (H3'), m <= s_B(r) * Q_B(N,M).
+* **Theorem D, (C).** For RSA moduli in BDF's sense (sqrt(N)/2 < q < p <
+  2 sqrt(N), which holds for p, q in [X,2X]): if a known rough prime
+  l >= 2^(n/4) of M divides phi(N), then N factors. Try p mod l = 1 for each such
+  l. This is imported from Boneh-Durfee-Frankel 1998, Corollary 2.2.
+* **Size of Q_B.**
+  - Proved, for M chosen independently of (p,q):
+    Pr[Q_B > 1] <= (ln M / ln B) * 4 ln X (1/B + 1/X).
+    With log M <= (ln N)^(c_T) and B >= (ln N)^(c_T+2), for a constant c_T > 0,
+    this is O(1/(ln N ln ln N)).
+    The bound reaches 1 only once ln M is about B ln B / (4 ln X).
+  - Heuristic: Q_B <= poly for typical N, not "=1". Example: for M=lcm(1..Y)
+    with Y=poly, each prime l in (B,Y] divides phi with probability about 2/l.
+    So by Mertens Pr[Q_B > 1] is about 1 - (ln B / ln Y)^2, which is bounded
+    away from 0 when Y >= B^(1+eps) and tends to 0 when ln Y / ln B -> 1.
+  - For M computed from N the question is the search assumption below.
+
+## The named assumption
+
+**REA_fact** (named in S6c07b6b839fd452a; no prior-art search was done):
+no PPT map from N to a factored poly-bit M makes Q_B(N,M) super-polynomial for
+typical N. It lies in the Phi-hiding parameter range (B, 2^(n/4)); see
+Kiltz-O'Neill-Smith, ePrint 2011/559, section 5.2.
+
+**Theorem E (proved).** Over N-only subgroups whose phases come from a factored
+multiple of exp(H):
+* REA_fact implies C124's conjecture, under any phase reading.
+* Under the weak-(H3) reading the converse also holds, so there the two are
+  equivalent.
+* Under point (H3), REA_fact is only shown sufficient. Point phases on
+  G[E_B M] need discrete logs in its cyclic rough part of order Q_B.
+
+## Conditional refutations of stronger forms
+
+* **Oracle form (proved).** K_min={x = 1 mod min(p,q)} has poly-time membership
+  from N alone: gcd(x-1,N) is N, 1 or one prime, and a size comparison
+  identifies min(p,q). Its m is about N^(1/2)/poly, and its (H3) oracle adds no
+  factoring power (simulation lemma). A pure-oracle dichotomy for all N-only H
+  is therefore equivalent to typical-N factoring being in BPP. So membership
+  alone bounds nothing, and the conjecture rests on how (H3) is implemented.
+* **All-N form (proved, conditional).** Assume a prime e_n in (B, 2^(n/4)),
+  determined by n and computable from n in probabilistic polynomial time. H=G[E_B e_n]
+  must be N-only, which is why e_n has to be computable. Unconditionally no
+  such canonical construction is known for every n: the least prime above
+  2^floor(c_e n), for a fixed c_e in (0, 1/4), qualifies only under a
+  Cramer-type prime-gap conjecture. Then
+  "factor or m <= poly * s_B(r)" fails on Phi-hiding lossy moduli, where
+  H=G[E_B e_n] gives m/s_B(r)=e_n, unless the fixed-e variant of the Enhanced
+  Phi-Hiding Assumption fails. That variant is KOS footnote 9's suggested
+  parameterization; KOS conjecture EPhiA for random e.
+
+## Unprovability (proved; standard smooth-number input)
+
+Under weak (H3), C124's conjecture implies that factoring (applied to N and
+to p-1 and q-1) is not in BPP, and hence P != NP. Under point (H3) it implies
+only that factoring and discrete logarithms in F_p^* are not both in BPP.
+
+The argument takes H=G, so d=1 and the saving is r_R. That is phi_R for typical
+a, and phi_R is super-polynomial for typical N by a standard smooth-number count.
+With B=(ln X)^(c_U) for a constant c_U, Pr[(p-1)_R <= T] <= T X^(-1/c_U + o(1)) for c_U > 1
+(Bourgain-Konyagin-Shparlinski, arXiv:1103.0567, Corollary 13, after Granville).
+Smaller B covers c_U <= 1, because (p-1)_R only grows as B decreases. So the
+conjecture cannot be derived unconditionally. The right record is a reduction
+to a named assumption.
+
+## Open
+
+* **Lemma P**, the central gap: in the middle case where e_H and the rough
+  index are both super-polynomial, do poly-time phases yield a factored multiple
+  of |H|_R? It is false as an oracle statement and true for factored-multiple
+  implementations. Fixed-modulus implementations give only an unfactored
+  multiple, which is the unfactored-M residual below. It is plausible
+  generically, by analogy with Shoup (not read).
+* **Other residuals:**
+  - REA_fact itself (Phi-hiding literature);
+  - unfactored M;
+  - moduli where RC_B fails;
+  - special N;
+  - small B.
+* **Relation to C124.** None of this touches C124's dominance theorem. Even a
+  counterexample to the conjecture only shortens the charged quotient walk.
+
+## Evidence
+
+* Submission S6c07b6b839fd452a; review Vf59b4285e64444e4 (accept). That review
+  states it re-derived the graded steps it lists; its exact checks are not
+  evidence.
+* The author's sanity checks, at N in {91, 95, 253, 341, 377}, are not evidence.
+* Standard inputs not re-read: PNT interval bounds, Brun-Titchmarsh,
+  Siegel-Walfisz, index-calculus complexity. Shoup 1997 is used as analogy only.
 
 ---
 
