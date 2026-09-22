@@ -5,7 +5,7 @@
 One item per file. State is the directory it lives in: moving a file
 between `open/` and `done/` is how state changes.
 
-**21 open · 71 done**
+**19 open · 73 done**
 
 ## Open
 
@@ -27,9 +27,7 @@ between `open/` and `done/` is how state changes.
 | [66](todo/open/66-clean-scratch-virtual-reset.md) | Clean-scratch virtual reset: apply C105's clear rule at every point where a unitary circuit returns scratch to |0>, and measure what it removes |
 | [68](todo/open/68-non-prefix-cuts.md) | Cut rank and bond at cuts that are not exponent prefixes: interleaved and work-first orders of the modexp pullback |
 | [69](todo/open/69-limdd-interleaved-orders.md) | Pauli-LIMDD width of the post-modexp state in orders that interleave exponent and x qubits |
-| [72](todo/open/72-factor-state-construction.md) | Can the compact divisor state be constructed from the composite alone? |
 | [73](todo/open/73-factoring-memory-and-aggregation.md) | Factoring memory after the cache and recurrence audits |
-| [74](todo/open/74-memory-scaling.md) | Attack memory scaling through Grover precision, streamed counting and sampled symmetries |
 | [hk3](todo/open/hk3-experiment-experiment2-and-all-experiment3.md) | experiment.py §3, experiment2.py §§2–3 and all of experiment3.py |
 | [hk7](todo/open/hk7-six-more-dependencies-are-also-unused.md) | Six more dependencies are also unused |
 
@@ -101,6 +99,8 @@ between `open/` and `done/` is how state changes.
 | [67](todo/done/67-quadratic-cell-sum-representation.md) | Store the Heisenberg operator as a sum of affine-support quadratic-sign cells instead of Walsh keys: how many cells does modexp need? | Closed at the premise check (2026-09-18): the ledger already answers it. C102/HD measure affine pieces on u_a (a constant factor below Walsh, beaten by the ROBDD), C83/C84 and TODOs 45-47 identify quadratic cells with known stabilizer decomposition, and DN shows diagram-native propagation loses in bytes |
 | [70](todo/done/70-approximate-bond-from-arithmetic-collisions.md) | Can arithmetic collision counts force a large MPS bond even when the clean post-modexp state is approximated? | Completed by proof and independent review (2026-09-21): C113 gives a fidelity-robust bond obstruction at the specified mixed cut; no numerical diagnostic needed |
 | [71](todo/done/71-structured-grover-sampling.md) | Structured Grover: extend coherent selected probabilities to exact output sampling | Completed (2026-09-21): exact coherent sampler, rare128 validation and bounded rolling-versus-cached comparison in C117 |
+| [72](todo/done/72-factor-state-construction.md) | Can the compact divisor state be constructed from the composite alone? | Closed at complexity triage (2026-09-22): success is factoring N from N alone, the TX42/TX15 barrier; reopen only with named number-theoretic structure |
+| [74](todo/done/74-memory-scaling.md) | Attack memory scaling through Grover precision, streamed counting and sampled symmetries | Closed at complexity triage (2026-09-22): C122-C125 decide its questions; what remains refines barriers (TX15, TX42, TX50) or needs factor advice, and cannot remove an exponential |
 | [hk1](todo/done/hk1-yao-backend.md) | Yao.jl backend | - |
 | [hk2](todo/done/hk2-decide-whether-env-should-tracked.md) | Decide whether .env should be tracked | - |
 | [hk4](todo/done/hk4-organize-experiments-into-proper-file-structure.md) | Organize experiments into a proper file structure, with a general | - |

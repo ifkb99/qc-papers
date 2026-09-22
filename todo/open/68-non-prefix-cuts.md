@@ -7,6 +7,8 @@ claims: [C19, C48, C103, C106]
 ---
 # Beyond exponent-prefix cuts
 
+**Triage (2026-09-22, METHOD.md barrier check 4):** a representation bound; passes. **Stale checkpoint:** the "remaining" referee and composite-N steps below are done. C108 was accepted, and C109 covers Shor's N = pq. With C48, every variable order already has an exponential cut when κ(⟨a⟩) is small, so the max-cut question is settled; what remains is which cuts, and bytes rather than bond.
+
 From a 2026-09-18 discussion. C106 bounds the bond of every representation linear
 across an **exponent-prefix** cut and says explicitly that it covers no other cut.
 Tensor-network memory (the one simulator family where entanglement itself is the

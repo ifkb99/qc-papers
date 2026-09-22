@@ -7,6 +7,8 @@ claims: [C110, C111, C112]
 ---
 # Interleaved orders for Pauli-LIMDDs
 
+**Triage (2026-09-22, METHOD.md barrier check 4):** a small LIMDD width in some order would not by itself factor, because applying the inverse QFT to a LIMDD is not known to stay polynomial. A result that also kept the QFT polynomial would be the TX15 barrier, so any claimed escape must say which step stays polynomial.
+
 From the 2026-09-19 session (note LM). C110 covers exponent-first orders and C111 covers
 x-first orders. An order that reads some x qubits before the last exponent qubit is
 covered by neither: at that level most sub-states become single basis states, which

@@ -7,6 +7,8 @@ claims: [C45, C50, C104, C105, C106, C115]
 ---
 # Clean-scratch virtual reset
 
+**Triage (2026-09-22, METHOD.md barrier check 4):** restricts to clean inputs; computes nothing known to be hard. Passes.
+
 From a 2026-09-18 discussion of where PPS memory goes once the exponent register is
 handled (C45, C104). What remains exponential is the work width q_w = 3n + 4, and
 two claims place the excess on inputs the physical computation never visits:

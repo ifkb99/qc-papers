@@ -7,6 +7,8 @@ claims: [C56, C59, C60, C71, C72, C73]
 ---
 # Count the actual word before comparing samplers
 
+**Triage (2026-09-22, METHOD.md barrier check 4):** known-order samplers; success computes nothing known to be hard. Passes. TODO 34 still gates any long sweep.
+
 **Updated checkpoint: C73/WE complete steps 1–2 below.** Word mode is opt-in,
 setup-only and independently validated at support/prefix/full-law levels.
 Two attempted full serial timing sweeps aborted at different native-code

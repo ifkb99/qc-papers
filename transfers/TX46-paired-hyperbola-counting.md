@@ -48,4 +48,5 @@ certified total absolute error; relative accuracy of large terms is inadequate.
 
 No useful cancellation bound or removal of an exponential is proved. A
 restricted-family result or scoped obstruction would also help. TODO73 owns
-the first rule to prove/refute; TODO72 preserves the constructor question.
+the first rule to prove/refute. TODO72's constructor question closed at
+complexity triage (2026-09-22) as a barrier instance.

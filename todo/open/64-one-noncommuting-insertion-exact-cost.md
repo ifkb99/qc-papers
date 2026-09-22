@@ -6,6 +6,8 @@ claims: [C8, C52, C53, C56, C99, C104]
 ---
 # One non-permutation gate between blocks (queued)
 
+**Triage (2026-09-22, METHOD.md barrier check 4):** an exact term count at small sizes; computes nothing known to be hard. Passes.
+
 From the SN slate (2026-09-18), deriver candidate C1, which sits beside PAPER_B §13
 item 2. The deriver's diagnostics (exact, CPU, N = 3, 5, 7, t = 2) show three things.
 The exact support of the Z_x0 pullback is the same for every θ with irrational cos θ,

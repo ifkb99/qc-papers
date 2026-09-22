@@ -1,11 +1,18 @@
 ---
 id: 74
-state: open
+state: done
 title: "Attack memory scaling through Grover precision, streamed counting and sampled symmetries"
-outcome: "Grover coin solved for known M, given H_elem (C122); TX50 decided as an obstruction (C124); poly-memory factoring methods are the bar"
+outcome: "Closed at complexity triage (2026-09-22): C122-C125 decide its questions; what remains refines barriers (TX15, TX42, TX50) or needs factor advice, and cannot remove an exponential"
 claims: [C52, C60, C117, C118, C119, C120, C121, C122, C123, C124, C125]
 ---
 # 74: Memory scaling after the cache pilot
+
+**Closed at complexity triage (2026-09-22, METHOD.md barrier check 4).** C122-C125 decide the questions this item opened. None of what remains can remove an exponential:
+* Lemma P and C124's conjecture refine an obstruction that C125 shows is an assumption.
+* The C123 tail concerns factoring from (N, p xor q), i.e. with factor advice.
+* TX51's audit concerns a known-order baseline.
+
+Leads stay in notes GR and CJ. TX49 and TX51 stay open in the register. The text below is kept as it stood.
 
 Note FG owns the phase-0 slate, and note GR owns the round that decided it.
 C122 reduces the Grover precision question to predicate interfaces, given H_elem

@@ -6,6 +6,8 @@ claims: [C103]
 ---
 # Third simulation method on the r = β·2^α invariant
 
+**Triage (2026-09-22, METHOD.md barrier check 4):** success measures a real DD simulator's memory at small sizes and computes nothing known to be hard. Passes.
+
 Paper B open problem 4. Two structurally unrelated methods (PPS, MPS) keying
 on the same arithmetic invariant is suggestive; a third would make "property
 of the algorithm, not the simulator" hard to argue with. Decision diagrams are

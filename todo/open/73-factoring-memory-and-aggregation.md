@@ -7,9 +7,11 @@ claims: [C118, C119, C120, C121]
 ---
 # 73: Factoring memory and aggregation
 
+**Triage (2026-09-22, METHOD.md barrier check 4):** none of the three parts computes anything complexity-forbidden (they concern memory constants and certificates inside known factoring algorithms), so it passes. It concerns factoring software rather than these simulations: kept as the user's preserved direction, not scheduled.
+
 Notes FD and FE own discovery/provenance; C120/C121 own the completed cache
-pilot and exact symbolic audit; TX44-TX47 own transfer scope. TODO72 preserves
-the original factor-state direction. The selected user-approved measurements
+pilot and exact symbolic audit; TX44-TX47 own transfer scope. TODO72 (the
+original factor-state direction) closed at complexity triage on 2026-09-22. The selected user-approved measurements
 are complete; the items below are future decisions, not active experiments.
 The user accepts moderate slowdown for memory; no numerical tolerance was given.
 

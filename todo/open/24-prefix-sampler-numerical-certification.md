@@ -7,6 +7,8 @@ claims: [C55, C56, C59, C60, C61, C62, C63, C64, C65]
 ---
 # From an exact mathematical sampler to a certified numerical one
 
+**Triage (2026-09-22, METHOD.md barrier check 4):** the samplers here are given the order (a known-order promise), so success computes nothing known to be hard. Passes.
+
 **Progress 2026-09-11 UTC, NOT closed.** C60 proves the full-law block-kernel
 budget; C61/§VP implement verified exact-input prefixes and finite-bit sparse
 sampling, with tiny complete-law and supplied-wide validation. These do NOT

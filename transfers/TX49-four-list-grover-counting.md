@@ -52,12 +52,13 @@ classical advantage over specialized subset-sum solving. Modular multiplication
 has no supplied additive monotone decomposition; discrete logarithms cannot
 be introduced for free. C119's factor-count barrier is unchanged. TX48's
 precision tools could be shared, but its post-H output sampler cannot simply
-be copied. TODO74 owns the deciding counted-stream derivation.
+be copied. TODO74 held the deciding counted-stream derivation; it closed at
+complexity triage (2026-09-22) with this row still open and unscheduled.
 
 ## Status after C122 (2026-09-22)
 
 C122 derives the reduction in this row's dictionary: with the coin (given H_elem
 at binary t; exact at polynomial t), Contract-A sampling needs only prefix
 counts. The remaining hypothesis concerns a classical counting algorithm and has
-not been checked. It stays open. TODO74 deprioritizes it, because it would not
+not been checked. It stays open. TODO74 deprioritized it, because it would not
 remove an exponential from simulation.

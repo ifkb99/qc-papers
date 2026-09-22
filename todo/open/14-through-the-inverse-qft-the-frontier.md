@@ -7,6 +7,8 @@ claims: [C45, C46, C48, C49, C50, C51, C52, C53, C54, C55, C56, C57, C58, C59, C
 ---
 # Through the inverse QFT
 
+**Triage (2026-09-22, METHOD.md barrier check 4):** exact sampling of Shor's post-QFT output with the order unknown is the TX15 barrier (it would be classical order finding). The work below is in scope only because it supplies the order, perturbs the circuit, or bounds a representation; a new step must say which of these applies.
+
 **Current checkpoints: C73/WE through C81/NC.** The opt-in word envelope is
 implemented and passes independent support/prefix/full-law checks. TODO 32's
 full serial comparison remains unfinished after native crashes; TODO 34 owns

@@ -7,6 +7,8 @@ claims: [C72, C92]
 ---
 # Does the no-h control test the carry, or only that something changed?
 
+**Triage (2026-09-22, METHOD.md barrier check 4):** control validity (method hygiene); passes.
+
 ## The question
 
 `experiment_dirty_prefix_walsh.py` builds a `no_h` wrong reference by passing

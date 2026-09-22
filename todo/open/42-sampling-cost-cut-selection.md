@@ -7,6 +7,8 @@ claims: [C80, C81]
 ---
 # Choose the representation for the requested sample
 
+**Triage (2026-09-22, METHOD.md barrier check 4):** known-order samplers; success computes nothing known to be hard. Passes.
+
 TODO41/NS implement and test nested-phase sampling. Do not repeat those
 integer, amplitude or RNG pilots. The current selector minimizes a precise
 construction metric; actual component masses, cancellations, stride-dependent

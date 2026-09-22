@@ -1,11 +1,13 @@
 ---
 id: 72
-state: open
+state: done
 title: "Can the compact divisor state be constructed from the composite alone?"
-outcome: "First bounded round complete (2026-09-21): C118/C119; constructive aggregation remains open"
+outcome: "Closed at complexity triage (2026-09-22): success is factoring N from N alone, the TX42/TX15 barrier; reopen only with named number-theoretic structure"
 claims: [C117, C118, C119]
 ---
 # 72: Can the compact divisor state be constructed from the composite alone?
+
+**Closed at complexity triage (2026-09-22, METHOD.md barrier check 4).** Success here is a nontrivial factor of N from N alone, which is the TX42/TX15 barrier. The mechanism named below, aggregating modular-inverse residues in dyadic boxes, is arithmetic every N = pq carries, not a number-theoretic weakness of particular N, so it does not meet check 3's bar. C118/C119, note FC and TX39-TX43 keep the record. Reopen only with a candidate that names such structure. The text below is kept as it stood.
 
 User-authorized continuation toward the public RSA Factoring Challenge numbers.
 Start from C117's constructive structured sampling lesson; do not assume that

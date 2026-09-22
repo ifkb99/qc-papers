@@ -7,6 +7,8 @@ claims: [C48, C82, C85, C86, C87, C88, C89, C90, C91, C92, C93, C94, C95, C96, C
 ---
 # Audit the actual controlled-add boundary
 
+**Triage (2026-09-22, METHOD.md barrier check 4):** a representation question about controlled additions; computes nothing known to be hard. Passes.
+
 ## Current checkpoint and next discriminator
 
 C96 and SB complete the sparse-mask prefix-Walsh proof and opt-in kernel.
