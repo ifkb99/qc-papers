@@ -439,7 +439,7 @@ baselines in §10.3 and §11.1–11.4. Their abstract/conclusion/scope passages 
 Appendix A maps were updated together. These are working consolidations, not
 a claim that the manuscript titles or publication positioning are finalized.
 
-Review findings and their counterexamples: `REVIEW_2026-09-09.md` and
+Review findings and their counterexamples: `archive/REVIEW_2026-09-09.md` and
 `experiments/experiment_independent_review.py`. The original review is a dated
 record; current statuses live in C17/C44 (peak relation), F12 (scalar periods),
 C21 (onset), C42 (useful fractions), and the revised manuscript scope.
