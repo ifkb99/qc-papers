@@ -43,7 +43,11 @@ Do not take over the main coordinator or contact its agents from a side chat.
   - Before editing a canonical file, the coordinator runs
     `uv run python tools/swarm.py inflight PATH`. On Claude, the project hook
     in `.claude/settings.json` asks first for Edit/Write/MultiEdit/NotebookEdit.
-    It does not see shell writes such as `sed -i`.
+    That check does not see shell writes such as `sed -i`. A second hook,
+    `tools/swarm.py seals --hook`, runs after Bash and every edit tool. It
+    compares each sealed input with its recorded hash, so it catches a
+    broken seal however the file was changed, and reports each break once.
+    `uv run python tools/swarm.py seals` lists the current breaks.
   - Prefer inputs that stay fixed during a round. Snapshot contract text into
     `out/` rather than listing a row the coordinator expects to integrate into.
   - If the attempt's work stays valid after an edit, the coordinator records

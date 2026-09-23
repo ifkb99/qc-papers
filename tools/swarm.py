@@ -15,6 +15,8 @@ Run from the research root with `uv run python tools/swarm.py COMMAND`:
   inflight [PATH ...]    which open attempts sealed these files as inputs (exit 1 if any);
                          editing one makes that attempt stale. With no PATH, list them all.
                          --hook reads a Claude PreToolUse event on stdin and asks first.
+  seals                  sealed inputs whose file no longer matches its seal, however it
+                         was edited (exit 1 if any); --hook is a Claude PostToolUse check
   attempt T_ID           the task's current attempt; --field id|output_dir prints one
                          value, for scripts, instead of parsing arb JSON by hand
 
@@ -24,6 +26,7 @@ science. arb remains the record; these commands only read it or format checks.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import shlex
@@ -329,32 +332,45 @@ def cmd_doc_gate(ns) -> int:
 SETTLED = {"ready", "closed", "cancelled"}
 
 
-def inflight_inputs(project: Path) -> dict[str, list[dict]]:
-    """Input path -> the attempts whose seal an edit would break: open attempts (active, blocked,
-    submitted, accepted, stalled), plus closed tasks that an open attempt depends on, because
-    arb's staleness check recurses into dependencies and would block that consumer."""
+def watched_attempts(project: Path) -> list[tuple[dict, dict]]:
+    """(task row, attempt record) for every attempt whose seal an edit would break: open
+    attempts (active, blocked, submitted, accepted, stalled), plus closed tasks that an open
+    attempt depends on, because arb's staleness check recurses into dependencies."""
     rows = all_pages(project, "task.list")
     by_id = {row["id"]: row for row in rows}
-    watched: dict[str, dict] = {}
-    for row in rows:
-        if row["state"] in SETTLED or not row.get("attempt"):
+    watched: dict[str, tuple[dict, dict]] = {}
+    pending = [row["id"] for row in rows if row["state"] not in SETTLED and row.get("attempt")]
+    while pending:
+        row = by_id.get(pending.pop())
+        if row is None or row["id"] in watched or not row.get("attempt"):
             continue
-        watched[row["id"]] = row
         attempt = arb(project, "show", row["attempt"])["record"]
-        pending = [binding["task"] for binding in attempt.get("dependencies", [])]
-        while pending:  # dependencies of dependencies are checked by arb as well
-            dep = by_id.get(pending.pop())
-            if dep is None or dep["id"] in watched or not dep.get("attempt"):
-                continue
-            watched[dep["id"]] = dep
-            pending += [b["task"] for b in arb(project, "show", dep["attempt"])["record"].get("dependencies", [])]
+        watched[row["id"]] = (row, attempt)
+        pending += [binding["task"] for binding in attempt.get("dependencies", [])]
+    return list(watched.values())
+
+
+def inflight_inputs(project: Path) -> dict[str, list[dict]]:
+    """Input path -> the watched attempts (see watched_attempts) that sealed it."""
     sealed: dict[str, list[dict]] = {}
-    for row in watched.values():
-        attempt = arb(project, "show", row["attempt"])["record"]
+    for row, attempt in watched_attempts(project):
         for ref in attempt["inputs"]:
             sealed.setdefault(ref["source"], []).append(
-                {"task": row["id"], "state": row["state"], "attempt": row["attempt"], "owner": row["owner"], "title": row["title"]})
+                {"task": row["id"], "state": row["state"], "attempt": row["attempt"], "owner": row["owner"],
+                 "title": row["title"], "sha256": ref["sha256"]})
     return sealed
+
+
+def broken_seals(project: Path) -> list[dict]:
+    """Sealed inputs whose file no longer matches its sealed sha256 (edited or deleted)."""
+    broken = []
+    for path, holders in sorted(inflight_inputs(project).items()):
+        target = project / path
+        current = hashlib.sha256(target.read_bytes()).hexdigest() if target.is_file() else None
+        for h in holders:
+            if current != h["sha256"]:
+                broken.append({"path": path, "current": current, **h})
+    return broken
 
 
 def project_relative(project: Path, value: str) -> str | None:
@@ -407,6 +423,47 @@ def cmd_inflight(ns) -> int:
     return 1 if hits else 0
 
 
+def cmd_seals(ns) -> int:
+    if ns.hook:
+        # Claude Code PostToolUse hook for any tool, Bash included: report seals that the call
+        # just broke. Each (attempt, path, current hash) is reported once per session state file.
+        # Fails open: a board or event error prints to stderr and exits 0.
+        try:
+            json.load(sys.stdin)
+            broken = broken_seals(ns.project)
+        except (ArbError, json.JSONDecodeError, OSError, subprocess.SubprocessError) as error:
+            print(f"swarm.py seals --hook could not check the board: {error}", file=sys.stderr)
+            return 0
+        state = ns.project / "out" / "agent-board" / "seals_reported.json"
+        try:
+            seen = set(json.loads(state.read_text())) if state.is_file() else set()
+        except (OSError, json.JSONDecodeError):
+            seen = set()
+        fresh = [b for b in broken if f"{b['attempt']}:{b['path']}:{b['current']}" not in seen]
+        if fresh:
+            lines = "; ".join(f"{b['path']} (sealed by {b['task']} {b['state']}, attempt {b['attempt']})" for b in fresh)
+            print(json.dumps({"hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext":
+                  f"Sealed input changed: {lines}. The dependent work is now stale. If the attempt's work stays "
+                  "valid, record it with `arb call task.accept_input_change task=T input=PATH reason=...`; "
+                  "otherwise revert the edit or reclaim."}}))
+            try:
+                state.parent.mkdir(parents=True, exist_ok=True)
+                state.write_text(json.dumps(sorted(seen | {f"{b['attempt']}:{b['path']}:{b['current']}" for b in fresh})))
+            except OSError:
+                pass
+        return 0
+    broken = broken_seals(ns.project)
+    if ns.json:
+        print(json.dumps(broken, indent=2))
+    else:
+        for b in broken:
+            state = "deleted" if b["current"] is None else "changed"
+            print(f"{b['path']}: {state} since sealed by {b['task']} {b['state']} {b['owner']} (attempt {b['attempt']})")
+        if not broken:
+            print("every sealed input matches its seal")
+    return 1 if broken else 0
+
+
 def cmd_attempt(ns) -> int:
     task = arb(ns.project, "call", "task.get", f"task={ns.task}")
     attempt = task["attempt"]
@@ -447,6 +504,9 @@ def main(argv=None) -> int:
     inflight.add_argument("paths", nargs="*")
     inflight.add_argument("--hook", action="store_true", help="Claude PreToolUse mode: read the event on stdin, ask before a stale-making edit")
     inflight.add_argument("--json", action="store_true")
+    seals = commands.add_parser("seals", help="sealed inputs that no longer match their seal")
+    seals.add_argument("--hook", action="store_true", help="Claude PostToolUse mode: report newly broken seals once")
+    seals.add_argument("--json", action="store_true")
     attempt = commands.add_parser("attempt", help="a task's current attempt")
     attempt.add_argument("task")
     attempt.add_argument("--field", choices=["id", "output_dir", "owner", "state", "snapshot_digest"])
@@ -468,7 +528,7 @@ def main(argv=None) -> int:
         ns.command = command
     ns.project = ns.project.resolve()
     handler = {"sweep": cmd_sweep, "todo": cmd_todo, "review-start": cmd_review_start,
-               "check": cmd_check, "doc-gate": cmd_doc_gate, "inflight": cmd_inflight, "attempt": cmd_attempt}[ns.name]
+               "check": cmd_check, "doc-gate": cmd_doc_gate, "inflight": cmd_inflight, "seals": cmd_seals, "attempt": cmd_attempt}[ns.name]
     try:
         return handler(ns)
     except ArbError as error:
