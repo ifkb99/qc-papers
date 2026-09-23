@@ -12,6 +12,11 @@ Run from the research root with `uv run python tools/swarm.py COMMAND`:
                          (--append FILE adds it to a JSON list for `checks:=@FILE`)
   doc-gate OUTDIR        documentation gate logs plus the arb checks list
                          (reindex --check by default; --reindex regenerates, coordinator only)
+  inflight [PATH ...]    which open attempts sealed these files as inputs (exit 1 if any);
+                         editing one makes that attempt stale. With no PATH, list them all.
+                         --hook reads a Claude PreToolUse event on stdin and asks first.
+  attempt T_ID           the task's current attempt; --field id|output_dir prints one
+                         value, for scripts, instead of parsing arb JSON by hand
 
 Nothing here creates, claims, reviews or closes board records, and nothing runs
 science. arb remains the record; these commands only read it or format checks.
@@ -321,6 +326,100 @@ def cmd_doc_gate(ns) -> int:
     return max(c["exit_code"] for c in checks)
 
 
+SETTLED = {"ready", "closed", "cancelled"}
+
+
+def inflight_inputs(project: Path) -> dict[str, list[dict]]:
+    """Input path -> the attempts whose seal an edit would break: open attempts (active, blocked,
+    submitted, accepted, stalled), plus closed tasks that an open attempt depends on, because
+    arb's staleness check recurses into dependencies and would block that consumer."""
+    rows = all_pages(project, "task.list")
+    by_id = {row["id"]: row for row in rows}
+    watched: dict[str, dict] = {}
+    for row in rows:
+        if row["state"] in SETTLED or not row.get("attempt"):
+            continue
+        watched[row["id"]] = row
+        attempt = arb(project, "show", row["attempt"])["record"]
+        pending = [binding["task"] for binding in attempt.get("dependencies", [])]
+        while pending:  # dependencies of dependencies are checked by arb as well
+            dep = by_id.get(pending.pop())
+            if dep is None or dep["id"] in watched or not dep.get("attempt"):
+                continue
+            watched[dep["id"]] = dep
+            pending += [b["task"] for b in arb(project, "show", dep["attempt"])["record"].get("dependencies", [])]
+    sealed: dict[str, list[dict]] = {}
+    for row in watched.values():
+        attempt = arb(project, "show", row["attempt"])["record"]
+        for ref in attempt["inputs"]:
+            sealed.setdefault(ref["source"], []).append(
+                {"task": row["id"], "state": row["state"], "attempt": row["attempt"], "owner": row["owner"], "title": row["title"]})
+    return sealed
+
+
+def project_relative(project: Path, value: str) -> str | None:
+    path = Path(value)
+    path = (path if path.is_absolute() else Path.cwd() / path).resolve()
+    return str(path.relative_to(project)) if path.is_relative_to(project) else None
+
+
+def cmd_inflight(ns) -> int:
+    if ns.hook:
+        # Claude Code PreToolUse hook: ask the user before an edit that would make an
+        # open attempt stale. Fail open (exit 0, no decision) if the event or board is unreadable.
+        try:
+            event = json.load(sys.stdin)
+            tool_input = event.get("tool_input", {})
+            target = tool_input.get("file_path") or tool_input.get("notebook_path")
+            relative = project_relative(ns.project, target) if target else None
+            holders = inflight_inputs(ns.project).get(relative, []) if relative else []
+        except (ArbError, json.JSONDecodeError, OSError, subprocess.SubprocessError) as error:
+            print(f"swarm.py inflight --hook could not check the board: {error}", file=sys.stderr)
+            return 0
+        if holders:
+            tasks = "; ".join(f"{h['task']} ({h['state']}, {h['owner']})" for h in holders)
+            reason = (f"{relative} is a sealed input of open attempt(s) {tasks}. Editing it makes them stale "
+                      "and blocks their submission or review. Wait until they close, or after the edit record it with "
+                      "`arb call task.accept_input_change` if the attempt's work stays valid.")
+            print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse",
+                                                     "permissionDecision": "ask", "permissionDecisionReason": reason}}))
+        return 0
+    sealed = inflight_inputs(ns.project)
+    if ns.paths:
+        wanted = {}
+        for value in ns.paths:
+            relative = project_relative(ns.project, value)
+            if relative is None:
+                raise SystemExit(f"{value} is outside the project")
+            wanted[relative] = sealed.get(relative, [])
+        sealed = wanted
+    hits = {path: holders for path, holders in sealed.items() if holders}
+    if ns.json:
+        print(json.dumps(sealed if ns.paths else hits, indent=2))
+    else:
+        for path, holders in sorted(sealed.items()):
+            if not holders:
+                print(f"{path}: free")
+            for h in holders:
+                print(f"{path}: sealed by {h['task']} {h['state']} {h['owner']} (attempt {h['attempt']}) {h['title'][:60]}")
+        if not sealed:
+            print("no open attempt holds sealed inputs")
+    return 1 if hits else 0
+
+
+def cmd_attempt(ns) -> int:
+    task = arb(ns.project, "call", "task.get", f"task={ns.task}")
+    attempt = task["attempt"]
+    if attempt is None:
+        raise SystemExit(f"{ns.task} has no current attempt (state {task['task']['state']})")
+    if ns.field:
+        print(attempt[ns.field])
+    else:
+        print(json.dumps({key: attempt[key] for key in ("id", "owner", "state", "output_dir", "snapshot_digest")}
+                         | {"input_changes": len(attempt.get("input_changes", []))}, indent=2))
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--project", type=Path, default=ROOT)
@@ -344,6 +443,13 @@ def main(argv=None) -> int:
     gate.add_argument("outdir")
     gate.add_argument("--reindex", action="store_true", help="regenerate indexes (coordinator integration only)")
     gate.add_argument("--prefix", default="", help="log name prefix, e.g. C98_")
+    inflight = commands.add_parser("inflight", help="open attempts that sealed these files as inputs")
+    inflight.add_argument("paths", nargs="*")
+    inflight.add_argument("--hook", action="store_true", help="Claude PreToolUse mode: read the event on stdin, ask before a stale-making edit")
+    inflight.add_argument("--json", action="store_true")
+    attempt = commands.add_parser("attempt", help="a task's current attempt")
+    attempt.add_argument("task")
+    attempt.add_argument("--field", choices=["id", "output_dir", "owner", "state", "snapshot_digest"])
     argv = list(sys.argv[1:] if argv is None else argv)
     command = None
     at = 0
@@ -362,7 +468,7 @@ def main(argv=None) -> int:
         ns.command = command
     ns.project = ns.project.resolve()
     handler = {"sweep": cmd_sweep, "todo": cmd_todo, "review-start": cmd_review_start,
-               "check": cmd_check, "doc-gate": cmd_doc_gate}[ns.name]
+               "check": cmd_check, "doc-gate": cmd_doc_gate, "inflight": cmd_inflight, "attempt": cmd_attempt}[ns.name]
     try:
         return handler(ns)
     except ArbError as error:

@@ -38,6 +38,27 @@ Do not take over the main coordinator or contact its agents from a side chat.
 - Do not put current QSim workers in ordinary git worktrees: this dirty
   workspace contains untracked claims/config and ignored board artifacts.
   `not_initialized` means check the supplied root; do not create a second board.
+- **Sealed inputs.** A claim seals each input file's hash. Editing one makes the
+  attempt stale, which blocks its submission, review and closure.
+  - Before editing a canonical file, the coordinator runs
+    `uv run python tools/swarm.py inflight PATH`. On Claude, the project hook
+    in `.claude/settings.json` asks first for Edit/Write/MultiEdit/NotebookEdit.
+    It does not see shell writes such as `sed -i`.
+  - Prefer inputs that stay fixed during a round. Snapshot contract text into
+    `out/` rather than listing a row the coordinator expects to integrate into.
+  - If the attempt's work stays valid after an edit, the coordinator records
+    that with `arb call task.accept_input_change task=T input=PATH reason=...`.
+    The call re-seals that one input in place and keeps the attempt, its
+    output directory and its runs. The old and new hashes and the reason enter
+    the submission manifest for the referee.
+  - Staleness also passes along dependencies: an open task becomes stale when
+    an input of a task it depends on changes, even if that task is closed.
+    `inflight` reports those closed dependencies too. `task.accept_input_change`
+    also works on a closed task, which is how its consumers are unblocked
+    after an integration edit.
+  - Reclaim only when the change alters what the attempt relied on.
+  - For scripts, `tools/swarm.py attempt T --field output_dir` prints one value;
+    do not parse arb JSON by hand.
 - Scope instructions and Claude hooks are guardrails. Do not claim a per-worker
   sandbox without verified host enforcement. Never add fictitious sandbox
   fields to spawning APIs. Respect actual process handles when reclaiming;
