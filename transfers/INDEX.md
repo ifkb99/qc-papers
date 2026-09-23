@@ -10,7 +10,7 @@ the barrier check", says how rows are used.
 
 Status: **imported** applies here and was used; its consequence is in the cited claims; **obstruction** applies here and rules out a class of methods; **escaped** an obstruction whose hypotheses this construction escapes; **barrier** a reduction that any success must respect (METHOD.md, the barrier check); **open** candidate transfer; hypotheses not yet checked against the construction; **not-applicable** hypotheses checked and fail; kept so it is not re-proposed.
 
-**51 rows**
+**55 rows**
 
 | id | status | effect | field | transfer | claims |
 |---|---|---|---|---|---|
@@ -65,3 +65,7 @@ Status: **imported** applies here and was used; its consequence is in the cited 
 | [TX49](transfers/TX49-four-list-grover-counting.md) | open | unknown | Time-space algorithms for subset sum and exact counting | Subset-sum Grover sampling is prefix counting plus a solved coin (C122); open question: multiplicity- and prefix-preserving four-list counting in … | C117, C119, C122 |
 | [TX50](transfers/TX50-sampled-character-sectors.md) | obstruction | barrier | Abelian symmetry decomposition and output-only simulation | Sector sampling needs only d=r/|<a> cap H| and chi(a^d); any interface supplying them is quotient order finding, so known N-only H with cheap … | C52, C115, C116, C124, C125 |
 | [TX51](transfers/TX51-low-space-order-baseline.md) | open | unknown | Low-space generic-group order algorithms and spectral sampling | Two bars: for the factor output, ECM and Pollard rho already factor with polynomial memory (heuristic); for C52's exponent law, a fully charged … | C52, C124 |
+| [TX52](transfers/TX52-algebraic-cryptanalysis-degree.md) | imported | lower-bound | Symmetric cryptography: algebraic cryptanalysis (division property, monomial prediction, cube attacks) | An ANF monomial of degree k >= 2 in the pulled-back bit forces PPS term count >= 2^k (lemma accepted); monomial prediction certifies such monomials … | C8, C26, C102, C126 |
+| [TX53](transfers/TX53-straight-line-programs.md) | barrier | barrier | Arithmetic complexity: straight-line programs and the tau-conjecture | Short +,-,x program families that split every k-bit N would be nonuniform factoring; proving none exist would prove a constant-free permanent lower … | - |
+| [TX54](transfers/TX54-relations-mod-n.md) | open | unknown | Index calculus: relation generation mod N | Template B needs multiplicative relations mod N not implied by relations in Z, produced without smoothness luck; with one generator this is order … | - |
+| [TX55](transfers/TX55-field-with-one-element.md) | open | unknown | Arithmetic geometry: the field with one element, lambda-rings, Frobenius lifts | Candidate home for a Frobenius-like structure on Z (a small constant field) that small-characteristic DL exploited; no known computational content | - |

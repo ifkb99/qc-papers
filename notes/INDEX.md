@@ -7,7 +7,7 @@ they say what was believed at the time, so a note may contain a status
 later superseded. Where a note disagrees with a claim file, the claim
 file wins.
 
-**125 investigations**
+**126 investigations**
 
 | code | date | outcome | subject | claims |
 |---|---|---|---|---|
@@ -75,6 +75,7 @@ file wins.
 | [MP](notes/MP-merged-prefixes-without-rejection.md) | 2026-09-11 | confirmed | Merged intermediate prefixes remove rejection without a clear runtime win | C59, C60, C71, C72 |
 | [NC](notes/NC-nested-phase-prefix-cuts.md) | 2026-09-11 | confirmed | Several diagonal insertions share a nested-prefix partition | C79, C80, C81 |
 | [NG](notes/NG-norm-geometry-and-working-precision.md) | 2026-09-11 | mixed | Norm geometry explains excess enclosure precision, but extra bookkeeping loses the timing comparison | C61, C62 |
+| [NI](notes/NI-new-integer-structure.md) | 2026-09-22 | record | What a new structure in the integers would have to do: Joux's anatomy, the transplant failures, and four leads | - |
 | [NS](notes/NS-nested-phase-sampling.md) | 2026-09-12 | confirmed | Nested-phase construction savings survive conditional rejection in a bounded fixture | C78, C79, C80, C81 |
 | [OB](notes/OB-certified-odd-block-dynamics.md) | 2026-09-11 | confirmed | Certified finite-work sampling extends beyond the binary scalar tail | C56, C60, C61, C62, C63, C64, C65 |
 | [OS](notes/OS-todo-12e-the-onset-measured-and-and-qubits.md) | 2026-08-08 | record | TODO 12e: THE ONSET MEASURED AT α = 3 AND 4 (and C7 to 30 qubits) | C2, C7, C21, C23, C24, C30, C37, C38, C43 |

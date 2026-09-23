@@ -7,7 +7,7 @@ frontmatter; the claim file is the single source of truth for its own
 status. Retracted claims are in `claims/retracted/` and **may not be
 cited as support**.
 
-**125 live · 19 retracted**
+**126 live · 19 retracted**
 
 ## Live
 
@@ -135,6 +135,7 @@ cited as support**.
 | [C123](claims/C123.md) | - | derived | Hadamard-basis Grover output of the two-orientation semiprime predicate is Simon's law for p xor q; O(m) exact samples at t with non-negligible … |
 | [C124](claims/C124.md) | - | derived | Phase-labelled subgroup sectors of clean modexp are twisted d-cycles with d=r/|<a> cap H|; any interface that runs them yields d by a quotient walk … |
 | [C125](claims/C125.md) | - | derived | C124's open conjecture implies factoring is not in BPP (under weak phases; under point phases, that factoring and F_p^* discrete logs are not both in … |
+| [C126](claims/C126.md) | - | derived | full-space u_a x0 bit, W=final PPS support: deg<=3n+2, even W<=2^(3n+3)+2 proved; a=2: deg>=2n+1 proved (even n, N=2^n-1), verified n<=10 bar nine N; … |
 | [F12](claims/F12.md) | B | narrowed | At function level, β=1 gives selected-bit width independence; β>1 has no universal density claim because minimal scalar periods vary |
 | [dictionary-biased-product-input-state-ma](claims/dictionary-biased-product-input-state-ma.md) | B | established | Dictionary: a biased product input state makes ⟨O⟩ = Σ_z c_z ∏_{i∈z} δ_i, i.e. exactly the p-biased WHT of Gangopadhyay et al. (JAMC 2023) with δ_i = … |
 | [superseded-the-residual-ladder-the](claims/superseded-the-residual-ladder-the.md) | B | established | Superseded (§RS): the residual ladder is 1 − 2^−(k+1) in the conditioning depth k |

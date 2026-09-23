@@ -5,7 +5,7 @@
 One item per file. State is the directory it lives in: moving a file
 between `open/` and `done/` is how state changes.
 
-**19 open · 73 done**
+**20 open · 74 done**
 
 ## Open
 
@@ -28,6 +28,7 @@ between `open/` and `done/` is how state changes.
 | [68](todo/open/68-non-prefix-cuts.md) | Cut rank and bond at cuts that are not exponent prefixes: interleaved and work-first orders of the modexp pullback |
 | [69](todo/open/69-limdd-interleaved-orders.md) | Pauli-LIMDD width of the post-modexp state in orders that interleave exponent and x qubits |
 | [73](todo/open/73-factoring-memory-and-aggregation.md) | Factoring memory after the cache and recurrence audits |
+| [76](todo/open/76-algebraic-degree-of-modexp-pps.md) | Algebraic degree of the full-space u_a pulled-back bit: a certified PPS lower bound via monomial trails (TX52) |
 | [hk3](todo/open/hk3-experiment-experiment2-and-all-experiment3.md) | experiment.py §3, experiment2.py §§2–3 and all of experiment3.py |
 | [hk7](todo/open/hk7-six-more-dependencies-are-also-unused.md) | Six more dependencies are also unused |
 
@@ -101,6 +102,7 @@ between `open/` and `done/` is how state changes.
 | [71](todo/done/71-structured-grover-sampling.md) | Structured Grover: extend coherent selected probabilities to exact output sampling | Completed (2026-09-21): exact coherent sampler, rare128 validation and bounded rolling-versus-cached comparison in C117 |
 | [72](todo/done/72-factor-state-construction.md) | Can the compact divisor state be constructed from the composite alone? | Closed at complexity triage (2026-09-22): success is factoring N from N alone, the TX42/TX15 barrier; reopen only with named number-theoretic structure |
 | [74](todo/done/74-memory-scaling.md) | Attack memory scaling through Grover precision, streamed counting and sampled symmetries | Closed at complexity triage (2026-09-22): C122-C125 decide its questions; what remains refines barriers (TX15, TX42, TX50) or needs factor advice, and cannot remove an exponential |
+| [75](todo/done/75-straight-line-programs-for-factor-multiples.md) | Short straight-line programs for multiples of a hidden factor: what is known, what is conditional, and the strongest obstruction | Mapped; barrier in both directions (TX53). Closed without a round: survey v3 accepted in V31dbc84c4b964cf4; project steps in note NI, section SLP survey |
 | [hk1](todo/done/hk1-yao-backend.md) | Yao.jl backend | - |
 | [hk2](todo/done/hk2-decide-whether-env-should-tracked.md) | Decide whether .env should be tracked | - |
 | [hk4](todo/done/hk4-organize-experiments-into-proper-file-structure.md) | Organize experiments into a proper file structure, with a general | - |
